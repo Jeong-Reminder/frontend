@@ -1,31 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/gradeNotification/oneBoard_widget.dart';
+import 'package:frontend/widgets/gradeNotification/twoBoard_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
-class LevelPage extends StatefulWidget {
-  const LevelPage({Key? key}) : super(key: key);
+class GradePage extends StatefulWidget {
+  const GradePage({Key? key}) : super(key: key);
 
   @override
-  State<LevelPage> createState() => _LevelPageState();
+  State<GradePage> createState() => _GradePageState();
 }
 
-class _LevelPageState extends State<LevelPage> {
-  final List<Map<String, dynamic>> oneBoard = [
-    {
-      'title': '1차 증원',
-      'subtitle': '정보통신공학과 증원 신청',
-      'content': '1차 : 5일 오후 2시까지 신청',
-    },
-    {
-      'title': '새내기 게시판',
-      'subtitle': '수강 신청 하는 방법 알려주세요',
-      'content': '수강 신청 잘 할 수 있을까요?',
-    },
-    {
-      'title': '제자반 채플 자주 묻는 질문',
-      'subtitle': '채플 담당 교수님 연락처는 어떻게 알아요?',
-      'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
-    },
-  ];
+class _GradePageState extends State<GradePage> {
+  String selectedGrade = '1학년';
+  bool isSelceted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -76,93 +63,75 @@ class _LevelPageState extends State<LevelPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            // 학년 공지 상단바
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   '학년 공지',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Icon(Icons.more_vert),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.more_vert),
+                ),
               ],
             ),
             const SizedBox(height: 10),
-            const Row(
+
+            // 학년 별 카테고리 버튼
+            Row(
               children: [
-                LevelBtn(level: '1학년'),
-                SizedBox(width: 5),
-                LevelBtn(level: '2학년'),
-                SizedBox(width: 5),
-                LevelBtn(level: '3학년'),
-                SizedBox(width: 5),
-                LevelBtn(level: '4학년'),
+                GradeBtn(
+                  grade: '1학년',
+                  isSelceted:
+                      selectedGrade == '1학년', // 전달 받은 학년과 버튼 학년과 동일하면 true 반환
+                  // 전달 받은 grade 값을 selectedGrade에 저장
+                  onSelectedGrade: (grade) {
+                    setState(() {
+                      selectedGrade = grade;
+                    });
+                  },
+                ),
+                const SizedBox(width: 5),
+                GradeBtn(
+                  grade: '2학년',
+                  isSelceted: selectedGrade == '2학년',
+                  onSelectedGrade: (grade) {
+                    setState(() {
+                      selectedGrade = grade;
+                    });
+                  },
+                ),
+                const SizedBox(width: 5),
+                GradeBtn(
+                  grade: '3학년',
+                  isSelceted: selectedGrade == '3학년',
+                  onSelectedGrade: (grade) {
+                    setState(() {
+                      selectedGrade = grade;
+                    });
+                  },
+                ),
+                const SizedBox(width: 5),
+                GradeBtn(
+                  grade: '4학년',
+                  isSelceted: selectedGrade == '4학년',
+                  onSelectedGrade: (level) {
+                    setState(() {
+                      selectedGrade = level;
+                    });
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 13),
-            Expanded(
-              child: ListView.builder(
-                itemCount: oneBoard.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Card(
-                        color: const Color(0xFFFAFAFE),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        elevation: 1,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 18.0),
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                oneBoard[index]['title'],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 7),
-                              Text(
-                                oneBoard[index]['subtitle'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 7),
-                              Text(
-                                oneBoard[index]['content'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF7D7D7F),
-                                ),
-                              ),
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(
-                                    Icons.favorite_border,
-                                    color: Color(0xFFEA4E44),
-                                  ),
-                                  Text('4'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 13),
-                    ],
-                  );
-                },
-              ),
-            ),
+            // 해당 학년 공지 표시
+            if (selectedGrade == '1학년') const OneBoard(),
+            if (selectedGrade == '2학년') const TwoBoard(),
           ],
         ),
       ),

@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 
-class LevelBtn extends StatefulWidget {
-  final String level;
-  const LevelBtn({required this.level, super.key});
+class GradeBtn extends StatefulWidget {
+  final String grade;
+  final bool isSelceted;
+  final ValueChanged<String> onSelectedGrade;
+  const GradeBtn(
+      {required this.grade,
+      required this.isSelceted,
+      required this.onSelectedGrade,
+      super.key});
 
   @override
-  State<LevelBtn> createState() => _LevelBtnState();
+  State<GradeBtn> createState() => _GradeBtnState();
 }
 
-class _LevelBtnState extends State<LevelBtn> {
-  bool isSelected = false;
-
+class _GradeBtnState extends State<GradeBtn> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         setState(() {
-          isSelected = !isSelected;
+          // 선택된 학년(grade) 값을 전달
+          widget.onSelectedGrade(widget.grade);
         });
       },
       style: ElevatedButton.styleFrom(
@@ -28,9 +33,10 @@ class _LevelBtnState extends State<LevelBtn> {
         minimumSize: const Size(50, 40),
       ),
       child: Text(
-        widget.level,
+        widget.grade,
         style: TextStyle(
-          color: isSelected ? Colors.black : Colors.black.withOpacity(0.5),
+          color:
+              widget.isSelceted ? Colors.black : Colors.black.withOpacity(0.5),
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
