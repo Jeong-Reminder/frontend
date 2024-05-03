@@ -1,72 +1,482 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
+Widget homeItem({required String imgPath, required String title}) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Image.asset(
+        imgPath,
+        width: 50, // 이미지 너비
+        height: 50, // 이미지 높이
+      ),
+      const SizedBox(height: 2),
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF374AA3).withOpacity(0.66), // title 색상
+        ),
+      ),
+    ],
+  );
+}
+
 class _HomePageState extends State<HomePage> {
+  CalendarFormat _calendarFomat = CalendarFormat.month;
+  DateTime _focuseDay = DateTime.now();
+  DateTime? _selectedDay;
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _focuseDay;
+  }
+
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, selectedDay)) {
+      setState(() {
+        _selectedDay = selectedDay;
+        _focuseDay = focusedDay;
+      });
+    }
+  }
+
+  void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
+    setState(() {
+      _selectedDay = null;
+      _focuseDay = focusedDay;
+      _rangeStart = start;
+      _rangeEnd = end;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        // 사용자가 화면을 터치했을 때 포커스를 해제하는 onTap 콜백 정의
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Scaffold(
-          backgroundColor: Colors.white, // 배경색 설정
-
-          appBar: AppBar(
-            toolbarHeight: 70, // 앱 바의 높이 설정
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 12.0),
-              child: IconButton(
-                onPressed: () {},
-                icon: Image.asset('assets/images/logo.png'),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
+          toolbarHeight: 70,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12.0),
+            child: IconButton(
+              onPressed: () {},
+              icon: Image.asset('assets/images/logo.png'),
+              color: Colors.black,
+            ),
+          ),
+          leadingWidth: 120,
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: Icon(
+                Icons.search,
+                size: 30,
                 color: Colors.black,
               ),
             ),
-            leadingWidth: 120,
-            actions: const [
-              // 오른쪽 상단에 프로필 아이콘을 나타내는 아이콘 추가
-              Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: Icon(
-                  Icons.search,
-                  size: 30,
-                  color: Colors.black,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: Icon(
-                  Icons.add_alert,
-                  size: 30,
-                  color: Colors.black,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: Icon(
-                  Icons.account_circle,
-                  size: 30,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-          body: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15.0),
-            child: Text(
-              '정보통신공학과',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: Icon(
+                Icons.add_alert,
+                size: 30,
+                color: Colors.black,
               ),
             ),
+            Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '정보통신공학과',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SingleChildScrollView(
+                  // 사용자가 스크롤하여 모든 위젯을 볼 수 있음
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Container(
+                        // 첫 번째 위젯 박스
+                        width: 216,
+                        padding: const EdgeInsets.all(20.0),
+                        margin: const EdgeInsets.only(right: 9.0),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDBE7FB),
+                          borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
+                          border: Border.all(
+                            // 박스 테두리
+                            color: const Color(0xFF2B72E7).withOpacity(0.25),
+                            width: 1, // 두께
+                          ),
+                        ),
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '우리 학교의 모든 것',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '중요한 학교 정보 놓치지 마세요',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(height: 29),
+                            Row(
+                              children: [
+                                Text(
+                                  '더보기',
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 30.0),
+                                  child: Icon(Icons.arrow_forward_ios,
+                                      size: 14, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        // 두 번째 위젯 박스
+                        width: 216,
+                        padding: const EdgeInsets.all(20.0),
+                        margin: const EdgeInsets.only(right: 9.0),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDBE7FB),
+                          borderRadius: BorderRadius.circular(15.0),
+                          border: Border.all(
+                            color: const Color(0xFF2B72E7).withOpacity(0.25),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '졸업 이수학점 확인 공지',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '학생분들은 이수학점 및 현수강',
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(height: 29),
+                            Row(
+                              children: [
+                                Text(
+                                  '더보기',
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 30.0),
+                                  child: Icon(Icons.arrow_forward_ios,
+                                      size: 14, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+                // overflow 방지
+                SizedBox(
+                  height: 100,
+                  width: double.infinity,
+                  child: GridView.count(
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Gridview의 스크롤 방지
+                    crossAxisCount: 5, // 1개의 행에 보여줄 item의 개수
+                    crossAxisSpacing: 10.0, // 같은 행의 iteme들 사이의 간
+
+                    children: [
+                      homeItem(
+                          imgPath: 'assets/images/general.png', title: '전체공지'),
+                      homeItem(
+                          imgPath: 'assets/images/grade.png', title: '학년공지'),
+                      homeItem(
+                          imgPath: 'assets/images/competition.png',
+                          title: '전체대회'),
+                      homeItem(
+                          imgPath: 'assets/images/company.png', title: '기업탐방 '),
+                      homeItem(imgPath: 'assets/images/etc.png', title: '기타'),
+                    ],
+                  ),
+                ),
+                Container(
+                  // 세 번째 위젯 박스
+                  width: 432,
+
+                  padding: const EdgeInsets.all(20.0),
+                  margin: const EdgeInsets.only(right: 9.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDBE7FB),
+                    borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
+                    border: Border.all(
+                      // 박스 테두리
+                      color: const Color(0xFF2B72E7).withOpacity(0.25),
+                      width: 1, // 두께
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '이런 경진대회라면 놓칠 수 없지!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                '정보통신공학과 학생만 가능한 경험',
+                                style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10.0),
+                                child: Image.asset(
+                                  'assets/images/light.png',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 69),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10.0),
+                        child: Image.asset(
+                          'assets/images/smile.png',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Text(
+                        '커뮤니티',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Row(
+                        children: [
+                          Text(
+                            '더보기',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(right: 30.0),
+                            child: Icon(Icons.arrow_forward_ios,
+                                size: 14, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  // 네 번째 위젯 박스
+                  width: 432,
+
+                  padding: const EdgeInsets.all(20.0),
+                  margin: const EdgeInsets.only(right: 9.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFAFAFE),
+                    borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
+                  ),
+                  child: const Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '대외 활동',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          SizedBox(width: 17),
+                          Text(
+                            '코테노이아 절찬 모집중!!!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text(
+                            '취업 진로',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          SizedBox(width: 17),
+                          Text(
+                            '이거 꼭 해봐!!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Text(
+                            '정통 광장',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          SizedBox(width: 17),
+                          Text(
+                            '시험 범위 알려줄 사람~~',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Text(
+                    '달력',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: TableCalendar(
+                    firstDay: DateTime.utc(2010, 3, 14),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: _focuseDay,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    calendarFormat: _calendarFomat,
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    onDaySelected: _onDaySelected,
+                    rangeStartDay: _rangeStart,
+                    rangeSelectionMode: RangeSelectionMode.toggledOn,
+                    onRangeSelected: _onRangeSelected,
+                    rangeEndDay: _rangeEnd,
+                    calendarStyle: const CalendarStyle(
+                      outsideDaysVisible: false,
+                    ),
+                    onFormatChanged: (format) {
+                      if (_calendarFomat != format) {
+                        setState(() {
+                          _calendarFomat = format;
+                        });
+                      }
+                    },
+                    onPageChanged: (focusedDay) {
+                      focusedDay = focusedDay;
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
