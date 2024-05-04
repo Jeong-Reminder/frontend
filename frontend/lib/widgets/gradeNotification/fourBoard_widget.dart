@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-class OneBoard extends StatefulWidget {
+class FourBoard extends StatefulWidget {
   final ValueChanged<bool> onChecked;
-  const OneBoard({required this.onChecked, super.key});
+  const FourBoard({required this.onChecked, super.key});
 
   @override
-  State<OneBoard> createState() => _OneBoardState();
+  State<FourBoard> createState() => _FourBoardState();
 }
 
-class _OneBoardState extends State<OneBoard> {
+class _FourBoardState extends State<FourBoard> {
   bool isEdited = false; // 길게 눌렀을 때 편집모드 설정
 
-  final List<Map<String, dynamic>> oneBoard = [
+  final List<Map<String, dynamic>> fourBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
@@ -19,13 +19,13 @@ class _OneBoardState extends State<OneBoard> {
       'isChecked': false,
     },
     {
-      'title': '새내기 게시판',
-      'subtitle': '수강 신청 하는 방법 알려주세요',
-      'content': '수강 신청 잘 할 수 있을까요?',
+      'title': '졸업반 게시판',
+      'subtitle': '자기소개서 작성 하는 방법 알려주세요',
+      'content': '자소서 작성 잘 할 수 있을까요?',
     },
     {
-      'title': '제자반 채플 자주 묻는 질문',
-      'subtitle': '채플 담당 교수님 연락처는 어떻게 알아요?',
+      'title': '졸업작품 자주 묻는 질문',
+      'subtitle': '졸업작품 담당 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
     },
   ];
@@ -34,7 +34,7 @@ class _OneBoardState extends State<OneBoard> {
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
-        itemCount: oneBoard.length,
+        itemCount: fourBoard.length,
         itemBuilder: (context, index) {
           return Column(
             children: [
@@ -62,7 +62,7 @@ class _OneBoardState extends State<OneBoard> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              oneBoard[index]['title'],
+                              fourBoard[index]['title'],
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -74,11 +74,11 @@ class _OneBoardState extends State<OneBoard> {
                                     height: 20,
                                     width: 20,
                                     child: Checkbox(
-                                      value: oneBoard[index]['isChecked'] ??
+                                      value: fourBoard[index]['isChecked'] ??
                                           false, // isChecked가 null이면 기본값이 false 사용
                                       onChanged: (value) {
                                         setState(() {
-                                          oneBoard[index]['isChecked'] = value;
+                                          fourBoard[index]['isChecked'] = value;
                                         });
                                       },
                                       shape: const CircleBorder(),
@@ -90,14 +90,14 @@ class _OneBoardState extends State<OneBoard> {
                         ),
                         const SizedBox(height: 7),
                         Text(
-                          oneBoard[index]['subtitle'],
+                          fourBoard[index]['subtitle'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 7),
                         Text(
-                          oneBoard[index]['content'],
+                          fourBoard[index]['content'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF7D7D7F),

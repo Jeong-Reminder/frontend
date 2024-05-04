@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/widgets/gradeNotification/fourBoard_widget.dart';
 import 'package:frontend/widgets/gradeNotification/oneBoard_widget.dart';
+import 'package:frontend/widgets/gradeNotification/threeBoard_widget.dart';
 import 'package:frontend/widgets/gradeNotification/twoBoard_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
@@ -10,9 +12,12 @@ class GradePage extends StatefulWidget {
   State<GradePage> createState() => _GradePageState();
 }
 
+enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
+
 class _GradePageState extends State<GradePage> {
   String selectedGrade = '1학년';
   bool isSelceted = false;
+  bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +79,20 @@ class _GradePageState extends State<GradePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.more_vert),
+
+                // 팝업 메뉴 창
+                PopupMenuButton<PopUpItem>(
+                  color: const Color(0xFFEFF0F2),
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      popUpItem('글쓰기', PopUpItem.popUpItem1),
+                      const PopupMenuDivider(),
+                      popUpItem('새로고침', PopUpItem.popUpItem2),
+                      const PopupMenuDivider(),
+                      popUpItem('숨김 관리', PopUpItem.popUpItem3),
+                    ];
+                  },
+                  child: const Icon(Icons.more_vert),
                 ),
               ],
             ),
@@ -92,6 +108,9 @@ class _GradePageState extends State<GradePage> {
                   // 전달 받은 grade 값을 selectedGrade에 저장
                   onSelectedGrade: (grade) {
                     setState(() {
+                      // 다른 학년 버튼 시 숨김/삭제 버튼 비활성화
+                      // 이 콜백 함수가 onPressed 함수 내에 있어서 여기에 코드 작성
+                      isHidDel = false;
                       selectedGrade = grade;
                     });
                   },
@@ -102,6 +121,7 @@ class _GradePageState extends State<GradePage> {
                   isSelceted: selectedGrade == '2학년',
                   onSelectedGrade: (grade) {
                     setState(() {
+                      isHidDel = false;
                       selectedGrade = grade;
                     });
                   },
@@ -112,6 +132,7 @@ class _GradePageState extends State<GradePage> {
                   isSelceted: selectedGrade == '3학년',
                   onSelectedGrade: (grade) {
                     setState(() {
+                      isHidDel = false;
                       selectedGrade = grade;
                     });
                   },
@@ -122,6 +143,7 @@ class _GradePageState extends State<GradePage> {
                   isSelceted: selectedGrade == '4학년',
                   onSelectedGrade: (level) {
                     setState(() {
+                      isHidDel = false;
                       selectedGrade = level;
                     });
                   },
@@ -130,11 +152,98 @@ class _GradePageState extends State<GradePage> {
             ),
             const SizedBox(height: 13),
             // 해당 학년 공지 표시
-            if (selectedGrade == '1학년') const OneBoard(),
-            if (selectedGrade == '2학년') const TwoBoard(),
+            if (selectedGrade == '1학년')
+              // 전달받은 isEdited 값을 isHidDel 값에 저장
+              OneBoard(onChecked: (isEdited) {
+                setState(() {
+                  isHidDel = isEdited;
+                });
+              })
+            else if (selectedGrade == '2학년')
+              TwoBoard(onChecked: (isEdited) {
+                setState(() {
+                  isHidDel = isEdited;
+                });
+              })
+            else if (selectedGrade == '3학년')
+              ThreeBoard(onChecked: (isEdited) {
+                setState(() {
+                  isHidDel = isEdited;
+                });
+              })
+            else if (selectedGrade == '4학년')
+              FourBoard(onChecked: (isEdited) {
+                setState(() {
+                  isHidDel = isEdited;
+                });
+              })
           ],
         ),
       ),
+
+      // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
+      bottomNavigationBar: isHidDel
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '숨김',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
+}
+
+PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
+  return PopupMenuItem<PopUpItem>(
+    enabled: true, // 팝업메뉴 호출(ex: onTap()) 가능
+    onTap: () {},
+    value: item,
+    height: 25,
+    child: Center(
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF787879),
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  );
 }
