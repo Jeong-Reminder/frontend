@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/gradeNotification/fourBoard_widget.dart';
-import 'package:frontend/widgets/gradeNotification/oneBoard_widget.dart';
-import 'package:frontend/widgets/gradeNotification/threeBoard_widget.dart';
-import 'package:frontend/widgets/gradeNotification/twoBoard_widget.dart';
+import 'package:frontend/widgets/gradeBoard_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
 class GradePage extends StatefulWidget {
@@ -18,6 +15,81 @@ class _GradePageState extends State<GradePage> {
   String selectedGrade = '1학년';
   bool isSelceted = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
+
+  final List<Map<String, dynamic>> oneBoard = [
+    {
+      'title': '1차 증원',
+      'subtitle': '정보통신공학과 증원 신청',
+      'content': '1차 : 5일 오후 2시까지 신청',
+      'isChecked': false,
+    },
+    {
+      'title': '새내기 게시판',
+      'subtitle': '수강 신청 하는 방법 알려주세요',
+      'content': '수강 신청 잘 할 수 있을까요?',
+    },
+    {
+      'title': '제자반 채플 자주 묻는 질문',
+      'subtitle': '채플 담당 교수님 연락처는 어떻게 알아요?',
+      'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+    },
+  ];
+
+  final List<Map<String, dynamic>> twoBoard = [
+    {
+      'title': '2차 증원',
+      'subtitle': '정보통신공학과 증원 신청',
+      'content': '2차 : 5일 오후 2시까지 신청',
+    },
+    {
+      'title': '헌내기 게시판',
+      'subtitle': '수강 신청 하는 방법 알려주세요',
+      'content': '수강 신청 잘 할 수 있을까요?',
+    },
+    {
+      'title': '사회봉사 자주 묻는 질문',
+      'subtitle': '사회봉사 교수님 연락처는 어떻게 알아요?',
+      'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+    },
+  ];
+
+  final List<Map<String, dynamic>> threeBoard = [
+    {
+      'title': '1차 증원',
+      'subtitle': '정보통신공학과 증원 신청',
+      'content': '1차 : 5일 오후 2시까지 신청',
+      'isChecked': false,
+    },
+    {
+      'title': '암모니아 게시판',
+      'subtitle': '복학 신청 하는 방법 알려주세요',
+      'content': '복학 신청 잘 할 수 있을까요?',
+    },
+    {
+      'title': '현대인과 기독교 자주 묻는 질문',
+      'subtitle': '현기 교수님 연락처는 어떻게 알아요?',
+      'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+    },
+  ];
+
+  final List<Map<String, dynamic>> fourBoard = [
+    {
+      'title': '1차 증원',
+      'subtitle': '정보통신공학과 증원 신청',
+      'content': '1차 : 5일 오후 2시까지 신청',
+      'isChecked': false,
+    },
+    {
+      'title': '졸업반 게시판',
+      'subtitle': '자기소개서 작성 하는 방법 알려주세요',
+      'content': '자소서 작성 잘 할 수 있을까요?',
+    },
+    {
+      'title': '졸업작품 자주 묻는 질문',
+      'subtitle': '졸업작품 담당 교수님 연락처는 어떻게 알아요?',
+      'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -154,29 +226,45 @@ class _GradePageState extends State<GradePage> {
             // 해당 학년 공지 표시
             if (selectedGrade == '1학년')
               // 전달받은 isEdited 값을 isHidDel 값에 저장
-              OneBoard(onChecked: (isEdited) {
-                setState(() {
-                  isHidDel = isEdited;
-                });
-              })
+              GradeBoard(
+                boardList: oneBoard,
+                onChecked: (isPressed) {
+                  setState(() {
+                    isHidDel = isPressed;
+                  });
+                },
+                isShowed: isHidDel,
+              )
             else if (selectedGrade == '2학년')
-              TwoBoard(onChecked: (isEdited) {
-                setState(() {
-                  isHidDel = isEdited;
-                });
-              })
+              GradeBoard(
+                boardList: twoBoard,
+                onChecked: (isPressed) {
+                  setState(() {
+                    isHidDel = isPressed;
+                  });
+                },
+                isShowed: isHidDel,
+              )
             else if (selectedGrade == '3학년')
-              ThreeBoard(onChecked: (isEdited) {
-                setState(() {
-                  isHidDel = isEdited;
-                });
-              })
+              GradeBoard(
+                boardList: threeBoard,
+                onChecked: (isPressed) {
+                  setState(() {
+                    isHidDel = isPressed;
+                  });
+                },
+                isShowed: isHidDel,
+              )
             else if (selectedGrade == '4학년')
-              FourBoard(onChecked: (isEdited) {
-                setState(() {
-                  isHidDel = isEdited;
-                });
-              })
+              GradeBoard(
+                boardList: fourBoard,
+                onChecked: (isPressed) {
+                  setState(() {
+                    isHidDel = isPressed;
+                  });
+                },
+                isShowed: isHidDel,
+              )
           ],
         ),
       ),
