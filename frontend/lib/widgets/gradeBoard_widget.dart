@@ -96,14 +96,18 @@ class _GradeBoardState extends State<GradeBoard> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              padding: EdgeInsets.zero,
+                              padding: EdgeInsets.zero, // 패딩 설정
+                              constraints: const BoxConstraints(),
                               onPressed: () {},
                               icon: const Icon(
                                 Icons.favorite_border,
                                 color: Color(0xFFEA4E44),
                               ),
                             ),
-                            const Text('4'),
+                            const Text(
+                              '4',
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ],
                         ),
                       ],
