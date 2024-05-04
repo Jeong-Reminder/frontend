@@ -37,6 +37,24 @@ class _HomePageState extends State<HomePage> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
+  List<Map<String, dynamic>> voteList = [
+    {
+      "name": "1차 증원 투표",
+      "start_day": "2024-05-07",
+      "end_day": "2024-05-08",
+    },
+    {
+      "name": "2차 증원 투표",
+      "start_day": "2024-05-10",
+      "end_day": "2024-05-11",
+    },
+    {
+      "name": "팀원 모집 기간",
+      "start_day": "2024-05-21",
+      "end_day": "2024-05-25",
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -446,17 +464,20 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: TableCalendar(
-                    firstDay: DateTime.utc(2010, 3, 14),
-                    lastDay: DateTime.utc(2030, 3, 14),
-                    focusedDay: _focuseDay,
-                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    calendarFormat: _calendarFomat,
-                    startingDayOfWeek: StartingDayOfWeek.monday,
-                    onDaySelected: _onDaySelected,
-                    rangeStartDay: _rangeStart,
+                    firstDay: DateTime.utc(2010, 3, 14), //  달력의 시작 날짜
+                    lastDay: DateTime.utc(2030, 3, 14), // 달력의 종료 날짜
+                    focusedDay: _focuseDay, // 초기로 포커스된 날짜
+                    selectedDayPredicate: (day) =>
+                        isSameDay(_selectedDay, day), // 날짜 선택의 조건
+                    calendarFormat:
+                        _calendarFomat, // 달력의 형식 ->  (예: 'month', 'twoWeeks', 'week')
+                    startingDayOfWeek: StartingDayOfWeek.monday, // 주의 시작 요일
+                    onDaySelected: _onDaySelected, // 날짜가 선택되었을 때의 콜백 함수
+                    rangeStartDay: _rangeStart, // 선택된 범위의 시작일
                     rangeSelectionMode: RangeSelectionMode.toggledOn,
-                    onRangeSelected: _onRangeSelected,
-                    rangeEndDay: _rangeEnd,
+                    onRangeSelected:
+                        _onRangeSelected, // 일정 범위의 날짜가 선택되었을 때의 콜백 함수
+                    rangeEndDay: _rangeEnd, // 선택된 범위의 종료일
                     calendarStyle: const CalendarStyle(
                       outsideDaysVisible: false,
                     ),
@@ -469,6 +490,24 @@ class _HomePageState extends State<HomePage> {
                     },
                     onPageChanged: (focusedDay) {
                       focusedDay = focusedDay;
+                    },
+                    eventLoader: (day) {
+                      // day = 달력에서 확인하려는 날짜
+                      List<dynamic> events = []; // 이벤트를 저장할 빈 리스트를 초기화
+                      for (var vote in voteList) {
+                        // voteList의 각 요소에 대해 반복
+                        // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
+                        DateTime startDate = DateTime.parse(vote['start_day']);
+                        DateTime endDate = DateTime.parse(vote['end_day']);
+                        // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
+                        if (day.isAfter(startDate) &&
+                            day.isBefore(
+                                endDate.add(const Duration(days: 1)))) {
+                          // 현재 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
+                          events.add(vote['name']);
+                        }
+                      }
+                      return events; // voteList에 정의된 이벤트가 있는 날짜에만 해당 이벤트가 표시
                     },
                   ),
                 ),
