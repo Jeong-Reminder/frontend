@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -31,6 +32,7 @@ Widget homeItem({required String imgPath, required String title}) {
 }
 
 class _HomePageState extends State<HomePage> {
+  // 달력 형식과 초기 선택된 날짜 설정
   CalendarFormat _calendarFomat = CalendarFormat.month;
   DateTime _focuseDay = DateTime.now();
   DateTime? _selectedDay;
@@ -55,18 +57,23 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  // 위젯의 상태 초기화
   @override
   void initState() {
     super.initState();
     _selectedDay = _focuseDay;
   }
 
+  // 날짜가 선택되었을 때 실행되는 콜백 메서드
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
+      // 만약 선택한 날짜가 이전에 선택한 날짜와 다른 날짜라면 실행
       setState(() {
-        _selectedDay = selectedDay;
-        _focuseDay = focusedDay;
+        _selectedDay = selectedDay; // 선택한 날짜를 새로운 선택한 날짜로 설정
+        _focuseDay = focusedDay; // 포커스된 날짜를 새로운 포커스된 날짜로 설정
       });
+      _showEventsForSelectedDay(
+          selectedDay); // 선택한 날짜에 대한 이벤트를 표시하기 위해 _showEventsForSelectedDay 메서드 호출
     }
   }
 
@@ -77,6 +84,86 @@ class _HomePageState extends State<HomePage> {
       _rangeStart = start;
       _rangeEnd = end;
     });
+  }
+
+  // 선택된 날짜에 해당하는 이벤트 표시
+  void _showEventsForSelectedDay(DateTime selectedDay) {
+    // 선택된 날짜에 해당하는 이벤트 확인
+    List<String> eventsForSelectedDay = [];
+    for (var vote in voteList) {
+      // voteList의 각 요소에 대해 반복
+      // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
+      DateTime startDate = DateTime.parse(vote['start_day']);
+      DateTime endDate = DateTime.parse(vote['end_day']);
+      // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
+      if (selectedDay.isAfter(startDate) &&
+          selectedDay.isBefore(endDate.add(const Duration(days: 1)))) {
+        // 선택한 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
+        eventsForSelectedDay.add(vote['name']);
+      }
+    }
+    // 이벤트가 있는 경우 모달 다이얼로그로 표시
+    if (eventsForSelectedDay.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFFDBE7FB), // 모달창 배경색
+            title: Text(
+                '${selectedDay.year}년${selectedDay.month}월${selectedDay.day}일 이벤트'), // 날 / 월 / 년
+            titleTextStyle: const TextStyle(
+                fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: eventsForSelectedDay
+                  .map((event) => Text(
+                        event,
+                        style: const TextStyle(
+                            fontSize: 16, color: Colors.black), // 텍스트 스타일
+                      ))
+                  .toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // 선택된 날짜에 이벤트가 없는 경우 알림 표시
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFFDBE7FB), // 모달창 배경색
+            title: Text(
+                '${selectedDay.year}년${selectedDay.month}월${selectedDay.day}일 이벤트'),
+            titleTextStyle: const TextStyle(
+                fontSize: 24,
+                color: Colors.black,
+                fontWeight: FontWeight.bold), // 날 / 월 / 년
+            content: const Text('해당 날짜에는 이벤트가 없습니다.'),
+            // 텍스트 스타일
+            contentTextStyle:
+                const TextStyle(fontSize: 16, color: Colors.black),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -474,7 +561,7 @@ class _HomePageState extends State<HomePage> {
                     startingDayOfWeek: StartingDayOfWeek.monday, // 주의 시작 요일
                     onDaySelected: _onDaySelected, // 날짜가 선택되었을 때의 콜백 함수
                     rangeStartDay: _rangeStart, // 선택된 범위의 시작일
-                    rangeSelectionMode: RangeSelectionMode.toggledOn,
+                    rangeSelectionMode: RangeSelectionMode.toggledOff,
                     onRangeSelected:
                         _onRangeSelected, // 일정 범위의 날짜가 선택되었을 때의 콜백 함수
                     rangeEndDay: _rangeEnd, // 선택된 범위의 종료일
