@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/home_screen.dart';
 
+
 void main() {
   // GetX 서비스 초기화
   WidgetsFlutterBinding.ensureInitialized();
