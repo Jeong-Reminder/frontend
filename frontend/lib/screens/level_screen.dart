@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/widgets/gradeBoard_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
@@ -157,11 +159,29 @@ class _GradePageState extends State<GradePage> {
                   color: const Color(0xFFEFF0F2),
                   itemBuilder: (BuildContext context) {
                     return [
-                      popUpItem('글쓰기', PopUpItem.popUpItem1),
+                      popUpItem('글쓰기', PopUpItem.popUpItem1, () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const BoardWritePage()),
+                        );
+                      }),
                       const PopupMenuDivider(),
-                      popUpItem('새로고침', PopUpItem.popUpItem2),
+                      popUpItem('새로고침', PopUpItem.popUpItem2, () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Homepage()),
+                        );
+                      }),
                       const PopupMenuDivider(),
-                      popUpItem('숨김 관리', PopUpItem.popUpItem3),
+                      popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Homepage()),
+                        );
+                      }),
                     ];
                   },
                   child: const Icon(Icons.more_vert),
@@ -317,10 +337,11 @@ class _GradePageState extends State<GradePage> {
   }
 }
 
-PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
+PopupMenuItem<PopUpItem> popUpItem(
+    String text, PopUpItem item, Function() onTap) {
   return PopupMenuItem<PopUpItem>(
     enabled: true, // 팝업메뉴 호출(ex: onTap()) 가능
-    onTap: () {},
+    onTap: onTap,
     value: item,
     height: 25,
     child: Center(
