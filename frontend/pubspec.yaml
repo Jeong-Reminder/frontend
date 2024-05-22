@@ -67,6 +67,9 @@ flutter:
     - assets/images/etc.png
     - assets/images/light.png
     - assets/images/smile.png
+    - assets/images/good.png
+    - assets/images/votecheck.png
+    - assets/images/addsquare.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
