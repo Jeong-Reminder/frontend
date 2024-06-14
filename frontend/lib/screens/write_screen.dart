@@ -132,12 +132,64 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
+                    onSaved: (val) {
+                      setState(() {
+                        titleController.text = val!;
+                      });
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 17.0),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                                child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16.0, horizontal: 12.0),
+                              height: MediaQuery.of(context).size.height / 2,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(10.0),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    titleController.text,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  const Text(
+                                    '02/03  14:28',
+                                    style: TextStyle(
+                                      color: Color(0xFFA89F9F),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Text(
+                                    contentController.text,
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Image.file(pickedImage!),
+                                  ),
+                                ],
+                              ),
+                            ));
+                          });
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFDBE7FB),
                       shape: RoundedRectangleBorder(
@@ -179,6 +231,11 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 10.0, vertical: 100.0),
                 ),
+                onSaved: (val) {
+                  setState(() {
+                    contentController.text = val!;
+                  });
+                },
               ),
             ),
             Row(
