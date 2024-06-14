@@ -1,4 +1,6 @@
+import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class BoardWritePage extends StatefulWidget {
   const BoardWritePage({super.key});
@@ -11,10 +13,15 @@ class _BoardWritePageState extends State<BoardWritePage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
   bool isButtonEnabled = false; // 작성 완료 버튼 상태
+  bool isMustRead = false;
+  bool isOpenVote = false;
 
   bool categoryBtn = true; // 공지 혹은 학년 버튼 여부
   List<bool> isCategory = [false, false, false, false]; // 공지 선택 불리안
   List<bool> isGrade = [false, false, false, false, false]; // 학년 선택 불리안
+
+  File? pickedImage; // 선택된 이미지 파일
+  bool isPickingImage = false; // 이미지 선택 작업 진행 여부
 
   @override
   void initState() {
@@ -42,9 +49,39 @@ class _BoardWritePageState extends State<BoardWritePage> {
     });
   }
 
+  // 이미지 선택 함수
+  Future<void> _pickImage(ImageSource source) async {
+    if (isPickingImage) return; // 이미지 선택 작업이 이미 진행 중이면 중단
+
+    setState(() {
+      isPickingImage = true;
+    });
+
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        pickedImage = File(pickedFile.path);
+      });
+    }
+
+    setState(() {
+      isPickingImage = false;
+    });
+  }
+
+  // 이미지 삭제 함수
+  void _deleteImage() {
+    setState(() {
+      pickedImage = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // 버튼과 키보드가 겹쳐도 오류가 안나게 하기
       appBar: AppBar(
         toolbarHeight: 70,
         leading: IconButton(
@@ -72,122 +109,177 @@ class _BoardWritePageState extends State<BoardWritePage> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 제목 입력 필드
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 315,
-                child: TextFormField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: '제목을 입력해주세요',
-                    hintStyle: TextStyle(
-                      color: Colors.black.withOpacity(0.25),
-                    ),
-                    contentPadding:
-                        const EdgeInsetsDirectional.symmetric(horizontal: 10.0),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide.none,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목 입력 필드
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 315,
+                  child: TextFormField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      hintText: '제목을 입력해주세요',
+                      hintStyle: TextStyle(
+                        color: Colors.black.withOpacity(0.25),
+                      ),
+                      contentPadding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 10.0),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 17.0),
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDBE7FB),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                    ),
+                    child: const Text(
+                      '미리보기',
+                      style: TextStyle(
+                        color: Color(0xFF6E747E),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            Container(
+              width: double.infinity,
+              height: 1,
+              decoration: const BoxDecoration(
+                color: Color(0xFFC5C5C7),
               ),
+            ),
+
+            // 내용 입력 필드
+            SizedBox(
+              height: 210,
+              child: TextFormField(
+                controller: contentController,
+                decoration: InputDecoration(
+                  hintText: '내용을 입력해주세요',
+                  hintStyle: TextStyle(
+                    color: Colors.black.withOpacity(0.25),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 100.0),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                // 카메라 & 파일 버튼
+                camFileBtn(
+                    onTap: () => _pickImage(ImageSource.camera),
+                    rightWidth: 1,
+                    icon: Icons.camera_alt_outlined,
+                    title: '카메라'),
+                camFileBtn(
+                    onTap: () => _pickImage(ImageSource.gallery),
+                    rightWidth: 0,
+                    icon: Icons.file_present,
+                    title: '파일'),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // 선택된 사진
+            if (pickedImage != null)
               Padding(
-                padding: const EdgeInsets.only(right: 17.0),
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFDBE7FB),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
+                padding: const EdgeInsets.only(left: 10),
+                child: Stack(
+                  children: [
+                    Image.file(
+                      pickedImage!,
+                      height: 80,
+                      width: double.infinity,
+                      alignment: Alignment.centerLeft,
                     ),
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(50, 30),
-                  ),
-                  child: const Text(
-                    '미리보기',
-                    style: TextStyle(
-                      color: Color(0xFF6E747E),
-                      fontSize: 12,
+                    Positioned(
+                      right: 275,
+                      top: -5,
+                      child: IconButton(
+                        icon: const Icon(Icons.close_outlined,
+                            color: Colors.black),
+                        onPressed: _deleteImage,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            const SizedBox(height: 25),
 
-          Container(
-            width: double.infinity,
-            height: 1,
-            decoration: const BoxDecoration(
-              color: Color(0xFFC5C5C7),
-            ),
-          ),
-
-          // 내용 입력 필드
-          SizedBox(
-            height: 210,
-            child: TextFormField(
-              controller: contentController,
-              decoration: InputDecoration(
-                hintText: '내용을 입력해주세요',
-                hintStyle: TextStyle(
-                  color: Colors.black.withOpacity(0.25),
+            // 설정
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 17.0),
+              child: Text(
+                '설정',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10.0, vertical: 100.0),
               ),
             ),
-          ),
-          Row(
-            children: [
-              // 카메라 & 파일 버튼
-              camFileBtn(
-                  rightWidth: 1, icon: Icons.camera_alt_outlined, title: '카메라'),
-              camFileBtn(rightWidth: 0, icon: Icons.file_present, title: '파일'),
-            ],
-          ),
-          const SizedBox(height: 25),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 17.0),
-            child: Text(
-              '설정',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            const SizedBox(height: 20),
+
+            // 공지 토글 버튼
+            toggleButtons(
+                title: '공지', isSelected: isCategory, categoryBtn: true),
+
+            // 학년 토글 버튼
+            toggleButtons(title: '학년', isSelected: isGrade, categoryBtn: false),
+            const SizedBox(height: 5.0),
+
+            // 필독 버튼
+            readVoteBtn(
+                title: '필독',
+                imgPath: 'assets/images/mustRead.png',
+                state: isMustRead,
+                onPressed: () {
+                  setState(() {
+                    isMustRead = !isMustRead;
+                  });
+                }),
+            const SizedBox(height: 5.0),
+
+            // 투표 버튼
+            readVoteBtn(
+              title: '투표',
+              imgPath: 'assets/images/vote.png',
+              state: isOpenVote,
+              onPressed: () {
+                setState(() {
+                  isOpenVote = !isOpenVote;
+                });
+              },
+            ),
+            const SizedBox(height: 30),
+
+            // 경계선
+            Container(
+              width: double.infinity,
+              height: 1,
+              decoration: const BoxDecoration(
+                color: Color(0xFFC5C5C7),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-
-          // 공지 토글 버튼
-          toggleButtons(title: '공지', isSelected: isCategory, categoryBtn: true),
-
-          // 학년 토글 버튼
-          toggleButtons(title: '학년', isSelected: isGrade, categoryBtn: false),
-          const SizedBox(height: 5.0),
-
-          // 필독 버튼
-          readVoteBtn(title: '필독', imgPath: 'assets/images/mustRead.png'),
-          const SizedBox(height: 5.0),
-
-          // 투표 버튼
-          readVoteBtn(title: '투표', imgPath: 'assets/images/vote.png'),
-          const SizedBox(height: 30),
-
-          // 경계선
-          Container(
-            width: double.infinity,
-            height: 1,
-            decoration: const BoxDecoration(
-              color: Color(0xFFC5C5C7),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: ElevatedButton(
         onPressed: () {},
@@ -215,7 +307,12 @@ class _BoardWritePageState extends State<BoardWritePage> {
   }
 
   // 필독 & 투표 버튼 생성 함수
-  readVoteBtn({required String title, required String imgPath}) {
+  readVoteBtn({
+    required String title,
+    required String imgPath,
+    required state,
+    required VoidCallback onPressed,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 17.0),
       child: Row(
@@ -231,9 +328,10 @@ class _BoardWritePageState extends State<BoardWritePage> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: onPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFC5C5C7),
+              backgroundColor:
+                  state ? const Color(0xFFDBE7FB) : const Color(0xFFC5C5C7),
               minimumSize: const Size(55, 30),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
@@ -248,12 +346,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
   // 카메라 & 파일 버튼 생성 함수
   camFileBtn({
+    required VoidCallback onTap,
     required double rightWidth,
     required IconData icon,
     required String title,
   }) {
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         width: MediaQuery.of(context).size.width / 2, // 화면 절반
         height: 50,
@@ -318,13 +417,19 @@ class _BoardWritePageState extends State<BoardWritePage> {
             onPressed: (index) {
               setState(() {
                 for (int buttonIndex = 0;
-                    buttonIndex < isGrade.length;
+                    categoryBtn
+                        ? buttonIndex < isCategory.length
+                        : buttonIndex < isGrade.length;
                     buttonIndex++) {
                   // 예를 들어 현재 butonIndex값이 내가 누르는 버튼 index값과 일치하다면 선택
                   if (buttonIndex == index) {
-                    isGrade[buttonIndex] = true;
+                    categoryBtn
+                        ? isCategory[buttonIndex] = true
+                        : isGrade[buttonIndex] = true;
                   } else {
-                    isGrade[buttonIndex] = false;
+                    categoryBtn
+                        ? isCategory[buttonIndex] = false
+                        : isGrade[buttonIndex] = false;
                   }
                 }
               });
