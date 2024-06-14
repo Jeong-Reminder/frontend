@@ -358,14 +358,16 @@ class _HomePageState extends State<HomePage> {
                       homeItem(
                           imgPath: 'assets/images/grade.png', title: '학년공지'),
                       homeItem(
-                          imgPath: 'assets/images/competition.png',
-                          title: '전체대회'),
+                        imgPath: 'assets/images/competition.png',
+                        title: '경진대회',
+                      ),
                       homeItem(
-                          imgPath: 'assets/images/company.png', title: '기업탐방 '),
-                      homeItem(imgPath: 'assets/images/etc.png', title: '기타'),
+                          imgPath: 'assets/images/company.png', title: '기업탐방'),
+                      homeItem(imgPath: 'assets/images/etc.png', title: '팀원모집'),
                     ],
                   ),
                 ),
+                const SizedBox(height: 10),
                 Container(
                   // 세 번째 위젯 박스
                   width: 432,
