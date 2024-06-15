@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/widgets/gradeBoard_widget.dart';
@@ -18,7 +19,7 @@ class _BoardPageState extends State<BoardPage> {
   bool isSelceted = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
 
-  final List<Map<String, dynamic>> oneBoard = [
+  List<Map<String, dynamic>> oneBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
@@ -29,33 +30,38 @@ class _BoardPageState extends State<BoardPage> {
       'title': '새내기 게시판',
       'subtitle': '수강 신청 하는 방법 알려주세요',
       'content': '수강 신청 잘 할 수 있을까요?',
+      'isChecked': false,
     },
     {
       'title': '제자반 채플 자주 묻는 질문',
       'subtitle': '채플 담당 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
     },
   ];
 
-  final List<Map<String, dynamic>> twoBoard = [
+  List<Map<String, dynamic>> twoBoard = [
     {
       'title': '2차 증원',
       'subtitle': '정보통신공학과 증원 신청',
       'content': '2차 : 5일 오후 2시까지 신청',
+      'isChecked': false,
     },
     {
       'title': '헌내기 게시판',
       'subtitle': '수강 신청 하는 방법 알려주세요',
       'content': '수강 신청 잘 할 수 있을까요?',
+      'isChecked': false,
     },
     {
       'title': '사회봉사 자주 묻는 질문',
       'subtitle': '사회봉사 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
     },
   ];
 
-  final List<Map<String, dynamic>> threeBoard = [
+  List<Map<String, dynamic>> threeBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
@@ -66,15 +72,17 @@ class _BoardPageState extends State<BoardPage> {
       'title': '암모니아 게시판',
       'subtitle': '복학 신청 하는 방법 알려주세요',
       'content': '복학 신청 잘 할 수 있을까요?',
+      'isChecked': false,
     },
     {
       'title': '현대인과 기독교 자주 묻는 질문',
       'subtitle': '현기 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
     },
   ];
 
-  final List<Map<String, dynamic>> fourBoard = [
+  List<Map<String, dynamic>> fourBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
@@ -85,13 +93,17 @@ class _BoardPageState extends State<BoardPage> {
       'title': '졸업반 게시판',
       'subtitle': '자기소개서 작성 하는 방법 알려주세요',
       'content': '자소서 작성 잘 할 수 있을까요?',
+      'isChecked': false,
     },
     {
       'title': '졸업작품 자주 묻는 질문',
       'subtitle': '졸업작품 담당 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
     },
   ];
+
+  List<Map<String, dynamic>> hiddenList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +191,10 @@ class _BoardPageState extends State<BoardPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const HomePage()),
+                            builder: (context) => HiddenPage(
+                              hiddenList: hiddenList,
+                            ),
+                          ),
                         );
                       }),
                     ];
@@ -295,7 +310,32 @@ class _BoardPageState extends State<BoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      if (selectedGrade == '1학년') {
+                        hiddenList.addAll(oneBoard
+                            .where((board) => board['isChecked'] == true));
+                        oneBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      } else if (selectedGrade == '2학년') {
+                        hiddenList.addAll(twoBoard
+                            .where((board) => board['isChecked'] == true));
+                        twoBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      } else if (selectedGrade == '3학년') {
+                        hiddenList.addAll(threeBoard
+                            .where((board) => board['isChecked'] == true));
+                        threeBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      } else if (selectedGrade == '4학년') {
+                        hiddenList.addAll(fourBoard
+                            .where((board) => board['isChecked'] == true));
+                        fourBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      }
+                      isHidDel = false; // 숨김/삭제 버튼 비활성화
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),
@@ -313,7 +353,24 @@ class _BoardPageState extends State<BoardPage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // setState(() {
+                    //   if (selectedGrade == '1학년') {
+                    //     oneBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '2학년') {
+                    //     twoBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '3학년') {
+                    //     threeBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '4학년') {
+                    //     fourBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   }
+                    //   isHidDel = false; // 숨김/삭제 버튼 비활성화
+                    // });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),
