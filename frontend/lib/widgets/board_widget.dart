@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-class GradeBoard extends StatefulWidget {
+class Board extends StatefulWidget {
   final List<Map<String, dynamic>> boardList;
   final ValueChanged<bool> onChecked;
   final bool isShowed; // 체크박스와 숨김/삭제 버튼 활성화 여부
-  const GradeBoard(
+  const Board(
       {required this.onChecked,
       required this.boardList,
       required this.isShowed,
       super.key});
 
   @override
-  State<GradeBoard> createState() => _GradeBoardState();
+  State<Board> createState() => _BoardState();
 }
 
-class _GradeBoardState extends State<GradeBoard> {
+class _BoardState extends State<Board> {
   bool isPressed = false; // 길게 눌렀는지 여부
 
   @override
