@@ -16,7 +16,7 @@ enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
 class _BoardPageState extends State<BoardPage> {
   String selectedGrade = '1학년';
-  bool isSelceted = false;
+  bool isSelected = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
 
   List<Map<String, dynamic>> oneBoard = [
@@ -243,7 +243,7 @@ class _BoardPageState extends State<BoardPage> {
               children: [
                 GradeBtn(
                   grade: '1학년',
-                  isSelceted:
+                  isSelected:
                       selectedGrade == '1학년', // 전달 받은 학년과 버튼 학년과 동일하면 true 반환
                   // 전달 받은 grade 값을 selectedGrade에 저장
                   onSelectedGrade: (grade) {
@@ -258,7 +258,7 @@ class _BoardPageState extends State<BoardPage> {
                 const SizedBox(width: 5),
                 GradeBtn(
                   grade: '2학년',
-                  isSelceted: selectedGrade == '2학년',
+                  isSelected: selectedGrade == '2학년',
                   onSelectedGrade: (grade) {
                     setState(() {
                       isHidDel = false;
@@ -269,7 +269,7 @@ class _BoardPageState extends State<BoardPage> {
                 const SizedBox(width: 5),
                 GradeBtn(
                   grade: '3학년',
-                  isSelceted: selectedGrade == '3학년',
+                  isSelected: selectedGrade == '3학년',
                   onSelectedGrade: (grade) {
                     setState(() {
                       isHidDel = false;
@@ -280,7 +280,7 @@ class _BoardPageState extends State<BoardPage> {
                 const SizedBox(width: 5),
                 GradeBtn(
                   grade: '4학년',
-                  isSelceted: selectedGrade == '4학년',
+                  isSelected: selectedGrade == '4학년',
                   onSelectedGrade: (level) {
                     setState(() {
                       isHidDel = false;
