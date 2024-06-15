@@ -350,7 +350,7 @@ class _HomePageState extends State<HomePage> {
                     physics:
                         const NeverScrollableScrollPhysics(), // Gridview의 스크롤 방지
                     crossAxisCount: 5, // 1개의 행에 보여줄 item의 개수
-                    crossAxisSpacing: 10.0, // 같은 행의 iteme들 사이의 간
+                    crossAxisSpacing: 9.0, // 같은 행의 iteme들 사이의 간
 
                     children: [
                       homeItem(
@@ -384,6 +384,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,12 +416,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 69),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10.0),
-                        child: Image.asset(
-                          'assets/images/smile.png',
-                        ),
+                      Image.asset(
+                        'assets/images/smile.png',
                       ),
                     ],
                   ),
