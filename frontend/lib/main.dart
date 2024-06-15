@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/level_screen.dart';
+import 'package:frontend/screens/%08vote_screen.dart';
 
 void main() {
+  // GetX 서비스 초기화
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -11,13 +13,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      home: const GradePage(),
-      theme: ThemeData(
-        dividerTheme:
-            const DividerThemeData(color: Colors.white), // 팝업 메뉴 경계선 색상 설정
-      ),
+    return const MaterialApp(
+      home: votePage(),
     );
   }
 }
