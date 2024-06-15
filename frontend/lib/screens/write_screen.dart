@@ -139,56 +139,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
                     },
                   ),
                 ),
+
+                // 미리보기
                 Padding(
                   padding: const EdgeInsets.only(right: 17.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Dialog(
-                                child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16.0, horizontal: 12.0),
-                              height: MediaQuery.of(context).size.height / 2,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10.0),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    titleController.text,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  const Text(
-                                    '02/03  14:28',
-                                    style: TextStyle(
-                                      color: Color(0xFFA89F9F),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  Text(
-                                    contentController.text,
-                                    style: const TextStyle(fontSize: 15),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    child: Image.file(pickedImage!),
-                                  ),
-                                ],
-                              ),
-                            ));
-                          });
+                      showPreview(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFDBE7FB),
@@ -221,15 +178,18 @@ class _BoardWritePageState extends State<BoardWritePage> {
             // 내용 입력 필드
             SizedBox(
               height: 210,
+              width: double.infinity,
               child: TextFormField(
+                maxLines: null, // 여러 줄 입력 가능하게 설정
+                expands: true, // 텍스트필드 높이 확장
+                textInputAction: TextInputAction.done,
                 controller: contentController,
                 decoration: InputDecoration(
                   hintText: '내용을 입력해주세요',
                   hintStyle: TextStyle(
                     color: Colors.black.withOpacity(0.25),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 100.0),
+                  contentPadding: const EdgeInsets.all(10.0),
                 ),
                 onSaved: (val) {
                   setState(() {
@@ -343,7 +303,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
         style: ElevatedButton.styleFrom(
           // 작성이 되면 버튼 색상 변경
           backgroundColor: isButtonEnabled
-              ? const Color(0xFF2B72E7).withOpacity(0.25)
+              ? const Color(0xFF2B72E7)
               : const Color(0xFFFAFAFE),
           minimumSize: const Size(double.infinity, 75),
           shape: RoundedRectangleBorder(
@@ -361,6 +321,57 @@ class _BoardWritePageState extends State<BoardWritePage> {
         ),
       ),
     );
+  }
+
+  // 미리보기 함수
+  void showPreview(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+              child: Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+            height: MediaQuery.of(context).size.height / 2,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Text(
+                  titleController.text,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  '02/03  14:28',
+                  style: TextStyle(
+                    color: Color(0xFFA89F9F),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  contentController.text,
+                  style: const TextStyle(fontSize: 15),
+                ),
+                const SizedBox(height: 15),
+                if (pickedImage != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Image.file(pickedImage!),
+                  ),
+              ],
+            ),
+          ));
+        });
   }
 
   // 필독 & 투표 버튼 생성 함수
