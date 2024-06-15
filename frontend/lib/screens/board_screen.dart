@@ -4,16 +4,16 @@ import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/widgets/gradeBoard_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
-class GradePage extends StatefulWidget {
-  const GradePage({Key? key}) : super(key: key);
+class BoardPage extends StatefulWidget {
+  const BoardPage({Key? key}) : super(key: key);
 
   @override
-  State<GradePage> createState() => _GradePageState();
+  State<BoardPage> createState() => _BoardPageState();
 }
 
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
-class _GradePageState extends State<GradePage> {
+class _BoardPageState extends State<BoardPage> {
   String selectedGrade = '1학년';
   bool isSelceted = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
@@ -171,7 +171,7 @@ class _GradePageState extends State<GradePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const Homepage()),
+                              builder: (context) => const HomePage()),
                         );
                       }),
                       const PopupMenuDivider(),
@@ -179,7 +179,7 @@ class _GradePageState extends State<GradePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const Homepage()),
+                              builder: (context) => const HomePage()),
                         );
                       }),
                     ];
