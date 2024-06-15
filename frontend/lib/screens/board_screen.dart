@@ -313,10 +313,16 @@ class _BoardPageState extends State<BoardPage> {
                   onPressed: () {
                     setState(() {
                       if (selectedGrade == '1학년') {
-                        hiddenList.addAll(oneBoard
-                            .where((board) => board['isChecked'] == true));
-                        oneBoard
-                            .removeWhere((board) => board['isChecked'] == true);
+                        // 리스트에서 isChecked 값이 true인 board만 hiddenList에 추가
+                        hiddenList.addAll(oneBoard // addAll : 리스트에 추가
+                            .where((board) =>
+                                board['isChecked'] ==
+                                true)); // where : 조건에 맞게 필터링
+
+                        // isChecked 값이 true인 board만 BoardPage에서 제거
+                        oneBoard.removeWhere((board) =>
+                            board['isChecked'] ==
+                            true); // removeWhere : 조건에 맞게 제거
                       } else if (selectedGrade == '2학년') {
                         hiddenList.addAll(twoBoard
                             .where((board) => board['isChecked'] == true));
@@ -333,7 +339,7 @@ class _BoardPageState extends State<BoardPage> {
                         fourBoard
                             .removeWhere((board) => board['isChecked'] == true);
                       }
-                      isHidDel = false; // 숨김/삭제 버튼 비활성화
+                      isHidDel = false; // 숨김/삭제 작업이 완료되면 버튼 비활성화로 숨김
                     });
                   },
                   style: ElevatedButton.styleFrom(
