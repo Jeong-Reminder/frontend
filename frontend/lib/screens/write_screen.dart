@@ -364,9 +364,14 @@ class _BoardWritePageState extends State<BoardWritePage> {
                 ),
                 const SizedBox(height: 15),
                 if (pickedImage != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
-                    child: Image.file(pickedImage!),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Image.file(
+                        pickedImage!,
+                        height: 240,
+                      ),
+                    ),
                   ),
               ],
             ),
