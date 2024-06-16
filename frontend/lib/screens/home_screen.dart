@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -186,8 +187,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           leadingWidth: 120,
-          actions: const [
-            Padding(
+          actions: [
+            const Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: Icon(
                 Icons.search,
@@ -195,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.black,
               ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: Icon(
                 Icons.add_alert,
@@ -204,11 +205,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
+                  );
+                },
+                child: const Icon(
+                  Icons.account_circle,
+                  size: 30,
+                  color: Colors.black,
+                ),
               ),
             ),
           ],
