@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -186,8 +187,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           leadingWidth: 120,
-          actions: const [
-            Padding(
+          actions: [
+            const Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: Icon(
                 Icons.search,
@@ -195,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.black,
               ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: Icon(
                 Icons.add_alert,
@@ -204,11 +205,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
+                  );
+                },
+                child: const Icon(
+                  Icons.account_circle,
+                  size: 30,
+                  color: Colors.black,
+                ),
               ),
             ),
           ],
@@ -350,7 +361,7 @@ class _HomePageState extends State<HomePage> {
                     physics:
                         const NeverScrollableScrollPhysics(), // Gridview의 스크롤 방지
                     crossAxisCount: 5, // 1개의 행에 보여줄 item의 개수
-                    crossAxisSpacing: 10.0, // 같은 행의 iteme들 사이의 간
+                    crossAxisSpacing: 9.0, // 같은 행의 iteme들 사이의 간
 
                     children: [
                       homeItem(
@@ -384,6 +395,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,12 +427,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 69),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10.0),
-                        child: Image.asset(
-                          'assets/images/smile.png',
-                        ),
+                      Image.asset(
+                        'assets/images/smile.png',
                       ),
                     ],
                   ),
