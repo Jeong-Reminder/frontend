@@ -60,6 +60,8 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               const SizedBox(height: 20),
+
+              // 아이디 텍스트폼필드
               SizedBox(
                 height: 50,
                 child: TextFormField(
@@ -76,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 12),
+
+              // 비밀번호 텍스트폼필드
               SizedBox(
                 height: 50,
                 child: TextFormField(
@@ -92,60 +96,99 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 12),
-
-              // 자동 로그인
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Checkbox(
-                    value: isAutoLogin,
-                    onChanged: (value) {
-                      setState(() {
-                        isAutoLogin = !isAutoLogin;
-                      });
-                    },
-                    activeColor: const Color(0xFF2A72E7), // 체크 시 배경색
-                    // 기본 패딩 없애기
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: const VisualDensity(
-                      horizontal: VisualDensity.minimumDensity,
-                      vertical: VisualDensity.minimumDensity,
-                    ),
+                  // 자동 로그인
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isAutoLogin,
+                        onChanged: (value) {
+                          setState(() {
+                            isAutoLogin = !isAutoLogin;
+                          });
+                        },
+                        activeColor: const Color(0xFF2A72E7), // 체크 시 배경색
+                        // 기본 패딩 없애기
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: const VisualDensity(
+                          horizontal: VisualDensity.minimumDensity,
+                          vertical: VisualDensity.minimumDensity,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      const Text(
+                        '자동 로그인',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF808080),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 5),
-                  const Text(
-                    '자동 로그인',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF808080),
+
+                  // 아이디 / 비밀번호 찾기
+                  SizedBox(
+                    height: 20,
+                    child: Row(
+                      children: [
+                        idAndPwTextBtn('아이디'),
+                        const VerticalDivider(
+                          color: Color(0xFF808080),
+                          thickness: 2,
+                        ),
+                        idAndPwTextBtn('비밀번호'),
+                      ],
                     ),
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: EdgeInsets.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text('아이디'),
+              const SizedBox(height: 27),
+
+              // 로그인 버튼
+              ElevatedButton(
+                onPressed: () {
+                  // 홈 화면 이동
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2A72E7),
+                  minimumSize: const Size(double.infinity, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: EdgeInsets.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text('비밀번호'),
+                ),
+                child: const Text(
+                  '로그인',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                ],
+                ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // 아이디 / 비밀번호 찾기 텍스트 버튼
+  Widget idAndPwTextBtn(String title) {
+    return TextButton(
+      onPressed: () {},
+      style: TextButton.styleFrom(
+        minimumSize: Size.zero,
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF808080),
         ),
       ),
     );
