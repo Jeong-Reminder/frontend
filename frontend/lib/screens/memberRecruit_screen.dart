@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/recruitDetail_screen.dart';
 
 class memberRecruitPage extends StatefulWidget {
   const memberRecruitPage({super.key});
@@ -47,151 +48,159 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
 
   Widget _buildIOTContent() {
     // IOT 내용
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 341,
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15.0),
-            color: const Color(0xFFFAFAFE),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 3),
-              const Row(
-                children: [
-                  Text(
-                    '이승욱',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    '23/10/21 ',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                  Text(
-                    '10:57 ',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
-                style: TextStyle(fontSize: 12),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Text(
-                    '모집 인원 2/4',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    '~10/28까지',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDBE7FB),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '벡엔드',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const recruitDetailPage()),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 341,
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.0),
+              color: const Color(0xFFFAFAFE),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 3),
+                const Row(
+                  children: [
+                    Text(
+                      '이승욱',
+                      style: TextStyle(fontSize: 10),
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '23/10/21 ',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
+                    Text(
+                      '10:57 ',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
+                  style: TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Text(
+                      '모집 인원 2/4',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      '~10/28까지',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {},
+                              child: Container(
+                                height: 20,
+                                width: 80,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDBE7FB),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '벡엔드',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDBE7FB),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '프론트',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () {},
+                              child: Container(
+                                height: 20,
+                                width: 80,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDBE7FB),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '프론트',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              height: 20,
-                              width: 90,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDBE7FB),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  '디자이너',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () {},
+                              child: Container(
+                                height: 20,
+                                width: 90,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDBE7FB),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '디자이너',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

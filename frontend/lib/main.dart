@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/%08vote_screen.dart';
+import 'package:frontend/screens/vote_screen.dart';
 import 'package:frontend/screens/competitionNotice_screen.dart';
 
 void main() {
