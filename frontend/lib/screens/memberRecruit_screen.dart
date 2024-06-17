@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 
 class memberRecruitPage extends StatefulWidget {
@@ -561,11 +562,21 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
                   ),
                   PopupMenuButton<PopUpItem>(
                     color: const Color(0xFFEFF0F2),
+                    onSelected: (PopUpItem item) {
+                      if (item == PopUpItem.popUpItem2) {
+                        // 모집글 작성 PopUpItem 클릭 시 팀원 모집글 작성 페이지로 이동
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const makeTeamPage()),
+                        );
+                      }
+                    },
                     itemBuilder: (BuildContext context) {
                       return [
                         popUpItem('URL 공유', PopUpItem.popUpItem1),
                         const PopupMenuDivider(),
-                        popUpItem('모집글 작성', PopUpItem.popUpItem1),
+                        popUpItem('모집글 작성', PopUpItem.popUpItem2),
                       ];
                     },
                     child: const Icon(Icons.more_vert),
