@@ -58,26 +58,28 @@ flutter:
     # the material Icons class.
     uses-material-design: true
 
-    # To add assets to your application, add an assets section, like this:
-    assets:
-        - assets/images/logo.png
-        - assets/images/mustRead.png
-        - assets/images/coloredMustRead.png
-        - assets/images/vote.png
-        - assets/images/logo.png
-        - assets/images/general.png
-        - assets/images/grade.png
-        - assets/images/competition.png
-        - assets/images/company.png
-        - assets/images/etc.png
-        - assets/images/light.png
-        - assets/images/smile.png
-        - assets/images/good.png
-        - assets/images/votecheck.png
-        - assets/images/addsquare.png
-        - assets/images/classselect.png
-        - assets/images/contestnotice.png
-        - assets/images/profile.png
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/sungkyul.png
+    - assets/images/logo.png
+    - assets/images/mustRead.png
+    - assets/images/coloredMustRead.png
+    - assets/images/vote.png
+    - assets/images/logo.png
+    - assets/images/general.png
+    - assets/images/grade.png
+    - assets/images/competition.png
+    - assets/images/company.png
+    - assets/images/etc.png
+    - assets/images/light.png
+    - assets/images/smile.png
+    - assets/images/good.png
+    - assets/images/votecheck.png
+    - assets/images/addsquare.png
+    - assets/images/classselect.png
+    - assets/images/contestnotice.png
+    - assets/images/profile.png
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
