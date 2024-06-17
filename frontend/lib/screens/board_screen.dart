@@ -1,97 +1,142 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
-import 'package:frontend/widgets/gradeBoard_widget.dart';
+import 'package:frontend/widgets/board_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
-class GradePage extends StatefulWidget {
-  const GradePage({Key? key}) : super(key: key);
+class BoardPage extends StatefulWidget {
+  const BoardPage({Key? key}) : super(key: key);
 
   @override
-  State<GradePage> createState() => _GradePageState();
+  State<BoardPage> createState() => _BoardPageState();
 }
 
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
-class _GradePageState extends State<GradePage> {
+class _BoardPageState extends State<BoardPage> {
   String selectedGrade = '1학년';
-  bool isSelceted = false;
+  bool isSelected = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
 
-  final List<Map<String, dynamic>> oneBoard = [
+  List<Map<String, dynamic>> oneBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
       'content': '1차 : 5일 오후 2시까지 신청',
       'isChecked': false,
+      'originalIndex': 0,
     },
     {
       'title': '새내기 게시판',
       'subtitle': '수강 신청 하는 방법 알려주세요',
       'content': '수강 신청 잘 할 수 있을까요?',
+      'isChecked': false,
+      'originalIndex': 1,
     },
     {
       'title': '제자반 채플 자주 묻는 질문',
       'subtitle': '채플 담당 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
+      'originalIndex': 2,
     },
   ];
 
-  final List<Map<String, dynamic>> twoBoard = [
+  List<Map<String, dynamic>> twoBoard = [
     {
       'title': '2차 증원',
       'subtitle': '정보통신공학과 증원 신청',
       'content': '2차 : 5일 오후 2시까지 신청',
+      'isChecked': false,
+      'originalIndex': 0,
     },
     {
       'title': '헌내기 게시판',
       'subtitle': '수강 신청 하는 방법 알려주세요',
       'content': '수강 신청 잘 할 수 있을까요?',
+      'isChecked': false,
+      'originalIndex': 1,
     },
     {
       'title': '사회봉사 자주 묻는 질문',
       'subtitle': '사회봉사 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
+      'originalIndex': 2,
     },
   ];
 
-  final List<Map<String, dynamic>> threeBoard = [
+  List<Map<String, dynamic>> threeBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
       'content': '1차 : 5일 오후 2시까지 신청',
       'isChecked': false,
+      'originalIndex': 0,
     },
     {
       'title': '암모니아 게시판',
       'subtitle': '복학 신청 하는 방법 알려주세요',
       'content': '복학 신청 잘 할 수 있을까요?',
+      'isChecked': false,
+      'originalIndex': 1,
     },
     {
       'title': '현대인과 기독교 자주 묻는 질문',
       'subtitle': '현기 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
+      'originalIndex': 2,
     },
   ];
 
-  final List<Map<String, dynamic>> fourBoard = [
+  List<Map<String, dynamic>> fourBoard = [
     {
       'title': '1차 증원',
       'subtitle': '정보통신공학과 증원 신청',
       'content': '1차 : 5일 오후 2시까지 신청',
       'isChecked': false,
+      'originalIndex': 0,
     },
     {
       'title': '졸업반 게시판',
       'subtitle': '자기소개서 작성 하는 방법 알려주세요',
       'content': '자소서 작성 잘 할 수 있을까요?',
+      'isChecked': false,
+      'originalIndex': 1,
     },
     {
       'title': '졸업작품 자주 묻는 질문',
       'subtitle': '졸업작품 담당 교수님 연락처는 어떻게 알아요?',
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
+      'isChecked': false,
+      'originalIndex': 2,
     },
   ];
+
+  List<Map<String, dynamic>> hiddenList = [];
+
+  // 숨김 해제 시 호출되는 함수
+  void unhideItems(List<Map<String, dynamic>> items) {
+    setState(() {
+      for (var item in items) {
+        item['isChecked'] = false;
+        // 각 학년별 게시판 리스트 (oneBoard, twoBoard, threeBoard, fourBoard)를 정의
+        // 각 항목에 originalIndex를 추가하여 원래 인덱스를 저장
+        // 각 항목의 originalIndex를 사용하여 원래 인덱스 위치에 항목을 다시 추가
+        if (selectedGrade == '1학년') {
+          oneBoard.insert(item['originalIndex'], item);
+        } else if (selectedGrade == '2학년') {
+          twoBoard.insert(item['originalIndex'], item);
+        } else if (selectedGrade == '3학년') {
+          threeBoard.insert(item['originalIndex'], item);
+        } else if (selectedGrade == '4학년') {
+          fourBoard.insert(item['originalIndex'], item);
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +216,7 @@ class _GradePageState extends State<GradePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const Homepage()),
+                              builder: (context) => const HomePage()),
                         );
                       }),
                       const PopupMenuDivider(),
@@ -179,7 +224,10 @@ class _GradePageState extends State<GradePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const Homepage()),
+                              builder: (context) => HiddenPage(
+                                    hiddenList: hiddenList,
+                                    onUnhide: unhideItems,
+                                  )),
                         );
                       }),
                     ];
@@ -195,7 +243,7 @@ class _GradePageState extends State<GradePage> {
               children: [
                 GradeBtn(
                   grade: '1학년',
-                  isSelceted:
+                  isSelected:
                       selectedGrade == '1학년', // 전달 받은 학년과 버튼 학년과 동일하면 true 반환
                   // 전달 받은 grade 값을 selectedGrade에 저장
                   onSelectedGrade: (grade) {
@@ -210,7 +258,7 @@ class _GradePageState extends State<GradePage> {
                 const SizedBox(width: 5),
                 GradeBtn(
                   grade: '2학년',
-                  isSelceted: selectedGrade == '2학년',
+                  isSelected: selectedGrade == '2학년',
                   onSelectedGrade: (grade) {
                     setState(() {
                       isHidDel = false;
@@ -221,7 +269,7 @@ class _GradePageState extends State<GradePage> {
                 const SizedBox(width: 5),
                 GradeBtn(
                   grade: '3학년',
-                  isSelceted: selectedGrade == '3학년',
+                  isSelected: selectedGrade == '3학년',
                   onSelectedGrade: (grade) {
                     setState(() {
                       isHidDel = false;
@@ -232,7 +280,7 @@ class _GradePageState extends State<GradePage> {
                 const SizedBox(width: 5),
                 GradeBtn(
                   grade: '4학년',
-                  isSelceted: selectedGrade == '4학년',
+                  isSelected: selectedGrade == '4학년',
                   onSelectedGrade: (level) {
                     setState(() {
                       isHidDel = false;
@@ -246,7 +294,7 @@ class _GradePageState extends State<GradePage> {
             // 해당 학년 공지 표시
             if (selectedGrade == '1학년')
               // 전달받은 isEdited 값을 isHidDel 값에 저장
-              GradeBoard(
+              Board(
                 boardList: oneBoard,
                 onChecked: (isPressed) {
                   setState(() {
@@ -256,7 +304,7 @@ class _GradePageState extends State<GradePage> {
                 isShowed: isHidDel,
               )
             else if (selectedGrade == '2학년')
-              GradeBoard(
+              Board(
                 boardList: twoBoard,
                 onChecked: (isPressed) {
                   setState(() {
@@ -266,7 +314,7 @@ class _GradePageState extends State<GradePage> {
                 isShowed: isHidDel,
               )
             else if (selectedGrade == '3학년')
-              GradeBoard(
+              Board(
                 boardList: threeBoard,
                 onChecked: (isPressed) {
                   setState(() {
@@ -276,7 +324,7 @@ class _GradePageState extends State<GradePage> {
                 isShowed: isHidDel,
               )
             else if (selectedGrade == '4학년')
-              GradeBoard(
+              Board(
                 boardList: fourBoard,
                 onChecked: (isPressed) {
                   setState(() {
@@ -295,7 +343,38 @@ class _GradePageState extends State<GradePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      if (selectedGrade == '1학년') {
+                        // 리스트에서 isChecked 값이 true인 board만 hiddenList에 추가
+                        hiddenList.addAll(oneBoard // addAll : 리스트에 추가
+                            .where((board) =>
+                                board['isChecked'] ==
+                                true)); // where : 조건에 맞게 필터링
+
+                        // isChecked 값이 true인 board만 BoardPage에서 제거
+                        oneBoard.removeWhere((board) =>
+                            board['isChecked'] ==
+                            true); // removeWhere : 조건에 맞게 제거
+                      } else if (selectedGrade == '2학년') {
+                        hiddenList.addAll(twoBoard
+                            .where((board) => board['isChecked'] == true));
+                        twoBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      } else if (selectedGrade == '3학년') {
+                        hiddenList.addAll(threeBoard
+                            .where((board) => board['isChecked'] == true));
+                        threeBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      } else if (selectedGrade == '4학년') {
+                        hiddenList.addAll(fourBoard
+                            .where((board) => board['isChecked'] == true));
+                        fourBoard
+                            .removeWhere((board) => board['isChecked'] == true);
+                      }
+                      isHidDel = false; // 숨김/삭제 버튼 비활성화
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),
@@ -313,7 +392,24 @@ class _GradePageState extends State<GradePage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // setState(() {
+                    //   if (selectedGrade == '1학년') {
+                    //     oneBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '2학년') {
+                    //     twoBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '3학년') {
+                    //     threeBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '4학년') {
+                    //     fourBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   }
+                    //   isHidDel = false; // 숨김/삭제 버튼 비활성화
+                    // });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),
