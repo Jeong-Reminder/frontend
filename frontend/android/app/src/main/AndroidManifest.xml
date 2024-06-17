@@ -1,8 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <application
         android:label="frontend"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- requestLegacyExternalStorage : 외부 저장소 액세스 방식 -> 기존의 파일 액세스 방식 사용 -->
+        android:requestLegacyExternalStorage="true"
+        <!-- preserveLegacyExternalStorage : 외부 저장소 액세스 권한 유지 -> 권한을 유지하여 앱 정상 작동-->
+        android:preserveLegacyExternalStorage="true"
         <activity
             android:name=".MainActivity"
             android:exported="true"
