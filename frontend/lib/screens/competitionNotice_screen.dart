@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/memberRecruit_screen.dart';
+import 'package:frontend/screens/teamMember_screen.dart';
 
 class competitionNoticePage extends StatefulWidget {
   const competitionNoticePage({super.key});
@@ -32,10 +34,22 @@ class _competitionNoticePageState extends State<competitionNoticePage> {
   int? _selectedIndex = 0; // 유효한 인덱스 계산
 
   void _onItemTapped(int index) {
-    if (_selectedIndex != null) {
-      setState(() {
-        _selectedIndex = index;
-      });
+    setState(() {
+      _selectedIndex = index;
+    });
+    switch (index) {
+      case 0: // index 0인 경우 팀원 모집 페이지로 이동 -> 팀원 모집 클릭 시
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const memberRecruitPage()),
+        );
+        break;
+      case 1: // index 1인 경우 팀원 현황 페이지로 이동 -> 팀원 현황 클릭 시
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const teamMemberPage()),
+        );
+        break;
     }
   }
 
