@@ -63,7 +63,7 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                 ),
               );
             },
-            icon: Image.asset('assets/images/logo.png', width: 86, height: 80),
+            icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
           ),
         ),
@@ -102,20 +102,17 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 20.0, vertical: 26.0),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      child: Image.asset('assets/images/profile.png'),
+                child: ListTile(
+                  leading: ClipRRect(
+                    child: Image.asset('assets/images/profile.png'),
+                  ),
+                  title: const Text(
+                    '홍길동',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      '홍길동',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
