@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/widgets/account_widget.dart';
+import 'package:frontend/widgets/profile_widget.dart';
 
 class MyUserPage extends StatefulWidget {
   const MyUserPage({super.key});
@@ -167,40 +169,10 @@ class _MyUserPageState extends State<MyUserPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 프로필
-              Card(
-                color: const Color(0xFFFAFAFE),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                elevation: 0.5,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 26.0),
-                  child: ListTile(
-                    leading: ClipRRect(
-                      child: Image.asset('assets/images/profile.png'),
-                    ),
-                    title: const Text(
-                      '민택기',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: const Row(
-                      children: [
-                        Text('20190906'),
-                        SizedBox(width: 5),
-                        CircleAvatar(
-                          radius: 2,
-                          backgroundColor: Color(0xFF808080),
-                        ),
-                        SizedBox(width: 5),
-                        Text('재학생'),
-                      ],
-                    ),
-                  ),
-                ),
+              const Profile(
+                profileUrl: 'assets/images/profile.png',
+                name: '민택기',
+                showSubTitle: true,
               ),
 
               const SizedBox(height: 25),
@@ -285,61 +257,10 @@ class _MyUserPageState extends State<MyUserPage> {
 
               // 확장할 시 내 팀 현황 박스 보여주기
               if (isExpanded == true) showMyTeam(),
-
               const SizedBox(height: 20),
 
-              // 계정 경계선
-              const Divider(),
-              const SizedBox(height: 20),
-
-              // 계정 제목
-              const Text(
-                '계정',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // 비밀번호 변경 버튼
-              TextButton(
-                onPressed: () {
-                  // 비밀번호 변경 페이지로 이동
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  '비밀번호 변경',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF808080),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // 로그아웃 버튼
-              TextButton(
-                onPressed: () {
-                  logoutDialog(context);
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  '로그아웃',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF808080),
-                  ),
-                ),
-              ),
+              // 계정(비밀번호 변경, 로그아웃) 위젯
+              const AccountWidget(),
             ],
           ),
         ),
@@ -429,82 +350,6 @@ class _MyUserPageState extends State<MyUserPage> {
         badgeColor: badgeColor,
         shape: badges.BadgeShape.square,
       ),
-    );
-  }
-
-  // 로그아웃 다이얼로그 함수
-  Future<dynamic> logoutDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          icon: const Icon(
-            Icons.question_mark_rounded,
-            size: 40,
-            color: Color(0xFF2A72E7),
-          ),
-          // 메인 타이틀
-          title: const Column(
-            children: [
-              Text("정말 로그아웃 하실 건가요?"),
-            ],
-          ),
-          //
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "실수일 수도 있으니까요",
-              ),
-            ],
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: TextButton.styleFrom(
-                    fixedSize: const Size(100, 20),
-                  ),
-                  child: const Text(
-                    '닫기',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF2A72E7),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // 로그인 화면으로 이동
-                  },
-                  style: TextButton.styleFrom(
-                    fixedSize: const Size(100, 20),
-                  ),
-                  child: const Text(
-                    '로그아웃',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF2A72E7),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
     );
   }
 }
