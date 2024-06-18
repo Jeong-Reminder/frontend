@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
 
 class MyOwnerPage extends StatefulWidget {
   const MyOwnerPage({super.key});
@@ -50,11 +51,23 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: 70,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(),
+                ),
+              );
+            },
+            icon: Image.asset('assets/images/logo.png', width: 86, height: 80),
+            color: Colors.black,
+          ),
         ),
+        leadingWidth: 120, // leading에 있는 위젯 크게 만들기 위한 코드
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 23.0),
