@@ -1,7 +1,94 @@
 import 'package:flutter/material.dart';
+import 'package:badges/badges.dart' as badges;
 
-class MyUserPage extends StatelessWidget {
+class MyUserPage extends StatefulWidget {
   const MyUserPage({super.key});
+
+  @override
+  State<MyUserPage> createState() => _MyUserPageState();
+}
+
+class _MyUserPageState extends State<MyUserPage> {
+  List<Map<String, dynamic>> fieldList = [
+    {
+      'logoUrl': 'assets/skilImages/typescript.png',
+      'title': 'TYPESCRIPT',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF037BCB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/javascript.png',
+      'title': 'JAVASCRIPT',
+      'titleColor': Colors.black,
+      'badgeColor': const Color(0xFFF5DF1D),
+    },
+    {
+      'logoUrl': 'assets/skilImages/tailwindcss.png',
+      'title': 'TAILWINDCSS',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF3DB1AB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/html.png',
+      'title': 'HTML5',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFFE35026),
+    },
+    {
+      'logoUrl': 'assets/skilImages/css.png',
+      'title': 'CSS3',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF1472B6),
+    },
+    {
+      'logoUrl': 'assets/skilImages/react.png',
+      'title': 'REACT',
+      'titleColor': Colors.black,
+      'badgeColor': const Color(0xFF61DAFB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/npm.png',
+      'title': 'NPM',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFFCB3837),
+    },
+    {
+      'logoUrl': 'assets/skilImages/vscode.png',
+      'title': 'VISUAL STUDIO CODE',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF0078D7),
+    },
+    {
+      'logoUrl': 'assets/skilImages/docker.png',
+      'title': 'DOCKER',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF0BB7ED),
+    },
+    {
+      'logoUrl': 'assets/skilImages/yarn.png',
+      'title': 'YARN',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF2C8EBB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/prettier.png',
+      'title': 'PRETTIER',
+      'titleColor': Colors.black,
+      'badgeColor': const Color(0xFFF8B83E),
+    },
+    {
+      'logoUrl': 'assets/skilImages/eslint.png',
+      'title': 'ESLINT',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF4B3263),
+    },
+    {
+      'logoUrl': 'assets/skilImages/figma.png',
+      'title': 'FIGMA',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFFF24D1D),
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +166,40 @@ class MyUserPage extends StatelessWidget {
                 ),
               ),
             ),
+
+            const SizedBox(height: 25),
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'DEVELOPMENT FIELD',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // 배지
+                  // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
+                  Wrap(
+                    direction: Axis.horizontal,
+                    alignment: WrapAlignment.start,
+                    spacing: 10,
+                    runSpacing: 10,
+                    // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                    children: fieldList.map((field) {
+                      return badge(
+                        field['logoUrl'],
+                        field['title'],
+                        field['titleColor'],
+                        field['badgeColor'],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
             const Expanded(child: SizedBox()), // 빈 공간을 차지해서 맨 밑으로 적용이 되도록 구현
             const Divider(),
             const SizedBox(height: 20),
@@ -125,6 +246,41 @@ class MyUserPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget badge(
+    String logoUrl,
+    String title,
+    Color titleColor,
+    Color badgeColor,
+  ) {
+    return badges.Badge(
+      // IntrinsicWidth : 자식 요소에 맞게 자동으로 너비 조절하는 위젯
+      badgeContent: IntrinsicWidth(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              logoUrl,
+              width: 20,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: titleColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+      badgeStyle: badges.BadgeStyle(
+        badgeColor: badgeColor,
+        shape: badges.BadgeShape.square,
       ),
     );
   }
