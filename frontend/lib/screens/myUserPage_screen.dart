@@ -90,6 +90,39 @@ class _MyUserPageState extends State<MyUserPage> {
     },
   ];
 
+  List<Map<String, dynamic>> toolsList = [
+    {
+      'logoUrl': 'assets/skilImages/github.png',
+      'title': 'GITHUB',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF111011),
+    },
+    {
+      'logoUrl': 'assets/skilImages/notion.png',
+      'title': 'NOTION',
+      'titleColor': Colors.white,
+      'badgeColor': Colors.black,
+    },
+    {
+      'logoUrl': 'assets/skilImages/slack.png',
+      'title': 'SLACK',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF4A144C),
+    },
+    {
+      'logoUrl': 'assets/skilImages/zoom.png',
+      'title': 'ZOOM',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF2D8CFF),
+    },
+    {
+      'logoUrl': 'assets/skilImages/discord.png',
+      'title': 'DISCORD',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF5765F2),
+    }
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,126 +158,145 @@ class _MyUserPageState extends State<MyUserPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 프로필
-            Card(
-              color: const Color(0xFFFAFAFE),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 0.5,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 26.0),
-                child: ListTile(
-                  leading: ClipRRect(
-                    child: Image.asset('assets/images/profile.png'),
-                  ),
-                  title: const Text(
-                    '민택기',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 프로필
+              Card(
+                color: const Color(0xFFFAFAFE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                elevation: 0.5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 26.0),
+                  child: ListTile(
+                    leading: ClipRRect(
+                      child: Image.asset('assets/images/profile.png'),
                     ),
-                  ),
-                  subtitle: const Row(
-                    children: [
-                      Text('20190906'),
-                      SizedBox(width: 5),
-                      CircleAvatar(
-                        radius: 2,
-                        backgroundColor: Color(0xFF808080),
+                    title: const Text(
+                      '민택기',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      SizedBox(width: 5),
-                      Text('재학생'),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 25),
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'DEVELOPMENT FIELD',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    ),
+                    subtitle: const Row(
+                      children: [
+                        Text('20190906'),
+                        SizedBox(width: 5),
+                        CircleAvatar(
+                          radius: 2,
+                          backgroundColor: Color(0xFF808080),
+                        ),
+                        SizedBox(width: 5),
+                        Text('재학생'),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // 배지
-                  // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
-                  Wrap(
-                    direction: Axis.horizontal,
-                    alignment: WrapAlignment.start,
-                    spacing: 10,
-                    runSpacing: 10,
-                    // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                    children: fieldList.map((field) {
-                      return badge(
-                        field['logoUrl'],
-                        field['title'],
-                        field['titleColor'],
-                        field['badgeColor'],
-                      );
-                    }).toList(),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+              const Text(
+                'DEVELOPMENT FIELD',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // 배지
+              // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
+              Wrap(
+                direction: Axis.horizontal,
+                alignment: WrapAlignment.start,
+                spacing: 10,
+                runSpacing: 10,
+                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                children: fieldList.map((field) {
+                  // 괄호 안에 있는 변수는 리스트를 map한 이름
+                  return badge(
+                    field['logoUrl'],
+                    field['title'],
+                    field['titleColor'],
+                    field['badgeColor'],
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 26),
+              const Text(
+                'DEVELOPMENT TOOLS',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                direction: Axis.horizontal,
+                alignment: WrapAlignment.start,
+                spacing: 10,
+                runSpacing: 10,
+                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                children: toolsList.map((tools) {
+                  return badge(
+                    tools['logoUrl'],
+                    tools['title'],
+                    tools['titleColor'],
+                    tools['badgeColor'],
+                  );
+                }).toList(),
+              ),
+              const Divider(),
+              const SizedBox(height: 20),
+              const Text(
+                '계정',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  '비밀번호 변경',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF808080),
                   ),
-                ],
-              ),
-            ),
-            const Expanded(child: SizedBox()), // 빈 공간을 차지해서 맨 밑으로 적용이 되도록 구현
-            const Divider(),
-            const SizedBox(height: 20),
-            const Text(
-              '계정',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                '비밀번호 변경',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF808080),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                logoutDialog(context);
-              },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                '로그아웃',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF808080),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () {
+                  logoutDialog(context);
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  '로그아웃',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF808080),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
