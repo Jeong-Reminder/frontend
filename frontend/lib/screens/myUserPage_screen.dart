@@ -9,6 +9,8 @@ class MyUserPage extends StatefulWidget {
 }
 
 class _MyUserPageState extends State<MyUserPage> {
+  bool isExpanded = false; // 내 팀 현황 확장성
+
   List<Map<String, dynamic>> fieldList = [
     {
       'logoUrl': 'assets/skilImages/typescript.png',
@@ -210,7 +212,8 @@ class _MyUserPageState extends State<MyUserPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // 배지
+
+              // Development Field 배지
               // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
               Wrap(
                 direction: Axis.horizontal,
@@ -237,11 +240,14 @@ class _MyUserPageState extends State<MyUserPage> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Development Tools 배지
               Wrap(
                 direction: Axis.horizontal,
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
+
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: toolsList.map((tools) {
                   return badge(
@@ -252,8 +258,41 @@ class _MyUserPageState extends State<MyUserPage> {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 26),
+
+              // 내 팀 현황
+              Row(
+                children: [
+                  const Text(
+                    '내 팀 현황',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isExpanded = !isExpanded;
+                      });
+                    },
+                    icon: Icon(
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                    ),
+                  ),
+                ],
+              ),
+
+              // 확장할 시 내 팀 현황 박스 보여주기
+              if (isExpanded == true) showMyTeam(),
+
+              const SizedBox(height: 20),
+
+              // 계정 경계선
               const Divider(),
               const SizedBox(height: 20),
+
+              // 계정 제목
               const Text(
                 '계정',
                 style: TextStyle(
@@ -262,8 +301,12 @@ class _MyUserPageState extends State<MyUserPage> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // 비밀번호 변경 버튼
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  // 비밀번호 변경 페이지로 이동
+                },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -278,6 +321,8 @@ class _MyUserPageState extends State<MyUserPage> {
                 ),
               ),
               const SizedBox(height: 10),
+
+              // 로그아웃 버튼
               TextButton(
                 onPressed: () {
                   logoutDialog(context);
@@ -292,6 +337,56 @@ class _MyUserPageState extends State<MyUserPage> {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF808080),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 내 팀 현황 박스
+  Card showMyTeam() {
+    return Card(
+      color: const Color(0xFFECECEC),
+      elevation: 1.0,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 5.0),
+        child: ListTile(
+          title: const Text(
+            'IoT 박사',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Row(
+            children: [
+              const Text(
+                'IOT 경진대회',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF808080),
+                ),
+              ),
+              const SizedBox(width: 14),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEA4E44),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  minimumSize: const Size(33, 20),
+                ),
+                child: const Text(
+                  '팀원',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
