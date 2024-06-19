@@ -143,8 +143,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:
-              Center(child: Text('${comments[index]['name']} 승인')), // 제목 가운데 정렬
+          title: Center(child: Text('${comments[index]['name']} 승인')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -156,13 +155,13 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
               ),
               const SizedBox(height: 20.0),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Image.asset(
                     'assets/images/billiard.png',
                     width: 16,
                     height: 16,
-                    color: Colors.grey, // 필요에 따라 색상을 변경할 수 있습니다.
+                    color: Colors.grey,
                   ),
                   const SizedBox(width: 8.0),
                   const Text(
@@ -175,9 +174,8 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
           ),
           actions: <Widget>[
             Center(
-              // Center로 감싸서 가운데 정렬
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextButton(
                     child: const Text('취소'),
@@ -185,7 +183,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                       Navigator.of(context).pop();
                     },
                   ),
-                  const SizedBox(width: 8.0), // 버튼 사이 간격
+                  const SizedBox(width: 8.0),
                   TextButton(
                     child: const Text('확인'),
                     onPressed: () {
@@ -214,8 +212,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:
-              Center(child: Text('${comments[index]['name']} 반려')), // 제목 가운데 정렬
+          title: Center(child: Text('${comments[index]['name']} 반려')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -227,13 +224,13 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
               ),
               const SizedBox(height: 20.0),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Image.asset(
                     'assets/images/billiard.png',
                     width: 16,
                     height: 16,
-                    color: Colors.grey, // 필요에 따라 색상을 변경할 수 있습니다.
+                    color: Colors.grey,
                   ),
                   const SizedBox(width: 8.0),
                   const Text(
@@ -246,9 +243,8 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
           ),
           actions: <Widget>[
             Center(
-              // Center로 감싸서 가운데 정렬
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextButton(
                     child: const Text('취소'),
@@ -256,16 +252,12 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                       Navigator.of(context).pop();
                     },
                   ),
-                  const SizedBox(width: 8.0), // 버튼 사이 간격
+                  const SizedBox(width: 8.0),
                   TextButton(
                     child: const Text('확인'),
                     onPressed: () {
                       setState(() {
-                        // 모집 인원이 최대 인원보다 적을 때만 승인
-                        if (currentMembers < maxMembers) {
-                          currentMembers++;
-                          comments.removeAt(index);
-                        }
+                        comments.removeAt(index); // 반려 클릭 시 없어지도록
                       });
                       Navigator.of(context).pop();
                     },
@@ -279,7 +271,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
     );
   }
 
-  // 이름 클릭 시 다이얼로그 표시
+  // 댓글 단 사람 이름 클릭 시 다이얼로그 표시
   void _showNameDialog(String field, String githubUrl) {
     showDialog(
       context: context,
@@ -307,7 +299,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 20), // 텍스트와 배지 사이의 간격
+                const SizedBox(height: 20),
                 RichText(
                   text: TextSpan(
                     text: 'Github: ',
@@ -320,6 +312,71 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                       TextSpan(
                         text: githubUrl,
                         style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 글쓴 사람의 기술 스택 다이얼로그 표시
+  void _showAuthorStackDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('이승욱님의 기술 스택'),
+          titleTextStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: fieldList.map((field) {
+                    return badge(
+                      field['logoUrl'] ?? '',
+                      field['title'] ?? '',
+                      field['titleColor'] ?? Colors.black,
+                      field['badgeColor'] ?? Colors.grey,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                RichText(
+                  text: const TextSpan(
+                    text: 'Github: ',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'github.com/seungwooklee',
+                        style: TextStyle(
                           fontSize: 14,
                           color: Colors.blue,
                           decoration: TextDecoration.underline, // 하이퍼링크 스타일
@@ -395,21 +452,26 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 3),
-              const Row(
+              Row(
                 children: [
-                  Text(
-                    '이승욱',
-                    style: TextStyle(fontSize: 10),
+                  GestureDetector(
+                    onTap: () {
+                      _showAuthorStackDialog(); // 글쓴 사람 기술 스택 다이얼로그 표시
+                    },
+                    child: const Text(
+                      '이승욱',
+                      style: TextStyle(fontSize: 10),
+                    ),
                   ),
-                  SizedBox(width: 4),
-                  Text(
+                  const SizedBox(width: 4),
+                  const Text(
                     '23/10/21 ',
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: Colors.black54),
                   ),
-                  Text(
+                  const Text(
                     '10:57 ',
                     style: TextStyle(
                         fontSize: 11,
