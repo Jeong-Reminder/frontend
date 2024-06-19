@@ -16,7 +16,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
   TextEditingController contentController = TextEditingController();
   bool isButtonEnabled = false; // 작성 완료 버튼 상태
   bool isMustRead = false;
-  bool isOpenVote = false;
+  bool isConfirmedVote = false;
 
   bool categoryBtn = true; // 공지 혹은 학년 버튼 여부
   List<bool> isCategory = [false, false, false, false]; // 공지 선택 불리안
@@ -318,12 +318,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
             readVoteBtn(
               title: '투표',
               imgPath: 'assets/images/vote.png',
-              state: isOpenVote,
+              state: isConfirmedVote,
               onPressed: () {
-                setState(() {
-                  isOpenVote = !isOpenVote;
-                });
-
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
@@ -499,7 +495,14 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                 // 확인 버튼
                                 Center(
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      bottomState(() {
+                                        setState(() {
+                                          isConfirmedVote = true;
+                                        });
+                                      });
+                                      Navigator.pop(context);
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFFDBE7FB),
                                       surfaceTintColor: const Color(0xFF2B72E7)
