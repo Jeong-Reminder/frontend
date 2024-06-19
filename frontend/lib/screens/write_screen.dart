@@ -20,6 +20,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
   List<bool> isCategory = [false, false, false, false]; // 공지 선택 불리안
   List<bool> isGrade = [false, false, false, false, false]; // 학년 선택 불리안
 
+  // 기본 3개의 텍스트폼필드의 컨트롤러
+  List<TextEditingController> voteControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+  ];
+
   File? pickedImage; // 선택된 이미지 파일
   bool isPickingImage = false; // 이미지 선택 작업 진행 여부
 
@@ -39,6 +46,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
     contentController.removeListener(checkIfFormIsFilled);
     titleController.dispose();
     contentController.dispose();
+    for (var controller in voteControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -77,6 +87,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
   void _deleteImage() {
     setState(() {
       pickedImage = null;
+    });
+  }
+
+  // voteController 추가 함수
+  void _addVoteItem() {
+    setState(() {
+      voteControllers.add(TextEditingController());
     });
   }
 
@@ -326,86 +343,59 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                         ),
                                       ),
                                       const SizedBox(height: 19),
-                                      TextFormField(
-                                        decoration: InputDecoration(
-                                          hintText: '1. 항목을 입력하세요',
-                                          hintStyle: const TextStyle(
-                                            fontSize: 14,
-                                            color: Color(0xFFC5C5C7),
-                                          ),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
-                                          ),
-                                          suffixIcon: IconButton(
-                                            onPressed: () {},
-                                            icon: const Icon(
-                                              Icons.menu,
-                                            ),
-                                          ),
-                                          suffixIconColor:
-                                              const Color(0xFFC5C5C7),
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 10.0,
-                                                  vertical: 5.0),
-                                        ),
+
+                                      // 투표 항목
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: voteControllers.length,
+                                        itemBuilder: (context, index) {
+                                          return Column(
+                                            children: [
+                                              TextFormField(
+                                                controller:
+                                                    voteControllers[index],
+                                                decoration: InputDecoration(
+                                                  hintText:
+                                                      '${index + 1}. 항목을 입력하세요',
+                                                  hintStyle: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: Color(0xFFC5C5C7),
+                                                  ),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5.0),
+                                                  ),
+                                                  suffixIcon: IconButton(
+                                                    onPressed: () {},
+                                                    icon: const Icon(
+                                                      Icons.menu,
+                                                    ),
+                                                  ),
+                                                  suffixIconColor:
+                                                      const Color(0xFFC5C5C7),
+                                                  contentPadding:
+                                                      const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10.0,
+                                                          vertical: 5.0),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                            ],
+                                          );
+                                        },
                                       ),
-                                      const SizedBox(height: 10),
-                                      TextFormField(
-                                        decoration: InputDecoration(
-                                          hintText: '2. 항목을 입력하세요',
-                                          hintStyle: const TextStyle(
-                                            fontSize: 14,
-                                            color: Color(0xFFC5C5C7),
-                                          ),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
-                                          ),
-                                          suffixIcon: IconButton(
-                                            onPressed: () {},
-                                            icon: const Icon(
-                                              Icons.menu,
-                                            ),
-                                          ),
-                                          suffixIconColor:
-                                              const Color(0xFFC5C5C7),
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 10.0,
-                                                  vertical: 5.0),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextFormField(
-                                        decoration: InputDecoration(
-                                          hintText: '3. 항목을 입력하세요',
-                                          hintStyle: const TextStyle(
-                                            fontSize: 14,
-                                            color: Color(0xFFC5C5C7),
-                                          ),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5.0),
-                                          ),
-                                          suffixIcon: IconButton(
-                                            onPressed: () {},
-                                            icon: const Icon(
-                                              Icons.menu,
-                                            ),
-                                          ),
-                                          suffixIconColor:
-                                              const Color(0xFFC5C5C7),
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 10.0,
-                                                  vertical: 5.0),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 15),
+
+                                      // 항목 추가 버튼
                                       TextButton.icon(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          bottomState(() {
+                                            _addVoteItem(); //
+                                          });
+                                        },
                                         icon: const Icon(
                                           Icons.add,
                                           color: Colors.black,
@@ -419,9 +409,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 15),
-                                      const Divider(),
-                                      const SizedBox(height: 15),
+
+                                      // 복수 선택 허용 체크박스
                                       Row(
                                         children: [
                                           Checkbox(
@@ -445,11 +434,15 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 25),
+                                      const SizedBox(height: 10),
+                                      const Divider(),
+                                      const SizedBox(height: 10),
+
+                                      // 종료일 설정
                                       const Text(
                                         '종료일 설정',
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 18,
                                           color: Colors.black,
                                         ),
                                       ),
