@@ -1,6 +1,8 @@
 import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:intl/intl.dart';
 
 class BoardWritePage extends StatefulWidget {
   const BoardWritePage({super.key});
@@ -22,8 +24,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
   File? pickedImage; // 선택된 이미지 파일
   bool isPickingImage = false; // 이미지 선택 작업 진행 여부
-
   bool isMultiplied = false;
+
+  DateTime? selectedEndDate; // 종료 날짜
 
   // 기본 3개의 텍스트폼필드의 컨트롤러
   List<TextEditingController> voteControllers = [
@@ -107,6 +110,12 @@ class _BoardWritePageState extends State<BoardWritePage> {
       final item = voteControllers.removeAt(oldIndex);
       voteControllers.insert(newIndex, item);
     });
+  }
+
+  // 시간 포맷팅 함수
+  String formatDateTime(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    return formatter.format(dateTime);
   }
 
   @override
@@ -448,24 +457,46 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
+
+                                // 종료일 설정
                                 Row(
                                   children: [
+                                    // 달력 아이콘
                                     IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        DatePicker.showDateTimePicker(
+                                          context,
+                                          currentTime: DateTime.now(),
+                                          locale: LocaleType.ko, // 한국어 버전
+                                          onConfirm: (date) {
+                                            bottomState(() {
+                                              setState(() {
+                                                selectedEndDate = date;
+                                              });
+                                            });
+                                          },
+                                        );
+                                      },
                                       icon: const Icon(
                                         Icons.calendar_month,
                                       ),
                                     ),
-                                    const Text(
-                                      '지정한 종료 날짜',
-                                      style: TextStyle(
+
+                                    // 지정한 종료 날짜
+                                    Text(
+                                      selectedEndDate != null
+                                          ? (formatDateTime(selectedEndDate!))
+                                          : '',
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         color: Colors.black,
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 30),
+
+                                // 확인 버튼
                                 Center(
                                   child: ElevatedButton(
                                     onPressed: () {},
