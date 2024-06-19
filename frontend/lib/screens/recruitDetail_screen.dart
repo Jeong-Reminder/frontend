@@ -143,27 +143,64 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${comments[index]['name']} 승인'),
-          content: const Text('정말로 승인하시겠습니까?'),
+          title:
+              Center(child: Text('${comments[index]['name']} 승인')), // 제목 가운데 정렬
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 승인하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/billiard.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.grey, // 필요에 따라 색상을 변경할 수 있습니다.
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 승인하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('취소'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-                setState(() {
-                  // 모집 인원이 최대 인원보다 적을 때만 승인
-                  if (currentMembers < maxMembers) {
-                    currentMembers++;
-                    comments.removeAt(index);
-                  }
-                });
-                Navigator.of(context).pop();
-              },
+            Center(
+              // Center로 감싸서 가운데 정렬
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 8.0), // 버튼 사이 간격
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        // 모집 인원이 최대 인원보다 적을 때만 승인
+                        if (currentMembers < maxMembers) {
+                          currentMembers++;
+                          comments.removeAt(index);
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -177,23 +214,64 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${comments[index]['name']} 반려'),
-          content: const Text('정말로 반려하시겠습니까?'),
+          title:
+              Center(child: Text('${comments[index]['name']} 반려')), // 제목 가운데 정렬
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 반려하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/billiard.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.grey, // 필요에 따라 색상을 변경할 수 있습니다.
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 반려하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('취소'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-                setState(() {
-                  comments.removeAt(index);
-                });
-                Navigator.of(context).pop();
-              },
+            Center(
+              // Center로 감싸서 가운데 정렬
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 8.0), // 버튼 사이 간격
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        // 모집 인원이 최대 인원보다 적을 때만 승인
+                        if (currentMembers < maxMembers) {
+                          currentMembers++;
+                          comments.removeAt(index);
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         );
