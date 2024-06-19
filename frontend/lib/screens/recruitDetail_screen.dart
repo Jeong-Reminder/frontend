@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:badges/badges.dart' as badges;
 
 class recruitDetailPage extends StatefulWidget {
   const recruitDetailPage({super.key});
@@ -15,35 +16,124 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
   // 최대 모집 인원 수
   int maxMembers = 4;
 
+  List<Map<String, dynamic>> fieldList = [
+    {
+      'logoUrl': 'assets/skilImages/typescript.png',
+      'title': 'TYPESCRIPT',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF037BCB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/javascript.png',
+      'title': 'JAVASCRIPT',
+      'titleColor': Colors.black,
+      'badgeColor': const Color(0xFFF5DF1D),
+    },
+    {
+      'logoUrl': 'assets/skilImages/tailwindcss.png',
+      'title': 'TAILWINDCSS',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF3DB1AB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/html.png',
+      'title': 'HTML5',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFFE35026),
+    },
+    {
+      'logoUrl': 'assets/skilImages/css.png',
+      'title': 'CSS3',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF1472B6),
+    },
+    {
+      'logoUrl': 'assets/skilImages/react.png',
+      'title': 'REACT',
+      'titleColor': Colors.black,
+      'badgeColor': const Color(0xFF61DAFB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/npm.png',
+      'title': 'NPM',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFFCB3837),
+    },
+    {
+      'logoUrl': 'assets/skilImages/vscode.png',
+      'title': 'VISUAL STUDIO CODE',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF0078D7),
+    },
+    {
+      'logoUrl': 'assets/skilImages/docker.png',
+      'title': 'DOCKER',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF0BB7ED),
+    },
+    {
+      'logoUrl': 'assets/skilImages/yarn.png',
+      'title': 'YARN',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF2C8EBB),
+    },
+    {
+      'logoUrl': 'assets/skilImages/prettier.png',
+      'title': 'PRETTIER',
+      'titleColor': Colors.black,
+      'badgeColor': const Color(0xFFF8B83E),
+    },
+    {
+      'logoUrl': 'assets/skilImages/eslint.png',
+      'title': 'ESLINT',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF4B3263),
+    },
+    {
+      'logoUrl': 'assets/skilImages/figma.png',
+      'title': 'FIGMA',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFFF24D1D),
+    },
+  ];
+
   // 댓글 리스트
   final List<Map<String, dynamic>> comments = [
     {
-      'name': '소진수',
+      'name': '변우석',
       'year': '3학년',
       'date': '23/10/21',
       'time': '11:57',
-      'content': '저도 관심 있습니다~ 연락 주세요!!'
+      'content': '저도 관심 있습니다~ 연락 주세요!!',
+      'field': 'Frontend',
+      'githubUrl': 'github.com/byunwooseok'
     },
     {
       'name': '민택기',
       'year': '2학년',
       'date': '23/10/22',
       'time': '12:37',
-      'content': '경진대회 경험 쌓고 싶습니다!!'
+      'content': '경진대회 경험 쌓고 싶습니다!!',
+      'field': 'Frontend',
+      'githubUrl': 'github.com/minteki'
     },
     {
-      'name': '이승욱',
+      'name': '유다은',
       'year': '2학년',
       'date': '23/10/24',
       'time': '09:57',
-      'content': '저도 같이 나갈 사람 구하고 있었는데 같이 해봐요!!'
+      'content': '저도 같이 나갈 사람 구하고 있었는데 같이 해봐요!!',
+      'field': 'Backend',
+      'githubUrl': 'github.com/yudauen'
     },
     {
-      'name': '장찬현',
+      'name': '김혜윤',
       'year': '3학년',
       'date': '23/10/25',
       'time': '14:57',
-      'content': '연락 기다리겠습니다!!'
+      'content': '연락 기다리겠습니다!!',
+      'field': 'Backend',
+      'githubUrl': 'github.com/kimhyeyoon'
     },
   ];
 
@@ -53,27 +143,64 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${comments[index]['name']} 승인'),
-          content: const Text('정말로 승인하시겠습니까?'),
+          title:
+              Center(child: Text('${comments[index]['name']} 승인')), // 제목 가운데 정렬
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 승인하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/billiard.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.grey, // 필요에 따라 색상을 변경할 수 있습니다.
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 승인하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('취소'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-                setState(() {
-                  // 모집 인원이 최대 인원보다 적을 때만 승인
-                  if (currentMembers < maxMembers) {
-                    currentMembers++;
-                    comments.removeAt(index);
-                  }
-                });
-                Navigator.of(context).pop();
-              },
+            Center(
+              // Center로 감싸서 가운데 정렬
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 8.0), // 버튼 사이 간격
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        // 모집 인원이 최대 인원보다 적을 때만 승인
+                        if (currentMembers < maxMembers) {
+                          currentMembers++;
+                          comments.removeAt(index);
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -87,21 +214,127 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${comments[index]['name']} 반려'),
-          content: const Text('정말로 반려하시겠습니까?'),
+          title:
+              Center(child: Text('${comments[index]['name']} 반려')), // 제목 가운데 정렬
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 반려하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/billiard.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.grey, // 필요에 따라 색상을 변경할 수 있습니다.
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 반려하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              // Center로 감싸서 가운데 정렬
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // 주 축 가운데 정렬
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 8.0), // 버튼 사이 간격
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        // 모집 인원이 최대 인원보다 적을 때만 승인
+                        if (currentMembers < maxMembers) {
+                          currentMembers++;
+                          comments.removeAt(index);
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 이름 클릭 시 다이얼로그 표시
+  void _showNameDialog(String field, String githubUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(field),
+          titleTextStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: fieldList.map((field) {
+                    return badge(
+                      field['logoUrl'] ?? '',
+                      field['title'] ?? '',
+                      field['titleColor'] ?? Colors.black,
+                      field['badgeColor'] ?? Colors.grey,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20), // 텍스트와 배지 사이의 간격
+                RichText(
+                  text: TextSpan(
+                    text: 'Github: ',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: githubUrl,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           actions: <Widget>[
             TextButton(
-              child: const Text('취소'),
+              child: const Text('닫기'),
               onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('확인'),
-              onPressed: () {
-                setState(() {
-                  comments.removeAt(index);
-                });
                 Navigator.of(context).pop();
               },
             ),
@@ -494,16 +727,22 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                comment['name'],
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black),
+                              GestureDetector(
+                                onTap: () {
+                                  _showNameDialog(comment['field'] ?? 'Unknown',
+                                      comment['githubUrl'] ?? 'Unknown');
+                                },
+                                child: Text(
+                                  comment['name'] ?? 'Unknown',
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
+                                ),
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                comment['year'],
+                                comment['year'] ?? '',
                                 style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -562,7 +801,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                           Row(
                             children: [
                               Text(
-                                comment['date'],
+                                comment['date'] ?? '',
                                 style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
@@ -571,7 +810,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                comment['time'],
+                                comment['time'] ?? '',
                                 style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
@@ -582,7 +821,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            comment['content'],
+                            comment['content'] ?? '',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -604,6 +843,42 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget badge(
+    // badge 스타일 적용
+    String logoUrl,
+    String title,
+    Color titleColor,
+    Color badgeColor,
+  ) {
+    return badges.Badge(
+      // IntrinsicWidth : 자식 요소에 맞게 자동으로 너비 조절하는 위젯
+      badgeContent: IntrinsicWidth(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              logoUrl,
+              width: 20,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: titleColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+      badgeStyle: badges.BadgeStyle(
+        badgeColor: badgeColor,
+        shape: badges.BadgeShape.square,
       ),
     );
   }
