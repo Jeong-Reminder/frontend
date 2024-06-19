@@ -68,74 +68,72 @@ class _LoginPageState extends State<LoginPage> {
                 key: formKey,
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 65,
-                      child: TextFormField(
-                        controller: idController,
-                        decoration: const InputDecoration(
-                          labelText: '아이디',
-                          labelStyle: TextStyle(fontSize: 14.0),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(5.0),
-                            ),
+                    TextFormField(
+                      controller: idController,
+                      decoration: const InputDecoration(
+                        labelText: '아이디',
+                        labelStyle: TextStyle(fontSize: 14.0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(5.0),
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '아이디를 입력하세요';
-                          }
-                          if (value.length < 4 || value.length > 10) {
-                            return '4자 이상 10자 이하로 작성해주세요';
-                          }
-                          return null;
-                        },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 5.0),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '아이디를 입력하세요';
+                        }
+                        if (value.length < 4 || value.length > 10) {
+                          return '4자 이상 10자 이하로 작성해주세요';
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                     const SizedBox(height: 12),
 
                     // 비밀번호 텍스트폼필드
-                    SizedBox(
-                      height: 65,
-                      child: TextFormField(
-                        controller: pwController,
-                        decoration: InputDecoration(
-                          labelText: '비밀번호',
-                          labelStyle: const TextStyle(fontSize: 14.0),
-                          border: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(5.0),
-                            ),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                pwInvisible = !pwInvisible;
-                              });
-                            },
-                            icon: Icon(pwInvisible
-                                ? Icons.visibility
-                                : Icons.visibility_off),
+                    TextFormField(
+                      controller: pwController,
+                      decoration: InputDecoration(
+                        labelText: '비밀번호',
+                        labelStyle: const TextStyle(fontSize: 14.0),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(5.0),
                           ),
                         ),
-                        obscureText: pwInvisible ? true : false,
-                        // validator : 유효성 검사
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '비밀번호를 입력하세요';
-                          }
-                          if (value.length > 10) {
-                            return '10자 이하로 작성해주세요';
-                          }
-                          if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*[!@#\$&*~]).{1,}$')
-                              .hasMatch(value)) {
-                            return '영문자와 특수문자가 포함되어야 합니다';
-                          }
-                          return null;
-                        },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              pwInvisible = !pwInvisible;
+                            });
+                          },
+                          icon: Icon(pwInvisible
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 5.0),
                       ),
+                      obscureText: pwInvisible ? true : false,
+                      // validator : 유효성 검사
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '비밀번호를 입력하세요';
+                        }
+                        if (value.length > 10) {
+                          return '10자 이하로 작성해주세요';
+                        }
+                        if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*[!@#\$&*~]).{1,}$')
+                            .hasMatch(value)) {
+                          return '영문자와 특수문자가 포함되어야 합니다';
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                   ],
                 ),
