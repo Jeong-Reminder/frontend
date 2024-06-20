@@ -151,9 +151,9 @@ class _ProfileSettingPageState extends State<ProfileSettingPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '알리미 시작하기',
+                    '기술 스택 지정하기',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
