@@ -199,6 +199,7 @@ class _HomePageState extends State<HomePage> {
             const Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: Icon(
+                // badge 패키지 사용해서 다시 작성 예정
                 Icons.add_alert,
                 size: 30,
                 color: Colors.black,

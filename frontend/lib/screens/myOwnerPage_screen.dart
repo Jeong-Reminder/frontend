@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/widgets/account_widget.dart';
+import 'package:frontend/widgets/profile_widget.dart';
 
 class MyOwnerPage extends StatefulWidget {
   const MyOwnerPage({super.key});
@@ -50,11 +53,23 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: 70,
-        leading: BackButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(),
+                ),
+              );
+            },
+            icon: Image.asset('assets/images/logo.png'),
+            color: Colors.black,
+          ),
         ),
+        leadingWidth: 120, // leading에 있는 위젯 크게 만들기 위한 코드
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 23.0),
@@ -80,31 +95,10 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 프로필
-            Card(
-              color: const Color(0xFFFAFAFE),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 0.5,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 26.0),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      child: Image.asset('assets/images/profile.png'),
-                    ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      '홍길동',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const Profile(
+              profileUrl: 'assets/images/profile.png',
+              name: '홍길동',
+              showSubTitle: false,
             ),
             const SizedBox(height: 25),
 
@@ -156,128 +150,12 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                 },
               ),
             ),
-            const Divider(),
-            const SizedBox(height: 20),
-            const Text(
-              '계정',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                '비밀번호 변경',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF808080),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                logoutDialog(context);
-              },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                '로그아웃',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF808080),
-                ),
-              ),
-            ),
+
+            // 계정(비밀번호 변경, 로그아웃) 위젯
+            const AccountWidget(),
           ],
         ),
       ),
-    );
-  }
-
-  // 로그아웃 다이얼로그 함수
-  Future<dynamic> logoutDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          icon: const Icon(
-            Icons.question_mark_rounded,
-            size: 40,
-            color: Color(0xFF2A72E7),
-          ),
-          // 메인 타이틀
-          title: const Column(
-            children: [
-              Text("정말 로그아웃 하실 건가요?"),
-            ],
-          ),
-          //
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "실수일 수도 있으니까요",
-              ),
-            ],
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  style: TextButton.styleFrom(
-                    fixedSize: const Size(100, 20),
-                  ),
-                  child: const Text(
-                    '닫기',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF2A72E7),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // 로그인 화면으로 이동
-                  },
-                  style: TextButton.styleFrom(
-                    fixedSize: const Size(100, 20),
-                  ),
-                  child: const Text(
-                    '로그아웃',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF2A72E7),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
     );
   }
 
