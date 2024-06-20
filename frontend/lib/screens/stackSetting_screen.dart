@@ -141,6 +141,11 @@ class _StackSettingPageState extends State<StackSettingPage> {
     }
   ];
 
+  List<Map<String, dynamic>> selectedFields = []; // 선택된 Field 리스트
+  List<Map<String, dynamic>> selectedTools = []; // 선택된 Tools 리스트
+
+  bool completedField = false; // Field 선택 완료 불리안
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,8 +164,23 @@ class _StackSettingPageState extends State<StackSettingPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
+
+                // 초기화 버튼
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      for (var stack in selectedFields) {
+                        stack['isSelected'] = false;
+                      }
+                      for (var tool in selectedTools) {
+                        tool['isSelected'] = false;
+                      }
+                      selectedFields.clear();
+                      selectedTools.clear();
+
+                      completedField = false;
+                    });
+                  },
                   icon: const Icon(
                     Icons.restart_alt_outlined,
                     color: Colors.black,
@@ -175,122 +195,183 @@ class _StackSettingPageState extends State<StackSettingPage> {
               ],
             ),
             const SizedBox(height: 32),
-            const Text(
-              '1. DEVELOPMENT FIELD 선택',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 28),
-            Wrap(
-              direction: Axis.horizontal,
-              alignment: WrapAlignment.start,
-              spacing: 10,
-              runSpacing: 10,
-              // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-              children: fieldList.map((field) {
-                // 괄호 안에 있는 변수는 리스트를 map한 이름
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      field['isSelected'] = !field['isSelected'];
-                    });
-                    print('${field['title']} : ${field['isSelected']}');
-                  },
-                  child: badge(
-                    field['logoUrl'],
-                    field['title'],
-                    field['titleColor'],
-                    field['badgeColor'],
-                    field['isSelected'],
+
+            // Field 선택 완료 시 DEVELOPMENT TOOLS 선택으로 넘어감
+            completedField
+                ? const Text(
+                    '2. DEVELOPMENT TOOLS 선택',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : const Text(
+                    '1. DEVELOPMENT FIELD 선택',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              '2. DEVELOPMENT TOOLS 선택',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             const SizedBox(height: 28),
-            Wrap(
-              direction: Axis.horizontal,
-              alignment: WrapAlignment.start,
-              spacing: 10,
-              runSpacing: 10,
-              // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-              children: toolsList.map((tools) {
-                // 괄호 안에 있는 변수는 리스트를 map한 이름
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      tools['isSelected'] = !tools['isSelected'];
-                    });
-                    print('${tools['title']} : ${tools['isSelected']}');
-                  },
-                  child: badge(
-                    tools['logoUrl'],
-                    tools['title'],
-                    tools['titleColor'],
-                    tools['badgeColor'],
-                    tools['isSelected'],
+
+            // 기술 스택 목록
+            // Field 선택 완료 시 Tools 스택 표시
+            completedField
+                ? Wrap(
+                    direction: Axis.horizontal,
+                    alignment: WrapAlignment.start,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: toolsList.map((tools) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            tools['isSelected'] = !tools['isSelected'];
+                            if (tools['isSelected']) {
+                              selectedTools.add(tools);
+                            } else {
+                              selectedTools.remove(tools);
+                            }
+                          });
+                          print('${tools['title']} : ${tools['isSelected']}');
+                        },
+                        child: badge(
+                          tools['logoUrl'],
+                          tools['title'],
+                          tools['titleColor'],
+                          tools['badgeColor'],
+                          tools['isSelected'],
+                        ),
+                      );
+                    }).toList(),
+                  )
+                : Wrap(
+                    direction: Axis.horizontal,
+                    alignment: WrapAlignment.start,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: fieldList.map((field) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            field['isSelected'] = !field['isSelected'];
+                            if (field['isSelected']) {
+                              selectedFields.add(field);
+                            } else {
+                              selectedFields.remove(field);
+                            }
+                          });
+                          print('${field['title']} : ${field['isSelected']}');
+                        },
+                        child: badge(
+                          field['logoUrl'],
+                          field['title'],
+                          field['titleColor'],
+                          field['badgeColor'],
+                          field['isSelected'],
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
-            ),
           ],
         ),
       ),
-      bottomSheet: BottomSheet(
-        onClosing: () {},
-        constraints: BoxConstraints(
-          minWidth: MediaQuery.of(context).size.width,
-          maxHeight: MediaQuery.of(context).size.height / 3.6,
-        ),
-        backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-        builder: (context) {
-          return Column(
-            children: [
-              Container(
-                width: 400,
-                height: 160,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF6F6F6),
-                ),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+
+      // Visibility 위젯을 사용해 selectedStack가 하나라도 생기면 바텀 시트 생기게 구현
+      bottomSheet: Visibility(
+        // Field 선택 완료 시 visible이 selectedTools 리스트가 비어있는지 확인으로 바뀜
+        visible: completedField
+            ? selectedTools.isNotEmpty
+            : selectedFields.isNotEmpty,
+        child: BottomSheet(
+          onClosing: () {},
+          constraints: BoxConstraints(
+            minWidth: MediaQuery.of(context).size.width,
+            maxHeight: MediaQuery.of(context).size.height / 3.6,
+          ),
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          builder: (context) {
+            // 바텀 시트 영역
+            return Column(
+              children: [
+                SingleChildScrollView(
+                  child: Container(
+                    width: 400,
+                    height: 160,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF6F6F6),
+                    ),
+
+                    // Field 선택 완료 시 선택된 기술 스택 종류가 Tools로 바뀜
+                    child: completedField
+                        ? Wrap(
+                            direction: Axis.horizontal,
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: selectedTools.map((tools) {
+                              return badge(
+                                tools['logoUrl'],
+                                tools['title'],
+                                tools['titleColor'],
+                                tools['badgeColor'],
+                                tools['isSelected'],
+                              );
+                            }).toList(),
+                          )
+                        : Wrap(
+                            direction: Axis.horizontal,
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: selectedFields.map((stack) {
+                              return badge(
+                                stack['logoUrl'],
+                                stack['title'],
+                                stack['titleColor'],
+                                stack['badgeColor'],
+                                stack['isSelected'],
+                              );
+                            }).toList(),
+                          ),
                   ),
-                  backgroundColor: const Color(0xFF2A72E7),
-                  minimumSize: const Size(319, 46),
                 ),
-                child: const Text(
-                  '확인',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                const SizedBox(height: 15),
+
+                // 확인 버튼
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      // Field 선택 완료 시 Tools 선택 창으로 바뀜
+                      completedField = true;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    backgroundColor: const Color(0xFF2A72E7),
+                    minimumSize: const Size(319, 46),
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
+  // 기술 스택 배지
   Widget badge(
     String logoUrl,
     String title,
@@ -299,7 +380,6 @@ class _StackSettingPageState extends State<StackSettingPage> {
     bool isSelected,
   ) {
     return badges.Badge(
-      // IntrinsicWidth : 자식 요소에 맞게 자동으로 너비 조절하는 위젯
       badgeContent: IntrinsicWidth(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
