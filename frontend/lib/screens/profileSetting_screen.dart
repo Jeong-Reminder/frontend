@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileSettingPage extends StatefulWidget {
@@ -121,7 +122,30 @@ class _ProfileSettingPageState extends State<ProfileSettingPage> {
             GestureDetector(
               onTap: () {
                 // 프로필 설정해야만 이동
-                // 설정을 안하고 이동할 시 프로필을 설정하세요라고 입력
+                // 설정을 안하고 이동할 시 "프로필을 설정하세요"라고 출력
+                if (pickedImage != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomePage(),
+                    ),
+                  );
+                } else {
+                  // 하단 스낵바
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Color(0xFF2A72E7),
+                      content: Center(
+                        child: Text(
+                          '프로필을 지정해주세요',
+                          style: TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
               },
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
