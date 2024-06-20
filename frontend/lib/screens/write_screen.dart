@@ -1,6 +1,8 @@
 import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:intl/intl.dart';
 
 class BoardWritePage extends StatefulWidget {
   const BoardWritePage({super.key});
@@ -14,7 +16,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
   TextEditingController contentController = TextEditingController();
   bool isButtonEnabled = false; // 작성 완료 버튼 상태
   bool isMustRead = false;
-  bool isOpenVote = false;
+  bool isConfirmedVote = false;
 
   bool categoryBtn = true; // 공지 혹은 학년 버튼 여부
   List<bool> isCategory = [false, false, false, false]; // 공지 선택 불리안
@@ -22,6 +24,16 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
   File? pickedImage; // 선택된 이미지 파일
   bool isPickingImage = false; // 이미지 선택 작업 진행 여부
+  bool isMultiplied = false;
+
+  DateTime? selectedEndDate; // 종료 날짜
+
+  // 기본 3개의 텍스트폼필드의 컨트롤러
+  List<TextEditingController> voteControllers = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController()
+  ]; // 투표 항목 컨트롤러 리스트
 
   @override
   void initState() {
@@ -37,6 +49,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
     contentController.removeListener(checkIfFormIsFilled);
     titleController.dispose();
     contentController.dispose();
+    for (var controller in voteControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -76,6 +91,31 @@ class _BoardWritePageState extends State<BoardWritePage> {
     setState(() {
       pickedImage = null;
     });
+  }
+
+  // voteController 추가 함수
+  void _addVoteItem() {
+    setState(() {
+      voteControllers.add(TextEditingController());
+    });
+  }
+
+  // 아이템 재정렬 함수
+  void _reorderVoteItems(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      // 새 위치를 추가하고 이전 위치는 제거해서 순서 변경
+      final item = voteControllers.removeAt(oldIndex);
+      voteControllers.insert(newIndex, item);
+    });
+  }
+
+  // 시간 포맷팅 함수
+  String formatDateTime(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    return formatter.format(dateTime);
   }
 
   @override
@@ -278,11 +318,219 @@ class _BoardWritePageState extends State<BoardWritePage> {
             readVoteBtn(
               title: '투표',
               imgPath: 'assets/images/vote.png',
-              state: isOpenVote,
+              state: isConfirmedVote,
               onPressed: () {
-                setState(() {
-                  isOpenVote = !isOpenVote;
-                });
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(
+                      builder: (BuildContext context, StateSetter bottomState) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 22.0, vertical: 40.0),
+
+                            // 모달 내부 영역
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 제목 입력 필드
+                                TextFormField(
+                                  decoration: InputDecoration(
+                                    hintText: '제목을 입력해주세요',
+                                    hintStyle: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFFC5C5C7),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0, vertical: 5.0),
+                                  ),
+                                ),
+                                const SizedBox(height: 19),
+
+                                // 투표 항목 입력 필드
+                                // 목록의 순서를 재배열시켜주는 위젯
+                                ReorderableListView(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+
+                                  // 아이템을 재정렬할 때 호출
+                                  // 아이템을 이동할 때 함수를 사용해서 아이템의 순서를 업데이트
+                                  onReorder: (oldIndex, newIndex) {
+                                    bottomState(() {
+                                      setState(() {
+                                        _reorderVoteItems(oldIndex, newIndex);
+                                      });
+                                    });
+                                  },
+                                  children: [
+                                    for (int index = 0;
+                                        index < voteControllers.length;
+                                        index++)
+
+                                      // 드래그가 되지 않아 ListTile로 구현
+                                      // 투표 항목
+                                      ListTile(
+                                        key: ValueKey(index),
+                                        title: TextFormField(
+                                          controller: voteControllers[index],
+                                          decoration: InputDecoration(
+                                            hintText: '${index + 1}. 항목을 입력하세요',
+                                            hintStyle: const TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFFC5C5C7),
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5.0),
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 10.0,
+                                                    vertical: 5.0),
+                                          ),
+                                        ),
+                                        trailing: const Icon(Icons.menu),
+                                      ),
+                                  ],
+                                ),
+
+                                // 항목 추가 버튼
+                                TextButton.icon(
+                                  onPressed: () {
+                                    bottomState(() {
+                                      _addVoteItem(); // 투표 항목 추가 함수 호출
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.add,
+                                    color: Colors.black,
+                                    size: 20,
+                                  ),
+                                  label: const Text(
+                                    '항목 추가',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                const Divider(),
+                                const SizedBox(height: 15),
+
+                                // 복수 선택 허용 체크박스
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: isMultiplied,
+                                      onChanged: (value) {
+                                        bottomState(() {
+                                          isMultiplied = value!;
+                                        });
+                                      },
+                                    ),
+                                    const Text(
+                                      '복수 선택 허용',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 25),
+                                const Text(
+                                  '종료일 설정',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // 종료일 설정
+                                Row(
+                                  children: [
+                                    // 달력 아이콘
+                                    IconButton(
+                                      onPressed: () {
+                                        DatePicker.showDateTimePicker(
+                                          context,
+                                          currentTime: DateTime.now(),
+                                          locale: LocaleType.ko, // 한국어 버전
+                                          onConfirm: (date) {
+                                            bottomState(() {
+                                              setState(() {
+                                                selectedEndDate = date;
+                                              });
+                                            });
+                                          },
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.calendar_month,
+                                      ),
+                                    ),
+
+                                    // 지정한 종료 날짜
+                                    Text(
+                                      selectedEndDate != null
+                                          ? (formatDateTime(selectedEndDate!))
+                                          : '',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 30),
+
+                                // 확인 버튼
+                                Center(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      bottomState(() {
+                                        setState(() {
+                                          isConfirmedVote = true;
+                                        });
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFDBE7FB),
+                                      surfaceTintColor: const Color(0xFF2B72E7)
+                                          .withOpacity(0.25),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
+                                      minimumSize: const Size(94, 38),
+                                    ),
+                                    child: const Text(
+                                      '확인',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF6E747E),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
               },
             ),
             const SizedBox(height: 30),
