@@ -153,7 +153,7 @@ class _makeTeamPageState extends State<makeTeamPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'IoT 통합 설계 경진대회',
+                '팀원 모집',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
