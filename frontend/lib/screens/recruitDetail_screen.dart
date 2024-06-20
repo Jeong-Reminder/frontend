@@ -15,7 +15,64 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
   int currentMembers = 2;
   // 최대 모집 인원 수
   int maxMembers = 4;
+  final TextEditingController _controller = TextEditingController();
+  // 댓글 리스트 초기화
+  final List<Comment> _comments = [
+    Comment(
+      name: '변우석',
+      grade: '3학년',
+      timestamp: '23/10/21 11:57',
+      content: '저도 관심 있습니다~ 연락 주세요!!',
+      field: 'Frontend',
+      githubUrl: 'github.com/byunwooseok',
+    ),
+    Comment(
+      name: '민택기',
+      grade: '2학년',
+      timestamp: '23/10/22 12:37',
+      content: '경진대회 경험 쌓고 싶습니다!!',
+      field: 'Frontend',
+      githubUrl: 'github.com/minteki',
+    ),
+    Comment(
+      name: '유다은',
+      grade: '2학년',
+      timestamp: '23/10/24 09:57',
+      content: '저도 같이 나갈 사람 구하고 있었는데 같이 해봐요!!',
+      field: 'Backend',
+      githubUrl: 'github.com/yudauen',
+    ),
+    Comment(
+      name: '김혜윤',
+      grade: '3학년',
+      timestamp: '23/10/25 14:57',
+      content: '연락 기다리겠습니다!!',
+      field: 'Backend',
+      githubUrl: 'github.com/kimhyeyoon',
+    ),
+  ];
 
+  // 새로운 댓글을 추가하는 함수
+  void _addComment() {
+    if (_controller.text.isNotEmpty) {
+      setState(() {
+        _comments.add(
+          Comment(
+            name: "익명",
+            grade: "1학년",
+            timestamp: // DateTime 매서드로 실시간 년도, 월, 일, 시간, 분 설정
+                "${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day} ${DateTime.now().hour}:${DateTime.now().minute}",
+            content: _controller.text,
+            field: 'Unknown',
+            githubUrl: 'github.com/anonymous',
+          ),
+        );
+        _controller.clear();
+      });
+    }
+  }
+
+  // 기술 스택 리스트
   List<Map<String, dynamic>> fieldList = [
     {
       'logoUrl': 'assets/skilImages/typescript.png',
@@ -97,53 +154,13 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
     },
   ];
 
-  // 댓글 리스트
-  final List<Map<String, dynamic>> comments = [
-    {
-      'name': '변우석',
-      'year': '3학년',
-      'date': '23/10/21',
-      'time': '11:57',
-      'content': '저도 관심 있습니다~ 연락 주세요!!',
-      'field': 'Frontend',
-      'githubUrl': 'github.com/byunwooseok'
-    },
-    {
-      'name': '민택기',
-      'year': '2학년',
-      'date': '23/10/22',
-      'time': '12:37',
-      'content': '경진대회 경험 쌓고 싶습니다!!',
-      'field': 'Frontend',
-      'githubUrl': 'github.com/minteki'
-    },
-    {
-      'name': '유다은',
-      'year': '2학년',
-      'date': '23/10/24',
-      'time': '09:57',
-      'content': '저도 같이 나갈 사람 구하고 있었는데 같이 해봐요!!',
-      'field': 'Backend',
-      'githubUrl': 'github.com/yudauen'
-    },
-    {
-      'name': '김혜윤',
-      'year': '3학년',
-      'date': '23/10/25',
-      'time': '14:57',
-      'content': '연락 기다리겠습니다!!',
-      'field': 'Backend',
-      'githubUrl': 'github.com/kimhyeyoon'
-    },
-  ];
-
   // 승인 버튼 클릭 시 다이얼로그 표시
   void _showApproveDialog(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(child: Text('${comments[index]['name']} 승인')),
+          title: Center(child: Text('${_comments[index].name} 승인')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -191,7 +208,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                         // 모집 인원이 최대 인원보다 적을 때만 승인
                         if (currentMembers < maxMembers) {
                           currentMembers++;
-                          comments.removeAt(index);
+                          _comments.removeAt(index);
                         }
                       });
                       Navigator.of(context).pop();
@@ -212,7 +229,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(child: Text('${comments[index]['name']} 반려')),
+          title: Center(child: Text('${_comments[index].name} 반려')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -257,7 +274,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                     child: const Text('확인'),
                     onPressed: () {
                       setState(() {
-                        comments.removeAt(index); // 반려 클릭 시 없어지도록
+                        _comments.removeAt(index); // 반려 클릭 시 리스트에서 제거
                       });
                       Navigator.of(context).pop();
                     },
@@ -776,12 +793,52 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                 height: 30,
               ),
               const SizedBox(height: 10),
+              Container(
+                height: 40,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFEFF2),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        style: const TextStyle(
+                            fontSize: 12, color: Color(0xFF848488)),
+                        textAlignVertical: TextAlignVertical.top,
+                        decoration: const InputDecoration(
+                          hintText: '댓글을 입력하세요',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _addComment();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Image.asset(
+                          'assets/images/send.png',
+                          width: 16,
+                          height: 16,
+                          color: const Color(0xFF2A72E7),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
               // 댓글 리스트 빌드
               Expanded(
                 child: ListView.builder(
-                  itemCount: comments.length,
+                  itemCount: _comments.length,
                   itemBuilder: (context, index) {
-                    final comment = comments[index];
+                    final comment = _comments[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
                       child: Column(
@@ -791,11 +848,11 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  _showNameDialog(comment['field'] ?? 'Unknown',
-                                      comment['githubUrl'] ?? 'Unknown');
+                                  _showNameDialog(
+                                      comment.field, comment.githubUrl);
                                 },
                                 child: Text(
-                                  comment['name'] ?? 'Unknown',
+                                  comment.name,
                                   style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -804,7 +861,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                comment['year'] ?? '',
+                                comment.grade,
                                 style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -863,7 +920,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                           Row(
                             children: [
                               Text(
-                                comment['date'] ?? '',
+                                comment.timestamp.split(' ')[0],
                                 style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
@@ -872,7 +929,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                comment['time'] ?? '',
+                                comment.timestamp.split(' ')[1],
                                 style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
@@ -883,7 +940,7 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            comment['content'] ?? '',
+                            comment.content,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -944,4 +1001,23 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       ),
     );
   }
+}
+
+// 댓글 모델 클래스 정의
+class Comment {
+  final String name;
+  final String grade;
+  final String timestamp;
+  final String content;
+  final String field;
+  final String githubUrl;
+
+  Comment({
+    required this.name,
+    required this.grade,
+    required this.timestamp,
+    required this.content,
+    required this.field,
+    required this.githubUrl,
+  });
 }

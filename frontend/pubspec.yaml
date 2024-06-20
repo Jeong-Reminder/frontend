@@ -81,6 +81,7 @@ flutter:
         - assets/images/contestnotice.png
         - assets/images/profile.png
         - assets/images/billiard.png
+        - assets/images/send.png
         - assets/skilImages/typescript.png
         - assets/skilImages/javascript.png
         - assets/skilImages/tailwindcss.png
