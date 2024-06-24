@@ -538,17 +538,12 @@ class _votePageState extends State<votePage> {
                                     });
                                   }
                                 : null,
-                            style: ButtonStyle(
+                            style: TextButton.styleFrom(
                               backgroundColor: _isVoteBoxSelected
-                                  ? WidgetStateProperty.all<Color>(
-                                      const Color(0xff2A72E7))
-                                  : WidgetStateProperty.all<Color>(
-                                      const Color(0xFFEFEFF2)),
-                              shape: WidgetStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
+                                  ? const Color(0xff2A72E7)
+                                  : const Color(0xFFEFEFF2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                             child: Text(
