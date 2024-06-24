@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/screens/home_screen.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class SettingProfilePage extends StatefulWidget {
@@ -146,7 +147,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
   List<Map<String, dynamic>> selectedTools = []; // 선택된 Tools 리스트
 
   bool completedField = false; // Field 선택 완료 불리안
-  double percent = 0.75;
+  double percent = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -373,11 +374,20 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                 const SizedBox(height: 15),
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      completedField = true;
+                    if (!completedField) {
+                      setState(() {
+                        completedField = true;
 
-                      percent = 1.0;
-                    });
+                        percent = 0.75;
+                      });
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomePage(),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
