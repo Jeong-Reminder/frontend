@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:frontend/screens/viewVote_screen.dart';
 
 class votePage extends StatefulWidget {
   const votePage({super.key});
@@ -95,7 +95,7 @@ class _votePageState extends State<votePage> {
     }
   }
 
-// 확인 버튼을 눌렀을 때 호출되는 함수
+  // 확인 버튼을 눌렀을 때 호출되는 함수
   void _onConfirmButtonPressed(int index) {
     // 입력된 인덱스가 유효한지 확인하고 새 항목 추가
     if (index >= 0 && index < _itemInputControllers.length) {
@@ -322,12 +322,23 @@ class _votePageState extends State<votePage> {
                                   const SizedBox(width: 20),
                                   // 이미 투표한 경우, 투표한 사람 수를 표시
                                   if (_hasVoted && _showIconList[i])
-                                    Text(
-                                      '${_voteCounts[i]}명',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const ViewVotePage(),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        '${_voteCounts[i]}명',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
                                       ),
                                     ),
                                 ],
@@ -529,11 +540,11 @@ class _votePageState extends State<votePage> {
                                 : null,
                             style: ButtonStyle(
                               backgroundColor: _isVoteBoxSelected
-                                  ? MaterialStateProperty.all<Color>(
+                                  ? WidgetStateProperty.all<Color>(
                                       const Color(0xff2A72E7))
-                                  : MaterialStateProperty.all<Color>(
+                                  : WidgetStateProperty.all<Color>(
                                       const Color(0xFFEFEFF2)),
-                              shape: MaterialStateProperty.all<
+                              shape: WidgetStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5),
