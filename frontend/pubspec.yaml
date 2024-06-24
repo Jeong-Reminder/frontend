@@ -39,6 +39,7 @@ dependencies:
   flutter_datetime_picker_plus: ^2.2.0
   intl: ^0.19.0
   badges: ^3.1.2
+  percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +84,7 @@ flutter:
     - assets/images/classselect.png
     - assets/images/contestnotice.png
     - assets/images/profile.png
+    - assets/images/cyclingPerson.png
     - assets/images/billiard.png
     - assets/skilImages/typescript.png
     - assets/skilImages/javascript.png

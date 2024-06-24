@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:percent_indicator/percent_indicator.dart';
 
-class StackSettingPage extends StatefulWidget {
-  const StackSettingPage({super.key});
+class SettingProfilePage extends StatefulWidget {
+  const SettingProfilePage({super.key});
 
   @override
-  State<StackSettingPage> createState() => _StackSettingPageState();
+  State<SettingProfilePage> createState() => _SettingProfilePageState();
 }
 
-class _StackSettingPageState extends State<StackSettingPage> {
+class _SettingProfilePageState extends State<SettingProfilePage> {
   List<Map<String, dynamic>> fieldList = [
     {
       'logoUrl': 'assets/skilImages/typescript.png',
@@ -145,15 +146,36 @@ class _StackSettingPageState extends State<StackSettingPage> {
   List<Map<String, dynamic>> selectedTools = []; // 선택된 Tools 리스트
 
   bool completedField = false; // Field 선택 완료 불리안
+  double percent = 0.75;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 100.0),
+        padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 120.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              alignment: FractionalOffset(percent, 1 - percent),
+              child: Image.asset(
+                'assets/images/cyclingPerson.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Center(
+              child: LinearPercentIndicator(
+                padding: EdgeInsets.zero,
+                percent: percent,
+                lineHeight: 20,
+                backgroundColor: const Color(0xFFD9D9D9),
+                progressColor: const Color(0xFF2A72E7),
+                width: 370,
+              ),
+            ),
+            const SizedBox(height: 60),
             Row(
               children: [
                 const Text(
@@ -164,8 +186,6 @@ class _StackSettingPageState extends State<StackSettingPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-
-                // 초기화 버튼
                 TextButton.icon(
                   onPressed: () {
                     setState(() {
@@ -177,7 +197,6 @@ class _StackSettingPageState extends State<StackSettingPage> {
                       }
                       selectedFields.clear();
                       selectedTools.clear();
-
                       completedField = false;
                     });
                   },
@@ -195,8 +214,6 @@ class _StackSettingPageState extends State<StackSettingPage> {
               ],
             ),
             const SizedBox(height: 32),
-
-            // Field 선택 완료 시 DEVELOPMENT TOOLS 선택으로 넘어감
             completedField
                 ? const Text(
                     '2. DEVELOPMENT TOOLS 선택',
@@ -213,73 +230,92 @@ class _StackSettingPageState extends State<StackSettingPage> {
                     ),
                   ),
             const SizedBox(height: 28),
-
-            // 기술 스택 목록
-            // Field 선택 완료 시 Tools 스택 표시
-            completedField
-                ? Wrap(
-                    direction: Axis.horizontal,
-                    alignment: WrapAlignment.start,
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: toolsList.map((tools) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            tools['isSelected'] = !tools['isSelected'];
-                            if (tools['isSelected']) {
-                              selectedTools.add(tools);
-                            } else {
-                              selectedTools.remove(tools);
-                            }
-                          });
-                          print('${tools['title']} : ${tools['isSelected']}');
-                        },
-                        child: badge(
-                          tools['logoUrl'],
-                          tools['title'],
-                          tools['titleColor'],
-                          tools['badgeColor'],
-                          tools['isSelected'],
-                        ),
-                      );
-                    }).toList(),
-                  )
-                : Wrap(
-                    direction: Axis.horizontal,
-                    alignment: WrapAlignment.start,
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: fieldList.map((field) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            field['isSelected'] = !field['isSelected'];
-                            if (field['isSelected']) {
-                              selectedFields.add(field);
-                            } else {
-                              selectedFields.remove(field);
-                            }
-                          });
-                          print('${field['title']} : ${field['isSelected']}');
-                        },
-                        child: badge(
-                          field['logoUrl'],
-                          field['title'],
-                          field['titleColor'],
-                          field['badgeColor'],
-                          field['isSelected'],
-                        ),
-                      );
-                    }).toList(),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween<Offset>(
+                      begin: const Offset(1, 0),
+                      end: const Offset(0, 0),
+                    ),
                   ),
+                  child: child,
+                );
+              },
+              layoutBuilder:
+                  (Widget? currentChild, List<Widget> previousChildren) {
+                return Stack(
+                  children: <Widget>[
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                );
+              },
+              child: completedField
+                  ? Wrap(
+                      key: ValueKey<bool>(completedField),
+                      direction: Axis.horizontal,
+                      alignment: WrapAlignment.start,
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: toolsList.map((tools) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              tools['isSelected'] = !tools['isSelected'];
+                              if (tools['isSelected']) {
+                                selectedTools.add(tools);
+                              } else {
+                                selectedTools.remove(tools);
+                              }
+                            });
+                            print('${tools['title']} : ${tools['isSelected']}');
+                          },
+                          child: badge(
+                            tools['logoUrl'],
+                            tools['title'],
+                            tools['titleColor'],
+                            tools['badgeColor'],
+                            tools['isSelected'],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Wrap(
+                      key: ValueKey<bool>(completedField),
+                      direction: Axis.horizontal,
+                      alignment: WrapAlignment.start,
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: fieldList.map((field) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              field['isSelected'] = !field['isSelected'];
+                              if (field['isSelected']) {
+                                selectedFields.add(field);
+                              } else {
+                                selectedFields.remove(field);
+                              }
+                            });
+                            print('${field['title']} : ${field['isSelected']}');
+                          },
+                          child: badge(
+                            field['logoUrl'],
+                            field['title'],
+                            field['titleColor'],
+                            field['badgeColor'],
+                            field['isSelected'],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            ),
           ],
         ),
       ),
-
-      // Visibility 위젯을 사용해 selectedStack가 하나라도 생기면 바텀 시트 생기게 구현
       bottomSheet: Visibility(
-        // Field 선택 완료 시 visible이 selectedTools 리스트가 비어있는지 확인으로 바뀜
         visible: completedField
             ? selectedTools.isNotEmpty
             : selectedFields.isNotEmpty,
@@ -294,7 +330,6 @@ class _StackSettingPageState extends State<StackSettingPage> {
             borderRadius: BorderRadius.zero,
           ),
           builder: (context) {
-            // 바텀 시트 영역
             return Column(
               children: [
                 SingleChildScrollView(
@@ -304,8 +339,6 @@ class _StackSettingPageState extends State<StackSettingPage> {
                     decoration: const BoxDecoration(
                       color: Color(0xFFF6F6F6),
                     ),
-
-                    // Field 선택 완료 시 선택된 기술 스택 종류가 Tools로 바뀜
                     child: completedField
                         ? Wrap(
                             direction: Axis.horizontal,
@@ -338,13 +371,12 @@ class _StackSettingPageState extends State<StackSettingPage> {
                   ),
                 ),
                 const SizedBox(height: 15),
-
-                // 확인 버튼
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      // Field 선택 완료 시 Tools 선택 창으로 바뀜
                       completedField = true;
+
+                      percent = 1.0;
                     });
                   },
                   style: ElevatedButton.styleFrom(
