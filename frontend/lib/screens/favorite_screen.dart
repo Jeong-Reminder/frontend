@@ -104,6 +104,7 @@ class _FavoritePageState extends State<FavoritePage> {
                   favoriteList = favoriteList.where((favorite) {
                     if (favorite['isDeleted'] == false) {
                       favorite['count'] -= 1;
+                      deletedCount = 0;
                     }
                     return favorite['isDeleted'] == false;
                   }).toList();
