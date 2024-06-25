@@ -105,7 +105,7 @@ class _FavoritePageState extends State<FavoritePage> {
                     if (favorite['isDeleted'] == false) {
                       favorite['count'] -= 1;
                     }
-                    return favorite['isDeleted'] = false;
+                    return favorite['isDeleted'] == false;
                   }).toList();
 
                   // 선택 버튼으로 돌아롬
