@@ -100,13 +100,13 @@ class _FavoritePageState extends State<FavoritePage> {
                   // 여기에 좋아요 삭제 api 구현
 
                   // where를 사용해서 필터링한 리스트를 새로 생성하여 favoriteList를 업데이트
-                  // isDeleted가 true일 때 favoriteList에 제거
-                  favoriteList = favoriteList
-                      .where((favorite) => !favorite['isDeleted'])
-                      .toList();
-
-                  // 좋아요 개수 1 감소
-                  deletedCount -= 1;
+                  // isDeleted가 true일 때 count를 1 감소하고 favoriteList에 제거
+                  favoriteList = favoriteList.where((favorite) {
+                    if (favorite['isDeleted'] == false) {
+                      favorite['count'] -= 1;
+                    }
+                    return favorite['isDeleted'] = false;
+                  }).toList();
 
                   // 선택 버튼으로 돌아롬
                   chosenBtn = false;
@@ -157,7 +157,7 @@ class _FavoritePageState extends State<FavoritePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          board['title'],
+                          board['title'], // 제목
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -172,7 +172,12 @@ class _FavoritePageState extends State<FavoritePage> {
                                   onChanged: (value) {
                                     setState(() {
                                       board['isDeleted'] = value;
-                                      deletedCount += 1;
+                                      // isDeleted가 true일 때 좋아요 삭제 갯수 1 증가
+                                      if (board['isDeleted']) {
+                                        deletedCount += 1;
+                                      } else {
+                                        deletedCount -= 1;
+                                      }
                                     });
                                   },
                                   shape: const CircleBorder(),
@@ -184,14 +189,14 @@ class _FavoritePageState extends State<FavoritePage> {
                     ),
                     const SizedBox(height: 7),
                     Text(
-                      board['subtitle'],
+                      board['subtitle'], // 부제목
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 7),
                     Text(
-                      board['content'],
+                      board['content'], // 내용
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF7D7D7F),
@@ -207,6 +212,7 @@ class _FavoritePageState extends State<FavoritePage> {
                             setState(() {
                               board['isLiked'] = !board['isLiked'];
 
+                              // isLiked가 true일 때 좋아요 개수 1 증가
                               if (board['isLiked']) {
                                 board['count'] += 1;
                               } else {
@@ -222,7 +228,7 @@ class _FavoritePageState extends State<FavoritePage> {
                           ),
                         ),
                         Text(
-                          '${board['count']}',
+                          '${board['count']}', // 좋아요 개수
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],
