@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/screens/favorite_screen.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/profile_widget.dart';
 
@@ -143,16 +144,32 @@ class _MyUserPageState extends State<MyUserPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
+        actions: [
+          const Padding(
+            padding: EdgeInsets.only(right: 12.0),
             child: Icon(
               Icons.add_alert,
               size: 30,
               color: Colors.black,
             ),
           ),
-          Padding(
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FavoritePage(),
+                ),
+              );
+            },
+            padding: const EdgeInsets.only(right: 10.0),
+            icon: const Icon(
+              Icons.favorite_outlined,
+              size: 30,
+              color: Colors.black,
+            ),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: 20.0),
             child: Icon(
               Icons.account_circle,
