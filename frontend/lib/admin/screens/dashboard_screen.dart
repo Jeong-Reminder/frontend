@@ -51,103 +51,67 @@ class _DashBoardPageState extends State<DashBoardPage> {
           ),
           const SizedBox(height: 72),
 
-          // 회원 정보 목록 버튼
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: GestureDetector(
-              onTap: () {
-                // 회원 정보 페이지로 이동
-              },
-              child: Container(
-                height: 154,
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 20),
-                alignment: Alignment.topCenter,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFAFAFE),
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/userInfoImg.png'),
-                    opacity: 0.3,
-                    alignment: Alignment(-0.65, -0.5), // 이미지의 위치 조정
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                children: [
+                  // 회원 정보 목록 버튼
+                  dashboardBtn(
+                    () {},
+                    'assets/images/userInfoImg.png',
+                    '회원 정보 목록',
                   ),
-                ),
-                child: const Text(
-                  '회원 정보 목록',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
 
-          // 팀원 모집글 목록 버튼
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: GestureDetector(
-              onTap: () {
-                // 팀원 모집글로 이동
-              },
-              child: Container(
-                height: 154,
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 20),
-                alignment: Alignment.topCenter,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFAFAFE),
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/teamRecruitImg.png'),
-                    opacity: 0.3,
-                    alignment: Alignment(-0.65, -0.5), // 이미지의 위치 조정
+                  // 팀원 모집글 버튼
+                  dashboardBtn(
+                    () {},
+                    'assets/images/teamRecruitImg.png',
+                    '팀원 모집글',
                   ),
-                ),
-                child: const Text(
-                  '팀원 모집글',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
 
-          // 경진대회 목록 버튼
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: GestureDetector(
-              onTap: () {
-                // 경진대회 페이지로 이동
-              },
-              child: Container(
-                height: 154,
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 20),
-                alignment: Alignment.topCenter,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFAFAFE),
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/contestImg.png'),
-                    opacity: 0.3,
-                    alignment: Alignment(-0.65, -0.5), // 이미지의 위치 조정
+                  // 경진대회 버튼
+                  dashboardBtn(
+                    () {},
+                    'assets/images/contestImg.png',
+                    '경진대회',
                   ),
-                ),
-                child: const Text(
-                  '경진대회',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
+                ],
+              )),
           const SizedBox(height: 10),
         ],
       ),
+    );
+  }
+
+  Widget dashboardBtn(VoidCallback onTap, String imageAsset, String title) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 154,
+            width: double.infinity,
+            padding: const EdgeInsets.only(top: 20),
+            alignment: Alignment.topCenter,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAFAFE),
+              image: DecorationImage(
+                image: AssetImage(imageAsset),
+                opacity: 0.3,
+                alignment: const Alignment(-0.65, -0.5), // 이미지의 위치 조정
+              ),
+            ),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 }
