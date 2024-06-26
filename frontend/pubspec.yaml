@@ -80,6 +80,11 @@ flutter:
     - assets/images/cyclingPerson.png
     - assets/images/billiard.png
     - assets/images/projectExperience.png
+    - assets/images/userInfoImg.png
+    - assets/images/githubLogo.png
+    - assets/images/userInfoImg.png
+    - assets/images/teamRecruitImg.png
+    - assets/images/contestImg.png
     - assets/images/githubLogo.png
     - assets/skilImages/typescript.png
     - assets/skilImages/javascript.png
