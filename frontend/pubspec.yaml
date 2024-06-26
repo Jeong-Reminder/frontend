@@ -71,6 +71,7 @@ flutter:
     - assets/images/etc.png
     - assets/images/light.png
     - assets/images/smile.png
+    - assets/images/send.png
     - assets/images/good.png
     - assets/images/votecheck.png
     - assets/images/addsquare.png
@@ -86,6 +87,7 @@ flutter:
     - assets/images/teamRecruitImg.png
     - assets/images/contestImg.png
     - assets/images/githubLogo.png
+    - assets/images/Folder_send_light.png
     - assets/skilImages/typescript.png
     - assets/skilImages/javascript.png
     - assets/skilImages/tailwindcss.png
