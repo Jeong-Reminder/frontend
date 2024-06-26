@@ -26,6 +26,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '1차 : 5일 오후 2시까지 신청',
       'isChecked': false,
       'originalIndex': 0,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '새내기 게시판',
@@ -33,6 +35,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '수강 신청 잘 할 수 있을까요?',
       'isChecked': false,
       'originalIndex': 1,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '제자반 채플 자주 묻는 질문',
@@ -40,6 +44,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
       'isChecked': false,
       'originalIndex': 2,
+      'isLiked': false,
+      'count': 0,
     },
   ];
 
@@ -50,6 +56,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '2차 : 5일 오후 2시까지 신청',
       'isChecked': false,
       'originalIndex': 0,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '헌내기 게시판',
@@ -57,6 +65,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '수강 신청 잘 할 수 있을까요?',
       'isChecked': false,
       'originalIndex': 1,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '사회봉사 자주 묻는 질문',
@@ -64,6 +74,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
       'isChecked': false,
       'originalIndex': 2,
+      'isLiked': false,
+      'count': 0,
     },
   ];
 
@@ -74,6 +86,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '1차 : 5일 오후 2시까지 신청',
       'isChecked': false,
       'originalIndex': 0,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '암모니아 게시판',
@@ -81,6 +95,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '복학 신청 잘 할 수 있을까요?',
       'isChecked': false,
       'originalIndex': 1,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '현대인과 기독교 자주 묻는 질문',
@@ -88,6 +104,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
       'isChecked': false,
       'originalIndex': 2,
+      'isLiked': false,
+      'count': 0,
     },
   ];
 
@@ -98,6 +116,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '1차 : 5일 오후 2시까지 신청',
       'isChecked': false,
       'originalIndex': 0,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '졸업반 게시판',
@@ -105,6 +125,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '자소서 작성 잘 할 수 있을까요?',
       'isChecked': false,
       'originalIndex': 1,
+      'isLiked': false,
+      'count': 0,
     },
     {
       'title': '졸업작품 자주 묻는 질문',
@@ -112,6 +134,8 @@ class _BoardPageState extends State<BoardPage> {
       'content': '스카이 시스템 -> 학적 정보 -> 학적 정보 조회 -> 지도 교수(전화번호...',
       'isChecked': false,
       'originalIndex': 2,
+      'isLiked': false,
+      'count': 0,
     },
   ];
 

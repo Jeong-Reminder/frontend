@@ -16,6 +16,7 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   bool isPressed = false; // 길게 눌렀는지 여부
+  int count = 4; // 좋아요 개수
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,7 @@ class _BoardState extends State<Board> {
       child: ListView.builder(
         itemCount: widget.boardList.length,
         itemBuilder: (context, index) {
+          final board = widget.boardList[index];
           return Column(
             children: [
               GestureDetector(
@@ -49,7 +51,7 @@ class _BoardState extends State<Board> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              widget.boardList[index]['title'],
+                              board['title'],
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -61,13 +63,11 @@ class _BoardState extends State<Board> {
                                     height: 20,
                                     width: 20,
                                     child: Checkbox(
-                                      value: widget.boardList[index]
-                                              ['isChecked'] ??
+                                      value: board['isChecked'] ??
                                           false, // isChecked가 null이면 기본값이 false 사용
                                       onChanged: (value) {
                                         setState(() {
-                                          widget.boardList[index]['isChecked'] =
-                                              value;
+                                          board['isChecked'] = value;
                                         });
                                       },
                                       shape: const CircleBorder(),
@@ -79,14 +79,14 @@ class _BoardState extends State<Board> {
                         ),
                         const SizedBox(height: 7),
                         Text(
-                          widget.boardList[index]['subtitle'],
+                          board['subtitle'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 7),
                         Text(
-                          widget.boardList[index]['content'],
+                          board['content'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF7D7D7F),
@@ -98,15 +98,29 @@ class _BoardState extends State<Board> {
                             IconButton(
                               padding: EdgeInsets.zero, // 패딩 설정
                               constraints: const BoxConstraints(),
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.favorite_border,
-                                color: Color(0xFFEA4E44),
+                              onPressed: () {
+                                // 여기에 좋아요 api 구현
+
+                                setState(() {
+                                  board['isLiked'] = !board['isLiked'];
+
+                                  if (board['isLiked']) {
+                                    board['count'] += 1;
+                                  } else {
+                                    board['count'] -= 1;
+                                  }
+                                });
+                              },
+                              icon: Icon(
+                                board['isLiked']
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: const Color(0xFFEA4E44),
                               ),
                             ),
-                            const Text(
-                              '4',
-                              style: TextStyle(fontSize: 16),
+                            Text(
+                              '${board['count']}',
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
