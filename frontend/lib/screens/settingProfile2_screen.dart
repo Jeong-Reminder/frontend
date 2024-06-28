@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class SettingProfile2Page extends StatefulWidget {
@@ -14,6 +16,9 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
       TextEditingController(); // 프로젝트명 입력 컨트롤러
   TextEditingController projectExperienceController =
       TextEditingController(); // 프로젝트 경험 입력 컨트롤러
+  TextEditingController githubLinkController =
+      TextEditingController(); // 깃허브 링크 입력 컨드롤러
+  TextEditingController rollController = TextEditingController(); // 역할 입력 컨드롤러
   bool writtenText = false;
 
   @override
@@ -21,14 +26,20 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
     super.initState();
     projectNameController.addListener(_updateTextState);
     projectExperienceController.addListener(_updateTextState);
+    githubLinkController.addListener(_updateTextState);
+    rollController.addListener(_updateTextState);
   }
 
   @override
   void dispose() {
     projectNameController.removeListener(_updateTextState);
     projectExperienceController.removeListener(_updateTextState);
+    githubLinkController.removeListener(_updateTextState);
+    rollController.removeListener(_updateTextState);
     projectNameController.dispose();
     projectExperienceController.dispose();
+    githubLinkController.dispose();
+    rollController.dispose();
     super.dispose();
   }
 
@@ -40,14 +51,21 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
     setState(() {
       final projectName = projectNameController.text;
       final projectExperience = projectExperienceController.text;
-      if (projectName.isNotEmpty || projectExperience.isNotEmpty) {
+      final githubLink = githubLinkController.text;
+      final roll = rollController.text;
+      if (projectName.isNotEmpty &&
+          projectExperience.isNotEmpty &&
+          githubLink.isNotEmpty &&
+          roll.isNotEmpty) {
         print('프로젝트 명 : $projectName');
         print('프로젝트 경험 : $projectExperience');
+        print('깃허브 링크 : $githubLink');
+        print('역할 : $roll');
+        writtenText = true; // 프로젝트 경험 작성 true로 설정
+        percent = 1; // 100%로 진행률 증가
       } else {
         print('프로젝트 경험 없음');
       }
-      writtenText = true; // 프로젝트 경험 작성 true로 설정
-      percent = 1; // 100%로 진행률 증가
     });
   }
 
@@ -103,6 +121,34 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                 contentPadding:
                     EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
               ),
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // 역할 입력 필드
+            TextFormField(
+              controller: rollController,
+              decoration: const InputDecoration(
+                labelText: '나의 역할을 입력해주세요',
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF808080),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                  ),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5.0),
+                  ),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              ),
+              style: const TextStyle(
+                fontSize: 12,
+              ),
             ),
             const SizedBox(height: 10),
             // 프로젝트 경험 입력 필드
@@ -126,9 +172,42 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                 contentPadding:
                     EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
               ),
+              style: const TextStyle(
+                fontSize: 12,
+              ),
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: githubLinkController,
+              decoration: const InputDecoration(
+                labelText: '깃허브 링크를 입력해주세요',
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF808080),
+                ),
+                // github.com 고정
+                prefixText: 'github.com/',
+                prefixStyle: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                  ),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5.0),
+                  ),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              ),
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
 
+            const SizedBox(height: 40),
             // 알리미 시작하기 또는 없음 버튼
             GestureDetector(
               onTap: _onTapHandler,
@@ -138,7 +217,9 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                 children: [
                   Text(
                     projectNameController.text.isNotEmpty &&
-                            projectExperienceController.text.isNotEmpty
+                            projectExperienceController.text.isNotEmpty &&
+                            githubLinkController.text.isNotEmpty &&
+                            rollController.text.isNotEmpty
                         ? '알리미 시작하기'
                         : '없음',
                     style: const TextStyle(
