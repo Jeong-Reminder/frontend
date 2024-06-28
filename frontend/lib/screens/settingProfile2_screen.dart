@@ -10,20 +10,25 @@ class SettingProfile2Page extends StatefulWidget {
 
 class _SettingProfile2PageState extends State<SettingProfile2Page> {
   double percent = 0; // 프로그레스 바 진행률
-  TextEditingController textEditingController =
-      TextEditingController(); // 프로젝트 경험 입력
+  TextEditingController projectNameController =
+      TextEditingController(); // 프로젝트명 입력 컨트롤러
+  TextEditingController projectExperienceController =
+      TextEditingController(); // 프로젝트 경험 입력 컨트롤러
   bool writtenText = false;
 
   @override
   void initState() {
     super.initState();
-    textEditingController.addListener(_updateTextState);
+    projectNameController.addListener(_updateTextState);
+    projectExperienceController.addListener(_updateTextState);
   }
 
   @override
   void dispose() {
-    textEditingController.removeListener(_updateTextState);
-    textEditingController.dispose();
+    projectNameController.removeListener(_updateTextState);
+    projectExperienceController.removeListener(_updateTextState);
+    projectNameController.dispose();
+    projectExperienceController.dispose();
     super.dispose();
   }
 
@@ -33,8 +38,10 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
 
   void _onTapHandler() {
     setState(() {
-      if (textEditingController.text.isNotEmpty) {
-        final projectExperience = textEditingController.text; // 프로젝트 경험 최종 텍스트
+      final projectName = projectNameController.text;
+      final projectExperience = projectExperienceController.text;
+      if (projectName.isNotEmpty || projectExperience.isNotEmpty) {
+        print('프로젝트 명 : $projectName');
         print('프로젝트 경험 : $projectExperience');
       } else {
         print('프로젝트 경험 없음');
@@ -76,15 +83,36 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
               width: 200,
             ),
             const SizedBox(height: 59),
-
+            // 프로젝트명 입력 필드
+            TextFormField(
+              controller: projectNameController,
+              decoration: const InputDecoration(
+                labelText: '프로젝트명을 입력해주세요',
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF808080),
+                ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black,
+                  ),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(5.0),
+                  ),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              ),
+            ),
+            const SizedBox(height: 10),
             // 프로젝트 경험 입력 필드
             TextFormField(
-              controller: textEditingController,
-              maxLines: 5,
+              controller: projectExperienceController,
+              maxLines: 4,
               decoration: const InputDecoration(
                 labelText: '프로젝트 경험을 입력해주세요',
                 labelStyle: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: Color(0xFF808080),
                 ),
                 border: OutlineInputBorder(
@@ -109,7 +137,10 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    textEditingController.text.isNotEmpty ? '알리미 시작하기' : '없음',
+                    projectNameController.text.isNotEmpty &&
+                            projectExperienceController.text.isNotEmpty
+                        ? '알리미 시작하기'
+                        : '없음',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
