@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -12,6 +13,7 @@ class UserInfoPage extends StatefulWidget {
 class _UserInfoPageState extends State<UserInfoPage> {
   TextEditingController searchController = TextEditingController(); // 검색 컨트롤러
   FilePickerResult? pickedFile;
+  String searchQuery = ''; // 검색어를 저장하는 변수
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
   final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
@@ -216,50 +218,24 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 검색어에 따라 필터링된 회원 정보 목록 생성
+    List<Map<String, String>> searchedUserList = userList.where((item) {
+      return item['name']!
+          .contains(searchQuery); // 검색한 이름이 표에서의 이름에 포함이 된다면 해당 정보들을 반환
+    }).toList();
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 23.0, vertical: 133.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      '회원 정보 목록',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.calendar_month),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2A72E7),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(80, 10),
-                    padding: const EdgeInsets.symmetric(vertical: 1.0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                  ),
-                  child: const Text(
-                    '날짜 조회',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+            const Text(
+              '회원 정보 목록',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 6),
 
@@ -290,6 +266,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
               trailing: [
                 Image.asset('assets/images/send.png'),
               ],
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = searchController.text;
+                });
+              },
             ),
             const SizedBox(height: 23),
 
@@ -490,7 +471,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ),
                   ],
                   rows: List<DataRow>.generate(
-                    userList.length,
+                    // 검색을 하면 searchedUserList로 보여주거나 검색한 게 없으면 userList로 보여주기
+                    searchQuery.isEmpty
+                        ? userList.length
+                        : searchedUserList.length,
                     (index) => DataRow(
                       cells: [
                         DataCell(
