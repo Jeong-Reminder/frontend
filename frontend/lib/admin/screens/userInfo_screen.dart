@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -221,7 +220,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     // 검색어에 따라 필터링된 회원 정보 목록 생성
     List<Map<String, String>> searchedUserList = userList.where((item) {
       return item['name']!
-          .contains(searchQuery); // 검색한 이름이 표에서의 이름에 포함이 된다면 해당 정보들을 반환
+          .contains(searchQuery); // 검색한 이름이 표에서의 이름에 하나라도 포함이 된다면 해당 정보들을 반환
     }).toList();
 
     return Scaffold(
@@ -400,75 +399,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         ),
                       )), // 중앙 정렬
                     ),
-                    DataColumn(
-                      label: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('이름'),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              isAscendingName
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_upward,
-                              size: 16,
-                            ),
-                            onPressed: _sortByName,
-                          ),
-                        ],
-                      ),
-                    ),
-                    DataColumn(
-                      label: Row(
-                        children: [
-                          const Text('학번'),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              isAscendingStudentId
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_upward,
-                              size: 16,
-                            ),
-                            onPressed: _sortByStudentId,
-                          ),
-                        ],
-                      ),
-                    ),
-                    DataColumn(
-                      label: Row(
-                        children: [
-                          const Text('학년'),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              isAscendingGrade
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_upward,
-                              size: 16,
-                            ),
-                            onPressed: _sortByGrade,
-                          ),
-                        ],
-                      ),
-                    ),
-                    DataColumn(
-                      label: Row(
-                        children: [
-                          const Text('학적상태'),
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              isAscendingStatus
-                                  ? Icons.arrow_downward
-                                  : Icons.arrow_upward,
-                              size: 16,
-                            ),
-                            onPressed: _sortByStatus,
-                          ),
-                        ],
-                      ),
-                    ),
+                    dataColumn('이름', isAscendingName, _sortByName),
+                    dataColumn('학번', isAscendingStudentId, _sortByStudentId),
+                    dataColumn('학년', isAscendingGrade, _sortByGrade),
+                    dataColumn('학적상태', isAscendingStatus, _sortByStatus),
                   ],
                   rows: List<DataRow>.generate(
                     // 검색을 하면 searchedUserList로 보여주거나 검색한 게 없으면 userList로 보여주기
@@ -511,6 +445,25 @@ class _UserInfoPageState extends State<UserInfoPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // 데이터 열
+  DataColumn dataColumn(String label, bool isAscending, VoidCallback sort) {
+    return DataColumn(
+      label: Row(
+        children: [
+          Text(label),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            icon: Icon(
+              isAscending ? Icons.arrow_downward : Icons.arrow_upward,
+              size: 16,
+            ),
+            onPressed: sort,
+          ),
+        ],
       ),
     );
   }
