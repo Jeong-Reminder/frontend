@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:excel/excel.dart';
-import 'dart:typed_data';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -14,7 +12,207 @@ class UserInfoPage extends StatefulWidget {
 class _UserInfoPageState extends State<UserInfoPage> {
   TextEditingController searchController = TextEditingController(); // 검색 컨트롤러
   FilePickerResult? pickedFile;
-  List<List<Data?>>? excelData; // 엑셀 데이터를 저장할 리스트
+
+  bool selectAll = false; // 전체 삭제 선택 상태 불리안
+  final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
+
+  bool isAscendingName = true; // 이름 정렬 순서 상태
+  bool isAscendingStudentId = true; // 학번 정렬 순서 상태
+  bool isAscendingGrade = true; // 학년 정렬 순서 상태
+  bool isAscendingStatus = true; // 학적상태 정렬 순서 상태
+
+  final List<Map<String, String>> userList = [
+    // 회원 목록을 저장하는 리스트
+    {
+      "name": "민택기",
+      "studentId": "20190906",
+      "grade": "4",
+      "status": "재학",
+    },
+    {
+      "name": "소진수",
+      "studentId": "20190914",
+      "grade": "4",
+      "status": "휴학",
+    },
+  ];
+
+  // 삭제 확인 다이얼로그를 표시하는 메서드
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white, // 모달 배경색
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ), // 모서리 둥글게
+          title: const Column(
+            children: [
+              Text(
+                '선택한 계정을 정말 삭제하시겠습니까?',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                    size: 24,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    '삭제하면 되돌릴 수 없습니다',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            SizedBox(
+              width: 74,
+              height: 20,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2),
+                      side: const BorderSide(color: Color(0xFFD9D9D9))),
+                ),
+                child: const Text(
+                  '취소',
+                  style: TextStyle(
+                    color: Color(0xFF2A72E7),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 74,
+              height: 20,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _deleteSelectedItems();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEA4E44),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                child: const Text(
+                  '삭제',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          actionsAlignment: MainAxisAlignment.center, // 버튼 중앙 정렬
+        );
+      },
+    );
+  }
+
+  // 개별 선택된 아이템들을 삭제하는 메서드
+  void _deleteSelectedItems() {
+    setState(() {
+      userList.removeWhere((item) {
+        // 리스트에서 선택된 아이템들을 제거
+        int index = userList.indexOf(item); // indexOf: 특정 인덱스값만 가져오는 메서드
+        return selectedItems[index] ?? false; // 선택된 아이템이 있으면 true로 반환해 아이템 제거
+      });
+      selectedItems.clear(); // 삭제 후 선택 상태 초기화(false로 설정)
+      selectAll = false; // 전체 선택 상태 초기화
+    });
+  }
+
+  // 전체 선택 상태를 변경하는 메서드
+  void _toggleSelectAll(bool? value) {
+    setState(() {
+      selectAll = value ?? false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
+      selectedItems.clear();
+
+      // true일 경우 userList를 반복해 각 아이템의 선택 상태를 true로 설정
+      if (selectAll) {
+        for (int i = 0; i < userList.length; i++) {
+          selectedItems[i] = true;
+        }
+      }
+    });
+  }
+
+  // 이름을 가나다순으로 정렬하는 메서드
+  void _sortByName() {
+    setState(() {
+      if (isAscendingName) {
+        userList.sort((a, b) => a['name']!.compareTo(b['name']!));
+      } else {
+        userList.sort((a, b) => b['name']!.compareTo(a['name']!));
+      }
+      isAscendingName = !isAscendingName;
+    });
+  }
+
+  // 학번을 숫자 크기순으로 정렬하는 메서드
+  void _sortByStudentId() {
+    setState(() {
+      if (isAscendingStudentId) {
+        userList.sort((a, b) =>
+            int.parse(a['studentId']!).compareTo(int.parse(b['studentId']!)));
+      } else {
+        userList.sort((a, b) =>
+            int.parse(b['studentId']!).compareTo(int.parse(a['studentId']!)));
+      }
+      isAscendingStudentId = !isAscendingStudentId;
+    });
+  }
+
+  // 학년을 숫자 크기순으로 정렬하는 메서드
+  void _sortByGrade() {
+    setState(() {
+      if (isAscendingGrade) {
+        userList.sort(
+            (a, b) => int.parse(a['grade']!).compareTo(int.parse(b['grade']!)));
+      } else {
+        userList.sort(
+            (a, b) => int.parse(b['grade']!).compareTo(int.parse(a['grade']!)));
+      }
+      isAscendingGrade = !isAscendingGrade;
+    });
+  }
+
+  // 학적 상태를 가나다순으로 정렬하는 메서드
+  void _sortByStatus() {
+    setState(() {
+      if (isAscendingStatus) {
+        userList.sort((a, b) => a['status']!.compareTo(b['status']!));
+      } else {
+        userList.sort((a, b) => b['status']!.compareTo(a['status']!));
+      }
+      isAscendingStatus = !isAscendingStatus;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +300,24 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // 선택된 아이템이 포함될 경우 삭제 다이얼로그 표시
+                        if (selectedItems.values.contains(true)) {
+                          _showDeleteConfirmationDialog();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.red,
+                              content: Text(
+                                '삭제할 항목을 선택하세요',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEA4E44),
                         foregroundColor: Colors.white,
@@ -183,29 +398,133 @@ class _UserInfoPageState extends State<UserInfoPage> {
             ),
             const SizedBox(height: 20),
 
-            // 엑셀 데이터를 표로 표시
-            if (excelData != null)
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columns: excelData![0]
-                        .map((cell) => DataColumn(
-                              label: Text(cell?.value.toString() ?? ''),
-                            ))
-                        .toList(),
-                    rows: excelData!.sublist(1).map((row) {
-                      return DataRow(
-                        cells: row
-                            .map((cell) => DataCell(
-                                  Text(cell?.value.toString() ?? ''),
-                                ))
-                            .toList(),
-                      );
-                    }).toList(),
+            // 회원정보 표
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: DataTable(
+                  columnSpacing: 12,
+                  horizontalMargin: 12,
+                  headingRowColor: const MaterialStatePropertyAll(
+                    Color(0xFFEFEFF2),
+                  ),
+                  columns: [
+                    DataColumn(
+                      label: Flexible(
+                          child: Center(
+                        child: Checkbox(
+                          value: selectAll,
+                          onChanged: _toggleSelectAll,
+                        ),
+                      )), // 중앙 정렬
+                    ),
+                    DataColumn(
+                      label: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('이름'),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: Icon(
+                              isAscendingName
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              size: 16,
+                            ),
+                            onPressed: _sortByName,
+                          ),
+                        ],
+                      ),
+                    ),
+                    DataColumn(
+                      label: Row(
+                        children: [
+                          const Text('학번'),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: Icon(
+                              isAscendingStudentId
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              size: 16,
+                            ),
+                            onPressed: _sortByStudentId,
+                          ),
+                        ],
+                      ),
+                    ),
+                    DataColumn(
+                      label: Row(
+                        children: [
+                          const Text('학년'),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: Icon(
+                              isAscendingGrade
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              size: 16,
+                            ),
+                            onPressed: _sortByGrade,
+                          ),
+                        ],
+                      ),
+                    ),
+                    DataColumn(
+                      label: Row(
+                        children: [
+                          const Text('학적상태'),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            icon: Icon(
+                              isAscendingStatus
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              size: 16,
+                            ),
+                            onPressed: _sortByStatus,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  rows: List<DataRow>.generate(
+                    userList.length,
+                    (index) => DataRow(
+                      cells: [
+                        DataCell(
+                          Center(
+                            child: Checkbox(
+                              value: selectedItems[index] ?? false,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  // 선택된 체크박스는 true로 반환
+                                  selectedItems[index] = value ?? false;
+                                });
+                              },
+                            ),
+                          ), // 중앙 정렬
+                        ),
+                        DataCell(
+                          Center(
+                              child: Text(userList[index]['name']!)), // 중앙 정렬
+                        ),
+                        DataCell(
+                          Center(child: Text(userList[index]['studentId']!)),
+                        ),
+                        DataCell(
+                          Center(child: Text(userList[index]['grade']!)),
+                        ),
+                        DataCell(
+                          Center(child: Text(userList[index]['status']!)),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),
