@@ -11,6 +11,9 @@ class UserInfoPage extends StatefulWidget {
 
 class _UserInfoPageState extends State<UserInfoPage> {
   TextEditingController searchController = TextEditingController(); // 검색 컨트롤러
+  TextEditingController idController = TextEditingController(); // 학번 컨트롤러
+  TextEditingController nameController = TextEditingController(); // 이름 컨트롤러
+
   FilePickerResult? pickedFile;
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
@@ -514,6 +517,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               onPressed: () {
                                 setState(() {
                                   selectedUser = filteredUserList[index];
+                                  idController.text = selectedUser['studentId'];
+                                  nameController.text = selectedUser['name'];
                                 });
 
                                 _showEditDialog(context, selectedUser);
@@ -572,7 +577,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (BuildContext context, StateSetter setStateDialog) {
             return Dialog(
               backgroundColor: Colors.white,
               child: Padding(
@@ -600,7 +605,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 50),
                           Expanded(
                             child: TextFormField(
-                              initialValue: user['studentId'],
+                              controller: idController,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                               ),
@@ -619,7 +624,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 50),
                           Expanded(
                             child: TextFormField(
-                              initialValue: user['name'],
+                              controller: nameController,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                               ),
@@ -646,8 +651,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       Checkbox(
                                         value: chosenGrades[index],
                                         onChanged: (value) {
-                                          setState(() {
-                                            chosenGrades[index] = value!;
+                                          setStateDialog(() {
+                                            setState(() {
+                                              chosenGrades[index] = value!;
+                                            });
                                           });
                                         },
                                       ),
@@ -680,8 +687,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       Checkbox(
                                         value: st['value'],
                                         onChanged: (value) {
-                                          setState(() {
-                                            st['value'] = value!;
+                                          setStateDialog(() {
+                                            setState(() {
+                                              st['value'] = value!;
+                                            });
                                           });
                                         },
                                       ),
@@ -721,6 +730,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 24),
                           ElevatedButton(
                             onPressed: () {
+                              setState(() {
+                                user['studentId'] = idController.text;
+                                user['name'] = nameController.text;
+                                user['grade'] = chosenGrades.indexOf(true) + 1;
+                                user['status'] = status
+                                    .firstWhere((st) => st['value'])['title'];
+                                _filterUserList(); // 필터링된 리스트 업데이트(나가자마자 수정된 내용 바로 볼 수 있음)
+                              });
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
