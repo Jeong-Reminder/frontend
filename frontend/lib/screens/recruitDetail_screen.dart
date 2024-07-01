@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/screens/experience_screen.dart';
 
 class recruitDetailPage extends StatefulWidget {
   const recruitDetailPage({super.key});
@@ -294,7 +295,30 @@ class _recruitDetailPageState extends State<recruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(field),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(field),
+              Directionality(
+                textDirection: TextDirection.rtl,
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ExperiencePage(),
+                      ),
+                    );
+                  },
+                  label: const Text(
+                    '경험 보러가기',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  icon: const Icon(Icons.chevron_left),
+                ),
+              ),
+            ],
+          ),
           titleTextStyle: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,

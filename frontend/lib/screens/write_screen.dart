@@ -241,16 +241,116 @@ class _BoardWritePageState extends State<BoardWritePage> {
             Row(
               children: [
                 // 카메라 & 파일 버튼
-                camFileBtn(
-                    onTap: () => _pickImage(ImageSource.camera),
-                    rightWidth: 1,
-                    icon: Icons.camera_alt_outlined,
-                    title: '카메라'),
-                camFileBtn(
-                    onTap: () => _pickImage(ImageSource.gallery),
-                    rightWidth: 0,
-                    icon: Icons.file_present,
-                    title: '파일'),
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height / 5,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF3F3FF),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20.0),
+                              topRight: Radius.circular(20.0),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  _pickImage(ImageSource.camera);
+                                },
+                                icon: const Icon(Icons.camera_alt),
+                                label: const Text('카메라'),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  _pickImage(ImageSource.gallery);
+                                },
+                                icon: const Icon(Icons.photo),
+                                label: const Text('갤러리'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 2, // 화면 절반
+                    height: 50,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          width: 1,
+                          color: Color(0xFFC5C5C7),
+                        ),
+                        bottom: BorderSide(
+                          width: 1,
+                          color: Color(0xFFC5C5C7),
+                        ),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt_outlined,
+                          size: 30,
+                          color: Color(0xFF2A72E7),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          '카메라',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFFC5C5C7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 2, // 화면 절반
+                    height: 50,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          width: 1,
+                          color: Color(0xFFC5C5C7),
+                        ),
+                        bottom: BorderSide(
+                          width: 1,
+                          color: Color(0xFFC5C5C7),
+                        ),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.file_present,
+                          size: 30,
+                          color: Color(0xFF2A72E7),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          '파일',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFFC5C5C7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -325,7 +425,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   isScrollControlled: true,
                   builder: (BuildContext context) {
                     return StatefulBuilder(
-                      builder: (BuildContext context, StateSetter bottomState) {
+                      builder: (BuildContext context, StateSetter setState) {
                         return SizedBox(
                           height: MediaQuery.of(context).size.height * 0.7,
                           child: SingleChildScrollView(
@@ -362,10 +462,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                   // 아이템을 재정렬할 때 호출
                                   // 아이템을 이동할 때 함수를 사용해서 아이템의 순서를 업데이트
                                   onReorder: (oldIndex, newIndex) {
-                                    bottomState(() {
-                                      setState(() {
-                                        _reorderVoteItems(oldIndex, newIndex);
-                                      });
+                                    setState(() {
+                                      _reorderVoteItems(oldIndex, newIndex);
                                     });
                                   },
                                   children: [
@@ -403,7 +501,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                 // 항목 추가 버튼
                                 TextButton.icon(
                                   onPressed: () {
-                                    bottomState(() {
+                                    setState(() {
                                       _addVoteItem(); // 투표 항목 추가 함수 호출
                                     });
                                   },
@@ -430,7 +528,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                     Checkbox(
                                       value: isMultiplied,
                                       onChanged: (value) {
-                                        bottomState(() {
+                                        setState(() {
                                           isMultiplied = value!;
                                         });
                                       },
@@ -465,10 +563,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                           currentTime: DateTime.now(),
                                           locale: LocaleType.ko, // 한국어 버전
                                           onConfirm: (date) {
-                                            bottomState(() {
-                                              setState(() {
-                                                selectedEndDate = date;
-                                              });
+                                            setState(() {
+                                              selectedEndDate = date;
                                             });
                                           },
                                         );
@@ -496,10 +592,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                 Center(
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      bottomState(() {
-                                        setState(() {
-                                          isConfirmedVote = true;
-                                        });
+                                      setState(() {
+                                        isConfirmedVote = true;
                                       });
                                       Navigator.pop(context);
                                     },
