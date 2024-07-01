@@ -1,4 +1,6 @@
 import 'dart:io'; // 파일을 다루기 위해 필요
+import 'dart:math';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
@@ -23,10 +25,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
   List<bool> isGrade = [false, false, false, false, false]; // 학년 선택 불리안
 
   File? pickedImage; // 선택된 이미지 파일
+  FilePickerResult? pickedFile; // 선택된 파일
   bool isPickingImage = false; // 이미지 선택 작업 진행 여부
   bool isMultiplied = false;
 
   DateTime? selectedEndDate; // 종료 날짜
+
+  String fileName = ''; // 선택한 파일명
 
   // 기본 3개의 텍스트폼필드의 컨트롤러
   List<TextEditingController> voteControllers = [
@@ -34,6 +39,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
     TextEditingController(),
     TextEditingController()
   ]; // 투표 항목 컨트롤러 리스트
+
+  List<PlatformFile> selectedFileWidgets = [];
 
   @override
   void initState() {
@@ -90,6 +97,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
   void _deleteImage() {
     setState(() {
       pickedImage = null;
+    });
+  }
+
+  // 파일 삭제 함수
+  void _deleteFile() {
+    setState(() {
+      pickedFile = null;
     });
   }
 
@@ -240,14 +254,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
             ),
             Row(
               children: [
-                // 카메라 & 파일 버튼
+                // 이미지 버튼
                 GestureDetector(
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
                       builder: (context) {
                         return Container(
-                          // height: MediaQuery.of(context).size.height / 5,
                           width: MediaQuery.of(context).size.width,
                           decoration: const BoxDecoration(
                             color: Colors.white,
@@ -260,6 +273,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // 카메라 버튼
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _pickImage(ImageSource.camera);
@@ -282,6 +296,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
                                       MediaQuery.of(context).size.width, 80),
                                 ),
                               ),
+
+                              // 갤러리 버튼
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _pickImage(ImageSource.gallery);
@@ -345,8 +361,37 @@ class _BoardWritePageState extends State<BoardWritePage> {
                     ),
                   ),
                 ),
+
+                // 파일 버튼
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    FilePickerResult? result =
+                        await FilePicker.platform.pickFiles(
+                      type: FileType.any, // 모든 파일을 선택 가능하게 설정
+                      allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
+                    );
+
+                    if (result != null) {
+                      // selectedFile: 선택한 파일들 중 하나의 파일
+                      for (var selectedFile in result.files) {
+                        setState(() {
+                          pickedFile = result;
+                          fileName = selectedFile.name;
+
+                          selectedFileWidgets.add(selectedFile);
+                        });
+                        print('파일: $pickedFile');
+                        print('선택한 파일 리스트: $selectedFileWidgets');
+
+                        // 선택된 파일의 경로를 File 객체 file에 저장
+                        File file = File(selectedFile.path!);
+
+                        // 선택된 엑셀 파일을 바이트 배열로 변환(readAsBytesSync)
+                        var fileBytes = file.readAsBytesSync();
+                        print('바이트 데이터: $fileBytes');
+                      }
+                    }
+                  },
                   child: Container(
                     width: MediaQuery.of(context).size.width / 2, // 화면 절반
                     height: 50,
@@ -391,23 +436,55 @@ class _BoardWritePageState extends State<BoardWritePage> {
               Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: Stack(
+                  alignment: Alignment.topRight,
                   children: [
                     Image.file(
                       pickedImage!,
                       height: 80,
-                      width: double.infinity,
                       alignment: Alignment.centerLeft,
                     ),
-                    Positioned(
-                      right: 275,
-                      top: -5,
-                      child: IconButton(
-                        icon: const Icon(Icons.close_outlined,
-                            color: Colors.black),
-                        onPressed: _deleteImage,
-                      ),
+                    IconButton(
+                      icon:
+                          const Icon(Icons.close_outlined, color: Colors.black),
+                      onPressed: _deleteImage,
                     ),
                   ],
+                ),
+              ),
+            const SizedBox(height: 20),
+
+            // 선택된 파일
+            if (selectedFileWidgets.isNotEmpty)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: selectedFileWidgets.map((selectedFile) {
+                    return Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.file_present),
+                            const SizedBox(width: 5),
+                            Text(selectedFile.name),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.close_outlined,
+                                color: Colors.black,
+                                size: 15,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  selectedFileWidgets.remove(selectedFile);
+                                });
+                                print('현재 파일 : $selectedFileWidgets');
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             const SizedBox(height: 25),
