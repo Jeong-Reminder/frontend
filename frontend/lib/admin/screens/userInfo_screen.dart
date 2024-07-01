@@ -12,7 +12,6 @@ class UserInfoPage extends StatefulWidget {
 class _UserInfoPageState extends State<UserInfoPage> {
   TextEditingController searchController = TextEditingController(); // 검색 컨트롤러
   FilePickerResult? pickedFile;
-  String searchQuery = ''; // 검색어를 저장하는 변수
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
   final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
@@ -36,7 +35,62 @@ class _UserInfoPageState extends State<UserInfoPage> {
       "grade": "4",
       "status": "휴학",
     },
+    {
+      "name": "이승욱",
+      "studentId": "20190926",
+      "grade": "3",
+      "status": "재학",
+    },
+    {
+      "name": "유다은",
+      "studentId": "20210916",
+      "grade": "2",
+      "status": "재학",
+    },
+    {
+      "name": "장찬현",
+      "studentId": "20190934",
+      "grade": "3",
+      "status": "재학",
+    },
+    {
+      "name": "김민택",
+      "studentId": "20190934",
+      "grade": "3",
+      "status": "재학",
+    },
   ];
+
+  List<Map<String, String>> filteredUserList = []; // 필터링된 회원 목록 리스트
+
+  @override
+  void initState() {
+    super.initState();
+    filteredUserList = userList; // 초기 상태는 전체 회원 목록
+    searchController.addListener(_filterUserList); // 검색어 변경 리스너 추가
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose(); // 컨트롤러 해제
+    super.dispose();
+  }
+
+  // 검색어에 따라 회원 목록을 필터링하는 메서드
+  void _filterUserList() {
+    String searchQuery = searchController.text;
+    setState(() {
+      // 검색어가 없으면 기존 userList를 가져오기
+      if (searchQuery.isEmpty) {
+        filteredUserList = userList;
+      } else {
+        // 검색어가 있으면 userList에 있는 이름에 하나라도 포함이 있으면 저장 후 가져오기
+        filteredUserList = userList.where((user) {
+          return user['name']!.contains(searchQuery);
+        }).toList();
+      }
+    });
+  }
 
   // 삭제 확인 다이얼로그를 표시하는 메서드
   void _showDeleteConfirmationDialog() {
@@ -138,13 +192,21 @@ class _UserInfoPageState extends State<UserInfoPage> {
   // 개별 선택된 아이템들을 삭제하는 메서드
   void _deleteSelectedItems() {
     setState(() {
-      userList.removeWhere((item) {
-        // 리스트에서 선택된 아이템들을 제거
-        int index = userList.indexOf(item); // indexOf: 특정 인덱스값만 가져오는 메서드
-        return selectedItems[index] ?? false; // 선택된 아이템이 있으면 true로 반환해 아이템 제거
-      });
+      filteredUserList
+          .where((item) {
+            // 선택된 항목 필터링
+            int index = filteredUserList.indexOf(item);
+            return selectedItems[index] ?? false;
+          })
+          .toList()
+          .forEach((item) {
+            // 원본 리스트에서 해당 항목 삭제
+            userList.remove(item);
+          });
+
       selectedItems.clear(); // 삭제 후 선택 상태 초기화(false로 설정)
       selectAll = false; // 전체 선택 상태 초기화
+      _filterUserList(); // 삭제 후 필터링된 리스트 업데이트
     });
   }
 
@@ -154,9 +216,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
       selectAll = value ?? false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
       selectedItems.clear();
 
-      // true일 경우 userList를 반복해 각 아이템의 선택 상태를 true로 설정
+      // true일 경우 filteredUserList를 반복해 각 아이템의 선택 상태를 true로 설정
       if (selectAll) {
-        for (int i = 0; i < userList.length; i++) {
+        for (int i = 0; i < filteredUserList.length; i++) {
           selectedItems[i] = true;
         }
       }
@@ -167,9 +229,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
   void _sortByName() {
     setState(() {
       if (isAscendingName) {
-        userList.sort((a, b) => a['name']!.compareTo(b['name']!));
+        filteredUserList.sort((a, b) => a['name']!.compareTo(b['name']!));
       } else {
-        userList.sort((a, b) => b['name']!.compareTo(a['name']!));
+        filteredUserList.sort((a, b) => b['name']!.compareTo(a['name']!));
       }
       isAscendingName = !isAscendingName;
     });
@@ -179,10 +241,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
   void _sortByStudentId() {
     setState(() {
       if (isAscendingStudentId) {
-        userList.sort((a, b) =>
+        filteredUserList.sort((a, b) =>
             int.parse(a['studentId']!).compareTo(int.parse(b['studentId']!)));
       } else {
-        userList.sort((a, b) =>
+        filteredUserList.sort((a, b) =>
             int.parse(b['studentId']!).compareTo(int.parse(a['studentId']!)));
       }
       isAscendingStudentId = !isAscendingStudentId;
@@ -193,10 +255,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
   void _sortByGrade() {
     setState(() {
       if (isAscendingGrade) {
-        userList.sort(
+        filteredUserList.sort(
             (a, b) => int.parse(a['grade']!).compareTo(int.parse(b['grade']!)));
       } else {
-        userList.sort(
+        filteredUserList.sort(
             (a, b) => int.parse(b['grade']!).compareTo(int.parse(a['grade']!)));
       }
       isAscendingGrade = !isAscendingGrade;
@@ -207,9 +269,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
   void _sortByStatus() {
     setState(() {
       if (isAscendingStatus) {
-        userList.sort((a, b) => a['status']!.compareTo(b['status']!));
+        filteredUserList.sort((a, b) => a['status']!.compareTo(b['status']!));
       } else {
-        userList.sort((a, b) => b['status']!.compareTo(a['status']!));
+        filteredUserList.sort((a, b) => b['status']!.compareTo(a['status']!));
       }
       isAscendingStatus = !isAscendingStatus;
     });
@@ -217,12 +279,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 검색어에 따라 필터링된 회원 정보 목록 생성
-    List<Map<String, String>> searchedUserList = userList.where((item) {
-      return item['name']!
-          .contains(searchQuery); // 검색한 이름이 표에서의 이름에 하나라도 포함이 된다면 해당 정보들을 반환
-    }).toList();
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 23.0, vertical: 133.0),
@@ -265,11 +321,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
               trailing: [
                 Image.asset('assets/images/send.png'),
               ],
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = searchController.text;
-                });
-              },
             ),
             const SizedBox(height: 23),
 
@@ -405,10 +456,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     dataColumn('학적상태', isAscendingStatus, _sortByStatus),
                   ],
                   rows: List<DataRow>.generate(
-                    // 검색을 하면 searchedUserList로 보여주거나 검색한 게 없으면 userList로 보여주기
-                    searchQuery.isEmpty
-                        ? userList.length
-                        : searchedUserList.length,
+                    filteredUserList.length,
                     (index) => DataRow(
                       cells: [
                         DataCell(
@@ -426,16 +474,21 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         ),
                         DataCell(
                           Center(
-                              child: Text(userList[index]['name']!)), // 중앙 정렬
+                              child: Text(
+                                  filteredUserList[index]['name']!)), // 중앙 정렬
                         ),
                         DataCell(
-                          Center(child: Text(userList[index]['studentId']!)),
+                          Center(
+                              child:
+                                  Text(filteredUserList[index]['studentId']!)),
                         ),
                         DataCell(
-                          Center(child: Text(userList[index]['grade']!)),
+                          Center(
+                              child: Text(filteredUserList[index]['grade']!)),
                         ),
                         DataCell(
-                          Center(child: Text(userList[index]['status']!)),
+                          Center(
+                              child: Text(filteredUserList[index]['status']!)),
                         ),
                       ],
                     ),
