@@ -247,10 +247,10 @@ class _BoardWritePageState extends State<BoardWritePage> {
                       context: context,
                       builder: (context) {
                         return Container(
-                          height: MediaQuery.of(context).size.height / 5,
+                          // height: MediaQuery.of(context).size.height / 5,
                           width: MediaQuery.of(context).size.width,
                           decoration: const BoxDecoration(
-                            color: Color(0xFFF3F3FF),
+                            color: Colors.white,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(20.0),
                               topRight: Radius.circular(20.0),
@@ -258,20 +258,51 @@ class _BoardWritePageState extends State<BoardWritePage> {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _pickImage(ImageSource.camera);
                                 },
-                                icon: const Icon(Icons.camera_alt),
-                                label: const Text('카메라'),
+                                icon: const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.black,
+                                ),
+                                label: const Text(
+                                  '카메라',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  elevation: 0,
+                                  fixedSize: Size(
+                                      MediaQuery.of(context).size.width, 80),
+                                ),
                               ),
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _pickImage(ImageSource.gallery);
                                 },
-                                icon: const Icon(Icons.photo),
-                                label: const Text('갤러리'),
+                                icon: const Icon(
+                                  Icons.photo,
+                                  color: Colors.black,
+                                ),
+                                label: const Text(
+                                  '갤러리',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  elevation: 0,
+                                  fixedSize: Size(
+                                      MediaQuery.of(context).size.width, 80),
+                                ),
                               ),
                             ],
                           ),
@@ -298,13 +329,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.camera_alt_outlined,
+                          Icons.image,
                           size: 30,
                           color: Color(0xFF2A72E7),
                         ),
                         SizedBox(width: 10),
                         Text(
-                          '카메라',
+                          '이미지',
                           style: TextStyle(
                             fontSize: 18,
                             color: Color(0xFFC5C5C7),
