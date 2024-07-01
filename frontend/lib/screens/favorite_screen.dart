@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/board_widget.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});

@@ -21,47 +21,49 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool isAscendingGrade = true; // 학년 정렬 순서 상태
   bool isAscendingStatus = true; // 학적상태 정렬 순서 상태
 
-  final List<Map<String, String>> userList = [
+  final List<Map<String, dynamic>> userList = [
     // 회원 목록을 저장하는 리스트
     {
       "name": "민택기",
       "studentId": "20190906",
-      "grade": "4",
+      "grade": 4,
       "status": "재학",
     },
     {
       "name": "소진수",
       "studentId": "20190914",
-      "grade": "4",
+      "grade": 4,
       "status": "휴학",
     },
     {
       "name": "이승욱",
       "studentId": "20190926",
-      "grade": "3",
+      "grade": 3,
       "status": "재학",
     },
     {
       "name": "유다은",
       "studentId": "20210916",
-      "grade": "2",
+      "grade": 2,
       "status": "재학",
     },
     {
       "name": "장찬현",
       "studentId": "20190934",
-      "grade": "3",
+      "grade": 3,
       "status": "재학",
     },
     {
       "name": "김민택",
       "studentId": "20190934",
-      "grade": "3",
+      "grade": 2,
       "status": "재학",
     },
   ];
 
-  List<Map<String, String>> filteredUserList = []; // 필터링된 회원 목록 리스트
+  List<Map<String, dynamic>> filteredUserList = []; // 필터링된 회원 목록 리스트
+
+  Map<String, dynamic> selectedUser = {}; // 수정 버튼 누를 시 선택된 회원
 
   @override
   void initState() {
@@ -277,6 +279,19 @@ class _UserInfoPageState extends State<UserInfoPage> {
     });
   }
 
+  List<bool> chosenGrades = [false, false, false, false];
+
+  List<Map<String, dynamic>> status = [
+    {
+      'title': '재학',
+      'value': false,
+    },
+    {
+      'title': '휴학',
+      'value': false,
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -433,7 +448,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SizedBox(
-                width: MediaQuery.of(context).size.width,
                 child: DataTable(
                   columnSpacing: 12,
                   horizontalMargin: 12,
@@ -454,6 +468,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     dataColumn('학번', isAscendingStudentId, _sortByStudentId),
                     dataColumn('학년', isAscendingGrade, _sortByGrade),
                     dataColumn('학적상태', isAscendingStatus, _sortByStatus),
+                    const DataColumn(
+                      label: Text('정보 수정'),
+                    ),
                   ],
                   rows: List<DataRow>.generate(
                     filteredUserList.length,
@@ -484,11 +501,41 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         ),
                         DataCell(
                           Center(
-                              child: Text(filteredUserList[index]['grade']!)),
+                              child:
+                                  Text('${filteredUserList[index]['grade']}')),
                         ),
                         DataCell(
                           Center(
                               child: Text(filteredUserList[index]['status']!)),
+                        ),
+                        DataCell(
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedUser = filteredUserList[index];
+                                });
+
+                                _showEditDialog(context, selectedUser);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2A72E7),
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(60, 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 2.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                              ),
+                              child: const Text(
+                                '수정',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -499,6 +546,208 @@ class _UserInfoPageState extends State<UserInfoPage> {
           ],
         ),
       ),
+    );
+  }
+
+  // 사용자 정보 수정 다이얼로그
+  void _showEditDialog(BuildContext context, Map<String, dynamic> user) {
+    // 학년 체크박스 초기화
+    setState(() {
+      chosenGrades = List.generate(
+          4,
+          (index) =>
+              user['grade'] ==
+              index + 1); // 선택한 회원의 학년과 (index+1)이 같으면 true로 변경
+
+      status = status.map((item) {
+        return {
+          'title': item['title'],
+          'value': item['title'] ==
+              user['status'] // title(재학 or 휴학)과 status(재학 or 휴학)이 같다면 true 반환
+        };
+      }).toList();
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 34.0, vertical: 55.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const Text(
+                        '사용자 정보 수정',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      const Divider(),
+                      Row(
+                        children: [
+                          const Text(
+                            '학번',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 50),
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: user['studentId'],
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Row(
+                        children: [
+                          const Text(
+                            '이름',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 50),
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: user['name'],
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Row(
+                        children: [
+                          const Text(
+                            '학년',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 35),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(4, (index) {
+                                  return Row(
+                                    children: [
+                                      Checkbox(
+                                        value: chosenGrades[index],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            chosenGrades[index] = value!;
+                                          });
+                                        },
+                                      ),
+                                      Text('${index + 1}학년'),
+                                    ],
+                                  );
+                                }),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Row(
+                        children: [
+                          const Text(
+                            '학적 상태',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: List.generate(2, (index) {
+                                  var st = status[index];
+                                  return Row(
+                                    children: [
+                                      Checkbox(
+                                        value: st['value'],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            st['value'] = value!;
+                                          });
+                                        },
+                                      ),
+                                      Text(st['title']),
+                                    ],
+                                  );
+                                }),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.black),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              minimumSize: const Size(57, 25),
+                            ),
+                            child: const Text(
+                              '취소',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 24),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2A72E7),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              minimumSize: const Size(57, 25),
+                            ),
+                            child: const Text(
+                              '수정',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
