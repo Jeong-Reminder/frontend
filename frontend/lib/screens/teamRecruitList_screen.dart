@@ -449,8 +449,8 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
-                  headingRowColor: WidgetStateColor.resolveWith(
-                      (states) => const Color(0xFFEFEFF2)),
+                  headingRowColor:
+                      const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
                   columns: [
                     DataColumn(
                       label: Row(
@@ -512,13 +512,15 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
                   rows: List<DataRow>.generate(
                     filteredRecruitList.length,
                     (int index) => DataRow(
-                      color: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                        if (index.isEven) {
-                          return Colors.white; // 짝수 열
-                        }
-                        return Colors.white; // 홀수 열
-                      }),
+                      color: MaterialStatePropertyAll(
+                          index.isEven ? Colors.white : Colors.white),
+                      // WidgetStateProperty.resolveWith<Color?>(
+                      //     (Set<WidgetState> states) {
+                      //   if (index.isEven) {
+                      //     return Colors.white; // 짝수 열
+                      //   }
+                      //   return Colors.white; // 홀수 열
+                      // }),
                       cells: [
                         DataCell(
                           Row(
