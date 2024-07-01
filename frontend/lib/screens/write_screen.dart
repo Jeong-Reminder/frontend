@@ -199,7 +199,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   padding: const EdgeInsets.only(right: 17.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      showPreview(context);
+                      _showPreview(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFDBE7FB),
@@ -255,178 +255,18 @@ class _BoardWritePageState extends State<BoardWritePage> {
             Row(
               children: [
                 // 이미지 버튼
-                GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (context) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20.0),
-                              topRight: Radius.circular(20.0),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // 카메라 버튼
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  _pickImage(ImageSource.camera);
-                                },
-                                icon: const Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.black,
-                                ),
-                                label: const Text(
-                                  '카메라',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  elevation: 0,
-                                  fixedSize: Size(
-                                      MediaQuery.of(context).size.width, 80),
-                                ),
-                              ),
-
-                              // 갤러리 버튼
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  _pickImage(ImageSource.gallery);
-                                },
-                                icon: const Icon(
-                                  Icons.photo,
-                                  color: Colors.black,
-                                ),
-                                label: const Text(
-                                  '갤러리',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  elevation: 0,
-                                  fixedSize: Size(
-                                      MediaQuery.of(context).size.width, 80),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width / 2, // 화면 절반
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          width: 1,
-                          color: Color(0xFFC5C5C7),
-                        ),
-                        bottom: BorderSide(
-                          width: 1,
-                          color: Color(0xFFC5C5C7),
-                        ),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.image,
-                          size: 30,
-                          color: Color(0xFF2A72E7),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          '이미지',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Color(0xFFC5C5C7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                imgFileBtn(
+                    onTap: () async {
+                      _showImageSource();
+                    },
+                    title: '이미지',
+                    icon: Icons.image), // void 함수는 async 작성
 
                 // 파일 버튼
-                GestureDetector(
-                  onTap: () async {
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles(
-                      type: FileType.any, // 모든 파일을 선택 가능하게 설정
-                      allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
-                    );
-
-                    if (result != null) {
-                      // selectedFile: 선택한 파일들 중 하나의 파일
-                      for (var selectedFile in result.files) {
-                        setState(() {
-                          pickedFile = result;
-                          fileName = selectedFile.name;
-
-                          selectedFileWidgets.add(selectedFile);
-                        });
-                        print('파일: $pickedFile');
-                        print('선택한 파일 리스트: $selectedFileWidgets');
-
-                        // 선택된 파일의 경로를 File 객체 file에 저장
-                        File file = File(selectedFile.path!);
-
-                        // 선택된 엑셀 파일을 바이트 배열로 변환(readAsBytesSync)
-                        var fileBytes = file.readAsBytesSync();
-                        print('바이트 데이터: $fileBytes');
-                      }
-                    }
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width / 2, // 화면 절반
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          width: 1,
-                          color: Color(0xFFC5C5C7),
-                        ),
-                        bottom: BorderSide(
-                          width: 1,
-                          color: Color(0xFFC5C5C7),
-                        ),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.file_present,
-                          size: 30,
-                          color: Color(0xFF2A72E7),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          '파일',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Color(0xFFC5C5C7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                imgFileBtn(
+                    onTap: _pickedFile,
+                    title: '파일',
+                    icon: Icons.file_present), // Future 함수는 이름만 작성
               ],
             ),
             const SizedBox(height: 20),
@@ -528,211 +368,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
               imgPath: 'assets/images/vote.png',
               state: isConfirmedVote,
               onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (BuildContext context) {
-                    return StatefulBuilder(
-                      builder: (BuildContext context, StateSetter setState) {
-                        return SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.7,
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 22.0, vertical: 40.0),
-
-                            // 모달 내부 영역
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // 제목 입력 필드
-                                TextFormField(
-                                  decoration: InputDecoration(
-                                    hintText: '제목을 입력해주세요',
-                                    hintStyle: const TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFFC5C5C7),
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0, vertical: 5.0),
-                                  ),
-                                ),
-                                const SizedBox(height: 19),
-
-                                // 투표 항목 입력 필드
-                                // 목록의 순서를 재배열시켜주는 위젯
-                                ReorderableListView(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-
-                                  // 아이템을 재정렬할 때 호출
-                                  // 아이템을 이동할 때 함수를 사용해서 아이템의 순서를 업데이트
-                                  onReorder: (oldIndex, newIndex) {
-                                    setState(() {
-                                      _reorderVoteItems(oldIndex, newIndex);
-                                    });
-                                  },
-                                  children: [
-                                    for (int index = 0;
-                                        index < voteControllers.length;
-                                        index++)
-
-                                      // 드래그가 되지 않아 ListTile로 구현
-                                      // 투표 항목
-                                      ListTile(
-                                        key: ValueKey(index),
-                                        title: TextFormField(
-                                          controller: voteControllers[index],
-                                          decoration: InputDecoration(
-                                            hintText: '${index + 1}. 항목을 입력하세요',
-                                            hintStyle: const TextStyle(
-                                              fontSize: 14,
-                                              color: Color(0xFFC5C5C7),
-                                            ),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(5.0),
-                                            ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 10.0,
-                                                    vertical: 5.0),
-                                          ),
-                                        ),
-                                        trailing: const Icon(Icons.menu),
-                                      ),
-                                  ],
-                                ),
-
-                                // 항목 추가 버튼
-                                TextButton.icon(
-                                  onPressed: () {
-                                    setState(() {
-                                      _addVoteItem(); // 투표 항목 추가 함수 호출
-                                    });
-                                  },
-                                  icon: const Icon(
-                                    Icons.add,
-                                    color: Colors.black,
-                                    size: 20,
-                                  ),
-                                  label: const Text(
-                                    '항목 추가',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-                                const Divider(),
-                                const SizedBox(height: 15),
-
-                                // 복수 선택 허용 체크박스
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: isMultiplied,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          isMultiplied = value!;
-                                        });
-                                      },
-                                    ),
-                                    const Text(
-                                      '복수 선택 허용',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 25),
-                                const Text(
-                                  '종료일 설정',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-
-                                // 종료일 설정
-                                Row(
-                                  children: [
-                                    // 달력 아이콘
-                                    IconButton(
-                                      onPressed: () {
-                                        DatePicker.showDateTimePicker(
-                                          context,
-                                          currentTime: DateTime.now(),
-                                          locale: LocaleType.ko, // 한국어 버전
-                                          onConfirm: (date) {
-                                            setState(() {
-                                              selectedEndDate = date;
-                                            });
-                                          },
-                                        );
-                                      },
-                                      icon: const Icon(
-                                        Icons.calendar_month,
-                                      ),
-                                    ),
-
-                                    // 지정한 종료 날짜
-                                    Text(
-                                      selectedEndDate != null
-                                          ? (formatDateTime(selectedEndDate!))
-                                          : '',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 30),
-
-                                // 확인 버튼
-                                Center(
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        isConfirmedVote = true;
-                                      });
-                                      Navigator.pop(context);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFDBE7FB),
-                                      surfaceTintColor: const Color(0xFF2B72E7)
-                                          .withOpacity(0.25),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      minimumSize: const Size(94, 38),
-                                    ),
-                                    child: const Text(
-                                      '확인',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF6E747E),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
+                _showVoteSheet(context);
               },
             ),
             const SizedBox(height: 30),
@@ -773,8 +409,242 @@ class _BoardWritePageState extends State<BoardWritePage> {
     );
   }
 
+  // 파일 선택 함수
+  Future<void> _pickedFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any, // 모든 파일을 선택 가능하게 설정
+      allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
+    );
+
+    if (result != null) {
+      // selectedFile: 선택한 파일들 중 하나의 파일
+      for (var selectedFile in result.files) {
+        setState(() {
+          pickedFile = result; // 선택한 파일들을 pickedFile에 저장
+          fileName = selectedFile.name; // 파일명
+
+          selectedFileWidgets.add(selectedFile); // 선택한 파일에 추가
+        });
+        print('파일: $pickedFile');
+        print('선택한 파일 리스트: $selectedFileWidgets');
+
+        // 선택된 파일의 경로를 File 객체 file에 저장
+        File file = File(selectedFile.path!);
+
+        // 선택된 엑셀 파일을 바이트 배열로 변환(readAsBytesSync)
+        var fileBytes = file.readAsBytesSync();
+        print('바이트 데이터: $fileBytes');
+      }
+    }
+  }
+
+  // 투표 바텀시트
+  void _showVoteSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.7,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 22.0, vertical: 40.0),
+
+                // 모달 내부 영역
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 제목 입력 필드
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: '제목을 입력해주세요',
+                        hintStyle: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFFC5C5C7),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 5.0),
+                      ),
+                    ),
+                    const SizedBox(height: 19),
+
+                    // 투표 항목 입력 필드
+                    // 목록의 순서를 재배열시켜주는 위젯
+                    ReorderableListView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+
+                      // 아이템을 재정렬할 때 호출
+                      // 아이템을 이동할 때 함수를 사용해서 아이템의 순서를 업데이트
+                      onReorder: (oldIndex, newIndex) {
+                        setState(() {
+                          _reorderVoteItems(oldIndex, newIndex);
+                        });
+                      },
+                      children: [
+                        for (int index = 0;
+                            index < voteControllers.length;
+                            index++)
+
+                          // 드래그가 되지 않아 ListTile로 구현
+                          // 투표 항목
+                          ListTile(
+                            key: ValueKey(index),
+                            title: TextFormField(
+                              controller: voteControllers[index],
+                              decoration: InputDecoration(
+                                hintText: '${index + 1}. 항목을 입력하세요',
+                                hintStyle: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFFC5C5C7),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 5.0),
+                              ),
+                            ),
+                            trailing: const Icon(Icons.menu),
+                          ),
+                      ],
+                    ),
+
+                    // 항목 추가 버튼
+                    TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _addVoteItem(); // 투표 항목 추가 함수 호출
+                        });
+                      },
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                      label: const Text(
+                        '항목 추가',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    const Divider(),
+                    const SizedBox(height: 15),
+
+                    // 복수 선택 허용 체크박스
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isMultiplied,
+                          onChanged: (value) {
+                            setState(() {
+                              isMultiplied = value!;
+                            });
+                          },
+                        ),
+                        const Text(
+                          '복수 선택 허용',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 25),
+                    const Text(
+                      '종료일 설정',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 종료일 설정
+                    Row(
+                      children: [
+                        // 달력 아이콘
+                        IconButton(
+                          onPressed: () {
+                            DatePicker.showDateTimePicker(
+                              context,
+                              currentTime: DateTime.now(),
+                              locale: LocaleType.ko, // 한국어 버전
+                              onConfirm: (date) {
+                                setState(() {
+                                  selectedEndDate = date;
+                                });
+                              },
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.calendar_month,
+                          ),
+                        ),
+
+                        // 지정한 종료 날짜
+                        Text(
+                          selectedEndDate != null
+                              ? (formatDateTime(selectedEndDate!))
+                              : '',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+
+                    // 확인 버튼
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isConfirmedVote = true;
+                          });
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFDBE7FB),
+                          surfaceTintColor:
+                              const Color(0xFF2B72E7).withOpacity(0.25),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          minimumSize: const Size(94, 38),
+                        ),
+                        child: const Text(
+                          '확인',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF6E747E),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   // 미리보기 함수
-  void showPreview(BuildContext context) {
+  void _showPreview(BuildContext context) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -829,8 +699,118 @@ class _BoardWritePageState extends State<BoardWritePage> {
         });
   }
 
+  // 카메라 & 파일 선택 바텀시트 함수
+  void _showImageSource() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.0),
+              topRight: Radius.circular(20.0),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 카메라 버튼
+              camGalBtn(
+                  source: ImageSource.camera,
+                  icon: Icons.camera_alt,
+                  title: '카메라'),
+
+              // 갤러리 버튼
+              camGalBtn(
+                  source: ImageSource.gallery, icon: Icons.photo, title: '갤러리'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 카메라 & 이미지 버튼
+  Widget camGalBtn({
+    required ImageSource source,
+    required IconData icon,
+    required String title,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        _pickImage(source);
+      },
+      icon: Icon(
+        icon,
+        color: Colors.black,
+      ),
+      label: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 20,
+          color: Colors.black,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        fixedSize: Size(MediaQuery.of(context).size.width, 80),
+      ),
+    );
+  }
+
+  // 이미지 & 파일 버튼
+  Widget imgFileBtn({
+    required Future<void> Function() onTap,
+    required String title,
+    required IconData icon,
+  }) {
+    return GestureDetector(
+      onTap: () async {
+        await onTap();
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width / 2, // 화면 절반
+        height: 50,
+        decoration: const BoxDecoration(
+          border: Border(
+            right: BorderSide(
+              width: 1,
+              color: Color(0xFFC5C5C7),
+            ),
+            bottom: BorderSide(
+              width: 1,
+              color: Color(0xFFC5C5C7),
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 30,
+              color: const Color(0xFF2A72E7),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Color(0xFFC5C5C7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // 필독 & 투표 버튼 생성 함수
-  readVoteBtn({
+  Widget readVoteBtn({
     required String title,
     required String imgPath,
     required state,
@@ -867,54 +847,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
     );
   }
 
-  // 카메라 & 파일 버튼 생성 함수
-  camFileBtn({
-    required VoidCallback onTap,
-    required double rightWidth,
-    required IconData icon,
-    required String title,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: MediaQuery.of(context).size.width / 2, // 화면 절반
-        height: 50,
-        decoration: BoxDecoration(
-          border: Border(
-            right: BorderSide(
-              width: rightWidth,
-              color: const Color(0xFFC5C5C7),
-            ),
-            bottom: const BorderSide(
-              width: 1,
-              color: Color(0xFFC5C5C7),
-            ),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 30,
-              color: const Color(0xFF2A72E7),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Color(0xFFC5C5C7),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // 토글 버튼 생성 함수
-  toggleButtons({
+  Widget toggleButtons({
     required String title,
     required List<bool> isSelected,
     required bool categoryBtn,
