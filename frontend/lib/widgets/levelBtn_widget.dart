@@ -14,24 +14,26 @@ class GradeBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        onSelectedGrade(grade);
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFDBE7FB),
-        side: BorderSide(
-          color: const Color(0xFF2B72E7).withOpacity(0.25),
-          width: 1.5,
+    return SizedBox(
+      height: 25,
+      width: 78,
+      child: ElevatedButton(
+        onPressed: () {
+          onSelectedGrade(grade);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFDBE7FB),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
-        minimumSize: const Size(50, 40),
-      ),
-      child: Text(
-        grade,
-        style: TextStyle(
-          color: isSelected ? Colors.black : Colors.black.withOpacity(0.5),
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
+        child: Text(
+          grade,
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.black.withOpacity(0.5),
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
