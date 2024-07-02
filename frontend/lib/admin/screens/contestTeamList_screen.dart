@@ -431,9 +431,7 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
                   headingRowColor:
-                      const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
-                  // WidgetStateColor.resolveWith(
-                  //     (states) => const Color(0xFFEFEFF2)),
+                      const WidgetStatePropertyAll(Color(0xFFEFEFF2)),
                   columns: [
                     DataColumn(
                       label: Row(
@@ -486,15 +484,8 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                   rows: List<DataRow>.generate(
                     filteredRecruitList.length,
                     (int index) => DataRow(
-                      color: MaterialStatePropertyAll(
+                      color: WidgetStatePropertyAll(
                           index.isEven ? Colors.white : Colors.white),
-                      //  WidgetStateProperty.resolveWith<Color?>(
-                      //     (Set<WidgetState> states) {
-                      //   if (index.isEven) {
-                      //     return Colors.white; // 짝수 열
-                      //   }
-                      //   return Colors.white; // 홀수 열
-                      // }),
                       cells: [
                         DataCell(
                           Row(
