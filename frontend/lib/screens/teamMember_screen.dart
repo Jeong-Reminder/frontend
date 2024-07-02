@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class teamMemberPage extends StatefulWidget {
-  const teamMemberPage({super.key});
+class TeamMemberPage extends StatefulWidget {
+  const TeamMemberPage({super.key});
 
   @override
-  State<teamMemberPage> createState() => _teamMemberPageState();
+  State<TeamMemberPage> createState() => _TeamMemberPageState();
 }
 
-class _teamMemberPageState extends State<teamMemberPage> {
+class _TeamMemberPageState extends State<TeamMemberPage> {
   // 각 섹션의 확장 상태를 관리하는 변수
   bool isExpandedSection1 = false;
   bool isExpandedSection2 = false;

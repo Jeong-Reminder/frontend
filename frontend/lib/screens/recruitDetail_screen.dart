@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/screens/experience_screen.dart';
 
-class recruitDetailPage extends StatefulWidget {
-  const recruitDetailPage({super.key});
+class RecruitDetailPage extends StatefulWidget {
+  const RecruitDetailPage({super.key});
 
   @override
-  State<recruitDetailPage> createState() => _recruitDetailPageState();
+  State<RecruitDetailPage> createState() => _RecruitDetailPageState();
 }
 
-class _recruitDetailPageState extends State<recruitDetailPage> {
+class _RecruitDetailPageState extends State<RecruitDetailPage> {
   // 모집 명단 확장 여부를 관리하는 변수
   bool isExpandedSection1 = false;
   // 현재 모집된 인원 수

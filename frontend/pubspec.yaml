@@ -88,6 +88,7 @@ flutter:
         - assets/images/userInfoImg.png
         - assets/images/teamRecruitImg.png
         - assets/images/contestImg.png
+        - assets/images/filtering.png
         - assets/skilImages/typescript.png
         - assets/skilImages/javascript.png
         - assets/skilImages/tailwindcss.png
