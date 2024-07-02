@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/viewVote_screen.dart';
 
-class votePage extends StatefulWidget {
-  const votePage({super.key});
+class VotePage extends StatefulWidget {
+  const VotePage({super.key});
 
   @override
-  State<votePage> createState() => _votePageState();
+  State<VotePage> createState() => _VotePageState();
 }
 
 PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
@@ -29,7 +29,7 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
 
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 } // 팝업 아이템
 
-class _votePageState extends State<votePage> {
+class _VotePageState extends State<VotePage> {
   final List<bool> _showIconList = [false, false, false]; // 각 카드의 아이콘 상태(숨김 여부)
   final List<Color> _circleColors = [
     Colors.black,
