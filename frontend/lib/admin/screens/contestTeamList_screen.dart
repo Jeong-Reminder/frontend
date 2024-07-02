@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class TeamRecruitListPage extends StatefulWidget {
-  const TeamRecruitListPage({super.key});
+class ContestTeamListPage extends StatefulWidget {
+  const ContestTeamListPage({super.key});
 
   @override
-  State<TeamRecruitListPage> createState() => _TeamRecruitListPageState();
+  State<ContestTeamListPage> createState() => _ContestTeamListPageState();
 }
 
 // 팝업 메뉴 아이템을 생성하는 함수
@@ -29,7 +29,7 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
 // 팝업 메뉴의 항목을 정의하는 열거형
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
-class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
+class _ContestTeamListPageState extends State<ContestTeamListPage> {
   final TextEditingController _controller =
       TextEditingController(); // 검색창의 텍스트 컨트롤러
   DateTime? _selectedDate; // 선택된 날짜 저장하는 변수
@@ -38,40 +38,19 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
   final List<Map<String, String>> _recruitList = [
     // 팀원 모집글 목록을 저장하는 리스트
     {
-      "title": "제목1",
-      "name": "페라자",
-      "type": "IoT",
-      "date": "2024-03-04 16:54:33"
+      "teamName": "팀명1",
+      "members": "소진수, 민택기, 이승욱, 유다은",
+      "contest": "IoT",
     },
     {
-      "title": "제목2",
-      "name": "소진수",
-      "type": "IoT",
-      "date": "2024-03-04 16:54:33"
+      "teamName": "팀명2",
+      "members": "소진수, 민택기, 이승욱, 장찬현",
+      "contest": "뉴테크",
     },
     {
-      "title": "제목3",
-      "name": "민택기",
-      "type": "뉴테크",
-      "date": "2024-03-04 16:54:33"
-    },
-    {
-      "title": "제목4",
-      "name": "이승욱",
-      "type": "멘토티",
-      "date": "2024-03-04 16:54:33"
-    },
-    {
-      "title": "제목5",
-      "name": "유다은",
-      "type": "IoT",
-      "date": "2024-03-04 16:54:33"
-    },
-    {
-      "title": "제목6",
-      "name": "장찬현",
-      "type": "뉴테크",
-      "date": "2024-03-04 16:54:33"
+      "teamName": "팀명3",
+      "members": "소진수, 민택기, 이승욱, 장찬현",
+      "contest": "멘토티",
     },
   ];
 
@@ -108,7 +87,7 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
           title: const Column(
             children: [
               Text(
-                '선택한 계정을 정말 삭제하시겠습니까?',
+                '선택한 팀을 정말 삭제하시겠습니까?',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -239,10 +218,10 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 검색어에 따라 필터링된 모집글 목록 생성
+    // 검색어에 따라 필터링된 팀 목록 생성
     List<Map<String, String>> filteredRecruitList = _recruitList.where((item) {
-      return item['title']!.contains(_searchQuery) ||
-          item['type']!.contains(_searchQuery);
+      return (item['teamName'] ?? '').contains(_searchQuery) ||
+          (item['contest'] ?? '').contains(_searchQuery);
     }).toList();
 
     return Scaffold(
@@ -292,7 +271,7 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
               Row(
                 children: [
                   const Text(
-                    '팀원 모집글',
+                    '경진대회 팀',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -358,10 +337,12 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
                       child: TextFormField(
                         controller: _controller,
                         style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF848488)),
+                          fontSize: 12,
+                          color: Color(0xFF848488),
+                        ),
                         textAlignVertical: TextAlignVertical.top,
                         decoration: const InputDecoration(
-                          hintText: '제목 혹은 경진대회를 검색하세요',
+                          hintText: '팀명 혹은 경진대회를 검색하세요',
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         ),
@@ -450,7 +431,7 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
                   headingRowColor:
-                      const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
+                      const WidgetStatePropertyAll(Color(0xFFEFEFF2)),
                   columns: [
                     DataColumn(
                       label: Row(
@@ -460,67 +441,51 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
                             onChanged: _toggleSelectAll,
                           ),
                           const Text(
-                            '제목',
+                            '팀명',
                             style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF848488)),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF848488),
+                            ),
                           ),
                         ],
                       ),
                       onSort: (int columnIndex, bool ascending) {
-                        _onColumnTap('제목');
+                        _onColumnTap('팀명');
                       },
                     ),
                     DataColumn(
                       label: const Text(
-                        '이름',
+                        '팀원',
                         style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF848488)),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF848488),
+                        ),
                       ),
                       onSort: (int columnIndex, bool ascending) {
-                        _onColumnTap('이름');
+                        _onColumnTap('팀원');
                       },
                     ),
                     DataColumn(
                       label: const Text(
                         '경진대회',
                         style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF848488)),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF848488),
+                        ),
                       ),
                       onSort: (int columnIndex, bool ascending) {
                         _onColumnTap('경진대회');
-                      },
-                    ),
-                    DataColumn(
-                      label: const Text(
-                        '작성일자',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF848488)),
-                      ),
-                      onSort: (int columnIndex, bool ascending) {
-                        _onColumnTap('작성일자');
                       },
                     ),
                   ],
                   rows: List<DataRow>.generate(
                     filteredRecruitList.length,
                     (int index) => DataRow(
-                      color: MaterialStatePropertyAll(
+                      color: WidgetStatePropertyAll(
                           index.isEven ? Colors.white : Colors.white),
-                      // WidgetStateProperty.resolveWith<Color?>(
-                      //     (Set<WidgetState> states) {
-                      //   if (index.isEven) {
-                      //     return Colors.white; // 짝수 열
-                      //   }
-                      //   return Colors.white; // 홀수 열
-                      // }),
                       cells: [
                         DataCell(
                           Row(
@@ -534,7 +499,7 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
                                 },
                               ),
                               Text(
-                                filteredRecruitList[index]['title']!,
+                                filteredRecruitList[index]['teamName'] ?? '',
                                 style: const TextStyle(fontSize: 10),
                               ),
                             ],
@@ -542,19 +507,13 @@ class _TeamRecruitListPageState extends State<TeamRecruitListPage> {
                         ),
                         DataCell(
                           Text(
-                            filteredRecruitList[index]['name']!,
+                            filteredRecruitList[index]['members'] ?? '',
                             style: const TextStyle(fontSize: 10),
                           ),
                         ),
                         DataCell(
                           Text(
-                            filteredRecruitList[index]['type']!,
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            filteredRecruitList[index]['date']!,
+                            filteredRecruitList[index]['contest'] ?? '',
                             style: const TextStyle(fontSize: 10),
                           ),
                         ),
