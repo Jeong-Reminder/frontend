@@ -2,13 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 
-class memberRecruitPage extends StatefulWidget {
-  const memberRecruitPage({super.key});
+class MemberRecruitPage extends StatefulWidget {
+  const MemberRecruitPage({super.key});
 
   @override
-  State<memberRecruitPage> createState() => _memberRecruitPageState();
+  State<MemberRecruitPage> createState() => _MemberRecruitPageState();
 }
 
+// 모집글 클래스 정의
+class RecruitmentPost {
+  final String title;
+  final String author;
+  final String date;
+  final String time;
+  final String content;
+  final int currentMembers;
+  final int maxMembers;
+
+  RecruitmentPost({
+    required this.title,
+    required this.author,
+    required this.date,
+    required this.time,
+    required this.content,
+    required this.currentMembers,
+    required this.maxMembers,
+  });
+}
+
+// 팝업 메뉴 아이템을 생성하는 함수
 PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
   return PopupMenuItem<PopUpItem>(
     enabled: true,
@@ -28,14 +50,55 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
   );
 }
 
+// 팝업 메뉴 항목 열거형 정의
 enum PopUpItem { popUpItem1, popUpItem2 }
 
-class _memberRecruitPageState extends State<memberRecruitPage> {
+class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String selectedButton = ''; // 초기에는 아무 페이지 선택이 안 되어있는 상태
+  List<RecruitmentPost> iotPosts = [
+    // IOT 경진대회 모집글 리스트
+    RecruitmentPost(
+      title: '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
+      author: '이승욱',
+      date: '23/10/21',
+      time: '10:57',
+      content: '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
+      currentMembers: 3,
+      maxMembers: 4,
+    ),
+    RecruitmentPost(
+      title: '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
+      author: '소진수',
+      date: '23/10/21',
+      time: '10:57',
+      content: '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
+      currentMembers: 2,
+      maxMembers: 4,
+    ),
+    RecruitmentPost(
+      title: '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
+      author: '민택기',
+      date: '23/10/21',
+      time: '10:57',
+      content: '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
+      currentMembers: 4,
+      maxMembers: 4,
+    ),
+  ];
 
+  // 모집글 리스트를 현재 모집 인원 수 기준으로 정렬하는 함수
+  void sortPostsByMembers() {
+    setState(() {
+      if (selectedButton == 'IOT') {
+        iotPosts.sort((a, b) => a.currentMembers.compareTo(b.currentMembers));
+      }
+      // 뉴테크, 보안 때도 필요하다면 같은 형식으로 코드 구현
+    });
+  }
+
+  // 선택된 버튼에 따라 다른 콘텐츠를 반환하는 함수
   Widget buildContent() {
     switch (selectedButton) {
-      // 해당 경진대회에 따라 보여지는 페이지가 다르게 설정
       case 'IOT':
         return _buildIOTContent();
       case '뉴테크':
@@ -47,21 +110,22 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
     }
   }
 
+  // IOT 콘텐츠를 빌드하는 함수
   Widget _buildIOTContent() {
-    // IOT 내용
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const recruitDetailPage()),
+          MaterialPageRoute(builder: (context) => const RecruitDetailPage()),
         );
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
+        children: iotPosts.map((post) {
+          return Container(
             width: 341,
             padding: const EdgeInsets.all(15),
+            margin: const EdgeInsets.only(bottom: 10), // 포스트 사이의 간격 조정
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15.0),
               color: const Color(0xFFFAFAFE),
@@ -69,56 +133,61 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                Text(
+                  post.title,
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 3),
-                const Row(
+                Row(
                   children: [
                     Text(
-                      '이승욱',
-                      style: TextStyle(fontSize: 10),
+                      post.author,
+                      style: const TextStyle(fontSize: 10),
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
-                      '23/10/21 ',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54),
+                      post.date,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
                     ),
                     Text(
-                      '10:57 ',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54),
+                      post.time,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
-                  style: TextStyle(fontSize: 12),
+                Text(
+                  post.content,
+                  style: const TextStyle(fontSize: 12),
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Text(
-                      '모집 인원 2/4',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54),
+                    Text(
+                      '모집 인원 ${post.currentMembers}/${post.maxMembers}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     const Text(
                       '~10/28까지',
                       style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -199,14 +268,14 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
 
+  // 뉴테크 콘텐츠를 빌드하는 함수
   Widget _buildNewTechContent() {
-    // 뉴테크 내용
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -355,8 +424,8 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
     );
   }
 
+  // 보안 콘텐츠를 빌드하는 함수
   Widget _buildSecurityContent() {
-    // 보안 내용
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -553,12 +622,30 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    '팀원 모집',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      const Text(
+                        '팀원 모집',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: () {
+                          sortPostsByMembers();
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 4.0),
+                          child: Image(
+                            image: AssetImage('assets/images/filtering.png'),
+                            width: 18,
+                            height: 18,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   PopupMenuButton<PopUpItem>(
                     color: const Color(0xFFEFF0F2),
@@ -568,7 +655,8 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const makeTeamPage()),
+                            builder: (context) => const MakeTeamPage(),
+                          ),
                         );
                       }
                     },
@@ -583,6 +671,7 @@ class _memberRecruitPageState extends State<memberRecruitPage> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 10),
               Row(
                 children: [

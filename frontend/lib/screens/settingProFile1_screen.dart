@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:frontend/screens/settingProfile.dart';
+import 'package:frontend/screens/settingProfile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class SettingProfile1Page extends StatefulWidget {

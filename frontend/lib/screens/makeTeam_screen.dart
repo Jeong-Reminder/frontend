@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class makeTeamPage extends StatefulWidget {
-  const makeTeamPage({super.key});
+class MakeTeamPage extends StatefulWidget {
+  const MakeTeamPage({super.key});
 
   @override
-  State<makeTeamPage> createState() => _makeTeamPageState();
+  State<MakeTeamPage> createState() => _MakeTeamPageState();
 }
 
-class _makeTeamPageState extends State<makeTeamPage> {
+class _MakeTeamPageState extends State<MakeTeamPage> {
   int selectedPeopleCount = -1; // 선택된 인원 수를 저장하는 상태 변수
   String selectedField = ''; // 선택된 희망 분야를 저장하는 상태 변수
   final TextEditingController _titleController =

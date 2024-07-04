@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class boardDetailPage extends StatefulWidget {
-  const boardDetailPage({super.key});
+class BoardDetailPage extends StatefulWidget {
+  const BoardDetailPage({super.key});
 
   @override
-  State<boardDetailPage> createState() => _boardDetailPageState();
+  State<BoardDetailPage> createState() => _BoardDetailPageState();
 }
 
 PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
@@ -28,7 +28,7 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
 
 enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
 
-class _boardDetailPageState extends State<boardDetailPage> {
+class _BoardDetailPageState extends State<BoardDetailPage> {
   bool isLiked = false;
   int likeCount = 5;
   @override
