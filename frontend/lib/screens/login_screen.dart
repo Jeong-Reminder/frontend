@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,8 +15,53 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController pwController = TextEditingController();
 
   bool isAutoLogin = false;
-  bool pwInvisible = false; // 비밀번호 숨김
+  bool pwInvisible = false; // 비밀번호 숨김 late String serverAddress;
+  late String serverAddress;
+  late String tokenAddress;
+
   final formKey = GlobalKey<FormState>(); // 폼 유효성을 검사하는데 사용
+
+  // 로그인 API 함수
+  Future<void> handleLogin(String studentId, String password) async {
+    try {
+      // 서버 주소를 설정 (로컬 네트워크 IP 주소)
+      const serverAddress = 'http://reminder.sungkyul.ac.kr/login';
+
+      // 2. 서버에 로그인 요청을 보냄
+      final url = Uri.parse(serverAddress);
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(<String, String>{
+          'studentId': studentId, // 학생 학번
+          'password': password, // 학생 비밀번호
+        }),
+      );
+
+      // 3. 서버 응답을 처리합니다.
+      if (response.statusCode == 200) {
+        // 로그인 성공 시
+        final responseData = jsonDecode(response.body);
+        final accessToken = responseData['accessToken']; // 엑세스 토큰
+        final refreshToken = responseData['refreshToken']; // 리프레시 토큰
+
+        // 4. 토큰을 SharedPreferences에 저장합니다.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', accessToken);
+        await prefs.setString('refreshToken', refreshToken);
+
+        print('accessToken: $accessToken');
+        print('refreshToken: $refreshToken');
+        print('로그인 성공');
+      } else {
+        // 로그인 실패 시
+        print('로그인 실패');
+      }
+    } catch (e) {
+      // 예외 발생 시
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
 
-              // 아이디 텍스트폼필드
+              // 학번 텍스트폼필드
               Form(
                 key: formKey,
                 child: Column(
@@ -71,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: idController,
                       decoration: const InputDecoration(
-                        labelText: '아이디',
+                        labelText: '학번',
                         labelStyle: TextStyle(fontSize: 14.0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(
@@ -83,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '아이디를 입력하세요';
+                          return '학번 입력하세요';
                         }
                         if (value.length < 4 || value.length > 10) {
                           return '4자 이상 10자 이하로 작성해주세요';
@@ -171,21 +219,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-
-                  // 아이디 / 비밀번호 찾기
-                  SizedBox(
-                    height: 20,
-                    child: Row(
-                      children: [
-                        idAndPwTextBtn('아이디'),
-                        const VerticalDivider(
-                          color: Color(0xFF808080),
-                          thickness: 2,
-                        ),
-                        idAndPwTextBtn('비밀번호'),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 27),
@@ -196,6 +229,9 @@ class _LoginPageState extends State<LoginPage> {
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
                     // 홈 화면 이동
+                    String studentId = idController.text;
+                    String password = pwController.text;
+                    handleLogin(studentId, password);
                   }
                 },
                 style: ElevatedButton.styleFrom(
