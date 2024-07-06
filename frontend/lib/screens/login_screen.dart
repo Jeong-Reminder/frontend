@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,51 +16,56 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController pwController = TextEditingController();
 
   bool isAutoLogin = false;
-  bool pwInvisible = false; // 비밀번호 숨김 late String serverAddress;
-  late String serverAddress;
-  late String tokenAddress;
+  bool pwInvisible = true; // 비밀번호 숨김 기본값 true
 
   final formKey = GlobalKey<FormState>(); // 폼 유효성을 검사하는데 사용
 
-  // 로그인 API 함수
+  // 로그인 및 토큰 재발급을 위한 서버 주소 상수
+  static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  // 로그인 API
   Future<void> handleLogin(String studentId, String password) async {
     try {
-      // 서버 주소를 설정 (로컬 네트워크 IP 주소)
-      const serverAddress = 'http://reminder.sungkyul.ac.kr/login';
+      final url = Uri.parse(loginAddress);
 
-      // 2. 서버에 로그인 요청을 보냄
-      final url = Uri.parse(serverAddress);
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(<String, String>{
-          'studentId': studentId, // 학생 학번
-          'password': password, // 학생 비밀번호
-        }),
+        body: {
+          'studentId': studentId,
+          'password': password,
+        },
       );
 
-      // 3. 서버 응답을 처리합니다.
+      print('로그인 응답 상태 코드: ${response.statusCode}');
+      print('로그인 응답 본문: ${response.body}');
+
       if (response.statusCode == 200) {
-        // 로그인 성공 시
         final responseData = jsonDecode(response.body);
-        final accessToken = responseData['accessToken']; // 엑세스 토큰
-        final refreshToken = responseData['refreshToken']; // 리프레시 토큰
+        final accessToken = responseData['accessToken'];
+        final refreshToken = responseData['refreshToken'];
 
-        // 4. 토큰을 SharedPreferences에 저장합니다.
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', accessToken);
-        await prefs.setString('refreshToken', refreshToken);
+        if (accessToken != null && refreshToken != null) {
+          await prefs.setString('accessToken', accessToken);
+        }
 
-        print('accessToken: $accessToken');
-        print('refreshToken: $refreshToken');
         print('로그인 성공');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SettingProfile1Page(),
+          ),
+        );
       } else {
-        // 로그인 실패 시
-        print('로그인 실패');
+        print('로그인 실패: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
-      // 예외 발생 시
-      print(e.toString());
+      print('로그인 요청 중 에러 발생: ${e.toString()}');
     }
   }
 
@@ -131,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '학번 입력하세요';
+                          return '학번을 입력하세요';
                         }
                         if (value.length < 4 || value.length > 10) {
                           return '4자 이상 10자 이하로 작성해주세요';
@@ -166,18 +172,16 @@ class _LoginPageState extends State<LoginPage> {
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 5.0),
                       ),
-                      obscureText: pwInvisible ? true : false,
-                      // validator : 유효성 검사
+                      obscureText: pwInvisible,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return '비밀번호를 입력하세요';
                         }
-                        if (value.length > 10) {
-                          return '10자 이하로 작성해주세요';
+                        if (value.length > 15) {
+                          return '15자 이하로 작성해주세요';
                         }
-                        if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*[!@#\$&*~]).{1,}$')
-                            .hasMatch(value)) {
-                          return '영문자와 특수문자가 포함되어야 합니다';
+                        if (!RegExp(r'^(?=.*[a-zA-Z])').hasMatch(value)) {
+                          return '영문자가 포함되어야 합니다';
                         }
                         return null;
                       },
@@ -200,8 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                             isAutoLogin = !isAutoLogin;
                           });
                         },
-                        activeColor: const Color(0xFF2A72E7), // 체크 시 배경색
-                        // 기본 패딩 없애기
+                        activeColor: const Color(0xFF2A72E7),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         visualDensity: const VisualDensity(
                           horizontal: VisualDensity.minimumDensity,
@@ -228,7 +231,6 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () {
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
-                    // 홈 화면 이동
                     String studentId = idController.text;
                     String password = pwController.text;
                     handleLogin(studentId, password);
