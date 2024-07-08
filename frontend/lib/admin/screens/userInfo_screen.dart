@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:frontend/admin/screens/addMember_screen.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -385,7 +386,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddMemberPage(),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2A72E7),
                         foregroundColor: Colors.white,
@@ -396,7 +404,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         ),
                       ),
                       child: const Text(
-                        '조회',
+                        '추가',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
