@@ -4,7 +4,7 @@ import 'package:frontend/admin/models/admin_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ApiService {
+class UserService {
   final String baseUrl =
       'https://reminder.sungkyul.ac.kr/api/v1/admin/admin-insert';
 

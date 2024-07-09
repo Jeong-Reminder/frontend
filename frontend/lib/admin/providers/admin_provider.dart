@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
-import 'package:frontend/admin/services/addMember_service.dart';
+import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final UserService _apiService = UserService();
   List<Admin> admins = [];
 
   List<Admin> get users => admins;

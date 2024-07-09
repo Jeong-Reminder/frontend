@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
-import 'package:frontend/admin/services/addMember_service.dart';
+import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:provider/provider.dart';
 
@@ -110,7 +110,7 @@ class _AddMemberPageState extends State<AddMemberPage> {
                 );
 
                 try {
-                  await ApiService().createUser(user);
+                  await UserService().createUser(user);
                   Navigator.pushNamed(context, '/user-info');
                 } catch (e) {
                   print(e);
