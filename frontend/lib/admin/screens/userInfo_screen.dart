@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
+import 'package:frontend/admin/services/userInfo_service.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -15,7 +16,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   TextEditingController idController = TextEditingController(); // 학번 컨트롤러
   TextEditingController nameController = TextEditingController(); // 이름 컨트롤러
 
-  FilePickerResult? pickedFile;
+  List<File> files = [];
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
   final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
@@ -422,19 +423,18 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       type: FileType.custom, // 특정 파일을 선택 가능하게 설정
                       allowedExtensions: ['xlsx'],
                       allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
+                      withData: true,
                     );
 
                     if (result != null) {
-                      for (var selectedFile in result.files) {
-                        print('파일 이름: ${selectedFile.name}');
-
-                        // 선택된 파일의 경로를 File 객체 file에 저장
-                        File file = File(selectedFile.path!);
-
-                        // 선택된 엑셀 파일을 바이트 배열로 변환(readAsBytesSync)
-                        var fileBytes = file.readAsBytesSync();
-                        print('바이트 데이터: $fileBytes');
-                      }
+                      setState(() {
+                        files =
+                            result.paths.map((path) => File(path!)).toList();
+                      });
+                      await UserService().updateMember(files);
+                    } else {
+                      // 파일을 선택하지 않은 경우
+                      print('No files selected.');
                     }
                   },
                   style: ElevatedButton.styleFrom(
