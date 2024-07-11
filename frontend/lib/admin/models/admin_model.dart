@@ -15,6 +15,16 @@ class Admin {
     required this.userRole,
   });
 
+  factory Admin.fromJson(Map<String, dynamic> json) {
+    return Admin(
+      studentId: json['studentId'],
+      name: json['name'],
+      level: json['level'],
+      status: json['status'],
+      userRole: json['userRole'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'studentId': studentId,
@@ -24,5 +34,10 @@ class Admin {
       'status': status,
       'userRole': userRole,
     };
+  }
+
+  @override
+  String toString() {
+    return 'studentId: $studentId, name: $name, level: $level, status: $status, userRole: $userRole';
   }
 }
