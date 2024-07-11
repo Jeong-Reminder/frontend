@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart';
 
 class UserService {
   Future<String?> getToken() async {
@@ -44,13 +42,19 @@ class UserService {
     }
   }
 
-  Future<void> updateMember(List<File> files) async {
+  // 엑셀로 member 업데이트 API
+  Future<List<Admin>> updateMember(File file) async {
     const String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
 
     final accessToken = await getToken();
     if (accessToken == null) {
-      throw Exception('No access token found');
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    // 파일이 존재하지 않으면 에러 발생
+    if (!await file.exists()) {
+      throw Exception('해당 경로의 파일을 찾을 수 없음: ${file.path}');
     }
 
     final url = Uri.parse(baseUrl);
@@ -58,30 +62,48 @@ class UserService {
 
     request.headers['access'] = accessToken;
 
-    // 선택한 파일 추가
-    for (var file in files) {
-      // 파일명 생성
-      final fileName = path.basename(file.path);
+    // 선택한 파일명 생성
+    final fileName = path.basename(file.path);
 
-      // 파일 내용을 바이트 배열로 읽어옴
-      final fileBytes = await file.readAsBytes();
+    // 파일 내용을 바이트 배열로 읽어옴
+    final fileBytes = await file.readAsBytes();
 
-      // 파일을 요청에 추가합니다.
-      request.files.add(http.MultipartFile.fromBytes(
-        'file',
-        fileBytes,
-        filename: fileName,
-      ));
+    // 파일을 요청 바디에 추가
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      fileBytes,
+      filename: fileName,
+    ));
 
-      // 요청 전송, 응답
-      final response = await request.send();
+    // 요청 전송, 응답
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
 
-      if (response.statusCode == 200) {
-        print('성공');
-      } else {
-        final responseBody = await response.stream.bytesToString();
-        print('실패: ${response.statusCode} - $responseBody');
-      }
+    if (response.statusCode == 200) {
+      final data = jsonDecode(responseBody);
+      print('성공');
+      print('responseBody: ${data['data']}');
+
+      // 응답 데이터를 가져와 updatedAdmins에 저장
+      List<Admin> updatedAdmins = (data['data'] as List)
+          .map((adminData) => Admin.fromJson(adminData))
+          .toList();
+
+      print('파일안의 회원정보들: $updatedAdmins');
+      return updatedAdmins;
+    } else {
+      print('실패: ${response.statusCode} - $responseBody');
+      return [];
     }
+  }
+
+  Future<void> saveFilePathToPreferences(String path) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_file_path', path);
+  }
+
+  Future<String?> getFilePathFromPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('selected_file_path');
   }
 }

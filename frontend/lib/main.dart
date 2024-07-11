@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/admin/screens/addMember_screen.dart';
+import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  // GetX 서비스 초기화
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LoginPage(),
+    return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/add_member': (context) => const AddMemberPage(),
+        '/user-info': (context) => const UserInfoPage(),
+      },
     );
   }
 }
