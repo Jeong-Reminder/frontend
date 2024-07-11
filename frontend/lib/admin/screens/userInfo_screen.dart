@@ -1,6 +1,13 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:frontend/admin/models/admin_model.dart';
+import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/admin/screens/addMember_screen.dart';
+import 'package:frontend/admin/services/userInfo_service.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -14,7 +21,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   TextEditingController idController = TextEditingController(); // 학번 컨트롤러
   TextEditingController nameController = TextEditingController(); // 이름 컨트롤러
 
-  FilePickerResult? pickedFile;
+  File? file;
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
   final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
@@ -24,7 +31,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool isAscendingGrade = true; // 학년 정렬 순서 상태
   bool isAscendingStatus = true; // 학적상태 정렬 순서 상태
 
-  final List<Map<String, dynamic>> userList = [
+  Future<List<Admin>>? userList;
+
+  final List<Map<String, dynamic>> dummyUserList = [
     // 회원 목록을 저장하는 리스트
     {
       "name": "민택기",
@@ -71,8 +80,51 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   void initState() {
     super.initState();
-    filteredUserList = userList; // 초기 상태는 전체 회원 목록
+    filteredUserList = dummyUserList; // 초기 상태는 전체 회원 목록
     searchController.addListener(_filterUserList); // 검색어 변경 리스너 추가
+    _loadFileFromPreferences();
+  }
+
+  // SharedPreferences에서 파일을 불러오는 함수
+  void _loadFileFromPreferences() async {
+    String? filePath = await _getFilePathFromPreferences();
+    if (filePath != null && filePath.isNotEmpty) {
+      setState(() {
+        file = File(filePath);
+        // 회원 정보(admins) 리스트를 가져와 userList에 저장
+        userList = Provider.of<AdminProvider>(context, listen: false)
+            .getMembers(file!);
+      });
+      print("파일 경로: $filePath");
+    }
+  }
+
+  // 파일 선택 메소드
+  void _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+      withData: true,
+    );
+
+    // 다른 파일로 갈 경우
+    if (result != null) {
+      // shard_preference에 저장되어있던 파일경로를 가져와서 삭제
+      String? oldFilePath = await _getFilePathFromPreferences();
+      if (oldFilePath != null && File(oldFilePath).existsSync()) {
+        File(oldFilePath).deleteSync();
+      }
+
+      // 새로 선택한 파일을 File 타입의 file에 저장 후 shared_preference에 저장
+      setState(() {
+        file = File(result.files.single.path!);
+      });
+      await _saveFilePathToPreferences(result.files.single.path!);
+      await UserService().updateMember(file!);
+      print("파일이 선택되었습니다: ${file!.path}");
+    } else {
+      print('No files selected.');
+    }
   }
 
   @override
@@ -87,10 +139,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
     setState(() {
       // 검색어가 없으면 기존 userList를 가져오기
       if (searchQuery.isEmpty) {
-        filteredUserList = userList;
+        filteredUserList = dummyUserList;
       } else {
         // 검색어가 있으면 userList에 있는 이름에 하나라도 포함이 있으면 저장 후 가져오기
-        filteredUserList = userList.where((user) {
+        filteredUserList = dummyUserList.where((user) {
           return user['name']!.contains(searchQuery);
         }).toList();
       }
@@ -206,7 +258,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
           .toList()
           .forEach((item) {
             // 원본 리스트에서 해당 항목 삭제
-            userList.remove(item);
+            dummyUserList.remove(item);
           });
 
       selectedItems.clear(); // 삭제 후 선택 상태 초기화(false로 설정)
@@ -294,6 +346,19 @@ class _UserInfoPageState extends State<UserInfoPage> {
       'value': false,
     },
   ];
+
+  // 파일 경로를 SharedPreferences에 저장하는 메소드
+  Future<void> _saveFilePathToPreferences(String path) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_file_path', path);
+    print(prefs);
+  }
+
+// SharedPreferences에서 파일 경로를 불러오는 메소드
+  Future<String?> _getFilePathFromPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('selected_file_path');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +450,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddMemberPage(),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2A72E7),
                         foregroundColor: Colors.white,
@@ -396,7 +468,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         ),
                       ),
                       child: const Text(
-                        '조회',
+                        '추가',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -407,28 +479,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
                 // 파일 불러오기 버튼
                 ElevatedButton(
-                  onPressed: () async {
-                    // 파일 선택기 열기(FilePicker.platform.pickFiles)
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles(
-                      type: FileType.custom, // 특정 파일을 선택 가능하게 설정
-                      allowedExtensions: ['xlsx'],
-                      allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
-                    );
-
-                    if (result != null) {
-                      for (var selectedFile in result.files) {
-                        print('파일 이름: ${selectedFile.name}');
-
-                        // 선택된 파일의 경로를 File 객체 file에 저장
-                        File file = File(selectedFile.path!);
-
-                        // 선택된 엑셀 파일을 바이트 배열로 변환(readAsBytesSync)
-                        var fileBytes = file.readAsBytesSync();
-                        print('바이트 데이터: $fileBytes');
-                      }
-                    }
-                  },
+                  onPressed: _pickFile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE6E6E6),
                     minimumSize: const Size(45, 45),
@@ -448,105 +499,131 @@ class _UserInfoPageState extends State<UserInfoPage> {
             const SizedBox(height: 20),
 
             // 회원정보 표
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                child: DataTable(
-                  columnSpacing: 12,
-                  horizontalMargin: 12,
-                  headingRowColor: const MaterialStatePropertyAll(
-                    Color(0xFFEFEFF2),
-                  ),
-                  columns: [
-                    DataColumn(
-                      label: Flexible(
-                          child: Center(
-                        child: Checkbox(
-                          value: selectAll,
-                          onChanged: _toggleSelectAll,
-                        ),
-                      )), // 중앙 정렬
-                    ),
-                    dataColumn('이름', isAscendingName, _sortByName),
-                    dataColumn('학번', isAscendingStudentId, _sortByStudentId),
-                    dataColumn('학년', isAscendingGrade, _sortByGrade),
-                    dataColumn('학적상태', isAscendingStatus, _sortByStatus),
-                    const DataColumn(
-                      label: Text('정보 수정'),
-                    ),
-                  ],
-                  rows: List<DataRow>.generate(
-                    filteredUserList.length,
-                    (index) => DataRow(
-                      cells: [
-                        DataCell(
-                          Center(
-                            child: Checkbox(
-                              value: selectedItems[index] ?? false,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  // 선택된 체크박스는 true로 반환
-                                  selectedItems[index] = value ?? false;
-                                });
-                              },
-                            ),
-                          ), // 중앙 정렬
-                        ),
-                        DataCell(
-                          Center(
-                              child: Text(
-                                  filteredUserList[index]['name']!)), // 중앙 정렬
-                        ),
-                        DataCell(
-                          Center(
-                              child:
-                                  Text(filteredUserList[index]['studentId']!)),
-                        ),
-                        DataCell(
-                          Center(
-                              child:
-                                  Text('${filteredUserList[index]['grade']}')),
-                        ),
-                        DataCell(
-                          Center(
-                              child: Text(filteredUserList[index]['status']!)),
-                        ),
-                        DataCell(
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  selectedUser = filteredUserList[index];
-                                  idController.text = selectedUser['studentId'];
-                                  nameController.text = selectedUser['name'];
-                                });
+            FutureBuilder<List<Admin>>(
+              future: userList,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('에러 로딩 데이터'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('저장된 멤버가 없습니다'));
+                }
 
-                                _showEditDialog(context, selectedUser);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2A72E7),
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(60, 16),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 2.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.0),
+                List<Admin> userListData = snapshot.data!;
+                return Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SizedBox(
+                        child: DataTable(
+                          columnSpacing: 12,
+                          horizontalMargin: 12,
+                          headingRowColor: const MaterialStatePropertyAll(
+                            Color(0xFFEFEFF2),
+                          ),
+                          columns: [
+                            DataColumn(
+                              label: Flexible(
+                                  child: Center(
+                                child: Checkbox(
+                                  value: selectAll,
+                                  onChanged: _toggleSelectAll,
                                 ),
-                              ),
-                              child: const Text(
-                                '수정',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                              )), // 중앙 정렬
+                            ),
+                            dataColumn('이름', isAscendingName, _sortByName),
+                            dataColumn(
+                                '학번', isAscendingStudentId, _sortByStudentId),
+                            dataColumn('학년', isAscendingGrade, _sortByGrade),
+                            dataColumn(
+                                '학적상태', isAscendingStatus, _sortByStatus),
+                            const DataColumn(
+                              label: Text('정보 수정'),
+                            ),
+                          ],
+                          rows: List<DataRow>.generate(
+                            userListData.length,
+                            (index) => DataRow(
+                              cells: [
+                                DataCell(
+                                  Center(
+                                    child: Checkbox(
+                                      value: selectedItems[index] ?? false,
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          // 선택된 체크박스는 true로 반환
+                                          selectedItems[index] = value ?? false;
+                                        });
+                                      },
+                                    ),
+                                  ), // 중앙 정렬
                                 ),
-                              ),
+                                DataCell(
+                                  Center(
+                                      child: Text(
+                                          userListData[index].name)), // 중앙 정렬
+                                ),
+                                DataCell(
+                                  Center(
+                                      child:
+                                          Text(userListData[index].studentId)),
+                                ),
+                                DataCell(
+                                  Center(
+                                      child:
+                                          Text('${userListData[index].level}')),
+                                ),
+                                DataCell(
+                                  Center(
+                                      child: Text(userListData[index].status)),
+                                ),
+                                DataCell(
+                                  Center(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedUser =
+                                              filteredUserList[index];
+                                          idController.text =
+                                              selectedUser['studentId'];
+                                          nameController.text =
+                                              selectedUser['name'];
+                                        });
+
+                                        _showEditDialog(context, selectedUser);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF2A72E7),
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size(60, 16),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 2.0),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6.0),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        '수정',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),
