@@ -12,7 +12,7 @@ class AdminProvider with ChangeNotifier {
 
   // 학생들 정보를 담는 메소드를 호출(그래야만 학생들 정보를 admins에 담고 반환할 수 있음)
   // admins 반환
-  // 순서 : userInfo_screen에서 getMembers -> updateMember -> getMembers로 가서 admins 리턴
+  // 순서 : userInfo_screen에서 getMembers -> updateMember or createUser -> getMembers로 가서 admins 리턴
   Future<List<Admin>> getMembers(File file) async {
     if (await file.exists()) {
       await updateMembers(file);
@@ -24,11 +24,12 @@ class AdminProvider with ChangeNotifier {
     return admins;
   }
 
-  Future<void> addUser(Admin admin) async {
+  // 회원 추가
+  Future<void> createUser(Admin admin) async {
     try {
-      await userService.createUser(admin);
-      admins.add(admin);
-      notifyListeners();
+      await userService.createUser(admin); // 회원 추가 API를 호출
+      admins.add(admin); // 회원 정보 리스트(admins)에 추가
+      notifyListeners(); // 상태 변경 알림
     } catch (e) {
       print(e);
     }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
-import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'package:provider/provider.dart';
 
 class AddMemberPage extends StatefulWidget {
   const AddMemberPage({super.key});
