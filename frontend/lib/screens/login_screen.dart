@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/settingProFile1_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:frontend/services/login_services.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,10 +13,49 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController idController = TextEditingController();
   TextEditingController pwController = TextEditingController();
+  final LoginAPI loginAPI = LoginAPI(); // API 객체 생성
 
   bool isAutoLogin = false;
-  bool pwInvisible = false; // 비밀번호 숨김
+  bool pwInvisible = true; // 비밀번호 숨김 기본값 true
+
   final formKey = GlobalKey<FormState>(); // 폼 유효성을 검사하는데 사용
+
+  @override
+  void initState() {
+    super.initState();
+    _autoLogin(); // 자동 로그인 시도
+  }
+
+  // 저장된 학번과 비밀번호 불러오기
+  Future<void> _loadCredentials() async {
+    final credentials = await loginAPI.loadCredentials();
+    final studentId = credentials['studentId'];
+    final password = credentials['password'];
+    final autoLogin = credentials['isAutoLogin'];
+
+    if (studentId != null && password != null && autoLogin) {
+      setState(() {
+        idController.text = studentId;
+        pwController.text = password;
+        isAutoLogin = autoLogin;
+      });
+    }
+  }
+
+  // 자동 로그인 시 페이지 이동 적용
+  Future<void> _autoLogin() async {
+    await _loadCredentials();
+    final isAutoLoggedIn = await loginAPI.autoLogin();
+
+    if (isAutoLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SettingProfile1Page(),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
 
-              // 아이디 텍스트폼필드
+              // 학번 텍스트폼필드
               Form(
                 key: formKey,
                 child: Column(
@@ -71,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: idController,
                       decoration: const InputDecoration(
-                        labelText: '아이디',
+                        labelText: '학번',
                         labelStyle: TextStyle(fontSize: 14.0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(
@@ -83,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '아이디를 입력하세요';
+                          return '학번을 입력하세요';
                         }
                         if (value.length < 4 || value.length > 10) {
                           return '4자 이상 10자 이하로 작성해주세요';
@@ -118,18 +160,16 @@ class _LoginPageState extends State<LoginPage> {
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 5.0),
                       ),
-                      obscureText: pwInvisible ? true : false,
-                      // validator : 유효성 검사
+                      obscureText: pwInvisible,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return '비밀번호를 입력하세요';
                         }
-                        if (value.length > 10) {
-                          return '10자 이하로 작성해주세요';
+                        if (value.length > 15) {
+                          return '15자 이하로 작성해주세요';
                         }
-                        if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*[!@#\$&*~]).{1,}$')
-                            .hasMatch(value)) {
-                          return '영문자와 특수문자가 포함되어야 합니다';
+                        if (!RegExp(r'^(?=.*[a-zA-Z])').hasMatch(value)) {
+                          return '영문자가 포함되어야 합니다';
                         }
                         return null;
                       },
@@ -147,13 +187,18 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Checkbox(
                         value: isAutoLogin,
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           setState(() {
-                            isAutoLogin = !isAutoLogin;
+                            isAutoLogin = value!;
                           });
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('isAutoLogin', isAutoLogin);
+                          if (!isAutoLogin) {
+                            await prefs.remove('studentId');
+                            await prefs.remove('password');
+                          }
                         },
-                        activeColor: const Color(0xFF2A72E7), // 체크 시 배경색
-                        // 기본 패딩 없애기
+                        activeColor: const Color(0xFF2A72E7),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         visualDensity: const VisualDensity(
                           horizontal: VisualDensity.minimumDensity,
@@ -171,21 +216,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-
-                  // 아이디 / 비밀번호 찾기
-                  SizedBox(
-                    height: 20,
-                    child: Row(
-                      children: [
-                        idAndPwTextBtn('아이디'),
-                        const VerticalDivider(
-                          color: Color(0xFF808080),
-                          thickness: 2,
-                        ),
-                        idAndPwTextBtn('비밀번호'),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 27),
@@ -195,7 +225,20 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () {
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
-                    // 홈 화면 이동
+                    String studentId = idController.text;
+                    String password = pwController.text;
+                    loginAPI
+                        .handleLogin(studentId, password, isAutoLogin)
+                        .then((isLoggedIn) {
+                      if (isLoggedIn) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingProfile1Page(),
+                          ),
+                        );
+                      }
+                    });
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -216,25 +259,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  // 아이디 / 비밀번호 찾기 텍스트 버튼
-  Widget idAndPwTextBtn(String title) {
-    return TextButton(
-      onPressed: () {},
-      style: TextButton.styleFrom(
-        minimumSize: Size.zero,
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF808080),
         ),
       ),
     );
