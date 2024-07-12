@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
-import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UserInfoPage extends StatefulWidget {
   const UserInfoPage({super.key});
@@ -82,21 +80,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     super.initState();
     filteredUserList = dummyUserList; // 초기 상태는 전체 회원 목록
     searchController.addListener(_filterUserList); // 검색어 변경 리스너 추가
-    _loadFileFromPreferences();
-  }
-
-  // SharedPreferences에서 파일을 불러오는 함수
-  void _loadFileFromPreferences() async {
-    String? filePath = await _getFilePathFromPreferences();
-    if (filePath != null && filePath.isNotEmpty) {
-      setState(() {
-        file = File(filePath);
-        // 회원 정보(admins) 리스트를 가져와 userList에 저장
-        userList = Provider.of<AdminProvider>(context, listen: false)
-            .getMembers(file!);
-      });
-      print("파일 경로: $filePath");
-    }
+    userList = AdminProvider().getMembers(); // 초기화
   }
 
   // 파일 선택 메소드
@@ -110,17 +94,23 @@ class _UserInfoPageState extends State<UserInfoPage> {
     // 다른 파일로 갈 경우
     if (result != null) {
       // shard_preference에 저장되어있던 파일경로를 가져와서 삭제
-      String? oldFilePath = await _getFilePathFromPreferences();
-      if (oldFilePath != null && File(oldFilePath).existsSync()) {
-        File(oldFilePath).deleteSync();
-      }
+      // String? oldFilePath = await _getFilePathFromPreferences();
+      // if (File(oldFilePath).existsSync()) {
+      //   File(oldFilePath).deleteSync();
+      // }
 
       // 새로 선택한 파일을 File 타입의 file에 저장 후 shared_preference에 저장
       setState(() {
         file = File(result.files.single.path!);
       });
-      await _saveFilePathToPreferences(result.files.single.path!);
+      final adminProvider = Provider.of<AdminProvider>(context, listen: false);
       await UserService().updateMember(file!);
+
+      // 파일 불러오면 회원정보를 전체 조회 api 호출 후 userList에 저장
+      setState(() {
+        userList = adminProvider.getMembers();
+      });
+
       print("파일이 선택되었습니다: ${file!.path}");
     } else {
       print('No files selected.');
@@ -326,19 +316,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
     },
   ];
 
-  // 파일 경로를 SharedPreferences에 저장하는 메소드
-  Future<void> _saveFilePathToPreferences(String path) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selected_file_path', path);
-    print(prefs);
-  }
-
-// SharedPreferences에서 파일 경로를 불러오는 메소드
-  Future<String?> _getFilePathFromPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('selected_file_path');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -431,12 +408,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AddMemberPage(),
-                          ),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const AddMemberPage(),
+                        //   ),
+                        // );
+                        print("userList: $userList");
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2A72E7),
@@ -479,149 +457,149 @@ class _UserInfoPageState extends State<UserInfoPage> {
             const SizedBox(height: 20),
 
             // 회원정보 표
-            FutureBuilder<List<Admin>>(
-              future: userList,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return const Center(child: Text('에러 로딩 데이터'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('저장된 멤버가 없습니다'));
-                }
+            Consumer<AdminProvider>(
+              builder: (context, provider, child) {
+                return FutureBuilder<List<Admin>>(
+                  future: userList,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return const Center(child: Text('에러 로딩 데이터'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('저장된 멤버가 없습니다'));
+                    }
 
-                List<Admin> userListData = snapshot.data!;
-
-                // selectedMembers 리스트의 길이를 userListData의 길이를 동일하게 설정
-                if (selectedMembers.length != userListData.length) {
-                  selectedMembers.clear();
-                  selectedMembers.addAll(
-                    List<bool>.filled(userListData.length, false),
-                  );
-                }
-
-                return Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: SizedBox(
-                        child: DataTable(
-                          columnSpacing: 12,
-                          horizontalMargin: 12,
-                          headingRowColor: const MaterialStatePropertyAll(
-                            Color(0xFFEFEFF2),
-                          ),
-                          columns: [
-                            DataColumn(
-                              label: Flexible(
-                                  child: Center(
-                                child: Checkbox(
-                                  value: selectAll,
-                                  onChanged: _toggleSelectAll,
-                                ),
-                              )), // 중앙 정렬
-                            ),
-                            dataColumn('이름', isAscendingName, _sortByName),
-                            dataColumn(
-                                '학번', isAscendingStudentId, _sortByStudentId),
-                            dataColumn('학년', isAscendingGrade, _sortByGrade),
-                            dataColumn(
-                                '학적상태', isAscendingStatus, _sortByStatus),
-                            const DataColumn(
-                              label: Text('정보 수정'),
-                            ),
-                          ],
-                          rows: List<DataRow>.generate(
-                            userListData.length,
-                            (index) => DataRow(
-                              cells: [
-                                DataCell(
-                                  Center(
+                    List<Admin> userListData = snapshot.data!;
+                    return Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: SizedBox(
+                            child: DataTable(
+                              columnSpacing: 12,
+                              horizontalMargin: 12,
+                              headingRowColor: const MaterialStatePropertyAll(
+                                Color(0xFFEFEFF2),
+                              ),
+                              columns: [
+                                DataColumn(
+                                  label: Flexible(
+                                      child: Center(
                                     child: Checkbox(
-                                      value: selectedMembers[
-                                          index], // 체크박스의 현재 상태(false)
-                                      onChanged: (bool? value) {
-                                        setState(() {
-                                          // 선택된 체크박스는 상태 값 변환
-                                          selectedMembers[index] =
-                                              value ?? false;
-                                          // 체크박스가 선택된 경우 해당 인덱스로 userListData를 접근한 후
-                                          // 학번을 가져와 추가
-                                          if (selectedMembers[index]) {
-                                            selectedStudentIds.add(
-                                                userListData[index].studentId);
-                                          } else {
-                                            selectedStudentIds.remove(
-                                                userListData[index].studentId);
-                                          }
-                                        });
-                                      },
+                                      value: selectAll,
+                                      onChanged: _toggleSelectAll,
                                     ),
-                                  ), // 중앙 정렬
+                                  )), // 중앙 정렬
                                 ),
-                                DataCell(
-                                  Center(
-                                      child: Text(
-                                          userListData[index].name)), // 중앙 정렬
-                                ),
-                                DataCell(
-                                  Center(
-                                      child:
-                                          Text(userListData[index].studentId)),
-                                ),
-                                DataCell(
-                                  Center(
-                                      child:
-                                          Text('${userListData[index].level}')),
-                                ),
-                                DataCell(
-                                  Center(
-                                      child: Text(userListData[index].status)),
-                                ),
-                                DataCell(
-                                  Center(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          selectedUser =
-                                              filteredUserList[index];
-                                          idController.text =
-                                              selectedUser['studentId'];
-                                          nameController.text =
-                                              selectedUser['name'];
-                                        });
-
-                                        _showEditDialog(context, selectedUser);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFF2A72E7),
-                                        foregroundColor: Colors.white,
-                                        minimumSize: const Size(60, 16),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 2.0),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(6.0),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        '수정',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                dataColumn('이름', isAscendingName, _sortByName),
+                                dataColumn('학번', isAscendingStudentId,
+                                    _sortByStudentId),
+                                dataColumn(
+                                    '학년', isAscendingGrade, _sortByGrade),
+                                dataColumn(
+                                    '학적상태', isAscendingStatus, _sortByStatus),
+                                const DataColumn(
+                                  label: Text('정보 수정'),
                                 ),
                               ],
+                              rows: List<DataRow>.generate(
+                                userListData.length,
+                                (index) => DataRow(
+                                  cells: [
+                                    DataCell(
+                                      Center(
+                                        child: Checkbox(
+                                          value: selectedMembers[
+                                              index], // 체크박스의 현재 상태(false)
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              // 선택된 체크박스는 상태 값 변환
+                                              selectedMembers[index] =
+                                                  value ?? false;
+                                              // 체크박스가 선택된 경우 해당 인덱스로 userListData를 접근한 후
+                                              // 학번을 가져와 추가
+                                              if (selectedMembers[index]) {
+                                                selectedStudentIds.add(
+                                                    userListData[index]
+                                                        .studentId);
+                                              } else {
+                                                selectedStudentIds.remove(
+                                                    userListData[index]
+                                                        .studentId);
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      ), // 중앙 정렬
+                                    ),
+                                    DataCell(
+                                      Center(
+                                          child: Text(userListData[index]
+                                              .name)), // 중앙 정렬
+                                    ),
+                                    DataCell(
+                                      Center(
+                                          child: Text(
+                                              userListData[index].studentId)),
+                                    ),
+                                    DataCell(
+                                      Center(
+                                          child: Text(
+                                              '${userListData[index].level}')),
+                                    ),
+                                    DataCell(
+                                      Center(
+                                          child:
+                                              Text(userListData[index].status)),
+                                    ),
+                                    DataCell(
+                                      Center(
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              selectedUser =
+                                                  filteredUserList[index];
+                                              idController.text =
+                                                  selectedUser['studentId'];
+                                              nameController.text =
+                                                  selectedUser['name'];
+                                            });
+
+                                            _showEditDialog(
+                                                context, selectedUser);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                const Color(0xFF2A72E7),
+                                            foregroundColor: Colors.white,
+                                            minimumSize: const Size(60, 16),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 2.0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6.0),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '수정',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),
