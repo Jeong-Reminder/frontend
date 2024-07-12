@@ -18,6 +18,7 @@ class AdminProvider with ChangeNotifier {
       await updateMembers(file);
     } else {
       print('File not found: $file');
+      admins = [];
     }
 
     print("admins: $admins");
@@ -45,6 +46,12 @@ class AdminProvider with ChangeNotifier {
     final List<Admin> updatedAdmins = await userService.updateMember(file);
     admins = updatedAdmins;
     notifyListeners(); // 상태 변경 알림
+  }
+
+  Future<void> deleteMembers(List<String> studentIds) async {
+    await userService.deleteMembers(studentIds);
+    admins.removeWhere((admin) => studentIds.contains(admin.studentId));
+    notifyListeners();
   }
 
   Future<void> setAccessToken(String token) async {

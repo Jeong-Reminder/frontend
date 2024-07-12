@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/models/admin_model.dart';
@@ -24,7 +23,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
   File? file;
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
-  final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
+  List<bool> selectedMembers = []; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
+  List<String> selectedStudentIds = [];
 
   bool isAscendingName = true; // 이름 정렬 순서 상태
   bool isAscendingStudentId = true; // 학번 정렬 순서 상태
@@ -221,7 +221,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _deleteSelectedItems();
+                  // _deleteSelectedItems();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEA4E44),
@@ -246,37 +246,16 @@ class _UserInfoPageState extends State<UserInfoPage> {
     );
   }
 
-  // 개별 선택된 아이템들을 삭제하는 메서드
-  void _deleteSelectedItems() {
-    setState(() {
-      filteredUserList
-          .where((item) {
-            // 선택된 항목 필터링
-            int index = filteredUserList.indexOf(item);
-            return selectedItems[index] ?? false;
-          })
-          .toList()
-          .forEach((item) {
-            // 원본 리스트에서 해당 항목 삭제
-            dummyUserList.remove(item);
-          });
-
-      selectedItems.clear(); // 삭제 후 선택 상태 초기화(false로 설정)
-      selectAll = false; // 전체 선택 상태 초기화
-      _filterUserList(); // 삭제 후 필터링된 리스트 업데이트
-    });
-  }
-
   // 전체 선택 상태를 변경하는 메서드
   void _toggleSelectAll(bool? value) {
     setState(() {
       selectAll = value ?? false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
-      selectedItems.clear();
+      selectedMembers.clear();
 
       // true일 경우 filteredUserList를 반복해 각 아이템의 선택 상태를 true로 설정
       if (selectAll) {
         for (int i = 0; i < filteredUserList.length; i++) {
-          selectedItems[i] = true;
+          selectedMembers[i] = true;
         }
       }
     });
@@ -416,7 +395,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ElevatedButton(
                       onPressed: () {
                         // 선택된 아이템이 포함될 경우 삭제 다이얼로그 표시
-                        if (selectedItems.values.contains(true)) {
+                        if (selectedMembers.contains(true)) {
                           _showDeleteConfirmationDialog();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -431,6 +410,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             ),
                           );
                         }
+                        print('selectedStudentIds: $selectedStudentIds');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEA4E44),
@@ -511,6 +491,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 }
 
                 List<Admin> userListData = snapshot.data!;
+
+                // selectedMembers 리스트의 길이를 userListData의 길이를 동일하게 설정
+                if (selectedMembers.length != userListData.length) {
+                  selectedMembers.clear();
+                  selectedMembers.addAll(
+                    List<bool>.filled(userListData.length, false),
+                  );
+                }
+
                 return Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -550,11 +539,22 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                 DataCell(
                                   Center(
                                     child: Checkbox(
-                                      value: selectedItems[index] ?? false,
+                                      value: selectedMembers[
+                                          index], // 체크박스의 현재 상태(false)
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          // 선택된 체크박스는 true로 반환
-                                          selectedItems[index] = value ?? false;
+                                          // 선택된 체크박스는 상태 값 변환
+                                          selectedMembers[index] =
+                                              value ?? false;
+                                          // 체크박스가 선택된 경우 해당 인덱스로 userListData를 접근한 후
+                                          // 학번을 가져와 추가
+                                          if (selectedMembers[index]) {
+                                            selectedStudentIds.add(
+                                                userListData[index].studentId);
+                                          } else {
+                                            selectedStudentIds.remove(
+                                                userListData[index].studentId);
+                                          }
                                         });
                                       },
                                     ),
