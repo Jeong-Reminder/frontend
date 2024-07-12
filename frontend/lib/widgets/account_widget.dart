@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/login_screen.dart';
 
 class AccountWidget extends StatelessWidget {
   const AccountWidget({super.key});
@@ -119,6 +120,12 @@ class AccountWidget extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     // 로그인 화면으로 이동
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
                   },
                   style: TextButton.styleFrom(
                     fixedSize: const Size(100, 20),
