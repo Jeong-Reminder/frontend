@@ -43,7 +43,7 @@ class UserService {
   }
 
   // 엑셀로 member 업데이트 API
-  Future<List<Admin>> updateMember(File file) async {
+  Future<void> updateMember(File file) async {
     const String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
 
@@ -90,9 +90,40 @@ class UserService {
           .toList();
 
       print('파일안의 회원정보들: $updatedAdmins');
-      return updatedAdmins;
     } else {
       print('실패: ${response.statusCode} - $responseBody');
+    }
+  }
+
+  // member 전체 조회 API
+  Future<List<Admin>> fetchMembers() async {
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/admin/members-get';
+
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'access': accessToken,
+      },
+    );
+    final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+    if (response.statusCode == 200) {
+      // 응답 데이터를 가져와 updatedAdmins에 저장
+      List<Admin> updatedAdmins = (responseData['data'] as List)
+          .map((adminData) => Admin.fromJson(adminData))
+          .toList();
+
+      print("조회 성공: $updatedAdmins");
+      return updatedAdmins;
+    } else {
+      print("조회 실패");
       return [];
     }
   }

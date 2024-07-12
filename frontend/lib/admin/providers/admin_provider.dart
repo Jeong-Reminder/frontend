@@ -12,15 +12,9 @@ class AdminProvider with ChangeNotifier {
 
   // 학생들 정보를 담는 메소드를 호출(그래야만 학생들 정보를 admins에 담고 반환할 수 있음)
   // admins 반환
-  // 순서 : userInfo_screen에서 getMembers -> updateMember or createUser -> getMembers로 가서 admins 리턴
-  Future<List<Admin>> getMembers(File file) async {
-    if (await file.exists()) {
-      await updateMembers(file);
-    } else {
-      print('File not found: $file');
-    }
-
-    print("admins: $admins");
+  // 순서 : userInfo_screen에서 getMembers -> fetchMembers or createUser -> getMembers로 가서 admins 리턴
+  Future<List<Admin>> getMembers() async {
+    await fetchMembers();
     return admins;
   }
 
@@ -37,13 +31,9 @@ class AdminProvider with ChangeNotifier {
 
   // 응답 데이터에 있는 정보들을 담은 엑셀로 member 업데이트 api를 가져와 위에서 선언한 admins 리스트에 저장
   // 상태 변경 알림 호출(notifyListeners)
-  Future<void> updateMembers(File file) async {
-    if (!await file.exists()) {
-      throw Exception('File not found at path: ${file.path}');
-    }
-
+  Future<void> fetchMembers() async {
     // 회원 정보 리스트를 받는 updateMember를 불러와 updatedAdmins에 저장 후 admins에 저장
-    final List<Admin> updatedAdmins = await userService.updateMember(file);
+    List<Admin> updatedAdmins = await userService.fetchMembers();
     admins = updatedAdmins;
     notifyListeners(); // 상태 변경 알림
   }
