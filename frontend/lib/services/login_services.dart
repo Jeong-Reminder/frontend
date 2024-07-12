@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -129,8 +128,7 @@ class LoginAPI {
   }
 
   // 로그인 API
-  Future<bool> handleLogin(
-      String studentId, String password, bool isAutoLogin) async {
+  Future<bool> handleLogin(String studentId, String password) async {
     try {
       final url = Uri.parse(loginAddress);
 
@@ -161,18 +159,6 @@ class LoginAPI {
           // 새 토큰 저장
           await prefs.setString('accessToken', accessToken); // 액세스 토큰 저장
           await prefs.setString('refreshToken', refreshToken); // 리프레시 토큰 저장
-
-          // 자동 로그인 상태 저장
-          await prefs.setBool('isAutoLogin', isAutoLogin);
-          if (isAutoLogin) {
-            // 자동 로그인 체크 시에만 학번과 비밀번호 저장
-            await prefs.setString('studentId', studentId);
-            await prefs.setString('password', password);
-          } else {
-            // 체크 해제 시 저장된 학번과 비밀번호 삭제
-            await prefs.remove('studentId');
-            await prefs.remove('password');
-          }
 
           final uri = Uri.parse(loginAddress);
           cookieJar.saveFromResponse(uri,

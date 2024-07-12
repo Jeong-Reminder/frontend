@@ -228,9 +228,15 @@ class _LoginPageState extends State<LoginPage> {
                     String studentId = idController.text;
                     String password = pwController.text;
                     loginAPI
-                        .handleLogin(studentId, password, isAutoLogin)
-                        .then((isLoggedIn) {
+                        .handleLogin(studentId, password)
+                        .then((isLoggedIn) async {
                       if (isLoggedIn) {
+                        final prefs = await SharedPreferences.getInstance();
+                        if (isAutoLogin) {
+                          // 자동 로그인 체크 시에만 학번과 비밀번호 저장
+                          await prefs.setString('studentId', studentId);
+                          await prefs.setString('password', password);
+                        }
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
