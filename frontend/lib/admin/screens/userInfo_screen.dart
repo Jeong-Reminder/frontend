@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:provider/provider.dart';
 
@@ -140,7 +141,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   // 삭제 확인 다이얼로그를 표시하는 메서드
-  void _showDeleteConfirmationDialog() {
+  void _showDeleteConfirmationDialog(List<String> studentIds) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -209,9 +210,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
               width: 74,
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // _deleteSelectedItems();
+                onPressed: () async {
+                  try {
+                    await UserService().deleteMembers(studentIds);
+                    if (context.mounted) {
+                      Navigator.pushNamed(context, '/user-info');
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEA4E44),
@@ -373,7 +380,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       onPressed: () {
                         // 선택된 아이템이 포함될 경우 삭제 다이얼로그 표시
                         if (selectedMembers.contains(true)) {
-                          _showDeleteConfirmationDialog();
+                          _showDeleteConfirmationDialog(selectedStudentIds);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -408,12 +415,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => const AddMemberPage(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddMemberPage(),
+                          ),
+                        );
                         print("userList: $userList");
                       },
                       style: ElevatedButton.styleFrom(
@@ -471,6 +478,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     }
 
                     List<Admin> userListData = snapshot.data!;
+                    // selectedMembers 리스트의 길이를 userListData의 길이를 동일하게 설정
+                    if (selectedMembers.length != userListData.length) {
+                      selectedMembers.clear();
+                      selectedMembers.addAll(
+                        List<bool>.filled(userListData.length, false),
+                      );
+                    }
                     return Expanded(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
