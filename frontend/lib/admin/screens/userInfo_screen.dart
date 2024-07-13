@@ -73,7 +73,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     },
   ];
 
-  Map<String, dynamic> selectedUser = {}; // 수정 버튼 누를 시 선택된 회원
+  Admin? selectedUser; // 수정 버튼 누를 시 선택된 회원
 
   @override
   void initState() {
@@ -250,8 +250,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
     );
   }
 
+  // 학년 체크박스 상태
   List<bool> chosenGrades = [false, false, false, false];
 
+  // 휴학과 재학일 때 불리안 지정
   List<Map<String, dynamic>> status = [
     {
       'title': '재학',
@@ -538,17 +540,16 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       Center(
                                         child: ElevatedButton(
                                           onPressed: () {
-                                            // setState(() {
-                                            //   selectedUser =
-                                            //       filteredUserList[index];
-                                            //   idController.text =
-                                            //       selectedUser['studentId'];
-                                            //   nameController.text =
-                                            //       selectedUser['name'];
-                                            // });
+                                            setState(() {
+                                              selectedUser =
+                                                  userListData[index];
+                                            });
+                                            print('현재 회원 정보: $selectedUser');
 
-                                            // _showEditDialog(
-                                            //     context, selectedUser);
+                                            _showEditDialog(
+                                              context,
+                                              userListData[index],
+                                            );
                                           },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor:
@@ -590,20 +591,19 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   // 사용자 정보 수정 다이얼로그
-  void _showEditDialog(BuildContext context, Map<String, dynamic> user) {
+  void _showEditDialog(BuildContext context, Admin user) {
     // 학년 체크박스 초기화
     setState(() {
       chosenGrades = List.generate(
           4,
           (index) =>
-              user['grade'] ==
-              index + 1); // 선택한 회원의 학년과 (index+1)이 같으면 true로 변경
+              user.level == index + 1); // 선택한 회원의 학년과 (index+1)이 같으면 true로 변경
 
       status = status.map((item) {
         return {
           'title': item['title'],
           'value': item['title'] ==
-              user['status'] // title(재학 or 휴학)과 status(재학 or 휴학)이 같다면 true 반환
+              user.status // title(재학 or 휴학)과 status(재학 or 휴학)이 같다면 true 반환
         };
       }).toList();
     });
@@ -640,10 +640,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 50),
                           Expanded(
                             child: TextFormField(
-                              controller: idController,
+                              initialValue: user.studentId,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                               ),
+                              onChanged: (value) {
+                                setState(() {
+                                  user.studentId = value;
+                                });
+                              },
                             ),
                           ),
                         ],
@@ -654,15 +659,23 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const Text(
                             '이름',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(width: 50),
                           Expanded(
                             child: TextFormField(
-                              controller: nameController,
+                              // controller: nameController,
+                              initialValue: user.name,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                               ),
+                              onChanged: (value) {
+                                setState(() {
+                                  user.name = value;
+                                });
+                              },
                             ),
                           ),
                         ],
@@ -688,7 +701,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                         onChanged: (value) {
                                           setStateDialog(() {
                                             setState(() {
+                                              // 선택한 체크박스에 true로 변환
                                               chosenGrades[index] = value!;
+
+                                              // chosenGrades에서 true가 되는 index를 가져온 후 1을 더해 user.level에 저장
+                                              user.level =
+                                                  chosenGrades.indexOf(true) +
+                                                      1;
                                             });
                                           });
                                         },
@@ -725,6 +744,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                           setStateDialog(() {
                                             setState(() {
                                               st['value'] = value!;
+
+                                              // firstWhere : 주어진 조건에 맞는 첫번째 요소를 찾는 메소드
+                                              // value값에 맞는 첫번째 요소를 찾아 value키에 해당하는 값, title를 가져옴
+                                              user.status = status.firstWhere(
+                                                  (st) => st['value'])['title'];
                                             });
                                           });
                                         },
@@ -764,16 +788,17 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ),
                           const SizedBox(width: 24),
                           ElevatedButton(
-                            onPressed: () {
-                              // setState(() {
-                              //   user['studentId'] = idController.text;
-                              //   user['name'] = nameController.text;
-                              //   user['grade'] = chosenGrades.indexOf(true) + 1;
-                              //   user['status'] = status
-                              //       .firstWhere((st) => st['value'])['title'];
-                              //   _filterUserList(); // 필터링된 리스트 업데이트(나가자마자 수정된 내용 바로 볼 수 있음)
-                              // });
-                              Navigator.pop(context);
+                            onPressed: () async {
+                              try {
+                                await UserService().editMember(user);
+
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                                print('수정된 회원정보 : $user');
+                              } catch (e) {
+                                print(e);
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2A72E7),

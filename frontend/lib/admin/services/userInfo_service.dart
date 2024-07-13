@@ -31,8 +31,6 @@ class UserService {
     );
 
     if (response.statusCode == 200) {
-      final responseData = response.body;
-
       // 성공 처리
       print('회원 추가 성공');
       print('회원 목록: ${response.body}');
@@ -128,6 +126,7 @@ class UserService {
     }
   }
 
+  // member 삭제 API
   Future<void> deleteMembers(List<String> studentIds) async {
     const String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/admin/member-delete';
@@ -155,13 +154,30 @@ class UserService {
     }
   }
 
-  Future<void> saveFilePathToPreferences(String path) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selected_file_path', path);
-  }
+  // member 정보 수정
+  Future<void> editMember(Admin admin) async {
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
 
-  Future<String?> getFilePathFromPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('selected_file_path');
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final response = await http.put(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': accessToken,
+      },
+      body: jsonEncode(admin.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      print('회원 수정 성공');
+    } else {
+      print('회원 수정 실패');
+    }
   }
 }
