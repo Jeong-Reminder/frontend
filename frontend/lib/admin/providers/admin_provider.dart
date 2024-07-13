@@ -38,6 +38,12 @@ class AdminProvider with ChangeNotifier {
     notifyListeners(); // 상태 변경 알림
   }
 
+  Future<void> deleteMembers(List<String> studentIds) async {
+    await userService.deleteMembers(studentIds);
+    admins.removeWhere((admin) => studentIds.contains(admin.studentId));
+    notifyListeners();
+  }
+
   Future<void> setAccessToken(String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', token); // access token 키 저장

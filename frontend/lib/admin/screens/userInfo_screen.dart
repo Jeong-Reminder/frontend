@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +22,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
   File? file;
 
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
-  final Map<int, bool> selectedItems = {}; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
+  List<bool> selectedMembers = []; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
+  List<String> selectedStudentIds = [];
 
   bool isAscendingName = true; // 이름 정렬 순서 상태
   bool isAscendingStudentId = true; // 학번 정렬 순서 상태
@@ -29,6 +31,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool isAscendingStatus = true; // 학적상태 정렬 순서 상태
 
   Future<List<Admin>>? userList;
+  List<Admin> filteredUserList = []; // 필터링된 회원 목록 리스트
 
   final List<Map<String, dynamic>> dummyUserList = [
     // 회원 목록을 저장하는 리스트
@@ -70,14 +73,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
     },
   ];
 
-  List<Map<String, dynamic>> filteredUserList = []; // 필터링된 회원 목록 리스트
-
   Map<String, dynamic> selectedUser = {}; // 수정 버튼 누를 시 선택된 회원
 
   @override
   void initState() {
     super.initState();
-    filteredUserList = dummyUserList; // 초기 상태는 전체 회원 목록
+    // filteredUserList = dummyUserList; // 초기 상태는 전체 회원 목록
     searchController.addListener(_filterUserList); // 검색어 변경 리스너 추가
     userList = AdminProvider().getMembers(); // 초기화
   }
@@ -128,18 +129,26 @@ class _UserInfoPageState extends State<UserInfoPage> {
     setState(() {
       // 검색어가 없으면 기존 userList를 가져오기
       if (searchQuery.isEmpty) {
-        filteredUserList = dummyUserList;
+        userList?.then((userListData) {
+          setState(() {
+            filteredUserList = userListData;
+          });
+        });
       } else {
         // 검색어가 있으면 userList에 있는 이름에 하나라도 포함이 있으면 저장 후 가져오기
-        filteredUserList = dummyUserList.where((user) {
-          return user['name']!.contains(searchQuery);
-        }).toList();
+        userList?.then((userListData) {
+          setState(() {
+            filteredUserList = userListData.where((user) {
+              return user.name.contains(searchQuery);
+            }).toList();
+          });
+        });
       }
     });
   }
 
   // 삭제 확인 다이얼로그를 표시하는 메서드
-  void _showDeleteConfirmationDialog() {
+  void _showDeleteConfirmationDialog(List<String> studentIds) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -208,9 +217,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
               width: 74,
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _deleteSelectedItems();
+                onPressed: () async {
+                  try {
+                    await UserService().deleteMembers(studentIds);
+                    if (context.mounted) {
+                      Navigator.pushNamed(context, '/user-info');
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEA4E44),
@@ -233,94 +248,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
         );
       },
     );
-  }
-
-  // 개별 선택된 아이템들을 삭제하는 메서드
-  void _deleteSelectedItems() {
-    setState(() {
-      filteredUserList
-          .where((item) {
-            // 선택된 항목 필터링
-            int index = filteredUserList.indexOf(item);
-            return selectedItems[index] ?? false;
-          })
-          .toList()
-          .forEach((item) {
-            // 원본 리스트에서 해당 항목 삭제
-            dummyUserList.remove(item);
-          });
-
-      selectedItems.clear(); // 삭제 후 선택 상태 초기화(false로 설정)
-      selectAll = false; // 전체 선택 상태 초기화
-      _filterUserList(); // 삭제 후 필터링된 리스트 업데이트
-    });
-  }
-
-  // 전체 선택 상태를 변경하는 메서드
-  void _toggleSelectAll(bool? value) {
-    setState(() {
-      selectAll = value ?? false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
-      selectedItems.clear();
-
-      // true일 경우 filteredUserList를 반복해 각 아이템의 선택 상태를 true로 설정
-      if (selectAll) {
-        for (int i = 0; i < filteredUserList.length; i++) {
-          selectedItems[i] = true;
-        }
-      }
-    });
-  }
-
-  // 이름을 가나다순으로 정렬하는 메서드
-  void _sortByName() {
-    setState(() {
-      if (isAscendingName) {
-        filteredUserList.sort((a, b) => a['name']!.compareTo(b['name']!));
-      } else {
-        filteredUserList.sort((a, b) => b['name']!.compareTo(a['name']!));
-      }
-      isAscendingName = !isAscendingName;
-    });
-  }
-
-  // 학번을 숫자 크기순으로 정렬하는 메서드
-  void _sortByStudentId() {
-    setState(() {
-      if (isAscendingStudentId) {
-        filteredUserList.sort((a, b) =>
-            int.parse(a['studentId']!).compareTo(int.parse(b['studentId']!)));
-      } else {
-        filteredUserList.sort((a, b) =>
-            int.parse(b['studentId']!).compareTo(int.parse(a['studentId']!)));
-      }
-      isAscendingStudentId = !isAscendingStudentId;
-    });
-  }
-
-  // 학년을 숫자 크기순으로 정렬하는 메서드
-  void _sortByGrade() {
-    setState(() {
-      if (isAscendingGrade) {
-        filteredUserList.sort(
-            (a, b) => int.parse(a['grade']!).compareTo(int.parse(b['grade']!)));
-      } else {
-        filteredUserList.sort(
-            (a, b) => int.parse(b['grade']!).compareTo(int.parse(a['grade']!)));
-      }
-      isAscendingGrade = !isAscendingGrade;
-    });
-  }
-
-  // 학적 상태를 가나다순으로 정렬하는 메서드
-  void _sortByStatus() {
-    setState(() {
-      if (isAscendingStatus) {
-        filteredUserList.sort((a, b) => a['status']!.compareTo(b['status']!));
-      } else {
-        filteredUserList.sort((a, b) => b['status']!.compareTo(a['status']!));
-      }
-      isAscendingStatus = !isAscendingStatus;
-    });
   }
 
   List<bool> chosenGrades = [false, false, false, false];
@@ -355,6 +282,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
             // 검색 바
             SearchBar(
+              onTap: () {
+                _filterUserList();
+              },
               controller: searchController,
               hintText: '이름을 검색하세요',
               hintStyle: const MaterialStatePropertyAll(
@@ -392,8 +322,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     ElevatedButton(
                       onPressed: () {
                         // 선택된 아이템이 포함될 경우 삭제 다이얼로그 표시
-                        if (selectedItems.values.contains(true)) {
-                          _showDeleteConfirmationDialog();
+                        if (selectedMembers.contains(true)) {
+                          _showDeleteConfirmationDialog(selectedStudentIds);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -407,6 +337,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             ),
                           );
                         }
+                        print('selectedStudentIds: $selectedStudentIds');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEA4E44),
@@ -427,12 +358,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => const AddMemberPage(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddMemberPage(),
+                          ),
+                        );
                         print("userList: $userList");
                       },
                       style: ElevatedButton.styleFrom(
@@ -479,7 +410,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
             Consumer<AdminProvider>(
               builder: (context, provider, child) {
                 return FutureBuilder<List<Admin>>(
-                  future: userList,
+                  future: searchController.text.isEmpty
+                      ? userList
+                      : Future.value(filteredUserList),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -490,6 +423,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     }
 
                     List<Admin> userListData = snapshot.data!;
+                    // selectedMembers 리스트의 길이를 userListData의 길이를 동일하게 설정
+                    if (selectedMembers.length != userListData.length) {
+                      selectedMembers.clear();
+                      selectedMembers.addAll(
+                        List<bool>.filled(userListData.length, false),
+                      );
+                    }
                     return Expanded(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -505,20 +445,41 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               columns: [
                                 DataColumn(
                                   label: Flexible(
-                                      child: Center(
-                                    child: Checkbox(
-                                      value: selectAll,
-                                      onChanged: _toggleSelectAll,
+                                    child: Center(
+                                      child: Checkbox(
+                                        value: selectAll,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            selectAll = value ??
+                                                false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
+                                            selectedMembers.clear();
+                                            selectedStudentIds.clear();
+
+                                            // true일 경우 userListData를 반복해 각 아이템의 선택 상태를 true로 설정
+                                            if (selectAll) {
+                                              for (int i = 0;
+                                                  i < userListData.length;
+                                                  i++) {
+                                                selectedMembers.add(true);
+                                                selectedStudentIds.add(
+                                                    userListData[i].studentId);
+                                              }
+                                            } else {
+                                              selectedMembers.addAll(
+                                                List<bool>.filled(
+                                                    userListData.length, false),
+                                              );
+                                            }
+                                          });
+                                        },
+                                      ),
                                     ),
-                                  )), // 중앙 정렬
+                                  ), // 중앙 정렬
                                 ),
-                                dataColumn('이름', isAscendingName, _sortByName),
-                                dataColumn('학번', isAscendingStudentId,
-                                    _sortByStudentId),
-                                dataColumn(
-                                    '학년', isAscendingGrade, _sortByGrade),
-                                dataColumn(
-                                    '학적상태', isAscendingStatus, _sortByStatus),
+                                dataColumn('이름', isAscendingName),
+                                dataColumn('학번', isAscendingStudentId),
+                                dataColumn('학년', isAscendingGrade),
+                                dataColumn('학적상태', isAscendingStatus),
                                 const DataColumn(
                                   label: Text('정보 수정'),
                                 ),
@@ -530,12 +491,24 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                     DataCell(
                                       Center(
                                         child: Checkbox(
-                                          value: selectedItems[index] ?? false,
+                                          value: selectedMembers[
+                                              index], // 체크박스의 현재 상태(false)
                                           onChanged: (bool? value) {
                                             setState(() {
-                                              // 선택된 체크박스는 true로 반환
-                                              selectedItems[index] =
+                                              // 선택된 체크박스는 상태 값 변환
+                                              selectedMembers[index] =
                                                   value ?? false;
+                                              // 체크박스가 선택된 경우 해당 인덱스로 userListData를 접근한 후
+                                              // 학번을 가져와 추가
+                                              if (selectedMembers[index]) {
+                                                selectedStudentIds.add(
+                                                    userListData[index]
+                                                        .studentId);
+                                              } else {
+                                                selectedStudentIds.remove(
+                                                    userListData[index]
+                                                        .studentId);
+                                              }
                                             });
                                           },
                                         ),
@@ -565,17 +538,17 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       Center(
                                         child: ElevatedButton(
                                           onPressed: () {
-                                            setState(() {
-                                              selectedUser =
-                                                  filteredUserList[index];
-                                              idController.text =
-                                                  selectedUser['studentId'];
-                                              nameController.text =
-                                                  selectedUser['name'];
-                                            });
+                                            // setState(() {
+                                            //   selectedUser =
+                                            //       filteredUserList[index];
+                                            //   idController.text =
+                                            //       selectedUser['studentId'];
+                                            //   nameController.text =
+                                            //       selectedUser['name'];
+                                            // });
 
-                                            _showEditDialog(
-                                                context, selectedUser);
+                                            // _showEditDialog(
+                                            //     context, selectedUser);
                                           },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor:
@@ -792,14 +765,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 24),
                           ElevatedButton(
                             onPressed: () {
-                              setState(() {
-                                user['studentId'] = idController.text;
-                                user['name'] = nameController.text;
-                                user['grade'] = chosenGrades.indexOf(true) + 1;
-                                user['status'] = status
-                                    .firstWhere((st) => st['value'])['title'];
-                                _filterUserList(); // 필터링된 리스트 업데이트(나가자마자 수정된 내용 바로 볼 수 있음)
-                              });
+                              // setState(() {
+                              //   user['studentId'] = idController.text;
+                              //   user['name'] = nameController.text;
+                              //   user['grade'] = chosenGrades.indexOf(true) + 1;
+                              //   user['status'] = status
+                              //       .firstWhere((st) => st['value'])['title'];
+                              //   _filterUserList(); // 필터링된 리스트 업데이트(나가자마자 수정된 내용 바로 볼 수 있음)
+                              // });
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
@@ -831,7 +804,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   // 데이터 열
-  DataColumn dataColumn(String label, bool isAscending, VoidCallback sort) {
+  DataColumn dataColumn(
+    String label,
+    bool isAscending,
+  ) {
     return DataColumn(
       label: Row(
         children: [
@@ -842,7 +818,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               isAscending ? Icons.arrow_downward : Icons.arrow_upward,
               size: 16,
             ),
-            onPressed: sort,
+            onPressed: () {},
           ),
         ],
       ),

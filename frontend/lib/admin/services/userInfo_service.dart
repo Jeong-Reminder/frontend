@@ -128,6 +128,33 @@ class UserService {
     }
   }
 
+  Future<void> deleteMembers(List<String> studentIds) async {
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/admin/member-delete';
+
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final response = await http.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': accessToken,
+      },
+      body: jsonEncode(studentIds),
+    );
+
+    if (response.statusCode == 200) {
+      print('회원 삭제 성공');
+    } else {
+      print('회원 삭제 실패: ${response.statusCode}');
+      throw Exception('회원 삭제 실패: ${response.body}');
+    }
+  }
+
   Future<void> saveFilePathToPreferences(String path) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_file_path', path);
