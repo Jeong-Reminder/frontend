@@ -250,21 +250,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
     );
   }
 
-  // 전체 선택 상태를 변경하는 메서드
-  void _toggleSelectAll(bool? value) {
-    setState(() {
-      selectAll = value ?? false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
-      selectedMembers.clear();
-
-      // true일 경우 filteredUserList를 반복해 각 아이템의 선택 상태를 true로 설정
-      if (selectAll) {
-        for (int i = 0; i < filteredUserList.length; i++) {
-          selectedMembers[i] = true;
-        }
-      }
-    });
-  }
-
   List<bool> chosenGrades = [false, false, false, false];
 
   List<Map<String, dynamic>> status = [
@@ -460,12 +445,36 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               columns: [
                                 DataColumn(
                                   label: Flexible(
-                                      child: Center(
-                                    child: Checkbox(
-                                      value: selectAll,
-                                      onChanged: _toggleSelectAll,
+                                    child: Center(
+                                      child: Checkbox(
+                                        value: selectAll,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            selectAll = value ??
+                                                false; // 전체 선택 체크박스에 체크가 되어있으면 true로 반환
+                                            selectedMembers.clear();
+                                            selectedStudentIds.clear();
+
+                                            // true일 경우 userListData를 반복해 각 아이템의 선택 상태를 true로 설정
+                                            if (selectAll) {
+                                              for (int i = 0;
+                                                  i < userListData.length;
+                                                  i++) {
+                                                selectedMembers.add(true);
+                                                selectedStudentIds.add(
+                                                    userListData[i].studentId);
+                                              }
+                                            } else {
+                                              selectedMembers.addAll(
+                                                List<bool>.filled(
+                                                    userListData.length, false),
+                                              );
+                                            }
+                                          });
+                                        },
+                                      ),
                                     ),
-                                  )), // 중앙 정렬
+                                  ), // 중앙 정렬
                                 ),
                                 dataColumn('이름', isAscendingName),
                                 dataColumn('학번', isAscendingStudentId),
