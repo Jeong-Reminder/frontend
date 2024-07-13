@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/services/login_services.dart';
 
 class AccountWidget extends StatelessWidget {
   const AccountWidget({super.key});
@@ -87,7 +88,6 @@ class AccountWidget extends StatelessWidget {
               Text("정말 로그아웃 하실 건가요?"),
             ],
           ),
-          //
           content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -118,14 +118,15 @@ class AccountWidget extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {
-                    // 로그인 화면으로 이동
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
+                  onPressed: () async {
+                    final loginAPI = LoginAPI();
+                    bool success = await loginAPI.logout();
+                    if (success) {
+                      // 로그인 화면으로 이동
+                      Navigator.pushNamed(context, '/');
+                    } else {
+                      Navigator.pop(context);
+                    }
                   },
                   style: TextButton.styleFrom(
                     fixedSize: const Size(100, 20),

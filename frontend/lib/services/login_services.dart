@@ -9,6 +9,7 @@ class LoginAPI {
   static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
   static const tokenRefreshAddress =
       'https://reminder.sungkyul.ac.kr/api/v1/reissue';
+  static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();
@@ -178,6 +179,49 @@ class LoginAPI {
       }
     } catch (e) {
       print('로그인 요청 중 에러 발생: ${e.toString()}');
+      return false;
+    }
+  }
+
+  // 로그아웃 API
+  Future<bool> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final refreshToken = prefs.getString('refreshToken') ?? '';
+
+      if (refreshToken.isEmpty) {
+        print('invalid refresh token');
+        return false;
+      }
+
+      final url = Uri.parse(logoutAddress);
+      final cookieHeader = 'refresh=$refreshToken';
+
+      final response = await http.post(url, headers: {
+        'Cookie': cookieHeader,
+      });
+
+      print('로그아웃 응답 상태 코드: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        await clearTokens();
+
+        final isAutoLogin = prefs.getBool('isAutoLogin') ?? false;
+
+        // 자동 로그인이 체크되지 않은 경우 리프레시 토큰도 삭제
+        if (!isAutoLogin) {
+          await prefs.remove('refreshToken');
+          print('자동 로그인 체크 안됨: 리프레시 토큰 삭제');
+        }
+
+        print('로그아웃 성공');
+        return true;
+      } else {
+        print('로그아웃 실패: ${response.statusCode} ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('로그아웃 요청 중 에러 발생: ${e.toString()}');
       return false;
     }
   }
