@@ -31,6 +31,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool isAscendingStatus = true; // 학적상태 정렬 순서 상태
 
   Future<List<Admin>>? userList;
+  List<Admin> filteredUserList = []; // 필터링된 회원 목록 리스트
 
   final List<Map<String, dynamic>> dummyUserList = [
     // 회원 목록을 저장하는 리스트
@@ -72,14 +73,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
     },
   ];
 
-  List<Map<String, dynamic>> filteredUserList = []; // 필터링된 회원 목록 리스트
-
   Map<String, dynamic> selectedUser = {}; // 수정 버튼 누를 시 선택된 회원
 
   @override
   void initState() {
     super.initState();
-    filteredUserList = dummyUserList; // 초기 상태는 전체 회원 목록
+    // filteredUserList = dummyUserList; // 초기 상태는 전체 회원 목록
     searchController.addListener(_filterUserList); // 검색어 변경 리스너 추가
     userList = AdminProvider().getMembers(); // 초기화
   }
@@ -130,12 +129,20 @@ class _UserInfoPageState extends State<UserInfoPage> {
     setState(() {
       // 검색어가 없으면 기존 userList를 가져오기
       if (searchQuery.isEmpty) {
-        filteredUserList = dummyUserList;
+        userList?.then((userListData) {
+          setState(() {
+            filteredUserList = userListData;
+          });
+        });
       } else {
         // 검색어가 있으면 userList에 있는 이름에 하나라도 포함이 있으면 저장 후 가져오기
-        filteredUserList = dummyUserList.where((user) {
-          return user['name']!.contains(searchQuery);
-        }).toList();
+        userList?.then((userListData) {
+          setState(() {
+            filteredUserList = userListData.where((user) {
+              return user.name.contains(searchQuery);
+            }).toList();
+          });
+        });
       }
     });
   }
@@ -258,58 +265,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
     });
   }
 
-  // 이름을 가나다순으로 정렬하는 메서드
-  void _sortByName() {
-    setState(() {
-      if (isAscendingName) {
-        filteredUserList.sort((a, b) => a['name']!.compareTo(b['name']!));
-      } else {
-        filteredUserList.sort((a, b) => b['name']!.compareTo(a['name']!));
-      }
-      isAscendingName = !isAscendingName;
-    });
-  }
-
-  // 학번을 숫자 크기순으로 정렬하는 메서드
-  void _sortByStudentId() {
-    setState(() {
-      if (isAscendingStudentId) {
-        filteredUserList.sort((a, b) =>
-            int.parse(a['studentId']!).compareTo(int.parse(b['studentId']!)));
-      } else {
-        filteredUserList.sort((a, b) =>
-            int.parse(b['studentId']!).compareTo(int.parse(a['studentId']!)));
-      }
-      isAscendingStudentId = !isAscendingStudentId;
-    });
-  }
-
-  // 학년을 숫자 크기순으로 정렬하는 메서드
-  void _sortByGrade() {
-    setState(() {
-      if (isAscendingGrade) {
-        filteredUserList.sort(
-            (a, b) => int.parse(a['grade']!).compareTo(int.parse(b['grade']!)));
-      } else {
-        filteredUserList.sort(
-            (a, b) => int.parse(b['grade']!).compareTo(int.parse(a['grade']!)));
-      }
-      isAscendingGrade = !isAscendingGrade;
-    });
-  }
-
-  // 학적 상태를 가나다순으로 정렬하는 메서드
-  void _sortByStatus() {
-    setState(() {
-      if (isAscendingStatus) {
-        filteredUserList.sort((a, b) => a['status']!.compareTo(b['status']!));
-      } else {
-        filteredUserList.sort((a, b) => b['status']!.compareTo(a['status']!));
-      }
-      isAscendingStatus = !isAscendingStatus;
-    });
-  }
-
   List<bool> chosenGrades = [false, false, false, false];
 
   List<Map<String, dynamic>> status = [
@@ -342,6 +297,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
             // 검색 바
             SearchBar(
+              onTap: () {
+                _filterUserList();
+              },
               controller: searchController,
               hintText: '이름을 검색하세요',
               hintStyle: const MaterialStatePropertyAll(
@@ -467,7 +425,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
             Consumer<AdminProvider>(
               builder: (context, provider, child) {
                 return FutureBuilder<List<Admin>>(
-                  future: userList,
+                  future: searchController.text.isEmpty
+                      ? userList
+                      : Future.value(filteredUserList),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -507,13 +467,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                     ),
                                   )), // 중앙 정렬
                                 ),
-                                dataColumn('이름', isAscendingName, _sortByName),
-                                dataColumn('학번', isAscendingStudentId,
-                                    _sortByStudentId),
-                                dataColumn(
-                                    '학년', isAscendingGrade, _sortByGrade),
-                                dataColumn(
-                                    '학적상태', isAscendingStatus, _sortByStatus),
+                                dataColumn('이름', isAscendingName),
+                                dataColumn('학번', isAscendingStudentId),
+                                dataColumn('학년', isAscendingGrade),
+                                dataColumn('학적상태', isAscendingStatus),
                                 const DataColumn(
                                   label: Text('정보 수정'),
                                 ),
@@ -572,17 +529,17 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       Center(
                                         child: ElevatedButton(
                                           onPressed: () {
-                                            setState(() {
-                                              selectedUser =
-                                                  filteredUserList[index];
-                                              idController.text =
-                                                  selectedUser['studentId'];
-                                              nameController.text =
-                                                  selectedUser['name'];
-                                            });
+                                            // setState(() {
+                                            //   selectedUser =
+                                            //       filteredUserList[index];
+                                            //   idController.text =
+                                            //       selectedUser['studentId'];
+                                            //   nameController.text =
+                                            //       selectedUser['name'];
+                                            // });
 
-                                            _showEditDialog(
-                                                context, selectedUser);
+                                            // _showEditDialog(
+                                            //     context, selectedUser);
                                           },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor:
@@ -799,14 +756,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 24),
                           ElevatedButton(
                             onPressed: () {
-                              setState(() {
-                                user['studentId'] = idController.text;
-                                user['name'] = nameController.text;
-                                user['grade'] = chosenGrades.indexOf(true) + 1;
-                                user['status'] = status
-                                    .firstWhere((st) => st['value'])['title'];
-                                _filterUserList(); // 필터링된 리스트 업데이트(나가자마자 수정된 내용 바로 볼 수 있음)
-                              });
+                              // setState(() {
+                              //   user['studentId'] = idController.text;
+                              //   user['name'] = nameController.text;
+                              //   user['grade'] = chosenGrades.indexOf(true) + 1;
+                              //   user['status'] = status
+                              //       .firstWhere((st) => st['value'])['title'];
+                              //   _filterUserList(); // 필터링된 리스트 업데이트(나가자마자 수정된 내용 바로 볼 수 있음)
+                              // });
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
@@ -838,7 +795,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   // 데이터 열
-  DataColumn dataColumn(String label, bool isAscending, VoidCallback sort) {
+  DataColumn dataColumn(
+    String label,
+    bool isAscending,
+  ) {
     return DataColumn(
       label: Row(
         children: [
@@ -849,7 +809,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
               isAscending ? Icons.arrow_downward : Icons.arrow_upward,
               size: 16,
             ),
-            onPressed: sort,
+            onPressed: () {},
           ),
         ],
       ),
