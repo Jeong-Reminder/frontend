@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -129,7 +130,8 @@ class LoginAPI {
   }
 
   // 로그인 API
-  Future<bool> handleLogin(String studentId, String password) async {
+  Future<Map<String, dynamic>> handleLogin(
+      String studentId, String password) async {
     try {
       final url = Uri.parse(loginAddress);
 
@@ -146,6 +148,9 @@ class LoginAPI {
       print('로그인 응답 본문: ${response.body}');
 
       if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final userRole = responseData['userRole'];
+
         final accessToken = response.headers['access']; // 액세스 토큰 추출
         final setCookieHeader = response.headers['set-cookie'];
         final refreshToken = setCookieHeader != null
@@ -172,14 +177,22 @@ class LoginAPI {
           print('저장된 리프레시 토큰: $savedRefreshToken');
         }
         print('로그인 성공');
-        return true;
+
+        return {
+          'success': true,
+          'role': userRole,
+        };
       } else {
         print('로그인 실패: ${response.statusCode} ${response.body}');
-        return false;
+        return {
+          'success': false,
+        };
       }
     } catch (e) {
       print('로그인 요청 중 에러 발생: ${e.toString()}');
-      return false;
+      return {
+        'success': false,
+      };
     }
   }
 

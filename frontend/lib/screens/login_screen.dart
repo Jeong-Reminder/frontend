@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
+import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontend/services/login_services.dart';
 
@@ -165,11 +166,8 @@ class _LoginPageState extends State<LoginPage> {
                         if (value == null || value.isEmpty) {
                           return '비밀번호를 입력하세요';
                         }
-                        if (value.length > 15) {
-                          return '15자 이하로 작성해주세요';
-                        }
-                        if (!RegExp(r'^(?=.*[a-zA-Z])').hasMatch(value)) {
-                          return '영문자가 포함되어야 합니다';
+                        if (value.length < 4 && value.length > 15) {
+                          return '4자 이상 15자 이하로 작성해주세요';
                         }
                         return null;
                       },
@@ -229,20 +227,22 @@ class _LoginPageState extends State<LoginPage> {
                     String password = pwController.text;
                     loginAPI
                         .handleLogin(studentId, password)
-                        .then((isLoggedIn) async {
-                      if (isLoggedIn) {
+                        .then((result) async {
+                      if (result['success']) {
                         final prefs = await SharedPreferences.getInstance();
                         if (isAutoLogin) {
                           // 자동 로그인 체크 시에만 학번과 비밀번호 저장
                           await prefs.setString('studentId', studentId);
                           await prefs.setString('password', password);
                         }
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingProfile1Page(),
-                          ),
-                        );
+                        // userRole 값에 따라 다른 페이지로 이동
+                        if (result['role'] == 'ROLE_ADMIN') {
+                          Navigator.pushNamed(context, '/user-info');
+                        } else if (result['role'] == 'ROLE_USER') {
+                          Navigator.pushNamed(context, '/setting-profile');
+                        }
+                      } else {
+                        // 로그인 실패 처리
                       }
                     });
                   }
