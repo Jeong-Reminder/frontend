@@ -1,9 +1,9 @@
 class Admin {
-  final String studentId;
-  final String? password;
-  final String name;
-  final int level;
-  final String status;
+  String studentId;
+  String? password;
+  String name;
+  int level;
+  String status;
   final String userRole;
 
   Admin({
@@ -18,6 +18,7 @@ class Admin {
   factory Admin.fromJson(Map<String, dynamic> json) {
     return Admin(
       studentId: json['studentId'],
+      password: json['password'],
       name: json['name'],
       level: json['level'],
       status: json['status'],
