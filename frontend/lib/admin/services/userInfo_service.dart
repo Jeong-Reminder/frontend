@@ -154,7 +154,7 @@ class UserService {
     }
   }
 
-  // member 정보 수정
+  // 회원 정보 수정 API 호출
   Future<void> editMember(Admin admin) async {
     const String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
@@ -175,9 +175,9 @@ class UserService {
     );
 
     if (response.statusCode == 200) {
-      print('회원 수정 성공');
+      print('회원 수정 성공: $admin');
     } else {
-      print('회원 수정 실패');
+      print('회원 수정 실패: ${response.statusCode} - ${response.body}');
     }
   }
 }

@@ -544,7 +544,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                               selectedUser =
                                                   userListData[index];
                                             });
-                                            print('현재 회원 정보: $selectedUser');
 
                                             _showEditDialog(
                                               context,
@@ -597,13 +596,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
       chosenGrades = List.generate(
           4,
           (index) =>
-              user.level == index + 1); // 선택한 회원의 학년과 (index+1)이 같으면 true로 변경
+              user.level == index + 1); // index + 1을 더한 값을 user의 학년에 저장해 4만큼 생성
 
       status = status.map((item) {
         return {
           'title': item['title'],
-          'value': item['title'] ==
-              user.status // title(재학 or 휴학)과 status(재학 or 휴학)이 같다면 true 반환
+          'value': item['title'] == user.status, // 선택한 회원의 학적상태 저장
         };
       }).toList();
     });
@@ -613,6 +611,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateDialog) {
+            String existStudentId = user.studentId;
+
             return Dialog(
               backgroundColor: Colors.white,
               child: Padding(
@@ -640,15 +640,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const SizedBox(width: 50),
                           Expanded(
                             child: TextFormField(
-                              initialValue: user.studentId,
+                              initialValue: user.studentId, // 해당 회원의 학번 표시
+                              readOnly: true, // 고정값이기 때문에 수정 불가능으로 설정
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                               ),
-                              onChanged: (value) {
-                                setState(() {
-                                  user.studentId = value;
-                                });
-                              },
                             ),
                           ),
                         ],
@@ -659,21 +655,18 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           const Text(
                             '이름',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 50),
                           Expanded(
                             child: TextFormField(
-                              // controller: nameController,
                               initialValue: user.name,
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                               ),
                               onChanged: (value) {
                                 setState(() {
-                                  user.name = value;
+                                  user.name = value; // 수정한 이름으로 변경
                                 });
                               },
                             ),
@@ -701,13 +694,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                         onChanged: (value) {
                                           setStateDialog(() {
                                             setState(() {
-                                              // 선택한 체크박스에 true로 변환
-                                              chosenGrades[index] = value!;
-
-                                              // chosenGrades에서 true가 되는 index를 가져온 후 1을 더해 user.level에 저장
-                                              user.level =
-                                                  chosenGrades.indexOf(true) +
-                                                      1;
+                                              // 선택한 체크박스는 true로 변환 후 해당 index에 1을 더해 학년 값으로 변경
+                                              for (int i = 0;
+                                                  i < chosenGrades.length;
+                                                  i++) {
+                                                chosenGrades[i] = false;
+                                              }
+                                              chosenGrades[index] = true;
+                                              user.level = index + 1;
                                             });
                                           });
                                         },
@@ -742,14 +736,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                         value: st['value'],
                                         onChanged: (value) {
                                           setStateDialog(() {
-                                            setState(() {
-                                              st['value'] = value!;
-
-                                              // firstWhere : 주어진 조건에 맞는 첫번째 요소를 찾는 메소드
-                                              // value값에 맞는 첫번째 요소를 찾아 value키에 해당하는 값, title를 가져옴
-                                              user.status = status.firstWhere(
-                                                  (st) => st['value'])['title'];
-                                            });
+                                            if (value!) {
+                                              // 선택한 체크박스에 true로 변환해 true인 title 값을 회원의 학적상태에 저장해 변환
+                                              for (var statusItem in status) {
+                                                statusItem['value'] = false;
+                                              }
+                                              st['value'] = true;
+                                              user.status = st['title'];
+                                            }
                                           });
                                         },
                                       ),
@@ -790,14 +784,19 @@ class _UserInfoPageState extends State<UserInfoPage> {
                           ElevatedButton(
                             onPressed: () async {
                               try {
-                                await UserService().editMember(user);
+                                final adminProvider =
+                                    Provider.of<AdminProvider>(context,
+                                        listen: false);
+                                await adminProvider.editMemberProvider(
+                                    user); // 회원 수정 provider 호출
+                                print('기존 회원 학번: $existStudentId');
 
                                 if (context.mounted) {
-                                  Navigator.pop(context);
+                                  Navigator.pop(
+                                      context); // 화면을 닫고 이전 화면으로 이동(수정한 회원이 그 자리에 유지, 디버깅됐을 때는 아님)
                                 }
-                                print('수정된 회원정보 : $user');
                               } catch (e) {
-                                print(e);
+                                print("회원 수정 오류 (수정 버튼 클릭): $e");
                               }
                             },
                             style: ElevatedButton.styleFrom(
