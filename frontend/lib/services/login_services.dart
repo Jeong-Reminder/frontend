@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +10,7 @@ class LoginAPI {
   static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
   static const tokenRefreshAddress =
       'https://reminder.sungkyul.ac.kr/api/v1/reissue';
+  static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();
@@ -66,11 +67,23 @@ class LoginAPI {
   }
 
   // 이전 토큰 삭제 함수
-  Future<void> clearTokens() async {
+  Future<void> clearTokens({bool removeRefreshToken = true}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
-    await prefs.remove('refreshToken');
-    await cookieJar.deleteAll(); // 쿠키 삭제
+    if (removeRefreshToken) {
+      await prefs.remove('refreshToken');
+      await cookieJar.deleteAll(); // 쿠키 삭제
+    }
+  }
+
+  // 앱 종료 시 로그아웃 호출
+  Future<void> logoutOnExit() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isAutoLogin = prefs.getBool('isAutoLogin') ?? false;
+
+    if (!isAutoLogin) {
+      await logout();
+    }
   }
 
   // 토큰 재발급 API
@@ -104,7 +117,7 @@ class LoginAPI {
         print('새로운 리프래시 토큰 $newRefreshToken');
 
         if (newAccessToken != null && newRefreshToken != null) {
-          await clearTokens();
+          await clearTokens(removeRefreshToken: false);
 
           await prefs.setString('accessToken', newAccessToken);
           await prefs.setString('refreshToken', newRefreshToken);
@@ -129,8 +142,8 @@ class LoginAPI {
   }
 
   // 로그인 API
-  Future<bool> handleLogin(
-      String studentId, String password, bool isAutoLogin) async {
+  Future<Map<String, dynamic>> handleLogin(
+      String studentId, String password) async {
     try {
       final url = Uri.parse(loginAddress);
 
@@ -147,6 +160,9 @@ class LoginAPI {
       print('로그인 응답 본문: ${response.body}');
 
       if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final userRole = responseData['userRole'];
+
         final accessToken = response.headers['access']; // 액세스 토큰 추출
         final setCookieHeader = response.headers['set-cookie'];
         final refreshToken = setCookieHeader != null
@@ -156,27 +172,15 @@ class LoginAPI {
         final prefs = await SharedPreferences.getInstance();
         if (accessToken != null && refreshToken != null) {
           // 이전 토큰 삭제
-          await clearTokens();
+          await clearTokens(removeRefreshToken: false);
 
           // 새 토큰 저장
           await prefs.setString('accessToken', accessToken); // 액세스 토큰 저장
           await prefs.setString('refreshToken', refreshToken); // 리프레시 토큰 저장
 
-          // 자동 로그인 상태 저장
-          await prefs.setBool('isAutoLogin', isAutoLogin);
-          if (isAutoLogin) {
-            // 자동 로그인 체크 시에만 학번과 비밀번호 저장
-            await prefs.setString('studentId', studentId);
-            await prefs.setString('password', password);
-          } else {
-            // 체크 해제 시 저장된 학번과 비밀번호 삭제
-            await prefs.remove('studentId');
-            await prefs.remove('password');
-          }
-
           final uri = Uri.parse(loginAddress);
-          cookieJar.saveFromResponse(uri,
-              [Cookie('refreshToken', refreshToken)]); // refreshToken 쿠키 저장
+          cookieJar.saveFromResponse(
+              uri, [Cookie('refresh', refreshToken)]); // refreshToken 쿠키 저장
 
           // 저장된 토큰 로그로 확인
           final savedAccessToken = prefs.getString('accessToken');
@@ -185,13 +189,64 @@ class LoginAPI {
           print('저장된 리프레시 토큰: $savedRefreshToken');
         }
         print('로그인 성공');
-        return true;
+
+        return {
+          'success': true,
+          'role': userRole,
+        };
       } else {
         print('로그인 실패: ${response.statusCode} ${response.body}');
-        return false;
+        return {
+          'success': false,
+        };
       }
     } catch (e) {
       print('로그인 요청 중 에러 발생: ${e.toString()}');
+      return {
+        'success': false,
+      };
+    }
+  }
+
+  // 로그아웃 API
+  Future<bool> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final refreshToken = prefs.getString('refreshToken') ?? '';
+
+      if (refreshToken.isEmpty) {
+        print('invalid refresh token');
+        return false;
+      }
+
+      final url = Uri.parse(logoutAddress);
+      final cookieHeader = 'refresh=$refreshToken';
+
+      final response = await http.post(url, headers: {
+        'Cookie': cookieHeader,
+      });
+
+      print('로그아웃 응답 상태 코드: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        await clearTokens();
+
+        final isAutoLogin = prefs.getBool('isAutoLogin') ?? false;
+
+        // 자동 로그인이 체크되지 않은 경우 리프레시 토큰도 삭제
+        if (!isAutoLogin) {
+          await prefs.remove('refreshToken');
+          print('자동 로그인 체크 안됨: 리프레시 토큰 삭제');
+        }
+
+        print('로그아웃 성공');
+        return true;
+      } else {
+        print('로그아웃 실패: ${response.statusCode} ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('로그아웃 요청 중 에러 발생: ${e.toString()}');
       return false;
     }
   }
