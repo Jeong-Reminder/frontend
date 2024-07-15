@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/settingProfile_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -14,6 +15,7 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
   double percent = 0; // 프로그레스 바 진행률
   TextEditingController linkController = TextEditingController(); // 깃허브 링크 입력
   bool writtenLink = false;
+  String githubUrl = '';
 
   @override
   void initState() {
@@ -179,7 +181,7 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
                       ),
 
                       // github.com 고정
-                      prefixText: 'github.com/',
+                      prefixText: 'https://github.com/',
                       prefixStyle: TextStyle(
                         fontSize: 14,
                         color: Colors.black,
@@ -207,10 +209,10 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
                 // writtenLink이 false일 때 깃허브 링크 화면에서 진행
                 if (!writtenLink) {
                   if (linkController.text.isNotEmpty) {
-                    final githubUrl =
-                        'github.com/${linkController.text}'; // 깃허브 링크 최종 주소
-                    print('깃허브 링크 : $githubUrl');
-                    // 이 자리에 api 작성
+                    setState(() {
+                      githubUrl =
+                          'https://github.com/${linkController.text}'; // 깃허브 링크 최종 주소
+                    });
                   } else {
                     print('깃허브 링크 없음');
                   }
@@ -225,7 +227,10 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SettingProfilePage(),
+                      builder: (context) => SettingProfilePage(
+                        githubUrl,
+                        chosenpositionList[0]['title'],
+                      ),
                     ),
                   );
                 }
