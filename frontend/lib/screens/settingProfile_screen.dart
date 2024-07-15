@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class SettingProfilePage extends StatefulWidget {
@@ -384,7 +384,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomePage(),
+                          builder: (context) => const SettingProfile2Page(),
                         ),
                       );
                     }

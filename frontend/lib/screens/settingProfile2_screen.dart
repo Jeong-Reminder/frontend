@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class SettingProfile2Page extends StatefulWidget {
@@ -84,6 +85,14 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
         }
         writtenText = true; // 입력 완료 상태로 변경
         percent = 1; // 100%로 진행률 증가
+
+        // 입력 사항 다 입력하고 '알리미 시작하기' 클릭하면 홈페이지로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
       } else {
         print('입력 사항을 모두 작성해주세요.');
       }
