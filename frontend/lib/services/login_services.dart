@@ -67,11 +67,23 @@ class LoginAPI {
   }
 
   // 이전 토큰 삭제 함수
-  Future<void> clearTokens() async {
+  Future<void> clearTokens({bool removeRefreshToken = true}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
-    await prefs.remove('refreshToken');
-    await cookieJar.deleteAll(); // 쿠키 삭제
+    if (removeRefreshToken) {
+      await prefs.remove('refreshToken');
+      await cookieJar.deleteAll(); // 쿠키 삭제
+    }
+  }
+
+  // 앱 종료 시 로그아웃 호출
+  Future<void> logoutOnExit() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isAutoLogin = prefs.getBool('isAutoLogin') ?? false;
+
+    if (!isAutoLogin) {
+      await logout();
+    }
   }
 
   // 토큰 재발급 API
@@ -105,7 +117,7 @@ class LoginAPI {
         print('새로운 리프래시 토큰 $newRefreshToken');
 
         if (newAccessToken != null && newRefreshToken != null) {
-          await clearTokens();
+          await clearTokens(removeRefreshToken: false);
 
           await prefs.setString('accessToken', newAccessToken);
           await prefs.setString('refreshToken', newRefreshToken);
@@ -160,15 +172,15 @@ class LoginAPI {
         final prefs = await SharedPreferences.getInstance();
         if (accessToken != null && refreshToken != null) {
           // 이전 토큰 삭제
-          await clearTokens();
+          await clearTokens(removeRefreshToken: false);
 
           // 새 토큰 저장
           await prefs.setString('accessToken', accessToken); // 액세스 토큰 저장
           await prefs.setString('refreshToken', refreshToken); // 리프레시 토큰 저장
 
           final uri = Uri.parse(loginAddress);
-          cookieJar.saveFromResponse(uri,
-              [Cookie('refreshToken', refreshToken)]); // refreshToken 쿠키 저장
+          cookieJar.saveFromResponse(
+              uri, [Cookie('refresh', refreshToken)]); // refreshToken 쿠키 저장
 
           // 저장된 토큰 로그로 확인
           final savedAccessToken = prefs.getString('accessToken');

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
-import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontend/services/login_services.dart';
 
