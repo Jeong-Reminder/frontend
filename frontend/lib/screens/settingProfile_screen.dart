@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/profile_model.dart';
+import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/services/profile_service.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -413,7 +414,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                       print('profile: $profile');
 
                       try {
-                        await ProfileService().createProfile(profile);
+                        await ProfileProvider().createProfile(profile);
                         if (context.mounted) {
                           Navigator.push(
                             context,
