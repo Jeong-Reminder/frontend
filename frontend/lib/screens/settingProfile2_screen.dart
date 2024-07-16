@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:frontend/models/projectExperience_model.dart';
+import 'package:frontend/providers/projectExperience_provider.dart';
 
 class SettingProfile2Page extends StatefulWidget {
   const SettingProfile2Page({Key? key}) : super(key: key);
@@ -57,46 +60,58 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
     setState(() {});
   }
 
-  void _onTapHandler() {
-    setState(() {
-      final projectName = projectNameController.text;
-      final projectExperience = projectExperienceController.text;
-      final githubLink = githubLinkController.text;
-      final roll = rollController.text;
-      final part = partController.text;
+  Future<void> _onTapHandler() async {
+    final projectName = projectNameController.text;
+    final projectExperience = projectExperienceController.text;
+    final githubLink = githubLinkController.text;
+    final roll = rollController.text;
+    final part = partController.text;
 
-      if (projectName.isNotEmpty &&
-          projectExperience.isNotEmpty &&
-          githubLink.isNotEmpty &&
-          roll.isNotEmpty &&
-          part.isNotEmpty &&
-          (selectedDuration != null || customDurationValue.isNotEmpty)) {
-        // 입력 사항이 모두 채워져 있을 때 처리할 로직
-        print('프로젝트 명 : $projectName');
-        print('프로젝트 경험 : $projectExperience');
-        print('깃허브 링크 : $githubLink');
-        print('역할 : $roll');
-        print('맡은 파트 : $part');
-        if (selectedDuration == '직접 입력') {
-          print('직접 입력한 프로젝트 기간 : $customDurationValue');
-        } else {
-          print('프로젝트 기간 : $selectedDuration');
-          customDurationValue = ''; // 선택된 값 초기화
-        }
-        writtenText = true; // 입력 완료 상태로 변경
-        percent = 1; // 100%로 진행률 증가
-
-        // 입력 사항 다 입력하고 '알리미 시작하기' 클릭하면 홈페이지로 이동
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
+    if (projectName.isNotEmpty &&
+        projectExperience.isNotEmpty &&
+        githubLink.isNotEmpty &&
+        roll.isNotEmpty &&
+        part.isNotEmpty &&
+        (selectedDuration != null || customDurationValue.isNotEmpty)) {
+      // 입력 사항이 모두 채워져 있을 때 처리할 로직
+      print('프로젝트 명 : $projectName');
+      print('프로젝트 경험 : $projectExperience');
+      print('깃허브 링크 : $githubLink');
+      print('역할 : $roll');
+      print('맡은 파트 : $part');
+      if (selectedDuration == '직접 입력') {
+        print('직접 입력한 프로젝트 기간 : $customDurationValue');
       } else {
-        print('입력 사항을 모두 작성해주세요.');
+        print('프로젝트 기간 : $selectedDuration');
+        customDurationValue = ''; // 선택된 값 초기화
       }
-    });
+      writtenText = true; // 입력 완료 상태로 변경
+      percent = 1; // 100%로 진행률 증가
+
+      // ProjectExperience 인스턴스 생성
+      ProjectExperience newExperience = ProjectExperience(
+        experienceName: projectName,
+        experienceRole: roll,
+        experienceContent: projectExperience,
+        experienceGithub: githubLink, // 깃허브 링크 설정
+        experienceJob: part,
+        experienceDate: selectedDuration ?? customDurationValue,
+      );
+
+      // Provider를 사용하여 API 호출
+      final provider = context.read<ProjectExperienceProvider>();
+      await provider.createProjectExperience(newExperience);
+
+      // 홈 페이지로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+      );
+    } else {
+      print('입력 사항을 모두 작성해주세요.');
+    }
   }
 
   @override
@@ -165,7 +180,7 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                     TextFormField(
                       controller: rollController,
                       decoration: const InputDecoration(
-                        labelText: '나의 역할(팀장, 팀원)을 입력해주세요',
+                        labelText: '나의 역할(LEADER, MEMBER)를 입력해주세요',
                         labelStyle: TextStyle(
                           fontSize: 12,
                           color: Color(0xFF808080),
@@ -221,7 +236,7 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                           fontSize: 12,
                           color: Color(0xFF808080),
                         ),
-                        prefixText: 'github.com/',
+                        prefixText: 'https://github.com/',
                         prefixStyle: TextStyle(
                           fontSize: 12,
                           color: Colors.black,
