@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
@@ -389,6 +390,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                         percent = 0.75;
                       });
                     } else {
+
                       setState(() {
                         // selectedFields에서 title들을 가져와 하나의 문자열로 생성
                         developmentField = selectedFields
@@ -409,6 +411,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                         githubLink: widget.githubLink,
                         developmentField: developmentField,
                         developmentTool: developmentTool,
+
                       );
 
                       print('profile: $profile');
@@ -419,7 +422,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomePage(),
+                              builder: (context) => const SettingProfile2Page(),
                             ),
                           );
                         }
