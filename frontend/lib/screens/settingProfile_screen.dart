@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/screens/settingProfile2_screen.dart';
+import 'package:frontend/models/profile_model.dart';
+import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/profile_service.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class SettingProfilePage extends StatefulWidget {
-  const SettingProfilePage({super.key});
+  final String githubLink;
+  final String hopeJob;
+  const SettingProfilePage(this.githubLink, this.hopeJob, {super.key});
 
   @override
   State<SettingProfilePage> createState() => _SettingProfilePageState();
 }
 
 class _SettingProfilePageState extends State<SettingProfilePage> {
+  String developmentField = '';
+  String developmentTool = '';
+
   List<Map<String, dynamic>> fieldList = [
     {
       'logoUrl': 'assets/skilImages/typescript.png',
@@ -62,13 +71,6 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
       'isSelected': false,
     },
     {
-      'logoUrl': 'assets/skilImages/vscode.png',
-      'title': 'VISUAL STUDIO CODE',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0078D7),
-      'isSelected': false,
-    },
-    {
       'logoUrl': 'assets/skilImages/docker.png',
       'title': 'DOCKER',
       'titleColor': Colors.white,
@@ -101,6 +103,13 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
       'title': 'FIGMA',
       'titleColor': Colors.white,
       'badgeColor': const Color(0xFFF24D1D),
+      'isSelected': false,
+    },
+    {
+      'logoUrl': 'assets/skilImages/vscode.png',
+      'title': 'VISUAL STUDIO CODE',
+      'titleColor': Colors.white,
+      'badgeColor': const Color(0xFF0078D7),
       'isSelected': false,
     },
   ];
@@ -373,7 +382,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                 ),
                 const SizedBox(height: 15),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (!completedField) {
                       setState(() {
                         completedField = true;
@@ -381,12 +390,45 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                         percent = 0.75;
                       });
                     } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingProfile2Page(),
-                        ),
+
+                      setState(() {
+                        // selectedFields에서 title들을 가져와 하나의 문자열로 생성
+                        developmentField = selectedFields
+                            .map((f) => f['title'])
+                            .toList()
+                            .join(',');
+
+                        // selectedTools에서 title들을 가져와 하나의 문자열로 생성
+                        developmentTool = selectedTools
+                            .map((t) => t['title'])
+                            .toList()
+                            .join(','); // 요소 사이에 콤마(,) 추가
+                      });
+
+                      // body에 집어넣을 프로필 model
+                      final profile = Profile(
+                        hopeJob: widget.hopeJob,
+                        githubLink: widget.githubLink,
+                        developmentField: developmentField,
+                        developmentTool: developmentTool,
+
                       );
+
+                      print('profile: $profile');
+
+                      try {
+                        await ProfileProvider().createProfile(profile);
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingProfile2Page(),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        print(e.toString());
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
