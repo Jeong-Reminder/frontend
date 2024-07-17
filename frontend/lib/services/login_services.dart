@@ -162,6 +162,8 @@ class LoginAPI {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         final userRole = responseData['userRole'];
+        final techStack = responseData['techStack'];
+        final memberExperience = responseData['memberExperiences'];
 
         final accessToken = response.headers['access']; // 액세스 토큰 추출
         final setCookieHeader = response.headers['set-cookie'];
@@ -193,6 +195,8 @@ class LoginAPI {
         return {
           'success': true,
           'role': userRole,
+          'techStack': techStack,
+          'memberExperiences': memberExperience,
         };
       } else {
         print('로그인 실패: ${response.statusCode} ${response.body}');
