@@ -28,4 +28,19 @@ class ProjectExperienceProvider with ChangeNotifier {
       print(e);
     }
   }
+
+  // 프로젝트 경험 여러개 추가
+  Future<void> createProjectExperiences(
+      List<ProjectExperience> projectExperienceList) async {
+    try {
+      await service.createProjectExperiences(
+          projectExperienceList); // 프로젝트 경험 여러 개 추가 API를 호출
+
+      // 프로젝트 경험 정보 리스트(projectExperiences)에 추가
+      projectExperiences.addAll(projectExperienceList);
+      notifyListeners(); // 상태 변경 알림
+    } catch (e) {
+      print(e);
+    }
+  }
 }
