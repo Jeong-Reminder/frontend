@@ -38,4 +38,36 @@ class ProjectExperienceService {
       throw Exception('프로젝트 경험 추가 실패: ${utf8.decode(response.bodyBytes)}');
     }
   }
+
+  // 프로젝트 경험 여러개 추가 API
+  Future<void> createProjectExperiences(
+      List<ProjectExperience> projectExperiences) async {
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience/list';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('No access token found: $token');
+    }
+
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+      body: jsonEncode(projectExperiences // ProjectExperience 객체의 리스트
+          .map((e) => e.toJson()) // toJson 메서드를 호출하여 해당 객체를 JSON으로 변환
+          .toList()), // JSON -> List 형식으로 변환
+    );
+
+    if (response.statusCode == 200) {
+      // 성공 처리
+      print('프로젝트 경험 여러 개 추가 성공');
+      print('프로젝트 경험 목록: ${utf8.decode(response.bodyBytes)}');
+    } else {
+      // 실패 처리
+      throw Exception('프로젝트 경험 여러 개 추가 실패: ${utf8.decode(response.bodyBytes)}');
+    }
+  }
 }
