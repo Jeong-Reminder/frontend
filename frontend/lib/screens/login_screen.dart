@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
@@ -83,13 +82,20 @@ class _LoginPageState extends State<LoginPage> {
         await againToken(); // 토큰 재발급 시도
       } else {
         print('유효한 토큰이 존재합니다.');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SettingProfile1Page(),
-          ),
-        );
+        final userRole = prefs.getString('userRole');
+        if (userRole != null) {
+          _navigateBasedOnRole(userRole);
+        }
       }
+    }
+  }
+
+  // 역할에 따라 페이지로 이동하는 함수
+  void _navigateBasedOnRole(String role) {
+    if (role == 'ROLE_ADMIN') {
+      Navigator.pushReplacementNamed(context, '/user-info');
+    } else if (role == 'ROLE_USER') {
+      Navigator.pushReplacementNamed(context, '/homepage');
     }
   }
 
@@ -101,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
     await cookieJar.deleteAll(); // 쿠키 삭제
   }
 
-  // 토큰 재발급 API
+  // 토큰 재발급 API(자동 로그인 체크 시)
   Future<void> againToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -144,13 +150,11 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         print('토큰 재발급 성공!');
-        // 토큰 재발급 성공 시
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SettingProfile1Page(),
-          ),
-        );
+        // 토큰 재발급 성공 시 역할에 따라 페이지로 이동
+        final userRole = prefs.getString('userRole');
+        if (userRole != null) {
+          _navigateBasedOnRole(userRole);
+        }
       } else {
         print('토큰 재발급 실패: ${response.statusCode} ${response.body}');
       }
@@ -352,6 +356,8 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushNamed(context, '/homepage');
                           }
                         }
+                        // userRole 저장
+                        await prefs.setString('userRole', result['role']);
                       } else {
                         // 로그인 실패 처리
                       }
