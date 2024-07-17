@@ -190,6 +190,7 @@ class _MyUserPageState extends State<MyUserPage> {
                 profileUrl: 'assets/images/profile.png',
                 name: '민택기',
                 showSubTitle: true,
+                showExperienceButton: true, // 내 경험 보러가기
               ),
 
               const SizedBox(height: 25),
