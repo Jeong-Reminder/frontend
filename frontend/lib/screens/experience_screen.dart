@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/projectExperience_model.dart';
 
-class ExperiencePage extends StatefulWidget {
-  const ExperiencePage({super.key});
+class ExperiencePage extends StatelessWidget {
+  final List<ProjectExperience> experiences;
 
-  @override
-  State<ExperiencePage> createState() => _ExperiencePageState();
-}
+  const ExperiencePage({required this.experiences, super.key});
 
-class _ExperiencePageState extends State<ExperiencePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,37 +43,61 @@ class _ExperiencePageState extends State<ExperiencePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '✨(이름)의 빛나는 경험✨',
+              '✨소진수의 빛나는 경험✨',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 20),
-            ExpansionTile(
-              title: userInfo(
-                  title: '프로젝트명',
-                  titleSize: 20,
-                  info: '음식점 사장님들을 위한 chatGPT를 이용한 AI 기반 운영꿀팁 다이닝 어플리케이션'),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
+            Expanded(
+              child: ListView.builder(
+                itemCount: experiences.length,
+                itemBuilder: (context, index) {
+                  final experience = experiences[index];
+                  return ExpansionTile(
+                    title: userInfo(
+                      title: '프로젝트명',
+                      titleSize: 20,
+                      info: experience.experienceName,
+                    ),
                     children: [
-                      userInfo(title: '나의 역할', titleSize: 18, info: '팀장'),
-                      userInfo(
-                          title: '프로젝트 경험',
-                          titleSize: 18,
-                          info: '프로젝트 경험에 대한 것...'),
-                      userInfo(
-                          title: '깃허브 프로젝트 링크',
-                          titleSize: 18,
-                          info: 'https://github.com/Jeong-Reminder/'),
-                      userInfo(title: '프로젝트 기간', titleSize: 18, info: '1개월'),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          children: [
+                            userInfo(
+                              title: '나의 역할',
+                              titleSize: 18,
+                              info: experience.experienceRole,
+                            ),
+                            userInfo(
+                              title: '프로젝트 경험',
+                              titleSize: 18,
+                              info: experience.experienceContent,
+                            ),
+                            userInfo(
+                              title: '깃허브 프로젝트 링크',
+                              titleSize: 18,
+                              info: experience.experienceGithub,
+                            ),
+                            userInfo(
+                              title: '직무',
+                              titleSize: 18,
+                              info: experience.experienceJob,
+                            ),
+                            userInfo(
+                              title: '프로젝트 기간',
+                              titleSize: 18,
+                              info: experience.experienceDate,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
           ],
         ),

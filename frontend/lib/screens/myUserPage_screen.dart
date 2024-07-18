@@ -138,7 +138,9 @@ class _MyUserPageState extends State<MyUserPage> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/homepage');
+            },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
           ),
@@ -188,7 +190,7 @@ class _MyUserPageState extends State<MyUserPage> {
               // 프로필
               const Profile(
                 profileUrl: 'assets/images/profile.png',
-                name: '민택기',
+                name: '소진수',
                 showSubTitle: true,
                 showExperienceButton: true, // 내 경험 보러가기
               ),

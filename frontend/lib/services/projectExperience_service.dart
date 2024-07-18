@@ -70,4 +70,41 @@ class ProjectExperienceService {
       throw Exception('프로젝트 경험 여러 개 추가 실패: ${utf8.decode(response.bodyBytes)}');
     }
   }
+
+  // 내 프로젝트 경험 조회 API
+  Future<List<ProjectExperience>> fetchExperiences() async {
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience';
+
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'access': accessToken,
+      },
+    );
+
+    // 응답 데이터를 UTF-8로 디코딩하고 JSON 형식으로 변환
+    final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+    if (response.statusCode == 200) {
+      // 응답 데이터에서 'data' 필드를 가져와서 리스트로 변환
+      List<ProjectExperience> fetchExperiences = (responseData['data'] as List)
+          .map((projectExperienceData) =>
+              ProjectExperience.fromJson(projectExperienceData))
+          .toList();
+
+      print("내 프로젝트 경험 조회 성공: $fetchExperiences");
+      return fetchExperiences;
+    } else {
+      print("내 프로젝트 경험 조회 실패");
+      return [];
+    }
+  }
 }

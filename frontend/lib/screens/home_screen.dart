@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -212,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MyOwnerPage(),
+                      builder: (context) => const MyUserPage(),
                     ),
                   );
                 },
