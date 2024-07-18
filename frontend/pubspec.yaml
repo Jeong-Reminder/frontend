@@ -1,8 +1,8 @@
 name: frontend
-description: 'A new Flutter project.'
+description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-    sdk: '>=3.2.3 <4.0.0'
+  sdk: ">=3.2.3 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -28,115 +28,115 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-    flutter:
-        sdk: flutter
+  flutter:
+    sdk: flutter
 
-    cupertino_icons: ^1.0.2
-    image_picker: ^1.0.8
-    table_calendar: ^3.1.1
-    flutter_datetime_picker_plus: ^2.2.0
-    intl: ^0.19.0
-    badges: ^3.1.2
-    percent_indicator: ^4.2.3
-    file_picker: ^8.0.0+1
-    excel: ^4.0.3
-    http: ^1.2.1
-    shared_preferences: ^2.2.3
-    cookie_jar: ^4.0.8
-    path_provider: ^2.1.3
-    jwt_decoder: ^2.0.1
-    path: ^1.8.3
-    provider: ^6.1.2
-    toggle_switch: ^2.3.0
+  cupertino_icons: ^1.0.2
+  image_picker: ^1.0.8
+  table_calendar: ^3.1.1
+  flutter_datetime_picker_plus: ^2.2.0
+  intl: ^0.19.0
+  badges: ^3.1.2
+  percent_indicator: ^4.2.3
+  file_picker: ^8.0.0+1
+  excel: ^4.0.3
+  http: ^1.2.0
+  shared_preferences: ^2.2.3
+  cookie_jar: ^4.0.8
+  path_provider: ^2.1.3
+  jwt_decoder: ^2.0.1
+  path: ^1.8.3
+  provider: ^6.1.2
+  toggle_switch: ^2.3.0
 
 dev_dependencies:
-    flutter_test:
-        sdk: flutter
+  flutter_test:
+    sdk: flutter
 
-    flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-    # The following line ensures that the Material Icons font is
-    # included with your application, so that you can use the icons in
-    # the material Icons class.
-    uses-material-design: true
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
 
-    # To add assets to your application, add an assets section, like this:
-    assets:
-        - assets/images/sungkyul.png
-        - assets/images/mustRead.png
-        - assets/images/coloredMustRead.png
-        - assets/images/vote.png
-        - assets/images/logo.png
-        - assets/images/general.png
-        - assets/images/grade.png
-        - assets/images/competition.png
-        - assets/images/company.png
-        - assets/images/etc.png
-        - assets/images/light.png
-        - assets/images/smile.png
-        - assets/images/good.png
-        - assets/images/votecheck.png
-        - assets/images/addsquare.png
-        - assets/images/classselect.png
-        - assets/images/contestnotice.png
-        - assets/images/profile.png
-        - assets/images/cyclingPerson.png
-        - assets/images/billiard.png
-        - assets/images/projectExperience.png
-        - assets/images/githubLogo.png
-        - assets/images/calendar.png
-        - assets/images/send.png
-        - assets/images/userInfoImg.png
-        - assets/images/teamRecruitImg.png
-        - assets/images/contestImg.png
-        - assets/images/filtering.png
-        - assets/images/Folder_send_light.png
-        - assets/skilImages/typescript.png
-        - assets/skilImages/javascript.png
-        - assets/skilImages/tailwindcss.png
-        - assets/skilImages/docker.png
-        - assets/skilImages/eslint.png
-        - assets/skilImages/figma.png
-        - assets/skilImages/html.png
-        - assets/skilImages/npm.png
-        - assets/skilImages/prettier.png
-        - assets/skilImages/react.png
-        - assets/skilImages/vscode.png
-        - assets/skilImages/css.png
-        - assets/skilImages/yarn.png
-        - assets/skilImages/discord.png
-        - assets/skilImages/github.png
-        - assets/skilImages/notion.png
-        - assets/skilImages/slack.png
-        - assets/skilImages/zoom.png
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/sungkyul.png
+    - assets/images/mustRead.png
+    - assets/images/coloredMustRead.png
+    - assets/images/vote.png
+    - assets/images/logo.png
+    - assets/images/general.png
+    - assets/images/grade.png
+    - assets/images/competition.png
+    - assets/images/company.png
+    - assets/images/etc.png
+    - assets/images/light.png
+    - assets/images/smile.png
+    - assets/images/good.png
+    - assets/images/votecheck.png
+    - assets/images/addsquare.png
+    - assets/images/classselect.png
+    - assets/images/contestnotice.png
+    - assets/images/profile.png
+    - assets/images/cyclingPerson.png
+    - assets/images/billiard.png
+    - assets/images/projectExperience.png
+    - assets/images/githubLogo.png
+    - assets/images/calendar.png
+    - assets/images/send.png
+    - assets/images/userInfoImg.png
+    - assets/images/teamRecruitImg.png
+    - assets/images/contestImg.png
+    - assets/images/filtering.png
+    - assets/images/Folder_send_light.png
+    - assets/skilImages/typescript.png
+    - assets/skilImages/javascript.png
+    - assets/skilImages/tailwindcss.png
+    - assets/skilImages/docker.png
+    - assets/skilImages/eslint.png
+    - assets/skilImages/figma.png
+    - assets/skilImages/html.png
+    - assets/skilImages/npm.png
+    - assets/skilImages/prettier.png
+    - assets/skilImages/react.png
+    - assets/skilImages/vscode.png
+    - assets/skilImages/css.png
+    - assets/skilImages/yarn.png
+    - assets/skilImages/discord.png
+    - assets/skilImages/github.png
+    - assets/skilImages/notion.png
+    - assets/skilImages/slack.png
+    - assets/skilImages/zoom.png
 
-    # An image asset can refer to one or more resolution-specific "variants", see
-    # https://flutter.dev/assets-and-images/#resolution-aware
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware
 
-    # For details regarding adding assets from package dependencies, see
-    # https://flutter.dev/assets-and-images/#from-packages
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
 
-    # To add custom fonts to your application, add a fonts section here,
-    # in this "flutter" section. Each entry in this list should have a
-    # "family" key with the font family name, and a "fonts" key with a
-    # list giving the asset and other descriptors for the font. For
-    # example:
-    # fonts:
-    #   - family: Schyler
-    #     fonts:
-    #       - asset: fonts/Schyler-Regular.ttf
-    #       - asset: fonts/Schyler-Italic.ttf
-    #         style: italic
-    #   - family: Trajan Pro
-    #     fonts:
-    #       - asset: fonts/TrajanPro.ttf
-    #       - asset: fonts/TrajanPro_Bold.ttf
-    #         weight: 700
-    #
-    # For details regarding fonts from package dependencies,
-    # see https://flutter.dev/custom-fonts/#from-packages
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages

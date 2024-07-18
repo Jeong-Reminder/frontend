@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/favorite_screen.dart';
 import 'package:frontend/widgets/account_widget.dart';
+import 'package:frontend/widgets/field_list.dart';
 import 'package:frontend/widgets/profile_widget.dart';
+import 'package:frontend/widgets/tool_list.dart';
+import 'package:provider/provider.dart';
 
 class MyUserPage extends StatefulWidget {
   const MyUserPage({super.key});
@@ -14,119 +18,7 @@ class MyUserPage extends StatefulWidget {
 class _MyUserPageState extends State<MyUserPage> {
   bool isExpanded = false; // 내 팀 현황 확장성
 
-  List<Map<String, dynamic>> fieldList = [
-    {
-      'logoUrl': 'assets/skilImages/typescript.png',
-      'title': 'TYPESCRIPT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF037BCB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/javascript.png',
-      'title': 'JAVASCRIPT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF5DF1D),
-    },
-    {
-      'logoUrl': 'assets/skilImages/tailwindcss.png',
-      'title': 'TAILWINDCSS',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF3DB1AB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/html.png',
-      'title': 'HTML5',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFE35026),
-    },
-    {
-      'logoUrl': 'assets/skilImages/css.png',
-      'title': 'CSS3',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF1472B6),
-    },
-    {
-      'logoUrl': 'assets/skilImages/react.png',
-      'title': 'REACT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFF61DAFB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/npm.png',
-      'title': 'NPM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFCB3837),
-    },
-    {
-      'logoUrl': 'assets/skilImages/vscode.png',
-      'title': 'VISUAL STUDIO CODE',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0078D7),
-    },
-    {
-      'logoUrl': 'assets/skilImages/docker.png',
-      'title': 'DOCKER',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0BB7ED),
-    },
-    {
-      'logoUrl': 'assets/skilImages/yarn.png',
-      'title': 'YARN',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2C8EBB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/prettier.png',
-      'title': 'PRETTIER',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF8B83E),
-    },
-    {
-      'logoUrl': 'assets/skilImages/eslint.png',
-      'title': 'ESLINT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4B3263),
-    },
-    {
-      'logoUrl': 'assets/skilImages/figma.png',
-      'title': 'FIGMA',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFF24D1D),
-    },
-  ];
-
-  List<Map<String, dynamic>> toolsList = [
-    {
-      'logoUrl': 'assets/skilImages/github.png',
-      'title': 'GITHUB',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF111011),
-    },
-    {
-      'logoUrl': 'assets/skilImages/notion.png',
-      'title': 'NOTION',
-      'titleColor': Colors.white,
-      'badgeColor': Colors.black,
-    },
-    {
-      'logoUrl': 'assets/skilImages/slack.png',
-      'title': 'SLACK',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4A144C),
-    },
-    {
-      'logoUrl': 'assets/skilImages/zoom.png',
-      'title': 'ZOOM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2D8CFF),
-    },
-    {
-      'logoUrl': 'assets/skilImages/discord.png',
-      'title': 'DISCORD',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF5765F2),
-    }
-  ];
+  List<Map<String, dynamic>> developmentField = []; // 학생이 선택한 development field
 
   @override
   Widget build(BuildContext context) {
@@ -261,6 +153,8 @@ class _MyUserPageState extends State<MyUserPage> {
                   ),
                   IconButton(
                     onPressed: () {
+                      getField();
+                      print(developmentField);
                       setState(() {
                         isExpanded = !isExpanded;
                       });

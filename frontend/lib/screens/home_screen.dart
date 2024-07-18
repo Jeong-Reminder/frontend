@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -208,11 +210,11 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MyOwnerPage(),
+                      builder: (context) => const MyUserPage(),
                     ),
                   );
                 },

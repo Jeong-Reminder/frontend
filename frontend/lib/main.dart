@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
+import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/login_services.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AdminProvider()),
         ChangeNotifierProvider(create: (_) => ProjectExperienceProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
       child: const MyApp(),
     ),
