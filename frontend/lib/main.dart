@@ -64,7 +64,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
         '/member-experience': (context) => const SettingProfile2Page(),
-        '/experience': (context) => const ExperiencePage(experiences: []),
+        '/experience': (context) => const ExperiencePage(
+              experiences: [],
+              name: '',
+            ),
         '/homepage': (context) => const HomePage(),
       },
     );

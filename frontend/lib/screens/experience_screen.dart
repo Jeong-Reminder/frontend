@@ -3,21 +3,24 @@ import 'package:frontend/models/projectExperience_model.dart';
 
 class ExperiencePage extends StatefulWidget {
   final List<ProjectExperience> experiences;
+  final String name;
 
-  const ExperiencePage({required this.experiences, super.key});
+  const ExperiencePage({
+    required this.experiences,
+    required this.name,
+    super.key,
+  });
 
   @override
   ExperiencePageState createState() => ExperiencePageState();
 }
 
 class ExperiencePageState extends State<ExperiencePage> {
-  // 각 ExpansionTile의 확장 상태를 저장하는 리스트
   late List<bool> _isExpanded;
 
   @override
   void initState() {
     super.initState();
-    // 각 경험 항목의 초기 확장 상태를 false로 설정
     _isExpanded = List<bool>.filled(widget.experiences.length, false);
   }
 
@@ -59,9 +62,9 @@ class ExperiencePageState extends State<ExperiencePage> {
           children: [
             Row(
               children: [
-                const Text(
-                  '✨소진수의 빛나는 경험✨',
-                  style: TextStyle(
+                Text(
+                  '✨${widget.name}의 빛나는 경험✨',
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),

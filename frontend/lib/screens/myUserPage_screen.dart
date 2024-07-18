@@ -15,19 +15,23 @@ class MyUserPage extends StatefulWidget {
 class _MyUserPageState extends State<MyUserPage> {
   bool isExpanded = false; // 내 팀 현황 확장성 여부를 나타내는 변수
   String? studentId = ''; // 학번을 저장할 변수, 기본 값을 빈 문자열로 설정
+  String? name = ''; // 이름을 저장할 변수, 기본 값을 빈 문자열로 설정
+  String? status = ''; // 상태를 저장할 변수, 기본 값을 빈 문자열로 설정
 
   @override
   void initState() {
     super.initState();
-    _loadStudentId(); // 학번을 로드하는 메서드 호출
+    _loadCredentials(); // 학번을 로드하는 메서드 호출
   }
 
-  // 학번을 로드하는 메서드
-  Future<void> _loadStudentId() async {
+  // 학번, 이름, 재적상태를 로드하는 메서드
+  Future<void> _loadCredentials() async {
     final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
     final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
     setState(() {
       studentId = credentials['studentId'] ?? ''; // 학번 설정, 없으면 빈 문자열로 설정
+      name = credentials['name'] ?? ''; // 이름 설정, 없으면 빈 문자열로 설정
+      status = credentials['status'] ?? ''; // 상태 설정, 없으면 빈 문자열로 설정
     });
   }
 
@@ -209,10 +213,11 @@ class _MyUserPageState extends State<MyUserPage> {
               // 프로필
               Profile(
                 profileUrl: 'assets/images/profile.png',
-                name: '소진수',
+                name: name ?? '', // 이름 전달
+                status: status ?? '', // 상태 전달
                 showSubTitle: true,
                 showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
-                studentId: studentId!, // 학번 전달
+                studentId: studentId ?? '', // 학번 전달
               ),
               const SizedBox(height: 25),
               const Text(

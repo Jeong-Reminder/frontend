@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 class Profile extends StatelessWidget {
   final String profileUrl;
   final String name;
+  final String status;
   final bool showSubTitle;
   final bool showExperienceButton;
   final String studentId;
@@ -14,6 +15,7 @@ class Profile extends StatelessWidget {
   const Profile({
     required this.profileUrl,
     required this.name,
+    required this.status,
     required this.showSubTitle,
     required this.studentId,
     this.showExperienceButton = false,
@@ -72,6 +74,7 @@ class Profile extends StatelessWidget {
                               MaterialPageRoute(
                                 builder: (context) => ExperiencePage(
                                   experiences: experiences,
+                                  name: name,
                                 ),
                               ),
                             );
@@ -101,14 +104,14 @@ class Profile extends StatelessWidget {
                   if (showSubTitle)
                     Row(
                       children: [
-                        Text(studentId), // 학번 또는 다른 정보를 표시
+                        Text(studentId), // 학번 표시
                         const SizedBox(width: 5),
                         const CircleAvatar(
                           radius: 2,
                           backgroundColor: Color(0xFF808080),
                         ),
                         const SizedBox(width: 5),
-                        const Text('재학생'),
+                        Text(status), // 상태 표시
                       ],
                     ),
                 ],
