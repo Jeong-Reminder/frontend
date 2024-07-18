@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/screens/favorite_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/profile_widget.dart';
 
@@ -12,8 +13,25 @@ class MyUserPage extends StatefulWidget {
 }
 
 class _MyUserPageState extends State<MyUserPage> {
-  bool isExpanded = false; // 내 팀 현황 확장성
+  bool isExpanded = false; // 내 팀 현황 확장성 여부를 나타내는 변수
+  String? studentId = ''; // 학번을 저장할 변수, 기본 값을 빈 문자열로 설정
 
+  @override
+  void initState() {
+    super.initState();
+    _loadStudentId(); // 학번을 로드하는 메서드 호출
+  }
+
+  // 학번을 로드하는 메서드
+  Future<void> _loadStudentId() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      studentId = credentials['studentId'] ?? ''; // 학번 설정, 없으면 빈 문자열로 설정
+    });
+  }
+
+  // 개발 필드 리스트
   List<Map<String, dynamic>> fieldList = [
     {
       'logoUrl': 'assets/skilImages/typescript.png',
@@ -95,6 +113,7 @@ class _MyUserPageState extends State<MyUserPage> {
     },
   ];
 
+  // 개발 도구 리스트
   List<Map<String, dynamic>> toolsList = [
     {
       'logoUrl': 'assets/skilImages/github.png',
@@ -133,13 +152,13 @@ class _MyUserPageState extends State<MyUserPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류 방지
         toolbarHeight: 70,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/homepage');
+              Navigator.pushNamed(context, '/homepage'); // 홈 페이지로 이동
             },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
@@ -160,7 +179,7 @@ class _MyUserPageState extends State<MyUserPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FavoritePage(),
+                  builder: (context) => const FavoritePage(), // 즐겨찾기 페이지로 이동
                 ),
               );
             },
@@ -188,13 +207,13 @@ class _MyUserPageState extends State<MyUserPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 프로필
-              const Profile(
+              Profile(
                 profileUrl: 'assets/images/profile.png',
                 name: '소진수',
                 showSubTitle: true,
-                showExperienceButton: true, // 내 경험 보러가기
+                showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                studentId: studentId!, // 학번 전달
               ),
-
               const SizedBox(height: 25),
               const Text(
                 'DEVELOPMENT FIELD',
@@ -212,7 +231,6 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: fieldList.map((field) {
                   // 괄호 안에 있는 변수는 리스트를 map한 이름
                   return badge(
@@ -239,8 +257,6 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-
-                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: toolsList.map((tools) {
                   return badge(
                     tools['logoUrl'],
@@ -338,6 +354,7 @@ class _MyUserPageState extends State<MyUserPage> {
     );
   }
 
+  // 배지 위젯 생성
   Widget badge(
     String logoUrl,
     String title,

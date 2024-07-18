@@ -9,11 +9,13 @@ class Profile extends StatelessWidget {
   final String name;
   final bool showSubTitle;
   final bool showExperienceButton;
+  final String studentId;
 
   const Profile({
     required this.profileUrl,
     required this.name,
     required this.showSubTitle,
+    required this.studentId,
     this.showExperienceButton = false,
     super.key,
   });
@@ -97,16 +99,16 @@ class Profile extends StatelessWidget {
                     ],
                   ),
                   if (showSubTitle)
-                    const Row(
+                    Row(
                       children: [
-                        Text('20190906'), // 학번 또는 다른 정보를 표시
-                        SizedBox(width: 5),
-                        CircleAvatar(
+                        Text(studentId), // 학번 또는 다른 정보를 표시
+                        const SizedBox(width: 5),
+                        const CircleAvatar(
                           radius: 2,
                           backgroundColor: Color(0xFF808080),
                         ),
-                        SizedBox(width: 5),
-                        Text('재학생'),
+                        const SizedBox(width: 5),
+                        const Text('재학생'),
                       ],
                     ),
                 ],

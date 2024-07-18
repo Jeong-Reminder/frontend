@@ -179,6 +179,7 @@ class LoginAPI {
           // 새 토큰 저장
           await prefs.setString('accessToken', accessToken); // 액세스 토큰 저장
           await prefs.setString('refreshToken', refreshToken); // 리프레시 토큰 저장
+          await prefs.setString('studentId', studentId); // 학번 저장
 
           final uri = Uri.parse(loginAddress);
           cookieJar.saveFromResponse(
@@ -187,8 +188,10 @@ class LoginAPI {
           // 저장된 토큰 로그로 확인
           final savedAccessToken = prefs.getString('accessToken');
           final savedRefreshToken = prefs.getString('refreshToken');
+          final savedStudentId = prefs.getString('studentId');
           print('저장된 액세스 토큰: $savedAccessToken');
           print('저장된 리프레시 토큰: $savedRefreshToken');
+          print('저장된 학번: $savedStudentId');
         }
         print('로그인 성공');
 
