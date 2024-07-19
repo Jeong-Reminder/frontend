@@ -43,4 +43,20 @@ class ProjectExperienceProvider with ChangeNotifier {
       print(e);
     }
   }
+
+  // 내 프로젝트 경험 조회
+  Future<void> fetchExperiences() async {
+    try {
+      // ProjectExperienceService의 인스턴스를 통해 프로젝트 경험 정보를 가져옴
+      List<ProjectExperience> fetchExperiences =
+          await service.fetchExperiences();
+
+      // fetchExperiences 매서드로 가져온 프로젝트 경험 정보를 projectExperiences 리스트에 할당
+      projectExperiences = fetchExperiences;
+
+      notifyListeners(); // 상태 변경을 알림
+    } catch (e) {
+      print(e);
+    }
+  }
 }

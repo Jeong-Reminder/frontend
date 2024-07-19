@@ -3,6 +3,7 @@ import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
@@ -63,6 +64,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
         '/member-experience': (context) => const SettingProfile2Page(),
+        '/experience': (context) => const ExperiencePage(
+              experiences: [],
+              name: '',
+            ),
         '/homepage': (context) => const HomePage(),
       },
     );

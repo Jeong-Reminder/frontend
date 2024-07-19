@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/projectExperience_model.dart';
 
 class ExperiencePage extends StatefulWidget {
-  const ExperiencePage({super.key});
+  final List<ProjectExperience> experiences;
+  final String name;
+
+  const ExperiencePage({
+    required this.experiences,
+    required this.name,
+    super.key,
+  });
 
   @override
-  State<ExperiencePage> createState() => _ExperiencePageState();
+  ExperiencePageState createState() => ExperiencePageState();
 }
 
-class _ExperiencePageState extends State<ExperiencePage> {
+class ExperiencePageState extends State<ExperiencePage> {
+  late List<bool> _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = List<bool>.filled(widget.experiences.length, false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,38 +60,104 @@ class _ExperiencePageState extends State<ExperiencePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '✨(이름)의 빛나는 경험✨',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ExpansionTile(
-              title: userInfo(
-                  title: '프로젝트명',
-                  titleSize: 20,
-                  info: '음식점 사장님들을 위한 chatGPT를 이용한 AI 기반 운영꿀팁 다이닝 어플리케이션'),
+            Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    children: [
-                      userInfo(title: '나의 역할', titleSize: 18, info: '팀장'),
-                      userInfo(
-                          title: '프로젝트 경험',
-                          titleSize: 18,
-                          info: '프로젝트 경험에 대한 것...'),
-                      userInfo(
-                          title: '깃허브 프로젝트 링크',
-                          titleSize: 18,
-                          info: 'https://github.com/Jeong-Reminder/'),
-                      userInfo(title: '프로젝트 기간', titleSize: 18, info: '1개월'),
-                    ],
+                Text(
+                  '✨${widget.name}의 빛나는 경험✨',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Spacer(),
+                Visibility(
+                  visible: _isExpanded.contains(true),
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      height: 20,
+                      width: 100,
+                      margin: const EdgeInsets.only(left: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2A72E7),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '경험 수정하기',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.experiences.length,
+                itemBuilder: (context, index) {
+                  final experience = widget.experiences[index];
+                  return Column(
+                    children: [
+                      ExpansionTile(
+                        title: userInfo(
+                          title: '프로젝트명',
+                          titleSize: 20,
+                          info: experience.experienceName,
+                        ),
+                        onExpansionChanged: (bool expanded) {
+                          setState(() {
+                            _isExpanded[index] = expanded;
+                          });
+                        },
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Column(
+                              children: [
+                                userInfo(
+                                  title: '나의 역할',
+                                  titleSize: 18,
+                                  info: experience.experienceRole,
+                                ),
+                                userInfo(
+                                  title: '프로젝트 경험',
+                                  titleSize: 18,
+                                  info: experience.experienceContent,
+                                ),
+                                userInfo(
+                                  title: '깃허브 프로젝트 링크',
+                                  titleSize: 18,
+                                  info: experience.experienceGithub,
+                                ),
+                                userInfo(
+                                  title: '직무',
+                                  titleSize: 18,
+                                  info: experience.experienceJob,
+                                ),
+                                userInfo(
+                                  title: '프로젝트 기간',
+                                  titleSize: 18,
+                                  info: experience.experienceDate,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -84,10 +166,11 @@ class _ExperiencePageState extends State<ExperiencePage> {
   }
 
   // 회원 정보 위젯
-  Widget userInfo(
-      {required String title,
-      required double titleSize,
-      required String info}) {
+  Widget userInfo({
+    required String title,
+    required double titleSize,
+    required String info,
+  }) {
     return Column(
       children: [
         ListTile(
