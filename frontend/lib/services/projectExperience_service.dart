@@ -6,7 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProjectExperienceService {
   Future<String?> getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
+    return prefs.getString('accessToken');
+  }
+
+  Future<List<String>> getMemberExperienceIds() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('memberExperienceIds') ?? [];
   }
 
   // 프로젝트 경험 추가 API
@@ -17,7 +22,7 @@ class ProjectExperienceService {
 
     final token = await getToken();
     if (token == null) {
-      throw Exception('No access token found: $token');
+      throw Exception('Access token을 찾을 수 없습니다.');
     }
 
     final response = await http.post(
@@ -26,15 +31,15 @@ class ProjectExperienceService {
         'Content-Type': 'application/json',
         'access': token,
       },
-      body: jsonEncode(projectExperience.toJson()), // 인스턴스를 사용하여 toJson 메서드를 호출
+      body: jsonEncode(projectExperience.toJson()),
     );
 
+    final responseData = utf8.decode(response.bodyBytes);
+
     if (response.statusCode == 200) {
-      // 성공 처리
       print('프로젝트 경험 추가 성공');
-      print('프로젝트 경험 목록: ${utf8.decode(response.bodyBytes)}');
+      print('프로젝트 경험 목록: $responseData');
     } else {
-      // 실패 처리
       throw Exception('프로젝트 경험 추가 실패: ${utf8.decode(response.bodyBytes)}');
     }
   }
@@ -47,7 +52,7 @@ class ProjectExperienceService {
 
     final token = await getToken();
     if (token == null) {
-      throw Exception('No access token found: $token');
+      throw Exception('Access token을 찾을 수 없습니다.');
     }
 
     final response = await http.post(
@@ -56,17 +61,13 @@ class ProjectExperienceService {
         'Content-Type': 'application/json',
         'access': token,
       },
-      body: jsonEncode(projectExperiences // ProjectExperience 객체의 리스트
-          .map((e) => e.toJson()) // toJson 메서드를 호출하여 해당 객체를 JSON으로 변환
-          .toList()), // JSON -> List 형식으로 변환
+      body: jsonEncode(projectExperiences.map((e) => e.toJson()).toList()),
     );
 
     if (response.statusCode == 200) {
-      // 성공 처리
       print('프로젝트 경험 여러 개 추가 성공');
       print('프로젝트 경험 목록: ${utf8.decode(response.bodyBytes)}');
     } else {
-      // 실패 처리
       throw Exception('프로젝트 경험 여러 개 추가 실패: ${utf8.decode(response.bodyBytes)}');
     }
   }
@@ -78,11 +79,10 @@ class ProjectExperienceService {
 
     final accessToken = await getToken();
     if (accessToken == null) {
-      throw Exception('엑세스 토큰을 찾을 수 없음');
+      throw Exception('Access token을 찾을 수 없습니다.');
     }
 
     final url = Uri.parse(baseUrl);
-
     final response = await http.get(
       url,
       headers: <String, String>{
@@ -90,11 +90,9 @@ class ProjectExperienceService {
       },
     );
 
-    // 응답 데이터를 UTF-8로 디코딩하고 JSON 형식으로 변환
     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
 
     if (response.statusCode == 200) {
-      // 응답 데이터에서 'data' 필드를 가져와서 리스트로 변환
       List<ProjectExperience> fetchExperiences = (responseData['data'] as List)
           .map((projectExperienceData) =>
               ProjectExperience.fromJson(projectExperienceData))
@@ -105,6 +103,53 @@ class ProjectExperienceService {
     } else {
       print("내 프로젝트 경험 조회 실패");
       return [];
+    }
+  }
+
+  // 프로젝트 경험 수정 API
+  Future<void> updateProjectExperience(
+      ProjectExperience projectExperience) async {
+    final int? id = projectExperience.id; // projectExperience 객체에서 id를 추출
+    if (id == null) {
+      throw Exception('프로젝트 경험 ID가 존재하지 않습니다.');
+    }
+
+    final baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience/$id';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    final experienceIds = await getMemberExperienceIds();
+
+    // 디버깅: experienceIds와 id 출력
+    print('경험 ID 리스트: $experienceIds');
+    print('수정하려는 ID: $id');
+
+    // 경험 ID가 리스트에 포함되어 있는지 확인
+    if (!experienceIds.contains(id.toString())) {
+      throw Exception('유효하지 않은 경험 ID: $id');
+    }
+
+    final response = await http.put(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+      body: jsonEncode(projectExperience.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      print('프로젝트 경험 수정 성공');
+      print('수정된 프로젝트 경험: ${utf8.decode(response.bodyBytes)}');
+    } else {
+      // 디버깅 용도로 응답을 출력
+      print(
+          '프로젝트 경험 수정 실패: ${utf8.decode(response.bodyBytes)}, ${response.statusCode}');
+      throw Exception('프로젝트 경험 수정 실패');
     }
   }
 }

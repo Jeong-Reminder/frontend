@@ -204,6 +204,13 @@ class LoginAPI {
           print('저장된 학번: $savedStudentId');
           print('저장된 이름: $savedName');
           print('저장된 상태: $savedStatus');
+
+          // memberExperience 배열에서 id 값 추출하여 저장
+          final memberExperienceIds = (memberExperience as List)
+              .map((exp) => (exp['id'] as int).toString()) // int를 String으로 변환
+              .toList();
+          await prefs.setStringList('memberExperienceIds', memberExperienceIds);
+          print('저장된 memberExperience id: $memberExperienceIds');
         }
         print('로그인 성공');
 
