@@ -98,7 +98,9 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
             const Profile(
               profileUrl: 'assets/images/profile.png',
               name: '홍길동',
+              status: 'Admin',
               showSubTitle: false,
+              studentId: '2090',
             ),
             const SizedBox(height: 25),
 
