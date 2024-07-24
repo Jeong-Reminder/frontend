@@ -22,6 +22,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
 
   ValueNotifier<bool> isButtonEnabled =
       ValueNotifier(false); // 버튼 활성화 상태를 관리하는 변수
+  ValueNotifier<bool> isChatUrlValid =
+      ValueNotifier(false); // 오픈채팅 URL 유효성 상태를 관리하는 변수
 
   @override
   void initState() {
@@ -50,6 +52,9 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     isButtonEnabled.value = _titleController.text.isNotEmpty &&
         _contentController.text.isNotEmpty &&
         _chatUrlController.text.isNotEmpty;
+
+    // 오픈채팅 URL이 유효한지 확인하여 상태 업데이트
+    isChatUrlValid.value = _chatUrlController.text.isNotEmpty;
   }
 
   // 날짜 선택기 함수
@@ -218,7 +223,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   color: Colors.black54,
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
               const Text(
                 '인원 수',
                 style: TextStyle(
@@ -361,7 +366,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
               ),
               const SizedBox(height: 20),
               const Text(
-                '카카오 오픈채팅방 링크',
+                '카카오톡 오픈채팅방 링크',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -387,7 +392,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                         hintText: '생성할 오픈채팅방 이름 입력해주세요',
                         hintStyle: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.normal,
+                          fontWeight: FontWeight.bold,
                           color: Color(0xFFC5C5C7),
                         ),
                         border: InputBorder.none,
@@ -404,23 +409,28 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               GestureDetector(
                 onTap: _launchChatUrl,
                 child: Container(
                   height: 30,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFACC7F1),
+                    color: const Color(0xFFDBE7FB),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Center(
-                    child: Text(
-                      '생성된 오픈채팅 링크 열어보기',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  child: Center(
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: isChatUrlValid,
+                      builder: (context, isValid, child) {
+                        return Text(
+                          '생성된 오픈채팅 링크 열어보기',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isValid ? Colors.black : Colors.black54,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -468,7 +478,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   hintText: '내용을 작성해주세요',
                   hintStyle: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.normal,
+                    fontWeight: FontWeight.bold,
                     color: Color(0xFFC5C5C7),
                   ),
                   border: InputBorder.none,
