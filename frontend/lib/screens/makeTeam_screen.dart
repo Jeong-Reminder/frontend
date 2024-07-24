@@ -297,13 +297,15 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                         color: const Color(0xFFDBE7FB),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           '종료 기간 선택',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: selectedEndDate != null
+                                ? Colors.black
+                                : Colors.black54,
                           ),
                         ),
                       ),
