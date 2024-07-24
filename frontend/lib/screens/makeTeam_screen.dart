@@ -8,15 +8,16 @@ class MakeTeamPage extends StatefulWidget {
 }
 
 class _MakeTeamPageState extends State<MakeTeamPage> {
-  int selectedPeopleCount = -1; // 선택된 인원 수를 저장하는 상태 변수
-  String selectedField = ''; // 선택된 희망 분야를 저장하는 상태 변수
+  int selectedPeopleCount = -1; // 선택된 인원 수를 저장하는 변수
+  String selectedField = ''; // 선택된 희망 분야를 저장하는 변수
+  DateTime? selectedEndDate; // 선택된 모집 종료 기간을 저장하는 변수
+
   final TextEditingController _titleController =
       TextEditingController(); // 제목 텍스트 제어하는 컨트롤러
   final TextEditingController _contentController =
       TextEditingController(); // 내용 텍스트 제어하는 컨트롤러
 
-  ValueNotifier<bool>
-      isButtonEnabled = // ValueNotifier는 값이 변경될 때 리스너들에게 알릴 수 있는 간단한 클래스로, 주로 상태 관리에 사용
+  ValueNotifier<bool> isButtonEnabled =
       ValueNotifier(false); // 버튼 활성화 상태를 관리하는 변수
 
   @override
@@ -41,6 +42,21 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     // 제목과 내용이 비어있지 않은지 확인하여 버튼 활성화 상태 업데이트
     isButtonEnabled.value =
         _titleController.text.isNotEmpty && _contentController.text.isNotEmpty;
+  }
+
+  // 날짜 선택기 함수
+  Future<void> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2010),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedEndDate) {
+      setState(() {
+        selectedEndDate = picked;
+      });
+    }
   }
 
   // 인원 수 버튼을 생성하는 위젯
@@ -273,17 +289,17 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => _selectEndDate(context), // 날짜 선택 함수 호출
                     child: Container(
                       height: 20,
-                      width: 70,
+                      width: 90,
                       decoration: BoxDecoration(
                         color: const Color(0xFFDBE7FB),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Center(
                         child: Text(
-                          '종료 기간',
+                          '종료 기간 선택',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -294,9 +310,11 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    '23.11.21',
-                    style: TextStyle(
+                  Text(
+                    selectedEndDate != null
+                        ? '${selectedEndDate!.year}.${selectedEndDate!.month}.${selectedEndDate!.day}'
+                        : '날짜를 선택해주세요',
+                    style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       color: Colors.black54,
