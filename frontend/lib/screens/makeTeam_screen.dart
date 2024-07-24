@@ -346,7 +346,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 controller: _titleController,
                 maxLines: 1,
                 decoration: const InputDecoration(
-                  hintText: 'IoT 통합 설계 경진대회',
+                  hintText: '제목을 작성해주세요',
                   hintStyle: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -364,7 +364,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 controller: _contentController,
                 maxLines: null, // 자동으로 확장되는 줄 수
                 decoration: const InputDecoration(
-                  hintText: '경진대회 나가고 싶은데 인원이 부족해서\n관심 있으신 분들과 같이 나가고 싶어요',
+                  hintText: '내용을 작성해주세요',
                   hintStyle: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.normal,
