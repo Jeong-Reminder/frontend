@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MakeTeamPage extends StatefulWidget {
   const MakeTeamPage({super.key});
@@ -16,6 +17,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
       TextEditingController(); // 제목 텍스트 제어하는 컨트롤러
   final TextEditingController _contentController =
       TextEditingController(); // 내용 텍스트 제어하는 컨트롤러
+  final TextEditingController _chatUrlController =
+      TextEditingController(); // 오픈채팅 URL 텍스트 제어하는 컨트롤러
 
   ValueNotifier<bool> isButtonEnabled =
       ValueNotifier(false); // 버튼 활성화 상태를 관리하는 변수
@@ -27,21 +30,26 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
         .addListener(_validateInputs); // 제목 텍스트 변경 시 _validateInputs 호출
     _contentController
         .addListener(_validateInputs); // 내용 텍스트 변경 시 _validateInputs 호출
+    _chatUrlController
+        .addListener(_validateInputs); // 오픈채팅 URL 텍스트 변경 시 _validateInputs 호출
   }
 
   @override
   void dispose() {
     _titleController.removeListener(_validateInputs); // 리스너 제거
     _contentController.removeListener(_validateInputs); // 리스너 제거
+    _chatUrlController.removeListener(_validateInputs); // 리스너 제거
     _titleController.dispose(); // 컨트롤러 폐기
     _contentController.dispose(); // 컨트롤러 폐기
+    _chatUrlController.dispose(); // 컨트롤러 폐기
     super.dispose();
   }
 
   void _validateInputs() {
-    // 제목과 내용이 비어있지 않은지 확인하여 버튼 활성화 상태 업데이트
-    isButtonEnabled.value =
-        _titleController.text.isNotEmpty && _contentController.text.isNotEmpty;
+    // 제목, 내용, 오픈채팅 URL이 비어있지 않은지 확인하여 버튼 활성화 상태 업데이트
+    isButtonEnabled.value = _titleController.text.isNotEmpty &&
+        _contentController.text.isNotEmpty &&
+        _chatUrlController.text.isNotEmpty;
   }
 
   // 날짜 선택기 함수
@@ -56,6 +64,33 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
       setState(() {
         selectedEndDate = picked;
       });
+    }
+  }
+
+  // 오픈채팅 URL을 자동으로 생성하는 함수
+  void _generateChatUrl() {
+    const baseUrl = 'https://open.kakao.com/o/';
+    final chatUrl = '$baseUrl${_chatUrlController.text}';
+
+    setState(() {
+      _chatUrlController.text = chatUrl;
+    });
+
+    _validateInputs(); // URL이 변경되었으므로 입력 유효성 검사를 다시 수행합니다.
+  }
+
+  // 오픈채팅방 링크 열기 함수
+  void _launchChatUrl() async {
+    final chatUrl = _chatUrlController.text;
+    final url = Uri.parse(chatUrl);
+
+    // 디버깅을 위해 URL 출력
+    print('Attempting to launch URL: $chatUrl');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $chatUrl';
     }
   }
 
@@ -324,6 +359,72 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
+              const Text(
+                '카카오 오픈채팅방 링크',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const Text(
+                '오픈채팅방 링크 설정해주세요',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _chatUrlController,
+                      maxLines: 1,
+                      decoration: const InputDecoration(
+                        hintText: '생성할 오픈채팅방 이름 입력해주세요',
+                        hintStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xFFC5C5C7),
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.link),
+                    onPressed: _generateChatUrl,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
+                onTap: _launchChatUrl,
+                child: Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFACC7F1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '생성된 오픈채팅 링크 열어보기',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 30),
               const Text(
                 '글 쓰기',
@@ -377,6 +478,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   fontWeight: FontWeight.normal,
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

@@ -6,7 +6,6 @@ import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
-import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:provider/provider.dart';
@@ -49,9 +48,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached ||
-        state == AppLifecycleState.inactive) {
-      _loginAPI.logoutOnExit(); // 앱이 종료되거나 비활성화될 때 로그아웃 호출
+    if (state == AppLifecycleState.detached) {
+      _loginAPI.logoutOnExit(); // 앱이 종료될 때 로그아웃 호출
     }
   }
 
@@ -60,7 +58,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MaterialApp(
       initialRoute: '/',
       routes: {
-        '/': (context) => const MakeTeamPage(),
+        '/': (context) => const LoginPage(),
         '/add_member': (context) => const AddMemberPage(),
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
