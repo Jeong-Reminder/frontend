@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:frontend/providers/profile_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -38,10 +41,14 @@ class LoginAPI {
   Future<Map<String, dynamic>> loadCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     final studentId = prefs.getString('studentId');
+    final name = prefs.getString('name'); // 이름 불러오기
+    final status = prefs.getString('status'); // 상태 불러오기
     final password = prefs.getString('password');
     final autoLogin = prefs.getBool('isAutoLogin') ?? false;
     return {
       'studentId': studentId,
+      'name': name, // 이름 추가
+      'status': status, // 상태 추가
       'password': password,
       'isAutoLogin': autoLogin,
     };
@@ -143,7 +150,7 @@ class LoginAPI {
 
   // 로그인 API
   Future<Map<String, dynamic>> handleLogin(
-      String studentId, String password) async {
+      BuildContext context, String studentId, String password) async {
     try {
       final url = Uri.parse(loginAddress);
 
@@ -162,6 +169,10 @@ class LoginAPI {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         final userRole = responseData['userRole'];
+        final techStack = responseData['techStack'];
+        final memberExperience = responseData['memberExperiences'];
+        final name = responseData['name'];
+        final status = responseData['status'];
 
         final accessToken = response.headers['access']; // 액세스 토큰 추출
         final setCookieHeader = response.headers['set-cookie'];
@@ -177,6 +188,9 @@ class LoginAPI {
           // 새 토큰 저장
           await prefs.setString('accessToken', accessToken); // 액세스 토큰 저장
           await prefs.setString('refreshToken', refreshToken); // 리프레시 토큰 저장
+          await prefs.setString('studentId', studentId); // 학번 저장
+          await prefs.setString('name', name); // 이름 저장
+          await prefs.setString('status', status); // 재적상태 저장
 
           final uri = Uri.parse(loginAddress);
           cookieJar.saveFromResponse(
@@ -185,14 +199,39 @@ class LoginAPI {
           // 저장된 토큰 로그로 확인
           final savedAccessToken = prefs.getString('accessToken');
           final savedRefreshToken = prefs.getString('refreshToken');
+          final savedStudentId = prefs.getString('studentId');
+          final savedName = prefs.getString('name');
+          final savedStatus = prefs.getString('status');
           print('저장된 액세스 토큰: $savedAccessToken');
           print('저장된 리프레시 토큰: $savedRefreshToken');
+          print('저장된 학번: $savedStudentId');
+          print('저장된 이름: $savedName');
+          print('저장된 상태: $savedStatus');
+
+          // memberExperience 배열에서 id 값 추출하여 저장
+          final memberExperienceIds = (memberExperience as List)
+              .map((exp) => (exp['id'] as int).toString()) // int를 String으로 변환
+              .toList();
+          await prefs.setStringList('memberExperienceIds', memberExperienceIds);
+          print('저장된 memberExperience id: $memberExperienceIds');
+
+          // memberID값 추출
+          final memberId = techStack['memberId'];
+
+          // ProfileProvider를 통해 memberId 저장
+          final profileProvider =
+              Provider.of<ProfileProvider>(context, listen: false);
+
+          profileProvider.memberId = memberId;
+          print("memberID: ${profileProvider.memberId}");
         }
         print('로그인 성공');
 
         return {
           'success': true,
           'role': userRole,
+          'techStack': techStack,
+          'memberExperiences': memberExperience,
         };
       } else {
         print('로그인 실패: ${response.statusCode} ${response.body}');

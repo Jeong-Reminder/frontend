@@ -1,6 +1,4 @@
 class Profile {
-  final int? id;
-  final int? memberId;
   final String? memberName;
   int? memberLevel;
   String? hopeJob;
@@ -9,8 +7,6 @@ class Profile {
   String? developmentTool;
 
   Profile({
-    this.id,
-    this.memberId,
     this.memberName,
     this.memberLevel,
     required this.hopeJob,
@@ -21,8 +17,6 @@ class Profile {
 
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
-      id: json['id'],
-      memberId: json['memberId'],
       memberName: json['memberName'],
       memberLevel: json['memberLevel'],
       hopeJob: json['hopeJob'],

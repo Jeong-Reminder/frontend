@@ -4,34 +4,44 @@ import 'package:frontend/services/profile_service.dart';
 
 class ProfileProvider with ChangeNotifier {
   ProfileService profileService = ProfileService();
-  late int _memberId;
-  late Profile _techStack;
+  Map<String, dynamic>? _techStack;
+  int? _memberId;
 
-  Profile get techStack => _techStack;
-  int get memberId => _memberId;
+  // memberId 꺼내기
+  int get memberId => _memberId!;
 
-  Future<Profile> getProfile() async {
-    await fetchProfile(memberId);
-    return techStack;
+  // 프로필 techStack 꺼내기
+  Map<String, dynamic> get techStack => _techStack!;
+
+  // memberId 저장
+  set memberId(int id) {
+    _memberId = id;
+    notifyListeners();
+  }
+
+  // 프로필 techStack 저장
+  set techStack(Map<String, dynamic> tech) {
+    _techStack = tech;
+    notifyListeners();
   }
 
   // 프로필 생성
   Future<void> createProfile(Profile profile) async {
     try {
-      _memberId = await profileService.createProfile(profile);
-
-      await fetchProfile(memberId);
+      await profileService.createProfile(profile);
+      // memberId = profileId;
+      // notifyListeners();
     } catch (e) {
-      print('에러: ${e.toString()}');
+      throw Exception('에러: ${e.toString()}');
     }
-    notifyListeners();
   }
 
   // 프로필 조회
-  Future<void> fetchProfile(int memberId) async {
-    _techStack = await profileService.fetchProfile(memberId);
+  Future<void> fetchProfile() async {
+    Map<String, dynamic> profile = await profileService.fetchProfile(memberId);
+    techStack = profile;
     notifyListeners();
 
-    print("기술 스택: $techStack");
+    print('techStack: $techStack');
   }
 }

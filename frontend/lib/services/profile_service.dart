@@ -11,7 +11,7 @@ class ProfileService {
   }
 
   // 프로필 생성 API
-  Future<int> createProfile(Profile profile) async {
+  Future<void> createProfile(Profile profile) async {
     const String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
 
@@ -37,16 +37,18 @@ class ProfileService {
 
       final json = jsonDecode(responseData);
       final jsonData = json['data'];
-      int id = jsonData['memberId'];
+      // final id = jsonData['memberId'];
 
-      return id;
+      // return id;
+
+      print('프로필 : $jsonData');
     } else {
       throw Exception('생성 실패: ${response.statusCode} - ${response.body}');
     }
   }
 
   // 프로필 조회 API
-  Future<Profile> fetchProfile(int memberId) async {
+  Future<Map<String, dynamic>> fetchProfile(int memberId) async {
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/member-profile/$memberId';
 
@@ -67,12 +69,11 @@ class ProfileService {
     final responseData = utf8.decode(response.bodyBytes);
 
     if (response.statusCode == 200) {
-      print('조회 성공: $responseData');
-
       final json = jsonDecode(responseData);
       final jsonData = json['data'];
 
-      return Profile.fromJson(jsonData);
+      print('조회 성공: $jsonData');
+      return jsonData;
     } else {
       throw Exception('조회 실패: ${response.statusCode} - ${response.body}');
     }
