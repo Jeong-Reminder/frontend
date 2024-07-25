@@ -563,7 +563,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                           .read<MakeTeamProvider>()
                           .createMakeTeam(makeTeam);
 
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
                     }
                   : null,
               child: Container(

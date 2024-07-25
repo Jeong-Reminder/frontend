@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/memberRecruit_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -380,7 +381,7 @@ class _HomePageState extends State<HomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const MakeTeamPage(),
+                                builder: (context) => const MemberRecruitPage(),
                               ),
                             );
                           },
