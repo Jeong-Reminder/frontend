@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MakeTeamPage extends StatefulWidget {
@@ -19,11 +20,55 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
       TextEditingController(); // 내용 텍스트 제어하는 컨트롤러
   final TextEditingController _chatUrlController =
       TextEditingController(); // 오픈채팅 URL 텍스트 제어하는 컨트롤러
+  final FocusNode _titleFocusNode = FocusNode(); // 포커스 노드
 
   ValueNotifier<bool> isButtonEnabled =
       ValueNotifier(false); // 버튼 활성화 상태를 관리하는 변수
   ValueNotifier<bool> isChatUrlValid =
       ValueNotifier(false); // 오픈채팅 URL 유효성 상태를 관리하는 변수
+
+  // 글 제목 [] 부분 파싱해 경진대회 이름 추출
+  String _parseCompetitionName(String title) {
+    final RegExp regExp = RegExp(
+      // RegExp 객체를 생성하여 정규 표현식 정의
+      r'\[(.*?)\]',
+      caseSensitive: false, // 대소문자 구분 여부
+    );
+    final match =
+        regExp.firstMatch(title); // title 문자열에서 정규 표현식과 일치하는 첫 번째 부분 찾도록
+    if (match != null) {
+      return match.group(1)?.trim() ?? '';
+      // match.group(1)을 사용하여 대괄호 안에 있는 텍스트를 추출
+      // group(1)은 정규 표현식에서 첫 번째 그룹 (.*?)에 해당하는 부분을 반환
+    }
+    return '';
+  }
+
+  int savedPeopleCount = -1;
+  String savedField = '';
+  String? savedEndDate;
+  String savedChatUrl = '';
+  String savedTitle = '';
+  String savedContent = '';
+
+  void _saveData() {
+    setState(() {
+      savedPeopleCount = selectedPeopleCount;
+      savedField = selectedField;
+      savedEndDate = selectedEndDate != null
+          ? DateFormat('yyyy-MM-dd').format(selectedEndDate!)
+          : null;
+      savedChatUrl = _chatUrlController.text;
+      savedTitle = _titleController.text;
+      savedContent = _contentController.text;
+    });
+    print('인원 수: $savedPeopleCount');
+    print('희망 분야: $savedField');
+    print('모집 종료 기간: $savedEndDate');
+    print('오픈채팅 URL: $savedChatUrl');
+    print('제목: $savedTitle');
+    print('내용: $savedContent');
+  }
 
   @override
   void initState() {
@@ -34,6 +79,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
         .addListener(_validateInputs); // 내용 텍스트 변경 시 _validateInputs 호출
     _chatUrlController
         .addListener(_validateInputs); // 오픈채팅 URL 텍스트 변경 시 _validateInputs 호출
+    _titleFocusNode
+        .addListener(_handleTitleFocus); // 포커스 노드 변경 시 _handleTitleFocus 호출
   }
 
   @override
@@ -41,9 +88,11 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     _titleController.removeListener(_validateInputs); // 리스너 제거
     _contentController.removeListener(_validateInputs); // 리스너 제거
     _chatUrlController.removeListener(_validateInputs); // 리스너 제거
-    _titleController.dispose(); // 컨트롤러 폐기
-    _contentController.dispose(); // 컨트롤러 폐기
-    _chatUrlController.dispose(); // 컨트롤러 폐기
+    _titleFocusNode.removeListener(_handleTitleFocus); // 리스너 제거
+    _titleController.dispose();
+    _contentController.dispose();
+    _chatUrlController.dispose();
+    _titleFocusNode.dispose();
     super.dispose();
   }
 
@@ -55,6 +104,17 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
 
     // 오픈채팅 URL이 유효한지 확인하여 상태 업데이트
     isChatUrlValid.value = _chatUrlController.text.isNotEmpty;
+  }
+
+  void _handleTitleFocus() {
+    if (_titleFocusNode.hasFocus && _titleController.text.isEmpty) {
+      setState(() {
+        _titleController.text = '[]';
+        _titleController.selection = TextSelection.fromPosition(
+          const TextPosition(offset: 1),
+        );
+      });
+    }
   }
 
   // 날짜 선택기 함수
@@ -445,7 +505,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 ),
               ),
               const Text(
-                '자유롭게 작성해주세요',
+                '[] 안에 경진대회나 프로젝트 이름 필수로 작성해주세요',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -455,9 +515,10 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
               const SizedBox(height: 10),
               TextField(
                 controller: _titleController,
+                focusNode: _titleFocusNode,
                 maxLines: 1,
                 decoration: const InputDecoration(
-                  hintText: '제목을 작성해주세요',
+                  hintText: '[] 제목을 작성해주세요',
                   hintStyle: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -500,6 +561,12 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
             onTap: isEnabled
                 ? () {
                     // 작성 완료 버튼 클릭 시 실행할 코드
+                    String competitionName =
+                        _parseCompetitionName(_titleController.text);
+                    if (competitionName.isNotEmpty) {
+                      print('경진대회 이름: $competitionName');
+                    }
+                    _saveData();
                   }
                 : null,
             child: Container(
