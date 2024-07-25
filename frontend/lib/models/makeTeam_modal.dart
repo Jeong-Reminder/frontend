@@ -2,12 +2,12 @@ class MakeTeam {
   int? id; // 선택적 필드
   int? memberId; // 선택적 필드
   String recruitmentCategory;
-  String recruitmentTile;
+  String recruitmentTitle;
   String recruitmentContent;
   int studentCount;
   String hopeField;
   String kakaoUrl;
-  String recruitmentStatus;
+  bool recruitmentStatus;
   String endTime;
   int announcementId;
 
@@ -15,7 +15,7 @@ class MakeTeam {
     this.id,
     this.memberId,
     required this.recruitmentCategory,
-    required this.recruitmentTile,
+    required this.recruitmentTitle,
     required this.recruitmentContent,
     required this.studentCount,
     required this.hopeField,
@@ -26,7 +26,6 @@ class MakeTeam {
   });
 
   factory MakeTeam.fromJson(Map<String, dynamic> json) {
-    // JSON 데이터에서 id와 memberId를 추출
     final id = json['id'] as int?;
     final memberId = json['memberId'] as int?;
 
@@ -34,12 +33,13 @@ class MakeTeam {
       id: id,
       memberId: memberId,
       recruitmentCategory: json['recruitmentCategory'] as String,
-      recruitmentTile: json['recruitmentTile'] as String,
+      recruitmentTitle: json['recruitmentTitle'] as String,
       recruitmentContent: json['recruitmentContent'] as String,
       studentCount: json['studentCount'] as int,
       hopeField: json['hopeField'] as String,
       kakaoUrl: json['kakaoUrl'] as String,
-      recruitmentStatus: json['recruitmentStatus'] as String,
+      recruitmentStatus:
+          json['recruitmentStatus'] as bool, // Changed to boolean
       endTime: json['endTime'] as String,
       announcementId: json['announcementId'] as int,
     );
@@ -48,7 +48,7 @@ class MakeTeam {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {
       'recruitmentCategory': recruitmentCategory,
-      'recruitmentTile': recruitmentTile,
+      'recruitmentTitle': recruitmentTitle,
       'recruitmentContent': recruitmentContent,
       'studentCount': studentCount,
       'hopeField': hopeField,
@@ -58,7 +58,9 @@ class MakeTeam {
       'announcementId': announcementId,
     };
 
-    // id 필드를 백엔드로 보내지 않도록 함
+    if (id != null) {
+      data['id'] = id;
+    }
     if (memberId != null) {
       data['memberId'] = memberId;
     }
@@ -68,6 +70,6 @@ class MakeTeam {
 
   @override
   String toString() {
-    return 'id: $id, memberId: $memberId, recruitmentCategory: $recruitmentCategory, recruitmentTile: $recruitmentTile, recruitmentContent: $recruitmentContent, studentCount: $studentCount, hopeField: $hopeField, kakaoUrl: $kakaoUrl, recruitmentStatus: $recruitmentStatus, endTime: $endTime, announcementId: $announcementId';
+    return 'id: $id, memberId: $memberId, recruitmentCategory: $recruitmentCategory, recruitmentTitle: $recruitmentTitle, recruitmentContent: $recruitmentContent, studentCount: $studentCount, hopeField: $hopeField, kakaoUrl: $kakaoUrl, recruitmentStatus: $recruitmentStatus, endTime: $endTime, announcementId: $announcementId';
   }
 }
