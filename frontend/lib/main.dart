@@ -1,17 +1,24 @@
+import 'dart:io';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
+import 'package:frontend/firebase_options.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/services/login_services.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(
     MultiProvider(
       providers: [
@@ -31,8 +38,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  final LoginAPI _loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
-
   @override
   void initState() {
     super.initState();
@@ -43,14 +48,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this); // 앱 라이프사이클 이벤트 관찰 중지
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached ||
-        state == AppLifecycleState.inactive) {
-      _loginAPI.logoutOnExit(); // 앱이 종료되거나 비활성화될 때 로그아웃 호출
-    }
   }
 
   @override

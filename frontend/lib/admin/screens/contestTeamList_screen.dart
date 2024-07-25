@@ -431,7 +431,7 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
                   headingRowColor:
-                      const WidgetStatePropertyAll(Color(0xFFEFEFF2)),
+                      const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
                   columns: [
                     DataColumn(
                       label: Row(
@@ -484,7 +484,7 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                   rows: List<DataRow>.generate(
                     filteredRecruitList.length,
                     (int index) => DataRow(
-                      color: WidgetStatePropertyAll(
+                      color: MaterialStatePropertyAll(
                           index.isEven ? Colors.white : Colors.white),
                       cells: [
                         DataCell(
