@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -374,7 +375,17 @@ class _HomePageState extends State<HomePage> {
                       ),
                       homeItem(
                           imgPath: 'assets/images/company.png', title: '기업탐방'),
-                      homeItem(imgPath: 'assets/images/etc.png', title: '팀원모집'),
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MakeTeamPage(),
+                              ),
+                            );
+                          },
+                          child: homeItem(
+                              imgPath: 'assets/images/etc.png', title: '팀원모집')),
                     ],
                   ),
                 ),

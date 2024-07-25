@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
+import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
@@ -18,6 +19,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AdminProvider()),
         ChangeNotifierProvider(create: (_) => ProjectExperienceProvider()),
+        ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
       ],
       child: const MyApp(),
     ),
@@ -48,9 +50,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached ||
-        state == AppLifecycleState.inactive) {
-      _loginAPI.logoutOnExit(); // 앱이 종료되거나 비활성화될 때 로그아웃 호출
+    if (state == AppLifecycleState.detached) {
+      _loginAPI.logoutOnExit(); // 앱이 종료될 때 로그아웃 호출
     }
   }
 
