@@ -11,7 +11,7 @@ class MakeTeamPage extends StatefulWidget {
 
 class _MakeTeamPageState extends State<MakeTeamPage> {
   int selectedPeopleCount = -1; // 선택된 인원 수를 저장하는 변수
-  String selectedField = ''; // 선택된 희망 분야를 저장하는 변수
+  List<String> selectedFields = []; // 선택된 희망 분야를 저장하는 리스트
   DateTime? selectedEndDate; // 선택된 모집 종료 기간을 저장하는 변수
 
   final TextEditingController _titleController =
@@ -30,22 +30,18 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
   // 글 제목 [] 부분 파싱해 경진대회 이름 추출
   String _parseCompetitionName(String title) {
     final RegExp regExp = RegExp(
-      // RegExp 객체를 생성하여 정규 표현식 정의
       r'\[(.*?)\]',
-      caseSensitive: false, // 대소문자 구분 여부
+      caseSensitive: false,
     );
-    final match =
-        regExp.firstMatch(title); // title 문자열에서 정규 표현식과 일치하는 첫 번째 부분 찾도록
+    final match = regExp.firstMatch(title);
     if (match != null) {
       return match.group(1)?.trim() ?? '';
-      // match.group(1)을 사용하여 대괄호 안에 있는 텍스트를 추출
-      // group(1)은 정규 표현식에서 첫 번째 그룹 (.*?)에 해당하는 부분을 반환
     }
     return '';
   }
 
   int savedPeopleCount = -1;
-  String savedField = '';
+  List<String> savedFields = [];
   String? savedEndDate;
   String savedChatUrl = '';
   String savedTitle = '';
@@ -54,16 +50,16 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
   void _saveData() {
     setState(() {
       savedPeopleCount = selectedPeopleCount;
-      savedField = selectedField;
+      savedFields = selectedFields;
       savedEndDate = selectedEndDate != null
-          ? DateFormat('yyyy-MM-dd').format(selectedEndDate!)
+          ? DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(selectedEndDate!)
           : null;
       savedChatUrl = _chatUrlController.text;
       savedTitle = _titleController.text;
       savedContent = _contentController.text;
     });
     print('인원 수: $savedPeopleCount');
-    print('희망 분야: $savedField');
+    print('희망 분야: $savedFields');
     print('모집 종료 기간: $savedEndDate');
     print('오픈채팅 URL: $savedChatUrl');
     print('제목: $savedTitle');
@@ -193,11 +189,15 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
 
   // 희망 분야 버튼을 생성하는 위젯
   Widget _buildFieldButton(String field) {
-    bool isSelected = selectedField == field; // 현재 버튼이 선택된 상태인지 확인
+    bool isSelected = selectedFields.contains(field); // 현재 버튼이 선택된 상태인지 확인
     return GestureDetector(
       onTap: () {
         setState(() {
-          selectedField = field; // 버튼 클릭 시 상태 변경
+          if (isSelected) {
+            selectedFields.remove(field); // 이미 선택된 경우 제거
+          } else {
+            selectedFields.add(field); // 선택되지 않은 경우 추가
+          }
         });
       },
       child: Container(
