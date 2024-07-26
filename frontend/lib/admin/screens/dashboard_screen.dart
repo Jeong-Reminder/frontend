@@ -57,7 +57,9 @@ class _DashBoardPageState extends State<DashBoardPage> {
                 children: [
                   // 회원 정보 목록 버튼
                   dashboardBtn(
-                    () {},
+                    () {
+                      Navigator.pushNamed(context, '/user-info');
+                    },
                     'assets/images/userInfoImg.png',
                     '회원 정보 목록',
                   ),

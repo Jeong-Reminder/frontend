@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
+import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
-import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:frontend/screens/settingProfile2_screen.dart';
@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
         '/homepage': (context) => const HomePage(),
         '/myuser': (context) => const MyUserPage(),
-        '/myowner': (context) => const MyOwnerPage(),
+        '/dashboard': (context) => const DashBoardPage(),
       },
     );
   }
