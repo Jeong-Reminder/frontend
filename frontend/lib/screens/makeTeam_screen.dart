@@ -249,20 +249,79 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '팀원 모집',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  '필요한 조건을 선택해 주세요',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '경진대회 팀원 모집',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '필요한 조건을 선택해 주세요',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            height: 20,
+                            width: 60,
+                            margin: const EdgeInsets.only(left: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2A72E7),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '수정',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            height: 20,
+                            width: 60,
+                            margin: const EdgeInsets.only(left: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEA4E44),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '삭제',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 14),
                 const Text(
@@ -483,7 +542,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   ),
                 ),
                 const Text(
-                  '[] 안에 경진대회나 프로젝트 이름 필수로 작성해주세요',
+                  '자유롭게 작성해주세요',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
