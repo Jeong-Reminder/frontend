@@ -210,12 +210,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyUserPage(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, '/myuser');
                 },
                 child: const Icon(
                   Icons.account_circle,

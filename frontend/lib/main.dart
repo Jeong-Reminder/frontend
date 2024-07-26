@@ -7,6 +7,8 @@ import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:provider/provider.dart';
@@ -70,6 +72,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               name: '',
             ),
         '/homepage': (context) => const HomePage(),
+        '/myuser': (context) => const MyUserPage(),
+        '/myowner': (context) => const MyOwnerPage(),
       },
     );
   }
