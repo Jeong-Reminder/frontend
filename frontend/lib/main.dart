@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
-import 'package:frontend/firebase_options.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -15,9 +14,34 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  try {
+    if (Platform.isAndroid) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: 'AIzaSyDvy25KphqLhKRHPXA82eWLbafv883gd7Q',
+          appId: '1:50450222487:android:4adeb947d058cfd45808d2',
+          messagingSenderId: '50450222487',
+          projectId: 'jeong-reminder',
+          storageBucket: 'jeong-reminder.appspot.com',
+        ),
+      );
+    } else {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: 'AIzaSyBZXl3f6UX_SS5HpBDicYGjCvZMq_GghxY',
+          appId: '1:50450222487:ios:a87e6f088462b2815808d2',
+          messagingSenderId: '50450222487',
+          projectId: 'jeong-reminder',
+          storageBucket: 'jeong-reminder.appspot.com',
+          iosBundleId: 'com.sungkyul.reminder',
+        ),
+      );
+    }
+    print("Firebase initialized successfully");
+  } catch (e) {
+    print("Firebase initialization error: $e");
+  }
 
   runApp(
     MultiProvider(
