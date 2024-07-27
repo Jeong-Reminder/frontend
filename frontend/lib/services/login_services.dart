@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -7,12 +8,34 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginAPI {
   late PersistCookieJar cookieJar;
-  static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
-  static const tokenRefreshAddress =
-      'https://reminder.sungkyul.ac.kr/api/v1/reissue';
-  static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+  late String loginAddress;
+  // static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
+  // static const tokenRefreshAddress =
+  //     'https://reminder.sungkyul.ac.kr/api/v1/reissue';
+  // static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+  late String tokenRefreshAddress;
+  late String logoutAddress;
 
   LoginAPI() {
+    // 현재 플랫폼에 따라 서버 주소 설정
+    if (Platform.isAndroid) {
+      loginAddress = 'http://10.0.2.2:9000/login';
+    } else if (Platform.isIOS) {
+      loginAddress = 'http://127.0.0.1:9000/login';
+    }
+
+    if (Platform.isAndroid) {
+      tokenRefreshAddress = 'http://10.0.2.2:9000/api/v1/reissue';
+    } else if (Platform.isIOS) {
+      tokenRefreshAddress = 'http://127.0.0.1:9000/api/v1/reissue';
+    }
+
+    if (Platform.isAndroid) {
+      logoutAddress = 'http://10.0.2.2:9000/api/v1/logout';
+    } else if (Platform.isIOS) {
+      logoutAddress = 'http://127.0.0.1:9000/api/v1/logout';
+    }
+
     _initCookieJar();
   }
 
@@ -143,7 +166,7 @@ class LoginAPI {
 
   // 로그인 API
   Future<Map<String, dynamic>> handleLogin(
-      String studentId, String password) async {
+      String studentId, String password, String fcmToken) async {
     try {
       final url = Uri.parse(loginAddress);
 
@@ -153,6 +176,7 @@ class LoginAPI {
         body: {
           'studentId': studentId,
           'password': password,
+          'fcmToken': fcmToken,
         },
       );
 
@@ -199,7 +223,7 @@ class LoginAPI {
           'memberExperiences': memberExperience,
         };
       } else {
-        print('로그인 실패: ${response.statusCode} ${response.body}');
+        print('로그인 실패: ${response.statusCode} - ${response.body}');
         return {
           'success': false,
         };
