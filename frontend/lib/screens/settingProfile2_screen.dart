@@ -63,7 +63,8 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
   Future<void> _onTapHandler() async {
     final projectName = projectNameController.text;
     final projectExperience = projectExperienceController.text;
-    final githubLink = githubLinkController.text;
+    final githubLink =
+        'https://github.com/${githubLinkController.text}'; // 깃허브 링크 저장 시 고정된 값 추가
     final roll = rollController.text;
     final part = partController.text;
 

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/notification_services.dart';
+import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -242,7 +244,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MyOwnerPage(),
+                      builder: (context) => const MyUserPage(),
                     ),
                   );
                 },
@@ -405,7 +407,17 @@ class _HomePageState extends State<HomePage> {
                       ),
                       homeItem(
                           imgPath: 'assets/images/company.png', title: '기업탐방'),
-                      homeItem(imgPath: 'assets/images/etc.png', title: '팀원모집'),
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MakeTeamPage(),
+                              ),
+                            );
+                          },
+                          child: homeItem(
+                              imgPath: 'assets/images/etc.png', title: '팀원모집')),
                     ],
                   ),
                 ),

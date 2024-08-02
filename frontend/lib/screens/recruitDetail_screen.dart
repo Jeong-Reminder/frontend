@@ -306,7 +306,10 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ExperiencePage(),
+                        builder: (context) => const ExperiencePage(
+                          experiences: [],
+                          name: '',
+                        ),
                       ),
                     );
                   },
