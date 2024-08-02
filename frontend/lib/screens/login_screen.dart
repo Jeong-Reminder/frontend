@@ -1,6 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/services/notification_services.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
@@ -170,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<String> _getFCMToken() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? token = await messaging.getToken();
-    // print('FCM 토큰: $token');
+    print('FCM 토큰: $token');
 
     return token!;
   }
@@ -337,6 +336,7 @@ class _LoginPageState extends State<LoginPage> {
 
               ElevatedButton(
                 onPressed: () async {
+                  await _getFCMToken();
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
@@ -371,8 +371,6 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         // userRole 저장
                         await prefs.setString('userRole', result['role']);
-
-                        await NotificationService().notification(fcmToken);
                       } else {
                         // 로그인 실패 처리
                       }
