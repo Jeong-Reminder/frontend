@@ -3,7 +3,6 @@ import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
-import 'package:frontend/services/profile_service.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class SettingProfilePage extends StatefulWidget {
@@ -175,13 +174,17 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
               ),
             ),
             Center(
-              child: LinearPercentIndicator(
-                padding: EdgeInsets.zero,
-                percent: percent,
-                lineHeight: 20,
-                backgroundColor: const Color(0xFFD9D9D9),
-                progressColor: const Color(0xFF2A72E7),
-                width: 370,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return LinearPercentIndicator(
+                    padding: EdgeInsets.zero,
+                    percent: percent,
+                    lineHeight: 20,
+                    backgroundColor: const Color(0xFFD9D9D9),
+                    progressColor: const Color(0xFF2A72E7),
+                    width: constraints.maxWidth,
+                  );
+                },
               ),
             ),
             const SizedBox(height: 60),
