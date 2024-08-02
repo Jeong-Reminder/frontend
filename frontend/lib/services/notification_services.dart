@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,9 +8,13 @@ class NotificationService {
     return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
   }
 
-  Future<void> notification(String fcmToken) async {
+  Future<void> notification(
+      Map<String, dynamic> notificationData, String fcmToken) async {
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/notifications/test-send';
     const String baseUrl =
-        'http://localhost:9000/api/v1/notifications/test-send';
+        'http://10.0.2.2:9000/api/v1/notifications/test-send';
+
     print('fcmToken: $fcmToken');
 
     final accessToken = await getToken();
@@ -26,15 +29,7 @@ class NotificationService {
         'Content-Type': 'application/json',
         'access': accessToken,
       },
-      body: jsonEncode({
-        "id": "1",
-        "title": "Test Notification",
-        "content": "This is a test notification message.",
-        // "isRead": false,
-        "category": "general",
-        "targetId": 1,
-        "createdAt": "2024-07-28T10:00:00"
-      }),
+      body: jsonEncode(notificationData),
     );
 
     if (response.statusCode == 200) {
