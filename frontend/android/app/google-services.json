@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "50450222487",
+    "project_id": "jeong-reminder",
+    "storage_bucket": "jeong-reminder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50450222487:android:bb93e8cc6e6aa67a5808d2",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvy25KphqLhKRHPXA82eWLbafv883gd7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50450222487:android:4adeb947d058cfd45808d2",
+        "android_client_info": {
+          "package_name": "com.sungkyul.reminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvy25KphqLhKRHPXA82eWLbafv883gd7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

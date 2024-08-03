@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -58,23 +59,23 @@ class LoginAPI {
   }
 
   // 자동 로그인 시도 함수
-  Future<bool> autoLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-    final studentId = prefs.getString('studentId');
-    final password = prefs.getString('password');
+  // Future<bool> autoLogin() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final accessToken = prefs.getString('accessToken');
+  //   final studentId = prefs.getString('studentId');
+  //   final password = prefs.getString('password');
 
-    if (accessToken != null && studentId != null && password != null) {
-      final isExpired = JwtDecoder.isExpired(accessToken);
-      if (isExpired) {
-        return await againToken(); // 토큰 재발급 시도
-      } else {
-        print('유효한 토큰이 존재합니다.');
-        return true;
-      }
-    }
-    return false;
-  }
+  //   if (accessToken != null && studentId != null && password != null) {
+  //     final isExpired = JwtDecoder.isExpired(accessToken);
+  //     if (isExpired) {
+  //       return await againToken(); // 토큰 재발급 시도
+  //     } else {
+  //       print('유효한 토큰이 존재합니다.');
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 
   // 이전 토큰 삭제 함수
   Future<void> clearTokens({bool removeRefreshToken = true}) async {
@@ -153,7 +154,10 @@ class LoginAPI {
 
   // 로그인 API
   Future<Map<String, dynamic>> handleLogin(
-      BuildContext context, String studentId, String password) async {
+      BuildContext context, String studentId, String password, String fcmToken) async {
+    // HttpOverrides 설정
+    HttpOverrides.global = MyHttpOverrides();
+
     try {
       final url = Uri.parse(loginAddress);
 
@@ -163,6 +167,7 @@ class LoginAPI {
         body: {
           'studentId': studentId,
           'password': password,
+          'fcmToken': fcmToken,
         },
       );
 
@@ -240,7 +245,7 @@ class LoginAPI {
           'memberExperiences': memberExperience,
         };
       } else {
-        print('로그인 실패: ${response.statusCode} ${response.body}');
+        print('로그인 실패: ${response.statusCode} - ${response.body}');
         return {
           'success': false,
         };
@@ -294,5 +299,15 @@ class LoginAPI {
       print('로그아웃 요청 중 에러 발생: ${e.toString()}');
       return false;
     }
+  }
+}
+
+// 개발 환경에서만 사용해야되고 보안상 위험하기 때문에 프로덕션 환경에서 사용하면 절대 안된다.
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }

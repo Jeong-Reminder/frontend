@@ -3,6 +3,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/favorite_screen.dart';
 import 'package:frontend/screens/userInfo_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/field_list.dart';
 import 'package:frontend/widgets/profile_widget.dart';
@@ -17,7 +18,10 @@ class MyUserPage extends StatefulWidget {
 }
 
 class _MyUserPageState extends State<MyUserPage> {
-  bool isExpanded = false; // 내 팀 현황 확장성
+  bool isExpanded = false; // 내 팀 현황 확장성 여부를 나타내는 변수
+  String? studentId = ''; // 학번을 저장할 변수, 기본 값을 빈 문자열로 설정
+  String? name = ''; // 이름을 저장할 변수, 기본 값을 빈 문자열로 설정
+  String? status = ''; // 상태를 저장할 변수, 기본 값을 빈 문자열로 설정
 
   List<String> stringToListFieldList = [];
   List<Map<String, dynamic>> developmentField = [];
@@ -30,6 +34,18 @@ class _MyUserPageState extends State<MyUserPage> {
     super.initState();
     getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
     getTool();
+    _loadCredentials(); // 학번을 로드하는 메서드 호출
+  }
+  
+  // 학번, 이름, 재적상태를 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      studentId = credentials['studentId'] ?? ''; // 학번 설정, 없으면 빈 문자열로 설정
+      name = credentials['name'] ?? ''; // 이름 설정, 없으면 빈 문자열로 설정
+      status = credentials['status'] ?? ''; // 상태 설정, 없으면 빈 문자열로 설정
+    });
   }
 
   // 문자열을 리스트로 변환하는 메소드
@@ -93,7 +109,7 @@ class _MyUserPageState extends State<MyUserPage> {
       },
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final techStack =
@@ -102,13 +118,13 @@ class _MyUserPageState extends State<MyUserPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류 방지
         toolbarHeight: 70,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/homepage');
+              Navigator.pushNamed(context, '/homepage'); // 홈 페이지로 이동
             },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
@@ -129,7 +145,7 @@ class _MyUserPageState extends State<MyUserPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FavoritePage(),
+                  builder: (context) => const FavoritePage(), // 즐겨찾기 페이지로 이동
                 ),
               );
             },
@@ -169,12 +185,13 @@ class _MyUserPageState extends State<MyUserPage> {
                   );
                 },
                 child: Profile(
-                  profileUrl: 'assets/images/profile.png',
-                  name: '${techStack['memberName']}',
-                  showSubTitle: true,
-                ),
+                profileUrl: 'assets/images/profile.png',
+                name: '${techStack['memberName']}' ?? '', // 이름 전달
+                status: status ?? '', // 상태 전달
+                showSubTitle: true,
+                showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                studentId: studentId ?? '', // 학번 전달
               ),
-
               const SizedBox(height: 25),
               const Text(
                 'DEVELOPMENT FIELD',
@@ -192,6 +209,7 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
+                
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: developmentField.map((field) {
                   // 괄호 안에 있는 변수는 리스트를 map한 이름
@@ -320,6 +338,7 @@ class _MyUserPageState extends State<MyUserPage> {
     );
   }
 
+  // 배지 위젯 생성
   Widget badge(
     String logoUrl,
     String title,

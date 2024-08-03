@@ -1,12 +1,17 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/services/notification_services.dart';
+import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -169,6 +174,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // 알림 버튼 누를 시  FCM 토큰 발급 함수
+  Future<String> _getFCMToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+    // print('FCM 토큰: $token');
+
+    return token!;
+  }
+
+  // 알림 테스트
+  // 푸시 알림 데이터
+  Map<String, dynamic> notificationData = {
+    "id": "1",
+    "title": "Test Notification",
+    "content": "This is a test notification message.",
+    "category": "general",
+    "targetId": 1,
+    "createdAt": "2024-07-28T10:00:00"
+  };
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -198,13 +223,21 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.black,
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: IconButton(
+                onPressed: () async {
+                  String fcmToken = await _getFCMToken();
+
+                  await NotificationService()
+                      .notification(notificationData, fcmToken);
+                },
                 // badge 패키지 사용해서 다시 작성 예정
-                Icons.add_alert,
-                size: 30,
-                color: Colors.black,
+                icon: const Icon(
+                  Icons.add_alert,
+                  size: 30,
+                  color: Colors.black,
+                ),
               ),
             ),
             Padding(
@@ -386,7 +419,17 @@ class _HomePageState extends State<HomePage> {
                       ),
                       homeItem(
                           imgPath: 'assets/images/company.png', title: '기업탐방'),
-                      homeItem(imgPath: 'assets/images/etc.png', title: '팀원모집'),
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MakeTeamPage(),
+                              ),
+                            );
+                          },
+                          child: homeItem(
+                              imgPath: 'assets/images/etc.png', title: '팀원모집')),
                     ],
                   ),
                 ),
