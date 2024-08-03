@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
-import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/widgets/badge_widget.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 
@@ -254,8 +254,11 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             int profileId =
                                 await ProfileProvider().createProfile(profile);
 
-                            Provider.of<ProfileProvider>(context, listen: false)
-                                .memberId = profileId;
+                            if (context.mounted) {
+                              Provider.of<ProfileProvider>(context,
+                                      listen: false)
+                                  .memberId = profileId;
+                            }
 
                             if (context.mounted) {
                               Navigator.pushNamed(
@@ -346,12 +349,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             });
                             print('${tools['title']} : ${tools['isSelected']}');
                           },
-                          child: badge(
-                            tools['logoUrl'],
-                            tools['title'],
-                            tools['titleColor'],
-                            tools['badgeColor'],
-                            tools['isSelected'],
+                          child: DevelopmentBadge(
+                            logoUrl: tools['logoUrl'],
+                            title: tools['title'],
+                            titleColor: tools['titleColor'],
+                            badgeColor: tools['badgeColor'],
+                            isSelected: tools['isSelected'],
                           ),
                         );
                       }).toList(),
@@ -375,12 +378,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             });
                             print('${field['title']} : ${field['isSelected']}');
                           },
-                          child: badge(
-                            field['logoUrl'],
-                            field['title'],
-                            field['titleColor'],
-                            field['badgeColor'],
-                            field['isSelected'],
+                          child: DevelopmentBadge(
+                            logoUrl: field['logoUrl'],
+                            title: field['title'],
+                            titleColor: field['titleColor'],
+                            badgeColor: field['badgeColor'],
+                            isSelected: field['isSelected'],
                           ),
                         );
                       }).toList(),
@@ -419,12 +422,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             spacing: 10,
                             runSpacing: 10,
                             children: selectedTools.map((tools) {
-                              return badge(
-                                tools['logoUrl'],
-                                tools['title'],
-                                tools['titleColor'],
-                                tools['badgeColor'],
-                                tools['isSelected'],
+                              return DevelopmentBadge(
+                                logoUrl: tools['logoUrl'],
+                                title: tools['title'],
+                                titleColor: tools['titleColor'],
+                                badgeColor: tools['badgeColor'],
+                                isSelected: tools['isSelected'],
                               );
                             }).toList(),
                           )
@@ -433,12 +436,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             spacing: 10,
                             runSpacing: 10,
                             children: selectedFields.map((stack) {
-                              return badge(
-                                stack['logoUrl'],
-                                stack['title'],
-                                stack['titleColor'],
-                                stack['badgeColor'],
-                                stack['isSelected'],
+                              return DevelopmentBadge(
+                                logoUrl: stack['logoUrl'],
+                                title: stack['title'],
+                                titleColor: stack['titleColor'],
+                                badgeColor: stack['badgeColor'],
+                                isSelected: stack['isSelected'],
                               );
                             }).toList(),
                           ),
@@ -514,48 +517,6 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  // 기술 스택 배지
-  Widget badge(
-    String logoUrl,
-    String title,
-    Color titleColor,
-    Color badgeColor,
-    bool isSelected,
-  ) {
-    return badges.Badge(
-      badgeContent: IntrinsicWidth(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(
-              logoUrl,
-              width: 20,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: titleColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-      badgeStyle: badges.BadgeStyle(
-        badgeColor: badgeColor,
-        shape: badges.BadgeShape.square,
-        borderSide: isSelected
-            ? const BorderSide(
-                color: Color(0xFF2A72E7),
-                width: 5.0,
-              )
-            : BorderSide.none,
       ),
     );
   }
