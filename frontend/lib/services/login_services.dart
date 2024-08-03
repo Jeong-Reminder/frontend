@@ -10,10 +10,13 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginAPI {
   late PersistCookieJar cookieJar;
-  static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
-  static const tokenRefreshAddress =
-      'https://reminder.sungkyul.ac.kr/api/v1/reissue';
-  static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+  // static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
+  // static const tokenRefreshAddress =
+  //     'https://reminder.sungkyul.ac.kr/api/v1/reissue';
+  // static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+  static const loginAddress = 'http://10.0.2.2:9000/login';
+  static const tokenRefreshAddress = 'http://10.0.2.2:9000/api/v1/reissue';
+  static const logoutAddress = 'http://10.0.2.2:9000/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();
@@ -215,15 +218,18 @@ class LoginAPI {
           await prefs.setStringList('memberExperienceIds', memberExperienceIds);
           print('저장된 memberExperience id: $memberExperienceIds');
 
-          // memberID값 추출
-          final memberId = techStack['memberId'];
+          // techStack이 null이 아닐 경우에 memberID값 추출
+          if (techStack != null) {
+            final memberId = techStack['memberId'];
 
-          // ProfileProvider를 통해 memberId 저장
-          final profileProvider =
-              Provider.of<ProfileProvider>(context, listen: false);
+            // ProfileProvider를 통해 memberId 저장
+            // techStack이 있을 경우에는 로그인 응답 데이터에서 가져와서 memberId 저장
+            final profileProvider =
+                Provider.of<ProfileProvider>(context, listen: false);
 
-          profileProvider.memberId = memberId;
-          print("memberID: ${profileProvider.memberId}");
+            profileProvider.memberId = memberId;
+            print("memberID: ${profileProvider.memberId}");
+          }
         }
         print('로그인 성공');
 

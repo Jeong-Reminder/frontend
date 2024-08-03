@@ -4,6 +4,7 @@ import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:provider/provider.dart';
 
 class SettingProfilePage extends StatefulWidget {
   final String githubLink;
@@ -227,19 +228,80 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
             ),
             const SizedBox(height: 32),
             completedField
-                ? const Text(
-                    '2. DEVELOPMENT TOOLS 선택',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ? Row(
+                    children: [
+                      const Text(
+                        '2. DEVELOPMENT TOOLS 선택',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // 선택한 Tool이 없으면 없음 버튼에서 프로필 생성 api 연동
+                          developmentTool = '없음';
+
+                          // body에 집어넣을 프로필 model
+                          final profile = Profile(
+                            hopeJob: widget.hopeJob,
+                            githubLink: widget.githubLink,
+                            developmentField: developmentField,
+                            developmentTool: developmentTool,
+                          );
+
+                          try {
+                            int profileId =
+                                await ProfileProvider().createProfile(profile);
+
+                            Provider.of<ProfileProvider>(context, listen: false)
+                                .memberId = profileId;
+
+                            if (context.mounted) {
+                              Navigator.pushNamed(
+                                  context, '/member-experience');
+                            }
+                          } catch (e) {
+                            print(e.toString());
+                          }
+                        },
+                        child: const Text(
+                          '없음',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   )
-                : const Text(
-                    '1. DEVELOPMENT FIELD 선택',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                : Row(
+                    children: [
+                      const Text(
+                        '1. DEVELOPMENT FIELD 선택',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            developmentField = '없음';
+                            completedField = true;
+                          });
+                        },
+                        child: const Text(
+                          '없음',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
             const SizedBox(height: 28),
             AnimatedSwitcher(
@@ -394,10 +456,13 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                     } else {
                       setState(() {
                         // selectedFields에서 title들을 가져와 하나의 문자열로 생성
-                        developmentField = selectedFields
-                            .map((f) => f['title'])
-                            .toList()
-                            .join(',');
+                        if (developmentField.isNotEmpty) {
+                          developmentField = selectedFields
+                              .map((f) => f['title'])
+                              .toList()
+                              .join(',');
+                        }
+                        developmentField = '없음';
 
                         // selectedTools에서 title들을 가져와 하나의 문자열로 생성
                         developmentTool = selectedTools
@@ -415,14 +480,14 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                       );
 
                       try {
-                        await ProfileProvider().createProfile(profile);
+                        // 처음에 프로필 생성할 때 바로 조회할려면 생성 api의 응답데이터를 가져와서 저장하도록 작성
+                        int profileId =
+                            await ProfileProvider().createProfile(profile);
+
+                        Provider.of<ProfileProvider>(context, listen: false)
+                            .memberId = profileId;
                         if (context.mounted) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomePage(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/member-experience');
                         }
                       } catch (e) {
                         print(e.toString());

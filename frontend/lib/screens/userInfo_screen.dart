@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
-class UserInfoPage extends StatelessWidget {
-  const UserInfoPage({super.key});
+class UserInfoPage extends StatefulWidget {
+  Map<String, dynamic> profile;
+  UserInfoPage({required this.profile, super.key});
 
+  @override
+  State<UserInfoPage> createState() => _UserInfoPageState();
+}
+
+class _UserInfoPageState extends State<UserInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,11 +52,10 @@ class UserInfoPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            userInfo('이름', '민택기'),
-            userInfo('학번', '20190906'),
-            userInfo('재적상태', '4학년, 재학중'),
-            userInfo('깃허브 링크', 'https://github.com/TaekkiMin'),
-            userInfo('전화번호', '010-1234-5678'),
+            userInfo('이름', '${widget.profile['memberName']}'),
+            userInfo('학년', '${widget.profile['memberLevel']}'),
+            userInfo('희망분야', '${widget.profile['hopeJob']}'),
+            userInfo('깃허브 링크', '${widget.profile['githubLink']}'),
           ],
         ),
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/favorite_screen.dart';
+import 'package:frontend/screens/userInfo_screen.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/field_list.dart';
 import 'package:frontend/widgets/profile_widget.dart';
@@ -18,10 +19,86 @@ class MyUserPage extends StatefulWidget {
 class _MyUserPageState extends State<MyUserPage> {
   bool isExpanded = false; // 내 팀 현황 확장성
 
-  List<Map<String, dynamic>> developmentField = []; // 학생이 선택한 development field
+  List<String> stringToListFieldList = [];
+  List<Map<String, dynamic>> developmentField = [];
+
+  List<String> stringToListToolList = [];
+  List<Map<String, dynamic>> developmentTool = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
+    getTool();
+  }
+
+  // 문자열을 리스트로 변환하는 메소드
+  void stringToListField() {
+    final techStack =
+        Provider.of<ProfileProvider>(context, listen: false).techStack;
+    String strField = techStack['developmentField'];
+
+    setState(() {
+      // 콤마(,)를 기준으로 끊어서 리스트 생성
+      stringToListFieldList = strField.split(',');
+    });
+  }
+
+  // 선택한 field의 배지를 가져오는 메서드
+  void getField() {
+    stringToListField();
+
+    setState(() {
+      // fieldList의 title에 생성한 stringToListFieldList이 있다면 출력해서 리스트로 생성
+      developmentField = fieldList.where((field) {
+        return stringToListFieldList.contains(field['title']);
+      }).toList();
+
+      print('developmentField: $developmentField');
+    });
+  }
+
+  // 문자열을 리스트로 변환하는 메소드
+  void stringToListTool() {
+    final techStack =
+        Provider.of<ProfileProvider>(context, listen: false).techStack;
+    String strTool = techStack['developmentTool'];
+
+    setState(() {
+      // 콤마(,)를 기준으로 끊어서 리스트 생성
+      stringToListToolList = strTool.split(',');
+    });
+  }
+
+  // 선택한 field의 배지를 가져오는 메서드
+  void getTool() {
+    stringToListTool();
+
+    setState(() {
+      // fieldList의 title에 생성한 stringToListFieldList이 있다면 출력해서 리스트로 생성
+      developmentTool = toolsList.where((tool) {
+        return stringToListToolList.contains(tool['title']);
+      }).toList();
+
+      print('developmentTool: $developmentTool');
+    });
+  }
+
+  void profileDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return const Column();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final techStack =
+        Provider.of<ProfileProvider>(context, listen: false).techStack;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -30,7 +107,9 @@ class _MyUserPageState extends State<MyUserPage> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/homepage');
+            },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
           ),
@@ -78,10 +157,22 @@ class _MyUserPageState extends State<MyUserPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 프로필
-              const Profile(
-                profileUrl: 'assets/images/profile.png',
-                name: '민택기',
-                showSubTitle: true,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserInfoPage(
+                        profile: techStack,
+                      ),
+                    ),
+                  );
+                },
+                child: Profile(
+                  profileUrl: 'assets/images/profile.png',
+                  name: '${techStack['memberName']}',
+                  showSubTitle: true,
+                ),
               ),
 
               const SizedBox(height: 25),
@@ -102,7 +193,7 @@ class _MyUserPageState extends State<MyUserPage> {
                 spacing: 10,
                 runSpacing: 10,
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                children: fieldList.map((field) {
+                children: developmentField.map((field) {
                   // 괄호 안에 있는 변수는 리스트를 map한 이름
                   return badge(
                     field['logoUrl'],
@@ -130,7 +221,7 @@ class _MyUserPageState extends State<MyUserPage> {
                 runSpacing: 10,
 
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                children: toolsList.map((tools) {
+                children: developmentTool.map((tools) {
                   return badge(
                     tools['logoUrl'],
                     tools['title'],
@@ -153,7 +244,7 @@ class _MyUserPageState extends State<MyUserPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      getField();
+                      // getField();
                       print(developmentField);
                       setState(() {
                         isExpanded = !isExpanded;

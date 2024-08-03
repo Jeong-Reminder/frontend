@@ -11,9 +11,10 @@ class ProfileService {
   }
 
   // 프로필 생성 API
-  Future<void> createProfile(Profile profile) async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
+  Future<int> createProfile(Profile profile) async {
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
+    const String baseUrl = 'http://10.0.2.2:9000/api/v1/member-profile';
 
     final accessToken = await getToken();
     if (accessToken == null) {
@@ -37,11 +38,11 @@ class ProfileService {
 
       final json = jsonDecode(responseData);
       final jsonData = json['data'];
-      // final id = jsonData['memberId'];
+      final id = jsonData['memberId'];
 
-      // return id;
+      return id;
 
-      print('프로필 : $jsonData');
+      // print('프로필 : $jsonData');
     } else {
       throw Exception('생성 실패: ${response.statusCode} - ${response.body}');
     }
@@ -49,8 +50,10 @@ class ProfileService {
 
   // 프로필 조회 API
   Future<Map<String, dynamic>> fetchProfile(int memberId) async {
+    // final String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/member-profile/$memberId';
     final String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/member-profile/$memberId';
+        'http://10.0.2.2:9000/api/v1/member-profile/$memberId';
 
     final accessToken = await getToken();
     if (accessToken == null) {

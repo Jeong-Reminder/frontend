@@ -54,6 +54,10 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
       'title': 'DevOps',
       'isSelected': false,
     },
+    {
+      'title': '없음',
+      'isSelected': false,
+    },
   ];
 
   List<Map<String, dynamic>> chosenpositionList = [];
@@ -220,7 +224,8 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
                             'https://github.com/${linkController.text}'; // 깃허브 링크 최종 주소
                       });
                     } else {
-                      print('깃허브 링크 없음');
+                      githubUrl = '깃허브 링크 없음';
+                      print(githubUrl);
                     }
                     setState(() {
                       writtenLink = true; // 깃허브 링크 작성 true로 설정

@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/home_screen.dart';
-import 'package:frontend/screens/settingProFile1_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,8 +23,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final formKey = GlobalKey<FormState>(); // 폼 유효성을 검사하는데 사용
 
-  // 로그인 및 토큰 재발급을 위한 서버 주소 상수
-  static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
+  // 토큰 재발급을 위한 서버 주소 상수
   static const tokenRefreshAddress =
       'https://reminder.sungkyul.ac.kr/api/v1/reissue';
 
@@ -86,13 +82,20 @@ class _LoginPageState extends State<LoginPage> {
         await againToken(); // 토큰 재발급 시도
       } else {
         print('유효한 토큰이 존재합니다.');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SettingProfile1Page(),
-          ),
-        );
+        final userRole = prefs.getString('userRole');
+        if (userRole != null) {
+          _navigateBasedOnRole(userRole);
+        }
       }
+    }
+  }
+
+  // 역할에 따라 페이지로 이동하는 함수
+  void _navigateBasedOnRole(String role) {
+    if (role == 'ROLE_ADMIN') {
+      Navigator.pushReplacementNamed(context, '/user-info');
+    } else if (role == 'ROLE_USER') {
+      Navigator.pushReplacementNamed(context, '/homepage');
     }
   }
 
@@ -104,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
     await cookieJar.deleteAll(); // 쿠키 삭제
   }
 
-  // 토큰 재발급 API
+  // 토큰 재발급 API(자동 로그인 체크 시)
   Future<void> againToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -147,112 +150,16 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         print('토큰 재발급 성공!');
-        // 토큰 재발급 성공 시
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SettingProfile1Page(),
-          ),
-        );
+        // 토큰 재발급 성공 시 역할에 따라 페이지로 이동
+        final userRole = prefs.getString('userRole');
+        if (userRole != null) {
+          _navigateBasedOnRole(userRole);
+        }
       } else {
         print('토큰 재발급 실패: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       print('토큰 재발급 요청 중 에러 발생: ${e.toString()}');
-    }
-  }
-
-  // 로그인 API
-  Future<void> handleLogin(String studentId, String password) async {
-    try {
-      final url = Uri.parse(loginAddress);
-
-      // HTTP POST 요청 전송
-      final response = await http.post(
-        url,
-        body: {
-          'studentId': studentId,
-          'password': password,
-        },
-      );
-
-      print('로그인 응답 상태 코드: ${response.statusCode}');
-      print('로그인 응답 본문: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        final userRole = responseData['userRole'];
-        final techStack = responseData['techStack'];
-
-        final accessToken = response.headers['access']; // 액세스 토큰 추출
-        final setCookieHeader = response.headers['set-cookie'];
-        final refreshToken = setCookieHeader != null
-            ? extractRefreshToken(setCookieHeader)
-            : null;
-
-        final prefs = await SharedPreferences.getInstance();
-        if (accessToken != null && refreshToken != null) {
-          // 이전 토큰 삭제
-          await clearTokens();
-
-          // 새 토큰 저장
-          await prefs.setString('accessToken', accessToken); // 액세스 토큰 저장
-          await prefs.setString('refreshToken', refreshToken); // 리프레시 토큰 저장
-
-          // 자동 로그인 상태 저장
-          await prefs.setBool('isAutoLogin', isAutoLogin);
-          if (isAutoLogin) {
-            // 자동 로그인 체크 시에만 학번과 비밀번호 저장
-            await prefs.setString('studentId', studentId);
-            await prefs.setString('password', password);
-          } else {
-            // 체크 해제 시 저장된 학번과 비밀번호 삭제
-            await prefs.remove('studentId');
-            await prefs.remove('password');
-          }
-
-          final uri = Uri.parse(loginAddress);
-          cookieJar.saveFromResponse(
-              uri, [Cookie('refreshToken', refreshToken)]); // 쿠키 저장
-
-          // 저장된 토큰 로그로 확인
-          final savedAccessToken = prefs.getString('accessToken');
-          final savedRefreshToken = prefs.getString('refreshToken');
-          print('저장된 액세스 토큰: $savedAccessToken');
-          print('저장된 리프레시 토큰: $savedRefreshToken');
-        }
-        print('로그인 성공');
-
-        if (userRole == 'ROLE_ADMIN') {
-          Navigator.pushNamed(
-            context,
-            '/user-info',
-          );
-        } else if (userRole == 'ROLE_USER') {
-          if (context.mounted) {
-            if (techStack != null && techStack.isNotEmpty) {
-              // isNotEmpty를 호출하기 전에 해당 변수가 null인지 확인해야 함
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HomePage(),
-                ),
-              );
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingProfile1Page(),
-                ),
-              );
-            }
-          }
-        }
-      } else {
-        print('로그인 실패: ${response.statusCode} ${response.body}');
-      }
-    } catch (e) {
-      print('로그인 요청 중 에러 발생: ${e.toString()}');
     }
   }
 
@@ -416,15 +323,14 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 27),
 
-              // 로그인 버튼
               ElevatedButton(
                 onPressed: () {
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
                     String password = pwController.text;
-                    loginAPI
-                        .handleLogin(studentId, password)
+                    LoginAPI()
+                        .handleLogin(context, studentId, password)
                         .then((result) async {
                       if (result['success']) {
                         final prefs = await SharedPreferences.getInstance();
@@ -435,10 +341,30 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         // userRole 값에 따라 다른 페이지로 이동
                         if (result['role'] == 'ROLE_ADMIN') {
-                          Navigator.pushNamed(context, '/user-info');
+                          Navigator.pushNamed(context, '/dashboard');
                         } else if (result['role'] == 'ROLE_USER') {
-                          Navigator.pushNamed(context, '/setting-profile');
+                          // techStack 값이 null이거나 값이 비어있는 경우
+                          if (result['techStack'] == null ||
+                              result['techStack'].isEmpty) {
+                            Navigator.pushNamed(context, '/setting-profile');
+                            // memberExperience 값이 null이거나 값이 비어있는 경우
+                          } else if (result['memberExperiences'] == null ||
+                              result['memberExperiences'].isEmpty) {
+                            Navigator.pushNamed(context, '/member-experience');
+
+                            // 둘 다 비어있을 경우
+                          } else if ((result['techStack'] == null ||
+                                  result['techStack'].isEmpty) &&
+                              (result['memberExperiences'] == null ||
+                                  result['memberExperiences'].isEmpty)) {
+                            Navigator.pushNamed(context, '/setting-profile');
+                          } else {
+                            // techStack, memberExperiences 값이 둘 다 채워진 경우
+                            Navigator.pushNamed(context, '/homepage');
+                          }
                         }
+                        // userRole 저장
+                        await prefs.setString('userRole', result['role']);
                       } else {
                         // 로그인 실패 처리
                       }
@@ -463,25 +389,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  // 아이디 / 비밀번호 찾기 텍스트 버튼
-  Widget idAndPwTextBtn(String title) {
-    return TextButton(
-      onPressed: () {},
-      style: TextButton.styleFrom(
-        minimumSize: Size.zero,
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF808080),
         ),
       ),
     );

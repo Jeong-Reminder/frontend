@@ -211,12 +211,21 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyUserPage(),
-                    ),
-                  );
+                  final memberId =
+                      Provider.of<ProfileProvider>(context, listen: false)
+                          .memberId;
+
+                  if (memberId > 0) {
+                    await Provider.of<ProfileProvider>(context, listen: false)
+                        .fetchProfile(memberId);
+                  }
+
+                  if (context.mounted) {
+                    Navigator.pushNamed(
+                      context,
+                      '/myuser',
+                    );
+                  }
                 },
                 child: const Icon(
                   Icons.account_circle,

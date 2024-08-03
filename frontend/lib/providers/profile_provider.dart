@@ -26,18 +26,18 @@ class ProfileProvider with ChangeNotifier {
   }
 
   // 프로필 생성
-  Future<void> createProfile(Profile profile) async {
+  Future<int> createProfile(Profile profile) async {
     try {
-      await profileService.createProfile(profile);
-      // memberId = profileId;
-      // notifyListeners();
+      int profileId = await profileService.createProfile(profile);
+
+      return profileId;
     } catch (e) {
       throw Exception('에러: ${e.toString()}');
     }
   }
 
   // 프로필 조회
-  Future<void> fetchProfile() async {
+  Future<void> fetchProfile(int memberId) async {
     Map<String, dynamic> profile = await profileService.fetchProfile(memberId);
     techStack = profile;
     notifyListeners();

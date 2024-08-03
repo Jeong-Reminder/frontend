@@ -4,8 +4,11 @@ import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
+import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/login_services.dart';
 
@@ -62,6 +65,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/add_member': (context) => const AddMemberPage(),
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
+        '/homepage': (context) => const HomePage(),
+        '/member-experience': (context) => const SettingProfile2Page(),
+        '/myuser': (context) => const MyUserPage(),
       },
     );
   }
