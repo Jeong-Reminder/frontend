@@ -36,7 +36,7 @@ class _MyUserPageState extends State<MyUserPage> {
     getTool();
     _loadCredentials(); // 학번을 로드하는 메서드 호출
   }
-  
+
   // 학번, 이름, 재적상태를 로드하는 메서드
   Future<void> _loadCredentials() async {
     final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
@@ -109,7 +109,7 @@ class _MyUserPageState extends State<MyUserPage> {
       },
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final techStack =
@@ -185,12 +185,13 @@ class _MyUserPageState extends State<MyUserPage> {
                   );
                 },
                 child: Profile(
-                profileUrl: 'assets/images/profile.png',
-                name: '${techStack['memberName']}' ?? '', // 이름 전달
-                status: status ?? '', // 상태 전달
-                showSubTitle: true,
-                showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
-                studentId: studentId ?? '', // 학번 전달
+                  profileUrl: 'assets/images/profile.png',
+                  name: '${techStack['memberName']}', // 이름 전달
+                  status: status ?? '', // 상태 전달
+                  showSubTitle: true,
+                  showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                  studentId: studentId ?? '', // 학번 전달
+                ),
               ),
               const SizedBox(height: 25),
               const Text(
@@ -209,7 +210,7 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-                
+
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: developmentField.map((field) {
                   // 괄호 안에 있는 변수는 리스트를 map한 이름

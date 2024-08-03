@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:frontend/screens/editField_screen.dart';
+import 'package:frontend/screens/editTool_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
@@ -180,6 +182,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               name: '',
             ),
         '/homepage': (context) => const HomePage(),
+        '/edit-field': (context) => const EditFieldPage(),
+        '/edit-tool': (context) => const EditToolPage(),
       },
     );
   }
