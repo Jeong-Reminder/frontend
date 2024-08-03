@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/favorite_screen.dart';
+import 'package:frontend/screens/userInfo_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/account_widget.dart';
+import 'package:frontend/widgets/field_list.dart';
 import 'package:frontend/widgets/profile_widget.dart';
+import 'package:frontend/widgets/tool_list.dart';
+import 'package:provider/provider.dart';
 
 class MyUserPage extends StatefulWidget {
   const MyUserPage({super.key});
@@ -18,12 +23,20 @@ class _MyUserPageState extends State<MyUserPage> {
   String? name = ''; // 이름을 저장할 변수, 기본 값을 빈 문자열로 설정
   String? status = ''; // 상태를 저장할 변수, 기본 값을 빈 문자열로 설정
 
+  List<String> stringToListFieldList = [];
+  List<Map<String, dynamic>> developmentField = [];
+
+  List<String> stringToListToolList = [];
+  List<Map<String, dynamic>> developmentTool = [];
+
   @override
   void initState() {
     super.initState();
+    getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
+    getTool();
     _loadCredentials(); // 학번을 로드하는 메서드 호출
   }
-
+  
   // 학번, 이름, 재적상태를 로드하는 메서드
   Future<void> _loadCredentials() async {
     final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
@@ -35,124 +48,73 @@ class _MyUserPageState extends State<MyUserPage> {
     });
   }
 
-  // 개발 필드 리스트
-  List<Map<String, dynamic>> fieldList = [
-    {
-      'logoUrl': 'assets/skilImages/typescript.png',
-      'title': 'TYPESCRIPT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF037BCB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/javascript.png',
-      'title': 'JAVASCRIPT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF5DF1D),
-    },
-    {
-      'logoUrl': 'assets/skilImages/tailwindcss.png',
-      'title': 'TAILWINDCSS',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF3DB1AB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/html.png',
-      'title': 'HTML5',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFE35026),
-    },
-    {
-      'logoUrl': 'assets/skilImages/css.png',
-      'title': 'CSS3',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF1472B6),
-    },
-    {
-      'logoUrl': 'assets/skilImages/react.png',
-      'title': 'REACT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFF61DAFB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/npm.png',
-      'title': 'NPM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFCB3837),
-    },
-    {
-      'logoUrl': 'assets/skilImages/vscode.png',
-      'title': 'VISUAL STUDIO CODE',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0078D7),
-    },
-    {
-      'logoUrl': 'assets/skilImages/docker.png',
-      'title': 'DOCKER',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0BB7ED),
-    },
-    {
-      'logoUrl': 'assets/skilImages/yarn.png',
-      'title': 'YARN',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2C8EBB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/prettier.png',
-      'title': 'PRETTIER',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF8B83E),
-    },
-    {
-      'logoUrl': 'assets/skilImages/eslint.png',
-      'title': 'ESLINT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4B3263),
-    },
-    {
-      'logoUrl': 'assets/skilImages/figma.png',
-      'title': 'FIGMA',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFF24D1D),
-    },
-  ];
+  // 문자열을 리스트로 변환하는 메소드
+  void stringToListField() {
+    final techStack =
+        Provider.of<ProfileProvider>(context, listen: false).techStack;
+    String strField = techStack['developmentField'];
 
-  // 개발 도구 리스트
-  List<Map<String, dynamic>> toolsList = [
-    {
-      'logoUrl': 'assets/skilImages/github.png',
-      'title': 'GITHUB',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF111011),
-    },
-    {
-      'logoUrl': 'assets/skilImages/notion.png',
-      'title': 'NOTION',
-      'titleColor': Colors.white,
-      'badgeColor': Colors.black,
-    },
-    {
-      'logoUrl': 'assets/skilImages/slack.png',
-      'title': 'SLACK',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4A144C),
-    },
-    {
-      'logoUrl': 'assets/skilImages/zoom.png',
-      'title': 'ZOOM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2D8CFF),
-    },
-    {
-      'logoUrl': 'assets/skilImages/discord.png',
-      'title': 'DISCORD',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF5765F2),
-    }
-  ];
+    setState(() {
+      // 콤마(,)를 기준으로 끊어서 리스트 생성
+      stringToListFieldList = strField.split(',');
+    });
+  }
 
+  // 선택한 field의 배지를 가져오는 메서드
+  void getField() {
+    stringToListField();
+
+    setState(() {
+      // fieldList의 title에 생성한 stringToListFieldList이 있다면 출력해서 리스트로 생성
+      developmentField = fieldList.where((field) {
+        return stringToListFieldList.contains(field['title']);
+      }).toList();
+
+      print('developmentField: $developmentField');
+    });
+  }
+
+  // 문자열을 리스트로 변환하는 메소드
+  void stringToListTool() {
+    final techStack =
+        Provider.of<ProfileProvider>(context, listen: false).techStack;
+    String strTool = techStack['developmentTool'];
+
+    setState(() {
+      // 콤마(,)를 기준으로 끊어서 리스트 생성
+      stringToListToolList = strTool.split(',');
+    });
+  }
+
+  // 선택한 field의 배지를 가져오는 메서드
+  void getTool() {
+    stringToListTool();
+
+    setState(() {
+      // fieldList의 title에 생성한 stringToListFieldList이 있다면 출력해서 리스트로 생성
+      developmentTool = toolsList.where((tool) {
+        return stringToListToolList.contains(tool['title']);
+      }).toList();
+
+      print('developmentTool: $developmentTool');
+    });
+  }
+
+  void profileDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return const Column();
+      },
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
+    final techStack =
+        Provider.of<ProfileProvider>(context, listen: false).techStack;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -211,9 +173,20 @@ class _MyUserPageState extends State<MyUserPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 프로필
-              Profile(
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserInfoPage(
+                        profile: techStack,
+                      ),
+                    ),
+                  );
+                },
+                child: Profile(
                 profileUrl: 'assets/images/profile.png',
-                name: name ?? '', // 이름 전달
+                name: '${techStack['memberName']}' ?? '', // 이름 전달
                 status: status ?? '', // 상태 전달
                 showSubTitle: true,
                 showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
@@ -236,7 +209,9 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-                children: fieldList.map((field) {
+                
+                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                children: developmentField.map((field) {
                   // 괄호 안에 있는 변수는 리스트를 map한 이름
                   return badge(
                     field['logoUrl'],
@@ -262,7 +237,9 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-                children: toolsList.map((tools) {
+
+                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                children: developmentTool.map((tools) {
                   return badge(
                     tools['logoUrl'],
                     tools['title'],
@@ -285,6 +262,8 @@ class _MyUserPageState extends State<MyUserPage> {
                   ),
                   IconButton(
                     onPressed: () {
+                      // getField();
+                      print(developmentField);
                       setState(() {
                         isExpanded = !isExpanded;
                       });

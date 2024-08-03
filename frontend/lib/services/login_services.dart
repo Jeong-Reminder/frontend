@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:frontend/providers/profile_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -151,7 +154,7 @@ class LoginAPI {
 
   // 로그인 API
   Future<Map<String, dynamic>> handleLogin(
-      String studentId, String password, String fcmToken) async {
+      BuildContext context, String studentId, String password, String fcmToken) async {
     // HttpOverrides 설정
     HttpOverrides.global = MyHttpOverrides();
 
@@ -219,6 +222,19 @@ class LoginAPI {
               .toList();
           await prefs.setStringList('memberExperienceIds', memberExperienceIds);
           print('저장된 memberExperience id: $memberExperienceIds');
+
+          // techStack이 null이 아닐 경우에 memberID값 추출
+          if (techStack != null) {
+            final memberId = techStack['memberId'];
+
+            // ProfileProvider를 통해 memberId 저장
+            // techStack이 있을 경우에는 로그인 응답 데이터에서 가져와서 memberId 저장
+            final profileProvider =
+                Provider.of<ProfileProvider>(context, listen: false);
+
+            profileProvider.memberId = memberId;
+            print("memberID: ${profileProvider.memberId}");
+          }
         }
         print('로그인 성공');
 

@@ -173,7 +173,6 @@ class _LoginPageState extends State<LoginPage> {
 
     return token!;
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -343,7 +342,7 @@ class _LoginPageState extends State<LoginPage> {
                     String password = pwController.text;
                     String fcmToken = await _getFCMToken(); // 토큰 발급
                     LoginAPI()
-                        .handleLogin(studentId, password, fcmToken)
+                        .handleLogin(context, studentId, password, fcmToken)
                         .then((result) async {
                       if (result['success']) {
                         final prefs = await SharedPreferences.getInstance();
@@ -354,7 +353,7 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         // userRole 값에 따라 다른 페이지로 이동
                         if (result['role'] == 'ROLE_ADMIN') {
-                          Navigator.pushNamed(context, '/user-info');
+                          Navigator.pushNamed(context, '/dashboard');
                         } else if (result['role'] == 'ROLE_USER') {
                           // techStack 값이 null이거나 값이 비어있는 경우
                           if (result['techStack'] == null ||
@@ -364,6 +363,13 @@ class _LoginPageState extends State<LoginPage> {
                           } else if (result['memberExperiences'] == null ||
                               result['memberExperiences'].isEmpty) {
                             Navigator.pushNamed(context, '/member-experience');
+
+                            // 둘 다 비어있을 경우
+                          } else if ((result['techStack'] == null ||
+                                  result['techStack'].isEmpty) &&
+                              (result['memberExperiences'] == null ||
+                                  result['memberExperiences'].isEmpty)) {
+                            Navigator.pushNamed(context, '/setting-profile');
                           } else {
                             // techStack, memberExperiences 값이 둘 다 채워진 경우
                             Navigator.pushNamed(context, '/homepage');

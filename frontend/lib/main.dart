@@ -6,11 +6,14 @@ import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
+import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/settingProFile1_screen.dart';
 import 'package:frontend/screens/settingProfile2_screen.dart';
 import 'package:frontend/services/login_services.dart';
@@ -89,6 +92,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AdminProvider()),
         ChangeNotifierProvider(create: (_) => ProjectExperienceProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
       ],
       child: const MyApp(),
@@ -169,6 +173,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/add_member': (context) => const AddMemberPage(),
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
+        '/myuser': (context) => const MyUserPage(),
         '/member-experience': (context) => const SettingProfile2Page(),
         '/experience': (context) => const ExperiencePage(
               experiences: [],
