@@ -14,10 +14,23 @@ class _EditToolPageState extends State<EditToolPage> {
   String developmentTool = '';
 
   @override
+  void initState() {
+    super.initState();
+    _resetIsSelected();
+  }
+
+  // isSelected 다 false로 설정
+  void _resetIsSelected() {
+    for (var tool in toolsList) {
+      tool['isSelected'] = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Development Tool Selection'),
+        title: const Text('Development Tool 수정'),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
@@ -25,7 +38,7 @@ class _EditToolPageState extends State<EditToolPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '2. DEVELOPMENT TOOLS 선택',
+              'DEVELOPMENT TOOLS 선택',
               style: TextStyle(
                 fontSize: 16.0,
                 fontWeight: FontWeight.bold,
@@ -103,15 +116,21 @@ class _EditToolPageState extends State<EditToolPage> {
                 ),
                 const SizedBox(height: 15),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // 선택된 툴을 보여주도록 작성
                     setState(() {
-                      developmentTool = selectedTools
-                          .map((f) => f['title'])
-                          .toList()
-                          .join(',');
+                      if (selectedTools.isNotEmpty) {
+                        developmentTool = selectedTools
+                            .map((f) => f['title'])
+                            .toList()
+                            .join(',');
+                      }
                     });
                     print('선택된 툴: $developmentTool');
+
+                    if (context.mounted) {
+                      Navigator.pop(context, developmentTool);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

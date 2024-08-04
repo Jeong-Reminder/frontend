@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:frontend/widgets/badge_widget.dart';
 import 'package:frontend/widgets/field_list.dart';
 
@@ -12,6 +13,18 @@ class EditFieldPage extends StatefulWidget {
 class _EditFieldPageState extends State<EditFieldPage> {
   List<Map<String, dynamic>> selectedFields = []; // 선택된 Field 리스트
   String developmentField = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _resetIsSelected();
+  }
+
+  void _resetIsSelected() {
+    for (var field in fieldList) {
+      field['isSelected'] = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,16 +116,23 @@ class _EditFieldPageState extends State<EditFieldPage> {
                 ),
                 const SizedBox(height: 15),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // 선택된 필드를 보여주도록 작성
                     setState(() {
-                      developmentField = selectedFields
-                          .map((f) => f['title'])
-                          .toList()
-                          .join(',');
+                      if (selectedFields.isNotEmpty) {
+                        developmentField = selectedFields
+                            .map((f) => f['title'])
+                            .toList()
+                            .join(',');
+                      }
                     });
 
                     print('선택된 필드: $developmentField');
+
+                    if (context.mounted) {
+                      // 변경된 developmentField를 이전 페이지로 전달하면서 이동
+                      Navigator.pop(context, developmentField);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
