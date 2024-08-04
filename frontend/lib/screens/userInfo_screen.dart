@@ -173,7 +173,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
         Text(
           title,
           style: const TextStyle(
@@ -213,7 +213,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
         Row(
           children: [
             Text(
@@ -225,26 +225,27 @@ class _UserInfoPageState extends State<UserInfoPage> {
               ),
             ),
             const SizedBox(width: 5),
-            IconButton(
-              onPressed: () async {
-                // 전달받은 데이터값을 result에 저장해 developmentField에 저장
-                final result = await Navigator.pushNamed(context, path);
+            if (isEdited)
+              IconButton(
+                onPressed: () async {
+                  // 전달받은 데이터값을 result에 저장해 developmentField에 저장
+                  final result = await Navigator.pushNamed(context, path);
 
-                if (result != null && result is String) {
-                  setState(() {
-                    if (path == '/edit-field') {
-                      developmentField = result;
-                    } else if (path == '/edit-tool') {
-                      developmentTool = result;
-                    }
-                  });
-                }
-              },
-              icon: const Icon(
-                Icons.edit,
-                size: 20,
+                  if (result != null && result is String) {
+                    setState(() {
+                      if (path == '/edit-field') {
+                        developmentField = result;
+                      } else if (path == '/edit-tool') {
+                        developmentTool = result;
+                      }
+                    });
+                  }
+                },
+                icon: const Icon(
+                  Icons.edit,
+                  size: 20,
+                ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 10),
