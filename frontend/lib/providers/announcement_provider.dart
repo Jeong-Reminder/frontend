@@ -18,7 +18,7 @@ class AnnouncementProvider with ChangeNotifier {
 
   final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
 
-  Future<void> createBoard(
+  Future<int> createBoard(
       Board board, List<File> pickedImages, List<File> pickedFiles) async {
     final accessToken = await getToken();
     if (accessToken == null) {
@@ -78,11 +78,15 @@ class AnnouncementProvider with ChangeNotifier {
         _board = Board.fromJson(responseBody['data']);
         print(_board);
         notifyListeners();
+
+        return _board.id!;
       } else {
         print('작성 실패: ${response.statusCode} - $responseString');
+        throw Exception();
       }
     } catch (e) {
       print('Exception: $e');
+      throw Exception();
     }
   }
 }

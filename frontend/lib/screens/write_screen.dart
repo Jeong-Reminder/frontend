@@ -3,11 +3,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
-import 'package:frontend/providers/announcement_services.dart';
+import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
 
 class BoardWritePage extends StatefulWidget {
   const BoardWritePage({super.key});
@@ -445,6 +447,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () async {
           try {
+            // 게시글
             final board = Board(
               announcementCategory: getSelectedCategoryText(),
               announcementTitle: titleController.text,
@@ -454,12 +457,29 @@ class _BoardWritePageState extends State<BoardWritePage> {
               announcementLevel: getSelectedGradeInt(),
             );
 
-            await AnnouncementProvider()
+            final boardId = await AnnouncementProvider()
                 .createBoard(board, pickedImages, pickedFiles);
 
-            // String fcmToken = await _getFCMToken();
+            String fcmToken = await _getFCMToken(); // fcm토큰 할당
+            DateTime dt = DateTime.now(); // 현재시간 할당
 
-            // await NotificationService().notification(board.toJson(), fcmToken);
+            // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
+            // 공백(' ')을 T로 대체
+            String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
+
+            Map<String, dynamic> notificationData = {
+              "title": titleController.text,
+              "content": contentController.text,
+              "category": getSelectedCategoryText(),
+              "targetId": boardId, // 게시글 아이디
+              "createdAt": createdAt, // 생성일
+            };
+            await NotificationService()
+                .notification(notificationData, fcmToken);
+
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           } catch (e) {
             print(e.toString());
           }

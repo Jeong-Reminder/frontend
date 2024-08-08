@@ -1,13 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:frontend/providers/profile_provider.dart';
-import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
-import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
