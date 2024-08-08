@@ -409,8 +409,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisSpacing: 9.0, // 같은 행의 iteme들 사이의 간
 
                     children: [
-                      homeItem(
-                          imgPath: 'assets/images/general.png', title: '전체공지'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/board');
+                        },
+                        child: homeItem(
+                            imgPath: 'assets/images/general.png',
+                            title: '전체공지'),
+                      ),
                       homeItem(
                           imgPath: 'assets/images/grade.png', title: '학년공지'),
                       homeItem(

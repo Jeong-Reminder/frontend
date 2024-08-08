@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:frontend/providers/announcement_services.dart';
+import 'package:frontend/screens/board_screen.dart';
 import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
 import 'package:get/get.dart';
@@ -96,6 +98,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProjectExperienceProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
+        ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
       ],
       child: const MyApp(),
     ),
@@ -184,6 +187,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/homepage': (context) => const HomePage(),
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
+        '/board': (context) => const BoardPage(),
       },
     );
   }

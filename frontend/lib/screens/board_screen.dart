@@ -6,7 +6,7 @@ import 'package:frontend/widgets/board_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
 class BoardPage extends StatefulWidget {
-  const BoardPage({Key? key}) : super(key: key);
+  const BoardPage({super.key});
 
   @override
   State<BoardPage> createState() => _BoardPageState();
@@ -171,7 +171,10 @@ class _BoardPageState extends State<BoardPage> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/homepage', (route) => false);
+            },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
           ),
