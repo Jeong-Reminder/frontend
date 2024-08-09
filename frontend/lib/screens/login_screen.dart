@@ -173,6 +173,7 @@ class _LoginPageState extends State<LoginPage> {
 
     return token!;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -336,11 +337,15 @@ class _LoginPageState extends State<LoginPage> {
               ElevatedButton(
                 onPressed: () async {
                   await _getFCMToken();
+
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
                     String password = pwController.text;
                     String fcmToken = await _getFCMToken(); // 토큰 발급
+
+                    print('fcmToken: $fcmToken');
+
                     LoginAPI()
                         .handleLogin(context, studentId, password, fcmToken)
                         .then((result) async {
@@ -353,7 +358,7 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         // userRole 값에 따라 다른 페이지로 이동
                         if (result['role'] == 'ROLE_ADMIN') {
-                          Navigator.pushNamed(context, '/dashboard');
+                          Navigator.pushNamed(context, '/homepage');
                         } else if (result['role'] == 'ROLE_USER') {
                           // techStack 값이 null이거나 값이 비어있는 경우
                           if (result['techStack'] == null ||

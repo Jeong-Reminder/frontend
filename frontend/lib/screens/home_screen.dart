@@ -2,12 +2,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:frontend/providers/profile_provider.dart';
-import 'package:frontend/screens/myUserPage_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
-import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -409,8 +407,19 @@ class _HomePageState extends State<HomePage> {
                     crossAxisSpacing: 9.0, // 같은 행의 iteme들 사이의 간
 
                     children: [
-                      homeItem(
-                          imgPath: 'assets/images/general.png', title: '전체공지'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TotalBoardPage(),
+                            ),
+                          );
+                        },
+                        child: homeItem(
+                            imgPath: 'assets/images/general.png',
+                            title: '전체공지'),
+                      ),
                       homeItem(
                           imgPath: 'assets/images/grade.png', title: '학년공지'),
                       homeItem(
