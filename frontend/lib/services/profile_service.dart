@@ -11,8 +11,9 @@ class ProfileService {
   }
 
   Future<void> createProfile(Profile profile) async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
+    const String baseUrl = 'http://localhost:9000/api/v1/member-profile';
 
     final accessToken = await getToken();
     if (accessToken == null) {

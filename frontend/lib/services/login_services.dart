@@ -7,10 +7,13 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginAPI {
   late PersistCookieJar cookieJar;
-  static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
-  static const tokenRefreshAddress =
-      'https://reminder.sungkyul.ac.kr/api/v1/reissue';
-  static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+  // static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
+  // static const tokenRefreshAddress =
+  //     'https://reminder.sungkyul.ac.kr/api/v1/reissue';
+  // static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+  static const loginAddress = 'http://localhost:9000/login';
+  static const tokenRefreshAddress = 'http://localhost:9000/api/v1/reissue';
+  static const logoutAddress = 'http://localhost:9000/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();

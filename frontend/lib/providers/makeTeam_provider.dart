@@ -5,10 +5,8 @@ import 'package:frontend/services/makeTeam_service.dart';
 class MakeTeamProvider with ChangeNotifier {
   final MakeTeamService service = MakeTeamService();
 
-  List<MakeTeam> makeTeams = []; // DataTable에 표시할 팀원 모집글 정보 리스트
+  List<MakeTeam> makeTeams = [];
 
-  // 팀원 모집글 정보를 담는 메소드를 호출
-  // makeTeams 반환
   Future<List<MakeTeam>> getMakeTeam() async {
     return makeTeams;
   }
@@ -16,11 +14,28 @@ class MakeTeamProvider with ChangeNotifier {
   // 팀원 모집글 작성
   Future<void> createMakeTeam(MakeTeam makeTeam) async {
     try {
-      await service.createMakeTeam(makeTeam); // 팀원 모집글 작성 API를 호출
-
-      // 팀원 모집글 정보 리스트(makeTeams)에 추가
+      int id = await service.createMakeTeam(makeTeam);
+      print('Set ID: $id'); // 추가된 디버깅 코드
+      makeTeam.id = id; // MakeTeam 객체에 ID 설정
       makeTeams.add(makeTeam);
-      notifyListeners(); // 상태 변경 알림
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 팀원 모집글 수정
+  Future<void> updateMakeTeam(MakeTeam makeTeam) async {
+    try {
+      int? id = await service.getId(); // SharedPreferences에서 ID 가져오기
+      if (id == null) {
+        throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
+      }
+      makeTeam.id = id; // MakeTeam 객체에 ID 설정
+
+      // 서비스 호출하여 팀원 모집글 수정
+      await service.updateMakeTeam(makeTeam);
+      makeTeams.add(makeTeam);
     } catch (e) {
       print(e);
     }
