@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
@@ -30,8 +31,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _initCookieJar(); // 초기화 함수 호출
-    _autoLogin(); // 자동 로그인 시도
+    _initCookieJar();
+    _autoLogin();
+    getApplicationDocumentsDirectory();
   }
 
   // refreshToken 추출 메서드
@@ -161,6 +163,15 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print('토큰 재발급 요청 중 에러 발생: ${e.toString()}');
     }
+  }
+
+  // 로그인 시 FCM 토큰 발급 함수
+  Future<String> _getFCMToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+    print('FCM 토큰: $token');
+
+    return token!;
   }
 
   @override
@@ -324,13 +335,19 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 27),
 
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  await _getFCMToken();
+
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
                     String password = pwController.text;
+                    String fcmToken = await _getFCMToken(); // 토큰 발급
+
+                    print('fcmToken: $fcmToken');
+
                     LoginAPI()
-                        .handleLogin(studentId, password)
+                        .handleLogin(context, studentId, password, fcmToken)
                         .then((result) async {
                       if (result['success']) {
                         final prefs = await SharedPreferences.getInstance();
@@ -351,6 +368,13 @@ class _LoginPageState extends State<LoginPage> {
                           } else if (result['memberExperiences'] == null ||
                               result['memberExperiences'].isEmpty) {
                             Navigator.pushNamed(context, '/member-experience');
+
+                            // 둘 다 비어있을 경우
+                          } else if ((result['techStack'] == null ||
+                                  result['techStack'].isEmpty) &&
+                              (result['memberExperiences'] == null ||
+                                  result['memberExperiences'].isEmpty)) {
+                            Navigator.pushNamed(context, '/setting-profile');
                           } else {
                             // techStack, memberExperiences 값이 둘 다 채워진 경우
                             Navigator.pushNamed(context, '/homepage');
@@ -380,6 +404,13 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     String fcmToken = await _getFCMToken();
+              //     await NotificationService().notification(fcmToken);
+              //   },
+              //   child: const Text('알림 테스트 버튼'),
+              // ),
             ],
           ),
         ),

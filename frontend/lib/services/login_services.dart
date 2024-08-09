@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:frontend/providers/profile_provider.dart';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -11,9 +15,10 @@ class LoginAPI {
   // static const tokenRefreshAddress =
   //     'https://reminder.sungkyul.ac.kr/api/v1/reissue';
   // static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
-  static const loginAddress = 'http://localhost:9000/login';
-  static const tokenRefreshAddress = 'http://localhost:9000/api/v1/reissue';
-  static const logoutAddress = 'http://localhost:9000/api/v1/logout';
+
+  static const loginAddress = 'http://10.0.2.2:9000/login';
+  static const tokenRefreshAddress = 'http://10.0.2.2:9000/api/v1/reissue';
+  static const logoutAddress = 'http://10.0.2.2:9000/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();
@@ -45,33 +50,37 @@ class LoginAPI {
     final status = prefs.getString('status'); // 상태 불러오기
     final password = prefs.getString('password');
     final autoLogin = prefs.getBool('isAutoLogin') ?? false;
+    final level = prefs.getInt('level');
+    final userRole = prefs.getString('userRole');
     return {
       'studentId': studentId,
       'name': name, // 이름 추가
       'status': status, // 상태 추가
       'password': password,
       'isAutoLogin': autoLogin,
+      'level': level,
+      'userRole': userRole,
     };
   }
 
   // 자동 로그인 시도 함수
-  Future<bool> autoLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-    final studentId = prefs.getString('studentId');
-    final password = prefs.getString('password');
+  // Future<bool> autoLogin() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final accessToken = prefs.getString('accessToken');
+  //   final studentId = prefs.getString('studentId');
+  //   final password = prefs.getString('password');
 
-    if (accessToken != null && studentId != null && password != null) {
-      final isExpired = JwtDecoder.isExpired(accessToken);
-      if (isExpired) {
-        return await againToken(); // 토큰 재발급 시도
-      } else {
-        print('유효한 토큰이 존재합니다.');
-        return true;
-      }
-    }
-    return false;
-  }
+  //   if (accessToken != null && studentId != null && password != null) {
+  //     final isExpired = JwtDecoder.isExpired(accessToken);
+  //     if (isExpired) {
+  //       return await againToken(); // 토큰 재발급 시도
+  //     } else {
+  //       print('유효한 토큰이 존재합니다.');
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 
   // 이전 토큰 삭제 함수
   Future<void> clearTokens({bool removeRefreshToken = true}) async {
@@ -149,8 +158,11 @@ class LoginAPI {
   }
 
   // 로그인 API
-  Future<Map<String, dynamic>> handleLogin(
-      String studentId, String password) async {
+  Future<Map<String, dynamic>> handleLogin(BuildContext context,
+      String studentId, String password, String fcmToken) async {
+    // HttpOverrides 설정
+    HttpOverrides.global = MyHttpOverrides();
+
     try {
       final url = Uri.parse(loginAddress);
 
@@ -160,6 +172,7 @@ class LoginAPI {
         body: {
           'studentId': studentId,
           'password': password,
+          'fcmToken': fcmToken,
         },
       );
 
@@ -173,6 +186,7 @@ class LoginAPI {
         final memberExperience = responseData['memberExperiences'];
         final name = responseData['name'];
         final status = responseData['status'];
+        final level = responseData['level'];
 
         final accessToken = response.headers['access']; // 액세스 토큰 추출
         final setCookieHeader = response.headers['set-cookie'];
@@ -191,6 +205,7 @@ class LoginAPI {
           await prefs.setString('studentId', studentId); // 학번 저장
           await prefs.setString('name', name); // 이름 저장
           await prefs.setString('status', status); // 재적상태 저장
+          await prefs.setInt('level', level);
 
           final uri = Uri.parse(loginAddress);
           cookieJar.saveFromResponse(
@@ -202,11 +217,13 @@ class LoginAPI {
           final savedStudentId = prefs.getString('studentId');
           final savedName = prefs.getString('name');
           final savedStatus = prefs.getString('status');
+          final savedLevel = prefs.getInt('level');
           print('저장된 액세스 토큰: $savedAccessToken');
           print('저장된 리프레시 토큰: $savedRefreshToken');
           print('저장된 학번: $savedStudentId');
           print('저장된 이름: $savedName');
           print('저장된 상태: $savedStatus');
+          print('저장된 학년: $savedLevel');
 
           // memberExperience 배열에서 id 값 추출하여 저장
           final memberExperienceIds = (memberExperience as List)
@@ -214,6 +231,19 @@ class LoginAPI {
               .toList();
           await prefs.setStringList('memberExperienceIds', memberExperienceIds);
           print('저장된 memberExperience id: $memberExperienceIds');
+
+          // techStack이 null이 아닐 경우에 memberID값 추출
+          if (techStack != null) {
+            final memberId = techStack['memberId'];
+
+            // ProfileProvider를 통해 memberId 저장
+            // techStack이 있을 경우에는 로그인 응답 데이터에서 가져와서 memberId 저장
+            final profileProvider =
+                Provider.of<ProfileProvider>(context, listen: false);
+
+            profileProvider.memberId = memberId;
+            print("memberID: ${profileProvider.memberId}");
+          }
         }
         print('로그인 성공');
 
@@ -224,7 +254,7 @@ class LoginAPI {
           'memberExperiences': memberExperience,
         };
       } else {
-        print('로그인 실패: ${response.statusCode} ${response.body}');
+        print('로그인 실패: ${response.statusCode} - ${response.body}');
         return {
           'success': false,
         };
@@ -278,5 +308,15 @@ class LoginAPI {
       print('로그아웃 요청 중 에러 발생: ${e.toString()}');
       return false;
     }
+  }
+}
+
+// 개발 환경에서만 사용해야되고 보안상 위험하기 때문에 프로덕션 환경에서 사용하면 절대 안된다.
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }

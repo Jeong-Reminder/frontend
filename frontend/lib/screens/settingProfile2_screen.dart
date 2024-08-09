@@ -119,288 +119,291 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 120.0),
-        child: Column(
-          children: [
-            Container(
-              alignment: FractionalOffset(percent, 1 - percent),
-              child: Image.asset(
-                'assets/images/cyclingPerson.png',
-                width: 30,
-                height: 30,
-                fit: BoxFit.cover,
+        padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 120.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                alignment: FractionalOffset(percent, 1 - percent),
+                child: Image.asset(
+                  'assets/images/cyclingPerson.png',
+                  width: 30,
+                  height: 30,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            Center(
-              child: LinearPercentIndicator(
-                padding: EdgeInsets.zero,
-                percent: percent,
-                lineHeight: 20,
-                backgroundColor: const Color(0xFFD9D9D9),
-                progressColor: const Color(0xFF2A72E7),
-                width: 370,
+              Center(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return LinearPercentIndicator(
+                      padding: EdgeInsets.zero,
+                      percent: percent,
+                      lineHeight: 20,
+                      backgroundColor: const Color(0xFFD9D9D9),
+                      progressColor: const Color(0xFF2A72E7),
+                      width: constraints.maxWidth,
+                    );
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 75),
-            Image.asset(
-              'assets/images/projectExperience.png',
-              width: 200,
-            ),
-            const SizedBox(height: 59),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 프로젝트명 입력 필드
-                    TextFormField(
-                      controller: projectNameController,
-                      decoration: const InputDecoration(
-                        labelText: '프로젝트명을 입력해주세요',
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF808080),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // 역할 입력 필드
-                    TextFormField(
-                      controller: rollController,
-                      decoration: const InputDecoration(
-                        labelText: '나의 역할(LEADER, MEMBER)를 입력해주세요',
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF808080),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // 프로젝트 경험 입력 필드
-                    TextFormField(
-                      controller: projectExperienceController,
-                      maxLines: 4,
-                      decoration: const InputDecoration(
-                        labelText: '프로젝트 경험을 입력해주세요',
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF808080),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // 깃허브 링크 입력 필드
-                    TextFormField(
-                      controller: githubLinkController,
-                      decoration: const InputDecoration(
-                        labelText: '깃허브 프로젝트 링크를 입력해주세요',
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF808080),
-                        ),
-                        prefixText: 'https://github.com/',
-                        prefixStyle: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // 맡은 파트 입력 필드
-                    TextFormField(
-                      controller: partController,
-                      decoration: const InputDecoration(
-                        labelText: '맡은 파트를 입력해주세요',
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF808080),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // 프로젝트 기간 드롭다운
-                    DropdownButtonFormField<String>(
-                      value: selectedDuration,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedDuration = newValue;
-                          // 선택된 값이 "직접 입력"이 아닐 때, 직접 입력 값을 초기화
-                          if (newValue != '직접 입력') {
-                            customDurationValue = '';
-                          }
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        labelText: '프로젝트 기간을 선택해주세요',
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF808080),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      style: const TextStyle(
+              const SizedBox(height: 75),
+              Image.asset(
+                'assets/images/projectExperience.png',
+                width: 200,
+              ),
+              const SizedBox(height: 59),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 프로젝트명 입력 필드
+                  TextFormField(
+                    controller: projectNameController,
+                    decoration: const InputDecoration(
+                      labelText: '프로젝트명을 입력해주세요',
+                      labelStyle: TextStyle(
                         fontSize: 12,
                         color: Color(0xFF808080),
                       ),
-                      items: projectDurationOptions.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                    if (selectedDuration == '직접 입력' &&
-                        customDurationValue.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: TextFormField(
-                          onChanged: (value) {
-                            customDurationValue = value;
-                          },
-                          decoration: const InputDecoration(
-                            labelText: '프로젝트 기간을 직접 입력해주세요',
-                            labelStyle: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF808080),
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(5.0),
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 10.0, vertical: 5.0),
-                          ),
-                          style: const TextStyle(
-                            fontSize: 12,
-                          ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5.0),
                         ),
                       ),
-                    if (customDurationValue.isNotEmpty) // 직접 입력된 기간이 있을 때만 보여줌
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: Text(
-                          '직접 입력한 프로젝트 기간: $customDurationValue',
-                          style: const TextStyle(
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // 역할 입력 필드
+                  TextFormField(
+                    controller: rollController,
+                    decoration: const InputDecoration(
+                      labelText: '나의 역할(LEADER, MEMBER)를 입력해주세요',
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF808080),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5.0),
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // 프로젝트 경험 입력 필드
+                  TextFormField(
+                    controller: projectExperienceController,
+                    maxLines: 4,
+                    textInputAction:
+                        TextInputAction.done, // 키패드 완료 버튼으로(키보드 창에서 나가도록 설정)
+                    decoration: const InputDecoration(
+                      labelText: '프로젝트 경험을 입력해주세요',
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF808080),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5.0),
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // 깃허브 링크 입력 필드
+                  TextFormField(
+                    controller: githubLinkController,
+                    decoration: const InputDecoration(
+                      labelText: '깃허브 프로젝트 링크를 입력해주세요',
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF808080),
+                      ),
+                      prefixText: 'https://github.com/',
+                      prefixStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5.0),
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // 맡은 파트 입력 필드
+                  TextFormField(
+                    controller: partController,
+                    decoration: const InputDecoration(
+                      labelText: '맡은 파트를 입력해주세요',
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF808080),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5.0),
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // 프로젝트 기간 드롭다운
+                  DropdownButtonFormField<String>(
+                    value: selectedDuration,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedDuration = newValue;
+                        // 선택된 값이 "직접 입력"이 아닐 때, 직접 입력 값을 초기화
+                        if (newValue != '직접 입력') {
+                          customDurationValue = '';
+                        }
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      labelText: '프로젝트 기간을 선택해주세요',
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF808080),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black,
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5.0),
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF808080),
+                    ),
+                    items: projectDurationOptions.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  if (selectedDuration == '직접 입력' &&
+                      customDurationValue.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: TextFormField(
+                        onChanged: (value) {
+                          customDurationValue = value;
+                        },
+                        decoration: const InputDecoration(
+                          labelText: '프로젝트 기간을 직접 입력해주세요',
+                          labelStyle: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF808080),
                           ),
-                        ),
-                      ),
-                    const SizedBox(height: 10),
-                    // 알리미 시작하기 또는 없음 버튼
-                    GestureDetector(
-                      onTap: _onTapHandler,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            projectNameController.text.isNotEmpty &&
-                                    projectExperienceController
-                                        .text.isNotEmpty &&
-                                    githubLinkController.text.isNotEmpty &&
-                                    rollController.text.isNotEmpty &&
-                                    partController.text.isNotEmpty &&
-                                    (selectedDuration != null ||
-                                        customDurationValue.isNotEmpty)
-                                ? '알리미 시작하기'
-                                : '없음',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2A72E7),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                            ),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(5.0),
                             ),
                           ),
-                          const Icon(
-                            Icons.chevron_right_rounded,
-                            color: Color(0xFF2A72E7),
-                          ),
-                        ],
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 5.0),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  if (customDurationValue.isNotEmpty) // 직접 입력된 기간이 있을 때만 보여줌
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text(
+                        '직접 입력한 프로젝트 기간: $customDurationValue',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF808080),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  // 알리미 시작하기 또는 없음 버튼
+                  GestureDetector(
+                    onTap: _onTapHandler,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          projectNameController.text.isNotEmpty &&
+                                  projectExperienceController.text.isNotEmpty &&
+                                  githubLinkController.text.isNotEmpty &&
+                                  rollController.text.isNotEmpty &&
+                                  partController.text.isNotEmpty &&
+                                  (selectedDuration != null ||
+                                      customDurationValue.isNotEmpty)
+                              ? '알리미 시작하기'
+                              : '없음',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2A72E7),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Color(0xFF2A72E7),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

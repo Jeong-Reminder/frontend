@@ -1,7 +1,5 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '12.0'
+platform :ios, '14.0'
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
@@ -32,10 +30,32 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # Add your pods here
+  pod 'Firebase', '~> 10.22.0'
+  pod 'FirebaseFirestore', '~> 10.22.0'
+  pod 'FirebaseCore', '~> 10.22.0'
+  pod 'FirebaseMessaging', '~> 10.22.0'
+  pod 'FirebaseAnalytics', '~> 10.22.0' # 모든 Firebase/Analytics 버전을 10.22.0으로 맞춤
+  pod 'SwiftyGif', :modular_headers => true
+
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    if ['PromisesObjC', 'nanopb', 'SDWebImage', 'SwiftyGif', 'FBLPromises'].include? target.name
+      target.build_configurations.each do |config|
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
+
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+    end
   end
 end
