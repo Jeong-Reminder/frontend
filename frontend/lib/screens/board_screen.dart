@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
+import 'package:frontend/widgets/boardAppbar_widget.dart';
 import 'package:frontend/widgets/board_widget.dart';
 import 'package:frontend/widgets/levelBtn_widget.dart';
 
 class BoardPage extends StatefulWidget {
-  const BoardPage({Key? key}) : super(key: key);
+  const BoardPage({super.key});
 
   @override
   State<BoardPage> createState() => _BoardPageState();
@@ -163,46 +165,14 @@ class _BoardPageState extends State<BoardPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 70,
-        leadingWidth: 140,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12.0),
-          child: IconButton(
-            onPressed: () {},
-            icon: Image.asset('assets/images/logo.png'),
-            color: Colors.black,
-          ),
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.search,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
+      appBar: const BoardAppbar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -216,7 +186,7 @@ class _BoardPageState extends State<BoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  '학년 공지',
+                  '전체 공지',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -271,6 +241,7 @@ class _BoardPageState extends State<BoardPage> {
                       selectedGrade == '1학년', // 전달 받은 학년과 버튼 학년과 동일하면 true 반환
                   // 전달 받은 grade 값을 selectedGrade에 저장
                   onSelectedGrade: (grade) {
+                    // 일관되게 grade로 통일
                     setState(() {
                       // 다른 학년 버튼 시 숨김/삭제 버튼 비활성화
                       // 이 콜백 함수가 onPressed 함수 내에 있어서 여기에 코드 작성
@@ -305,58 +276,60 @@ class _BoardPageState extends State<BoardPage> {
                 GradeBtn(
                   grade: '4학년',
                   isSelected: selectedGrade == '4학년',
-                  onSelectedGrade: (level) {
+                  onSelectedGrade: (grade) {
+                    // 일관되게 grade로 통일
                     setState(() {
                       isHidDel = false;
-                      selectedGrade = level;
+                      selectedGrade = grade;
                     });
                   },
                 ),
               ],
             ),
+
             const SizedBox(height: 13),
             // 해당 학년 공지 표시
-            if (selectedGrade == '1학년')
-              // 전달받은 isEdited 값을 isHidDel 값에 저장
-              Board(
-                boardList: oneBoard,
-                onChecked: (isPressed) {
-                  setState(() {
-                    isHidDel = isPressed;
-                  });
-                },
-                isShowed: isHidDel,
-              )
-            else if (selectedGrade == '2학년')
-              Board(
-                boardList: twoBoard,
-                onChecked: (isPressed) {
-                  setState(() {
-                    isHidDel = isPressed;
-                  });
-                },
-                isShowed: isHidDel,
-              )
-            else if (selectedGrade == '3학년')
-              Board(
-                boardList: threeBoard,
-                onChecked: (isPressed) {
-                  setState(() {
-                    isHidDel = isPressed;
-                  });
-                },
-                isShowed: isHidDel,
-              )
-            else if (selectedGrade == '4학년')
-              Board(
-                boardList: fourBoard,
-                onChecked: (isPressed) {
-                  setState(() {
-                    isHidDel = isPressed;
-                  });
-                },
-                isShowed: isHidDel,
-              )
+            // if (selectedGrade == '1학년')
+            //   // 전달받은 isEdited 값을 isHidDel 값에 저장
+            //   Board(
+            //     boardList: oneBoard,
+            //     onChecked: (isPressed) {
+            //       setState(() {
+            //         isHidDel = isPressed;
+            //       });
+            //     },
+            //     isShowed: isHidDel,
+            //   )
+            // else if (selectedGrade == '2학년')
+            //   Board(
+            //     boardList: twoBoard,
+            //     onChecked: (isPressed) {
+            //       setState(() {
+            //         isHidDel = isPressed;
+            //       });
+            //     },
+            //     isShowed: isHidDel,
+            //   )
+            // else if (selectedGrade == '3학년')
+            //   Board(
+            //     boardList: threeBoard,
+            //     onChecked: (isPressed) {
+            //       setState(() {
+            //         isHidDel = isPressed;
+            //       });
+            //     },
+            //     isShowed: isHidDel,
+            //   )
+            // else if (selectedGrade == '4학년')
+            //   Board(
+            //     boardList: fourBoard,
+            //     onChecked: (isPressed) {
+            //       setState(() {
+            //         isHidDel = isPressed;
+            //       });
+            //     },
+            //     isShowed: isHidDel,
+            //   )
           ],
         ),
       ),
