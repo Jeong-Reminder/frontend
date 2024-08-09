@@ -33,18 +33,13 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
 
   // 글 제목에서 대괄호([]) 안의 경진대회 이름을 추출하는 함수
   String _parseCompetitionName(String title) {
-    // 대괄호 안의 내용을 추출하는 정규 표현식을 정의
     final RegExp regExp = RegExp(
       r'\[(.*?)\]',
-      caseSensitive: false, // 대소문자 구분 없이 매칭
+      caseSensitive: false,
     );
-
-    // 정규 표현식과 일치하는 첫 번째 부분을 찾음
     final match = regExp.firstMatch(title);
-
-    // 일치하는 부분이 있으면 대괄호 안의 텍스트를 반환, 없으면 빈 문자열 반환
     if (match != null) {
-      return match.group(1)?.trim() ?? ''; // 대괄호 안의 문자열을 반환하며, 공백 제거
+      return match.group(1)?.trim() ?? '';
     }
     return '';
   }
@@ -52,17 +47,12 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
   @override
   void initState() {
     super.initState();
-    _titleController
-        .addListener(_validateInputs); // 제목 텍스트 변경 시 _validateInputs 호출
-    _contentController
-        .addListener(_validateInputs); // 내용 텍스트 변경 시 _validateInputs 호출
-    _chatUrlController
-        .addListener(_validateInputs); // 오픈채팅 URL 텍스트 변경 시 _validateInputs 호출
-    _titleFocusNode
-        .addListener(_handleTitleFocus); // 포커스 노드 변경 시 _handleTitleFocus 호출
+    _titleController.addListener(_validateInputs);
+    _contentController.addListener(_validateInputs);
+    _chatUrlController.addListener(_validateInputs);
+    _titleFocusNode.addListener(_handleTitleFocus);
 
     if (widget.makeTeam != null) {
-      // 수정할 팀원 모집글 정보가 있을 경우 초기값 설정
       _titleController.text = widget.makeTeam!.recruitmentTitle;
       _contentController.text = widget.makeTeam!.recruitmentContent;
       _chatUrlController.text = widget.makeTeam!.kakaoUrl;
@@ -87,23 +77,16 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
   }
 
   void _validateInputs() {
-    // 제목, 내용, 오픈채팅 URL이 비어있지 않은지 확인하여 버튼 활성화 상태 업데이트
     isButtonEnabled.value = _titleController.text.isNotEmpty &&
         _contentController.text.isNotEmpty &&
         _chatUrlController.text.isNotEmpty;
-
-    // 오픈채팅 URL이 유효한지 확인하여 상태 업데이트
     isChatUrlValid.value = _chatUrlController.text.isNotEmpty;
   }
 
-  // 제목 입력 필드가 포커스를 받을 때 대괄호([])를 자동으로 추가하는 함수
   void _handleTitleFocus() {
-    // 제목 입력 필드가 포커스를 가지고 있고, 텍스트가 비어 있는지 확인
     if (_titleFocusNode.hasFocus && _titleController.text.isEmpty) {
       setState(() {
-        // 텍스트 필드에 대괄호([])를 추가
         _titleController.text = '[]';
-        // 커서를 대괄호 안으로 이동
         _titleController.selection = TextSelection.fromPosition(
           const TextPosition(offset: 1),
         );
@@ -111,7 +94,6 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     }
   }
 
-  // 날짜 선택기 함수
   Future<void> _selectEndDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -119,14 +101,13 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
       firstDate: DateTime(2010),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedEndDate) {
+    if (picked != null || picked != selectedEndDate) {
       setState(() {
         selectedEndDate = picked;
       });
     }
   }
 
-  // 오픈채팅 URL을 자동으로 생성하는 함수
   void _generateChatUrl() {
     const baseUrl = 'https://open.kakao.com/o/';
     final chatUrl = '$baseUrl${_chatUrlController.text}';
@@ -138,7 +119,6 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     _validateInputs();
   }
 
-  // 오픈채팅방 링크 열기 함수
   void _launchChatUrl() async {
     final chatUrl = _chatUrlController.text;
     final url = Uri.parse(chatUrl);
@@ -150,7 +130,6 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     }
   }
 
-  // 인원 수 버튼을 생성하는 위젯
   Widget _buildPeopleCountButton(int count) {
     bool isSelected = selectedPeopleCount == count;
     return GestureDetector(
@@ -180,7 +159,6 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     );
   }
 
-  // 희망 분야 버튼을 생성하는 위젯
   Widget _buildFieldButton(String field) {
     bool isSelected = selectedFields.contains(field);
     return GestureDetector(
@@ -215,6 +193,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
   }
 
   void _showUpdateConfirmationDialog(MakeTeam makeTeam) {
+    // 모달 창에서 상태 관리를 위한 변수를 초기화
     TextEditingController titleController =
         TextEditingController(text: makeTeam.recruitmentTitle);
     TextEditingController contentController =
@@ -226,6 +205,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     DateTime updatedSelectedEndDate =
         DateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(makeTeam.endTime);
 
+    // 모달 창을 띄워 사용자 입력을 받음
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -236,6 +216,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
               content: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
+                    // 인원 수
                     Row(
                       children: [
                         const Text(
@@ -286,6 +267,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                       ],
                     ),
                     const SizedBox(height: 14),
+                    // 희망 분야
                     Row(
                       children: [
                         const Text(
@@ -329,6 +311,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                       ],
                     ),
                     const SizedBox(height: 14),
+                    // 종료 기간
                     Row(
                       children: [
                         const Text(
@@ -348,8 +331,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                               firstDate: DateTime(2010),
                               lastDate: DateTime(2101),
                             );
-                            if (picked != null &&
-                                picked != updatedSelectedEndDate) {
+
+                            if (picked != null) {
                               setState(() {
                                 updatedSelectedEndDate = picked;
                               });
@@ -379,12 +362,13 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 TextButton(
                   child: const Text('취소'),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(); // 모달 닫기
                   },
                 ),
                 TextButton(
                   child: const Text('수정'),
                   onPressed: () async {
+                    // MakeTeam 객체 업데이트
                     MakeTeam updatedMakeTeam = MakeTeam(
                       id: makeTeam.id,
                       recruitmentCategory: makeTeam.recruitmentCategory,
@@ -399,9 +383,11 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                       announcementId: 1,
                     );
 
-                    // Provider를 사용하여 경험 데이터를 업데이트하고, UI를 갱신
+                    // 업데이트된 객체를 Provider를 통해 저장
                     await Provider.of<MakeTeamProvider>(context, listen: false)
                         .updateMakeTeam(updatedMakeTeam);
+
+                    // 메인 화면 업데이트
                     setState(() {
                       widget.makeTeam?.id = updatedMakeTeam.id;
                       _titleController.text = updatedMakeTeam.recruitmentTitle;
@@ -410,9 +396,12 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                       _chatUrlController.text = updatedMakeTeam.kakaoUrl;
                       selectedPeopleCount = updatedMakeTeam.studentCount;
                       selectedFields = updatedMakeTeam.hopeField.split(', ');
-                      selectedEndDate = updatedSelectedEndDate;
+                      selectedEndDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                          .parse(updatedMakeTeam.endTime);
                     });
-                    Navigator.of(context).pop();
+
+                    // 모달 닫기
+                    Navigator.of(context).pop(true); // 변경 사항이 있다는 플래그 전달
                   },
                 ),
               ],
@@ -420,7 +409,12 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
           },
         );
       },
-    );
+    ).then((value) {
+      if (value == true) {
+        // 변경 사항이 있을 경우 setState로 메인 화면 업데이트
+        setState(() {});
+      }
+    });
   }
 
   Widget _buildPeopleCountButtonInDialog(
@@ -587,8 +581,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                                   ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                       .format(selectedEndDate!)
                                   : '',
-                              announcementId:
-                                  1, // 공지글 작성 API 완료 후 공지글 ID 추출 후 집어넣기
+                              announcementId: 1,
                             );
 
                             _showUpdateConfirmationDialog(makeTeam);
@@ -932,22 +925,20 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                             ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                 .format(selectedEndDate!)
                             : '',
-                        announcementId: 1, // 공지글 작성 API 완료 후 공지글 ID 추출 후 집어넣기
+                        announcementId: 1,
                       );
 
                       if (widget.makeTeam != null) {
-                        // 수정
                         await context
                             .read<MakeTeamProvider>()
                             .updateMakeTeam(makeTeam);
                       } else {
-                        // 새로 작성
                         await context
                             .read<MakeTeamProvider>()
                             .createMakeTeam(makeTeam);
                       }
 
-                      // Navigator.pop(context);
+                      Navigator.pop(context);
                     }
                   : null,
               child: Container(
