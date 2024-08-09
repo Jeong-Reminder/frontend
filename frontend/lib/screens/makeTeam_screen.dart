@@ -938,7 +938,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                             .createMakeTeam(makeTeam);
                       }
 
-                      Navigator.pop(context);
+                      // Navigator.pop(context);
                     }
                   : null,
               child: Container(

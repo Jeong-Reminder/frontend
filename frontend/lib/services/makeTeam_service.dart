@@ -23,7 +23,7 @@ class MakeTeamService {
 
   // 팀원 모집글 작성 API
   Future<int> createMakeTeam(MakeTeam makeTeam) async {
-    const String baseUrl = 'http://localhost:9000/api/v1/recruitment';
+    const String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment';
 
     final token = await getToken();
     if (token == null) {
@@ -66,7 +66,7 @@ class MakeTeamService {
     if (id == null) {
       throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
     }
-    final String baseUrl = 'http://localhost:9000/api/v1/recruitment/$id';
+    final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
 
     final token = await getToken();
     if (token == null) {
