@@ -24,7 +24,7 @@ Widget homeItem({required String imgPath, required String title}) {
         width: 50, // 이미지 너비
         height: 50, // 이미지 높이
       ),
-      const SizedBox(height: 2),
+      const SizedBox(height: 3),
       Text(
         title,
         style: TextStyle(
