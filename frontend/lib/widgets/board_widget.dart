@@ -4,8 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Board extends StatefulWidget {
   final List<Map<String, dynamic>> boardList;
+  final bool
+      total; // level과 memberLevel이 맞는 공지사항만 필터링하는 작업을 할 것인지 여부(true일 때 필터링 작업 진행)
 
-  const Board({required this.boardList, super.key});
+  const Board({required this.boardList, required this.total, super.key});
 
   @override
   State<Board> createState() => _BoardState();
@@ -16,6 +18,7 @@ class _BoardState extends State<Board> {
   bool isPressed = false; // 길게 눌렀는지 여부
   int count = 4; // 좋아요 개수
   int? level;
+  List<Map<String, dynamic>> filteredBoardList = [];
 
   @override
   void initState() {
@@ -35,31 +38,37 @@ class _BoardState extends State<Board> {
   @override
   Widget build(BuildContext context) {
     // level과 memberLevel이 맞는 공지사항만 필터링
-    final filteredBoardList = widget.boardList.where((board) {
-      final memberLevel = board['announcementLevel'];
-      return level == memberLevel || level == 0;
-    }).toList();
+    if (widget.total) {
+      setState(() {
+        filteredBoardList = widget.boardList.where((board) {
+          final memberLevel = board['announcementLevel'];
+          return level == memberLevel || level == 0;
+        }).toList();
+      });
 
-    // 만약 필터링된 리스트가 비어 있다면 텍스트 표시
-    if (filteredBoardList.isEmpty) {
-      return const Center(
-        child: Text(
-          '해당 학생의 공지가 없습니다.',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54,
+      // 만약 필터링된 리스트가 비어 있다면 텍스트 표시
+      if (filteredBoardList.isEmpty) {
+        return const Center(
+          child: Text(
+            '해당 학생의 공지가 없습니다.',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     // 필터링된 공지사항 리스트를 화면에 표시
     return ListView.builder(
-      itemCount: filteredBoardList.length,
+      itemCount:
+          widget.total ? filteredBoardList.length : widget.boardList.length,
       shrinkWrap: true, // 높이를 자동으로 조절
       itemBuilder: (context, index) {
-        final board = filteredBoardList[index];
+        final board =
+            widget.total ? filteredBoardList[index] : widget.boardList[index];
         final category = _getCategoryName(board['announcementCategory']);
 
         return Column(
@@ -132,7 +141,7 @@ class _BoardState extends State<Board> {
       case 'ACADEMIC_ALL':
         return '학년';
       default:
-        return 'null'; // 변환되지 않은 경우 원래 값을 반환
+        return category; // 변환되지 않은 경우 원래 값을 반환
     }
   }
 }

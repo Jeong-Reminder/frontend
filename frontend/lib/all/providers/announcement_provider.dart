@@ -160,8 +160,6 @@ class AnnouncementProvider with ChangeNotifier {
       } else {
         print('조회 실패');
       }
-
-      await fetchContestCate();
       notifyListeners();
     } catch (e) {
       print(e.toString());

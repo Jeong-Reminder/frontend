@@ -19,14 +19,19 @@ enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 class _ContestBoardPageState extends State<ContestBoardPage> {
   String boardCategory = 'CONTEST';
   String userRole = '';
-  String contestCategory = '';
+  String contestCategory = ''; // 경진대회 카테고리 버튼을 눌렀을 때 해당하는 카테고리를 저장하는 변수
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AnnouncementProvider>(context, listen: false)
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchCateBoard(boardCategory);
+
+      if (context.mounted) {
+        Provider.of<AnnouncementProvider>(context, listen: false)
+            .fetchContestCate();
+      }
     });
 
     // 첫 번째 카테고리를 선택하여 초기화
@@ -42,7 +47,7 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
     _loadCredentials();
   }
 
-  // 학번, 이름, 재적상태를 로드하는 메서드
+  // 역할을 로드하는 메서드
   Future<void> _loadCredentials() async {
     final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
     final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
@@ -157,7 +162,9 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
                         child: Text(
                           category,
                           style: TextStyle(
-                            color: Colors.black.withOpacity(0.5),
+                            color: (contestCategory == category)
+                                ? Colors.black
+                                : Colors.black.withOpacity(0.5),
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -175,7 +182,10 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
             // 여기서 Listview.builder() 작성할 필요가 없음
 
             Expanded(
-              child: Board(boardList: filteredBoardList),
+              child: Board(
+                boardList: filteredBoardList,
+                total: false,
+              ),
             ),
           ],
         ),
