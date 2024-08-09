@@ -9,9 +9,11 @@ import 'package:path/path.dart' as path;
 class AnnouncementProvider with ChangeNotifier {
   late Board _board;
   final List<Map<String, dynamic>> _boardList = [];
+  final List<String> _categoryList = [];
 
   Board get board => _board;
   List<Map<String, dynamic>> get boardList => _boardList;
+  List<String> get categoryList => _categoryList;
 
   // 엑세스 토큰 할당
   Future<String?> getToken() async {
@@ -85,6 +87,7 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
+  // 게시글 전체 조회
   Future<void> fetchAllBoards() async {
     try {
       final accessToken = await getToken();
@@ -99,6 +102,8 @@ class AnnouncementProvider with ChangeNotifier {
           'access': accessToken,
         },
       );
+
+      _boardList.clear();
 
       final utf8Response = utf8.decode(response.bodyBytes);
       final jsonResponse = json.decode(utf8Response)
@@ -115,6 +120,44 @@ class AnnouncementProvider with ChangeNotifier {
         print('조회 성공: $_boardList');
       } else {
         print('조회 실패: ${response.bodyBytes}');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  // 경진대회 카테고리 조회
+  Future<void> fetchContestCate() async {
+    try {
+      final accessToken = await getToken();
+      if (accessToken == null) {
+        throw Exception('엑세스 토큰을 찾을 수 없음');
+      }
+
+      final url = Uri.parse('$baseUrl/contest-categort-name');
+      final response = await http.get(
+        url,
+        headers: {
+          'access': accessToken,
+        },
+      );
+
+      // 호출됐을 때 새로운 데이터를 추가할 때 중복방지를 위해 clear 메소드로 구현
+      _categoryList.clear();
+
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response) as Map<String, dynamic>;
+
+      final dataResponse = jsonResponse['data'];
+
+      if (response.statusCode == 200) {
+        for (var data in dataResponse) {
+          _categoryList.add(data);
+          notifyListeners();
+        }
+        print('조회 성공: $_categoryList');
+      } else {
+        print('조회 실패');
       }
     } catch (e) {
       print(e.toString());

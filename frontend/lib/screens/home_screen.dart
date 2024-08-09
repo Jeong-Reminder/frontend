@@ -422,9 +422,17 @@ class _HomePageState extends State<HomePage> {
                       ),
                       homeItem(
                           imgPath: 'assets/images/grade.png', title: '학년공지'),
-                      homeItem(
-                        imgPath: 'assets/images/competition.png',
-                        title: '경진대회',
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/contest-board',
+                          );
+                        },
+                        child: homeItem(
+                          imgPath: 'assets/images/competition.png',
+                          title: '경진대회',
+                        ),
                       ),
                       homeItem(
                           imgPath: 'assets/images/company.png', title: '기업탐방'),
