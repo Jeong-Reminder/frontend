@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/screens/write_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/boardAppbar_widget.dart';
 import 'package:frontend/widgets/board_widget.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,8 @@ class TotalBoardPage extends StatefulWidget {
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
 class _TotalBoardPageState extends State<TotalBoardPage> {
+  String userRole = '';
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +26,15 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchAllBoards();
+    });
+  }
+
+  // 학번, 이름, 재적상태를 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
     });
   }
 
@@ -55,19 +67,21 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                   color: const Color(0xFFEFF0F2),
                   itemBuilder: (BuildContext context) {
                     return [
-                      popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const BoardWritePage()),
-                        );
-                      }),
-                      const PopupMenuDivider(),
+                      if (userRole == 'ROLE_ADMIN')
+                        popUpItem('글쓰기', PopUpItem.popUpItem1, () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const BoardWritePage()),
+                          );
+                        }),
+                      if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                       popUpItem('새로고침', PopUpItem.popUpItem2, () {}),
-                      const PopupMenuDivider(),
-                      popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
-                        // 숨김 페이지로 이동
-                      }),
+                      if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
+                      if (userRole == 'ROLE_ADMIN')
+                        popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
+                          // 숨김 페이지로 이동
+                        }),
                     ];
                   },
                   child: const Icon(Icons.more_vert),
