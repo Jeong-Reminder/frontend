@@ -34,129 +34,91 @@ class _BoardState extends State<Board> {
 
   @override
   Widget build(BuildContext context) {
-    if (level == null) {
-      return const Center(child: Text('해당 학생의 공지가 없습니다.')); // 로딩 스피너 표시
+    // level과 memberLevel이 맞는 공지사항만 필터링
+    final filteredBoardList = widget.boardList.where((board) {
+      final memberLevel = board['announcementLevel'];
+      return level == memberLevel || level == 0;
+    }).toList();
+
+    // 만약 필터링된 리스트가 비어 있다면 텍스트 표시
+    if (filteredBoardList.isEmpty) {
+      return const Center(
+        child: Text(
+          '해당 학생의 공지가 없습니다.',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+      );
     }
 
+    // 필터링된 공지사항 리스트를 화면에 표시
     return Expanded(
       child: ListView.builder(
-          itemCount: widget.boardList.length,
-          itemBuilder: (context, index) {
-            final board = widget.boardList[index];
+        itemCount: filteredBoardList.length,
+        itemBuilder: (context, index) {
+          final board = filteredBoardList[index];
+          final category = _getCategoryName(board['announcementCategory']);
 
-            final category =
-                _getCategoryName(board['announcementCategory']); // 카테고리 변환
-            final memberLevel = board['announcementLevel']; // 해당 공지 학년
-
-            // 로그인 정보의 학년(level)과 해당 공지의 학년(memberLevel)이 일치하면
-            // level이 0(관리자)이면 해당 공지를 보여주도록 설정
-            if (level == memberLevel || level == 0) {
-              return Column(
-                children: [
-                  Card(
-                    color: const Color(0xFFFAFAFE),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    elevation: 0.5,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20.0, vertical: 18.0),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+          return Column(
+            children: [
+              Card(
+                color: const Color(0xFFFAFAFE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                elevation: 0.5,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 18.0),
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    board['announcementTitle'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    category,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      color: Color(0xFF7D7D7F),
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                board['announcementTitle'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              // SizedBox(
-                              //   height: 20,
-                              //   width: 20,
-                              //   child: Checkbox(
-                              //     value: board['isChecked'] ??
-                              //         false, // isChecked가 null이면 기본값이 false 사용
-                              //     onChanged: (value) {
-                              //       setState(() {
-                              //         board['isChecked'] = value;
-                              //       });
-                              //     },
-                              //     shape: const CircleBorder(),
-                              //     activeColor: const Color(0xFF7B88C2),
-                              //   ),
-                              // )
+                              const SizedBox(width: 5),
+                              Text(
+                                category,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0xFF7D7D7F),
+                                ),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 7),
-                          Text(
-                            board['announcementContent'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 7),
-
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.end,
-                          //   children: [
-                          //     IconButton(
-                          //       padding: EdgeInsets.zero, // 패딩 설정
-                          //       constraints: const BoxConstraints(),
-                          //       onPressed: () {
-                          //         // 여기에 좋아요 api 구현
-
-                          //         setState(() {
-                          //           board['isLiked'] = !board['isLiked'];
-
-                          //           if (board['isLiked']) {
-                          //             board['count'] += 1;
-                          //           } else {
-                          //             board['count'] -= 1;
-                          //           }
-                          //         });
-                          //       },
-                          //       icon: Icon(
-                          //         board['isLiked']
-                          //             ? Icons.favorite
-                          //             : Icons.favorite_border,
-                          //         color: const Color(0xFFEA4E44),
-                          //       ),
-                          //     ),
-                          //     Text(
-                          //       '${board['count']}',
-                          //       style: const TextStyle(fontSize: 16),
-                          //     ),
-                          //   ],
-                          // ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 7),
+                      Text(
+                        board['announcementContent'],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                ],
-              );
-            }
-            return null;
-          }),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          );
+        },
+      ),
     );
   }
 
