@@ -116,7 +116,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  final LoginAPI _loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+  final LoginAPI loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
 
   @override
   void initState() {

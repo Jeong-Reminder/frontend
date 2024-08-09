@@ -23,10 +23,11 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
     super.initState();
     // listen: false를 사용하여 initState에서 Provider를 호출
     // addPostFrameCallback 사용하는 이유 : initState에서 직접 Provider.of를 호출할 때 context가 아직 완전히 준비되지 않았기 때문에 발생할 수 있는 에러를 방지
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AnnouncementProvider>(context, listen: false)
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchAllBoards();
     });
+    _loadCredentials();
   }
 
   // 학번, 이름, 재적상태를 로드하는 메서드

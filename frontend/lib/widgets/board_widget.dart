@@ -55,70 +55,69 @@ class _BoardState extends State<Board> {
     }
 
     // 필터링된 공지사항 리스트를 화면에 표시
-    return Expanded(
-      child: ListView.builder(
-        itemCount: filteredBoardList.length,
-        itemBuilder: (context, index) {
-          final board = filteredBoardList[index];
-          final category = _getCategoryName(board['announcementCategory']);
+    return ListView.builder(
+      itemCount: filteredBoardList.length,
+      shrinkWrap: true, // 높이를 자동으로 조절
+      itemBuilder: (context, index) {
+        final board = filteredBoardList[index];
+        final category = _getCategoryName(board['announcementCategory']);
 
-          return Column(
-            children: [
-              Card(
-                color: const Color(0xFFFAFAFE),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                elevation: 0.5,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 18.0),
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                board['announcementTitle'],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+        return Column(
+          children: [
+            Card(
+              color: const Color(0xFFFAFAFE),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              elevation: 0.5,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 18.0),
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              board['announcementTitle'],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(width: 5),
-                              Text(
-                                category,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFF7D7D7F),
-                                ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              category,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF7D7D7F),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 7),
-                      Text(
-                        board['announcementContent'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                            ),
+                          ],
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      board['announcementContent'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
-                      const SizedBox(height: 7),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 7),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
-            ],
-          );
-        },
-      ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        );
+      },
     );
   }
 

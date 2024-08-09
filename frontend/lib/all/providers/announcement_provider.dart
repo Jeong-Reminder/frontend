@@ -8,12 +8,14 @@ import 'package:path/path.dart' as path;
 
 class AnnouncementProvider with ChangeNotifier {
   late Board _board;
-  final List<Map<String, dynamic>> _boardList = [];
-  final List<String> _categoryList = [];
+  final List<Map<String, dynamic>> _boardList = []; // 전체 공지 리스트
+  final List<String> _categoryList = []; // 경진대회 카테고리 리스트
+  final List<Map<String, dynamic>> _cateBoardList = []; // 카테고리별 리스트
 
   Board get board => _board;
   List<Map<String, dynamic>> get boardList => _boardList;
   List<String> get categoryList => _categoryList;
+  List<Map<String, dynamic>> get cateBoardList => _cateBoardList;
 
   // 엑세스 토큰 할당
   Future<String?> getToken() async {
@@ -115,8 +117,8 @@ class AnnouncementProvider with ChangeNotifier {
         // 각 항목이 Map<String, dynamic>이라고 가정하고 추가
         for (var data in dataResponse) {
           _boardList.add(data);
-          notifyListeners();
         }
+        notifyListeners();
         print('조회 성공: $_boardList');
       } else {
         print('조회 실패: ${response.bodyBytes}');
@@ -126,7 +128,46 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
-  // 경진대회 카테고리 조회
+  // 카테고리별 조회
+  Future<void> fetchCateBoard(String boardCategory) async {
+    try {
+      final accessToken = await getToken();
+      if (accessToken == null) {
+        throw Exception('엑세스 토큰을 찾을 수 없음');
+      }
+
+      final url = Uri.parse('$baseUrl/category/$boardCategory');
+      final response = await http.get(
+        url,
+        headers: {
+          'access': accessToken,
+        },
+      );
+
+      _cateBoardList.clear();
+
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response) as Map<String, dynamic>;
+
+      final dataResponse = jsonResponse['data'];
+
+      if (response.statusCode == 200) {
+        for (var data in dataResponse) {
+          _cateBoardList.add(data);
+        }
+
+        print('조회 성공: $_cateBoardList');
+      } else {
+        print('조회 실패');
+      }
+
+      await fetchContestCate();
+      notifyListeners();
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   Future<void> fetchContestCate() async {
     try {
       final accessToken = await getToken();
@@ -153,12 +194,13 @@ class AnnouncementProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         for (var data in dataResponse) {
           _categoryList.add(data);
-          notifyListeners();
         }
+
         print('조회 성공: $_categoryList');
       } else {
         print('조회 실패');
       }
+      notifyListeners();
     } catch (e) {
       print(e.toString());
     }
