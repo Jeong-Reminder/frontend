@@ -317,7 +317,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                         const Text(
                           '종료 기간',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: Colors.black54,
                           ),
