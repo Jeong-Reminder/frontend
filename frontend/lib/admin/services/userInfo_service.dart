@@ -13,8 +13,9 @@ class UserService {
 
   // 회원 추가 API
   Future<void> createUser(Admin admin) async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/admin/admin-insert';
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/admin/admin-insert';
+    const String baseUrl = 'http://localhost:9000/api/v1/admin/admin-insert';
 
     final token = await getToken();
     if (token == null) {
@@ -42,8 +43,9 @@ class UserService {
 
   // 엑셀로 member 업데이트 API
   Future<void> updateMember(File file) async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
+    const String baseUrl = 'http://localhost:9000/api/v1/admin/member-update';
 
     final accessToken = await getToken();
     if (accessToken == null) {
@@ -95,8 +97,9 @@ class UserService {
 
   // member 전체 조회 API
   Future<List<Admin>> fetchMembers() async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/admin/members-get';
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/admin/members-get';
+    const String baseUrl = 'http://localhost:9000/api/v1/admin/members-get';
 
     final accessToken = await getToken();
     if (accessToken == null) {
@@ -128,8 +131,9 @@ class UserService {
 
   // member 삭제 API
   Future<void> deleteMembers(List<String> studentIds) async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/admin/member-delete';
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/admin/member-delete';
+    const String baseUrl = 'http://localhost:9000/api/v1/admin/member-delete';
 
     final accessToken = await getToken();
     if (accessToken == null) {
@@ -156,8 +160,9 @@ class UserService {
 
   // 회원 정보 수정 API 호출
   Future<void> editMember(Admin admin) async {
-    const String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
+    // const String baseUrl =
+    //     'https://reminder.sungkyul.ac.kr/api/v1/admin/member-update';
+    const String baseUrl = 'http://localhost:9000/api/v1/admin/member-update';
 
     final accessToken = await getToken();
     if (accessToken == null) {

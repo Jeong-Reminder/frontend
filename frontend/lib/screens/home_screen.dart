@@ -5,7 +5,7 @@ import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/notification_services.dart';
-import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/memberRecruit_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -441,7 +441,7 @@ class _HomePageState extends State<HomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const MakeTeamPage(),
+                                builder: (context) => const MemberRecruitPage(),
                               ),
                             );
                           },

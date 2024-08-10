@@ -9,11 +9,11 @@ import 'package:frontend/screens/editTool_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
+import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
-import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -116,7 +116,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  final LoginAPI _loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+  final LoginAPI loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
 
   @override
   void initState() {
@@ -185,6 +185,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               name: '',
             ),
         '/homepage': (context) => const HomePage(),
+        '/dashboard': (context) => const DashBoardPage(),
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
         '/contest-board': (context) => const ContestBoardPage(),

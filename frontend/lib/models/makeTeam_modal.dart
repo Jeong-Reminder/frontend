@@ -38,8 +38,7 @@ class MakeTeam {
       studentCount: json['studentCount'] as int,
       hopeField: json['hopeField'] as String,
       kakaoUrl: json['kakaoUrl'] as String,
-      recruitmentStatus:
-          json['recruitmentStatus'] as bool, // Changed to boolean
+      recruitmentStatus: json['recruitmentStatus'] as bool,
       endTime: json['endTime'] as String,
       announcementId: json['announcementId'] as int,
     );
@@ -58,9 +57,7 @@ class MakeTeam {
       'announcementId': announcementId,
     };
 
-    if (id != null) {
-      data['id'] = id;
-    }
+    // 요청 바디에 id를 포함하지 않음
     if (memberId != null) {
       data['memberId'] = memberId;
     }
