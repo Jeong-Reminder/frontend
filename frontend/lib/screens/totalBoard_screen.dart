@@ -17,6 +17,8 @@ enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
 class _TotalBoardPageState extends State<TotalBoardPage> {
   String userRole = '';
+  bool isHidDel = false;
+  Map<String, dynamic>? selectedBoard; // 선택된 게시글을 저장할 변수
 
   @override
   void initState() {
@@ -92,13 +94,97 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
             const SizedBox(height: 20),
             boardList.isEmpty
                 ? const Center(child: CircularProgressIndicator()) // 로딩 중일 때
-                : Board(
-                    boardList: boardList,
-                    total: false,
+                : GestureDetector(
+                    onLongPress: () {
+                      setState(() {
+                        isHidDel = !isHidDel;
+                      });
+                    },
+                    child: Board(
+                      boardList: boardList,
+                      total: false,
+                      onBoardSelected: (board) {
+                        setState(() {
+                          selectedBoard = board;
+                          isHidDel = true; // 숨김/삭제 버튼 표시
+                        });
+                      },
+                    ),
                   ),
           ],
         ),
       ),
+      // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
+      bottomNavigationBar: isHidDel
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      Provider.of<AnnouncementProvider>(context, listen: false)
+                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
+                      setState(() {
+                        isHidDel = false; // 숨김/삭제 버튼 숨기기
+                        selectedBoard = null; // 선택된 게시글 초기화
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '숨김',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // setState(() {
+                    //   if (selectedGrade == '1학년') {
+                    //     oneBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '2학년') {
+                    //     twoBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '3학년') {
+                    //     threeBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   } else if (selectedGrade == '4학년') {
+                    //     fourBoard
+                    //         .removeWhere((board) => board['isChecked'] == true);
+                    //   }
+                    //   isHidDel = false; // 숨김/삭제 버튼 비활성화
+                    // });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }
