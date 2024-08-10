@@ -24,7 +24,7 @@ Widget homeItem({required String imgPath, required String title}) {
         width: 50, // 이미지 너비
         height: 50, // 이미지 높이
       ),
-      const SizedBox(height: 3),
+      const SizedBox(height: 2),
       Text(
         title,
         style: TextStyle(
@@ -420,8 +420,13 @@ class _HomePageState extends State<HomePage> {
                             imgPath: 'assets/images/general.png',
                             title: '전체공지'),
                       ),
-                      homeItem(
-                          imgPath: 'assets/images/grade.png', title: '학년공지'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/grade-board');
+                        },
+                        child: homeItem(
+                            imgPath: 'assets/images/grade.png', title: '학년공지'),
+                      ),
                       GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(
@@ -434,8 +439,14 @@ class _HomePageState extends State<HomePage> {
                           title: '경진대회',
                         ),
                       ),
-                      homeItem(
-                          imgPath: 'assets/images/company.png', title: '기업탐방'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/corSea-board');
+                        },
+                        child: homeItem(
+                            imgPath: 'assets/images/company.png',
+                            title: '기업탐방'),
+                      ),
                       GestureDetector(
                           onTap: () {
                             Navigator.push(

@@ -6,17 +6,21 @@ import 'package:frontend/widgets/boardAppbar_widget.dart';
 import 'package:frontend/widgets/board_widget.dart';
 import 'package:provider/provider.dart';
 
-class TotalBoardPage extends StatefulWidget {
-  const TotalBoardPage({super.key});
+class CorSeaBoardPage extends StatefulWidget {
+  const CorSeaBoardPage({super.key});
 
   @override
-  State<TotalBoardPage> createState() => _TotalBoardPageState();
+  State<CorSeaBoardPage> createState() => _CorSeaBoardPageState();
 }
 
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
-class _TotalBoardPageState extends State<TotalBoardPage> {
+class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
   String userRole = '';
+  List<String> boardCategory = ['CORPORATE_TOUR', 'SEASONAL_SYSTEM'];
+
+  List<Map<String, dynamic>> corporateBoardList = [];
+  List<Map<String, dynamic>> seasonalBoardList = [];
 
   @override
   void initState() {
@@ -24,8 +28,31 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
     // listen: false를 사용하여 initState에서 Provider를 호출
     // addPostFrameCallback 사용하는 이유 : initState에서 직접 Provider.of를 호출할 때 context가 아직 완전히 준비되지 않았기 때문에 발생할 수 있는 에러를 방지
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 첫 번째 카테고리 API 호출
       await Provider.of<AnnouncementProvider>(context, listen: false)
-          .fetchAllBoards();
+          .fetchCateBoard(boardCategory[0]);
+
+      setState(() {
+        // 깊은 복사를 위해 List<Map<String, dynamic>>.from을 사용
+        // 이로 인해 cateBoardList가 변하더라도 corporateBoardList와 seasonalBoardList는 영향을 받지 않음
+        corporateBoardList = List<Map<String, dynamic>>.from(
+            Provider.of<AnnouncementProvider>(context, listen: false)
+                .cateBoardList); // cateBoardList를 corporateBoardList에 복사
+        print('corporateBoardList: $corporateBoardList');
+      });
+
+      if (context.mounted) {
+        // 두 번째 카테고리 API 호출
+        await Provider.of<AnnouncementProvider>(context, listen: false)
+            .fetchCateBoard(boardCategory[1]);
+
+        setState(() {
+          seasonalBoardList = List<Map<String, dynamic>>.from(
+              Provider.of<AnnouncementProvider>(context, listen: false)
+                  .cateBoardList); // cateBoardList를 seasonalBoardList에 복사
+          print('seasonalBoardList: $seasonalBoardList');
+        });
+      }
     });
     _loadCredentials();
   }
@@ -41,8 +68,8 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final boardList = Provider.of<AnnouncementProvider>(context).boardList;
-    print('boardList: $boardList');
+    final List<Map<String, dynamic>> sumList = List.from(corporateBoardList)
+      ..addAll(seasonalBoardList);
 
     return Scaffold(
       appBar: const BoardAppbar(),
@@ -57,7 +84,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  '전체 공지',
+                  '기업탐방 ⋅ 계절제 공지',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -90,10 +117,10 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               ],
             ),
             const SizedBox(height: 20),
-            boardList.isEmpty
-                ? const Center(child: CircularProgressIndicator()) // 로딩 중일 때
+            sumList.isEmpty
+                ? const Text('해당 공지가 없습니다.')
                 : Board(
-                    boardList: boardList,
+                    boardList: sumList,
                     total: false,
                   ),
           ],

@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/corSeaBoard_screen.dart';
+import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
@@ -189,6 +191,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
         '/contest-board': (context) => const ContestBoardPage(),
+        '/grade-board': (context) => const GradeBoardPage(),
+        '/corSea-board': (context) => const CorSeaBoardPage(),
       },
     );
   }
