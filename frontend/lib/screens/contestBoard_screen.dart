@@ -20,6 +20,8 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
   String boardCategory = 'CONTEST';
   String userRole = '';
   String contestCategory = ''; // 경진대회 카테고리 버튼을 눌렀을 때 해당하는 카테고리를 저장하는 변수
+  bool isHidDel = false;
+  Map<String, dynamic>? selectedBoard;
 
   @override
   void initState() {
@@ -184,12 +186,81 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
             Expanded(
               child: Board(
                 boardList: filteredBoardList,
-                total: false,
+                total: true, // true일 경우에는 특정 학년 게시글만 보여줌
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel;
+                  });
+                },
               ),
             ),
           ],
         ),
       ),
+
+      // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
+      bottomNavigationBar: isHidDel
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '숨김',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .deletedBoard(selectedBoard!['id']);
+
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory);
+                      }
+
+                      setState(() {
+                        selectedBoard = null;
+                        isHidDel = false;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 

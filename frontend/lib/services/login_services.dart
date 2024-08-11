@@ -16,9 +16,13 @@ class LoginAPI {
   //     'https://reminder.sungkyul.ac.kr/api/v1/reissue';
   // static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
 
-  static const loginAddress = 'http://127.0.0.1:9000/login';
-  static const tokenRefreshAddress = 'http://127.0.0.1:9000/api/v1/reissue';
-  static const logoutAddress = 'http://127.0.0.1:9000/api/v1/logout';
+  static const loginAddress = 'http://10.0.2.2:9000/login';
+  static const tokenRefreshAddress = 'http://10.0.2.2:9000/api/v1/reissue';
+  static const logoutAddress = 'http://10.0.2.2:9000/api/v1/logout';
+
+  // static const loginAddress = 'http://127.0.0.1:9000/login';
+  // static const tokenRefreshAddress = 'http://127.0.0.1:9000/api/v1/reissue';
+  // static const logoutAddress = 'http://127.0.0.1:9000/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();
