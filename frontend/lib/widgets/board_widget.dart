@@ -67,6 +67,17 @@ class _BoardState extends State<Board> {
           ),
         );
       }
+    } else if (widget.boardList.isEmpty) {
+      return const Center(
+        child: Text(
+          '해당 학생의 공지가 없습니다.',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+      );
     }
 
     // 필터링된 공지사항 리스트를 화면에 표시
@@ -78,11 +89,26 @@ class _BoardState extends State<Board> {
         final board =
             widget.total ? filteredBoardList[index] : widget.boardList[index];
         final category = _getCategoryName(board['announcementCategory']);
-        final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
+        // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
         return Column(
           children: [
             GestureDetector(
+              // 게시글 들어갈 때
+              onTap: () async {
+                await Provider.of<AnnouncementProvider>(context, listen: false)
+                    .fetchOneBoard(board['id']);
+
+                if (context.mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    '/detail-board',
+                    arguments: board['id'],
+                  );
+                }
+              },
+
+              // 숨김/삭제 버튼 띄울 때
               onLongPress: () async {
                 setState(() {
                   selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
@@ -90,17 +116,18 @@ class _BoardState extends State<Board> {
                 if (widget.onBoardSelected != null) {
                   widget.onBoardSelected!(board); // 선택된 게시글 콜백 호출
                 }
+                print('selectedBoard: ${board['announcementTitle']}');
               },
               child: Card(
                 color: const Color(0xFFFAFAFE),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
-                  side: BorderSide(
-                    color: isSelected
-                        ? Colors.blue
-                        : Colors.transparent, // 선택된 경우 테두리 색상 적용
-                    width: 1.0,
-                  ),
+                  // side: BorderSide(
+                  //   color: isSelected
+                  //       ? Colors.blue
+                  //       : Colors.transparent, // 선택된 경우 테두리 색상 적용
+                  //   width: 1.0,
+                  // ),
                 ),
                 elevation: 0.5,
                 child: Container(

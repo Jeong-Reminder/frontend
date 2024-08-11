@@ -92,25 +92,18 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               ],
             ),
             const SizedBox(height: 20),
-            boardList.isEmpty
-                ? const Center(child: CircularProgressIndicator()) // 로딩 중일 때
-                : GestureDetector(
-                    onLongPress: () {
-                      setState(() {
-                        isHidDel = !isHidDel;
-                      });
-                    },
-                    child: Board(
-                      boardList: boardList,
-                      total: false,
-                      onBoardSelected: (board) {
-                        setState(() {
-                          selectedBoard = board;
-                          isHidDel = true; // 숨김/삭제 버튼 표시
-                        });
-                      },
-                    ),
-                  ),
+            Expanded(
+              child: Board(
+                boardList: boardList,
+                total: true,
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel; // 숨김/삭제 버튼 표시
+                  });
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -148,23 +141,24 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    // setState(() {
-                    //   if (selectedGrade == '1학년') {
-                    //     oneBoard
-                    //         .removeWhere((board) => board['isChecked'] == true);
-                    //   } else if (selectedGrade == '2학년') {
-                    //     twoBoard
-                    //         .removeWhere((board) => board['isChecked'] == true);
-                    //   } else if (selectedGrade == '3학년') {
-                    //     threeBoard
-                    //         .removeWhere((board) => board['isChecked'] == true);
-                    //   } else if (selectedGrade == '4학년') {
-                    //     fourBoard
-                    //         .removeWhere((board) => board['isChecked'] == true);
-                    //   }
-                    //   isHidDel = false; // 숨김/삭제 버튼 비활성화
-                    // });
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .deletedBoard(selectedBoard!['id']);
+
+                      // 전체 boardList를 다시 불러옴
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchAllBoards();
+                      }
+                      setState(() {
+                        isHidDel = false; // 숨김/삭제 버튼 숨기기
+                        selectedBoard = null; // 선택된 게시글 초기화
+                      });
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),

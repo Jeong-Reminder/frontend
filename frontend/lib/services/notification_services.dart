@@ -13,7 +13,9 @@ class NotificationService {
     // const String baseUrl =
     //     'https://reminder.sungkyul.ac.kr/api/v1/notifications/test-send';
     const String baseUrl =
-        'http://127.0.0.1:9000/api/v1/notifications/test-send';
+        'http://10.0.2.2:9000/api/v1/notifications/test-send';
+    // const String baseUrl =
+    // 'http://127.0.0.1:9000/api/v1/notifications/test-send';
 
     print('fcmToken: $fcmToken');
 
@@ -33,7 +35,7 @@ class NotificationService {
     );
 
     if (response.statusCode == 200) {
-      print('푸쉬 알림 성공');
+      print('푸쉬 알림 성공: ${response.body}');
     } else {
       print('푸쉬 알림 실패: ${response.statusCode} - ${response.body}');
     }

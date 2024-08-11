@@ -1,9 +1,14 @@
 import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/all/providers/models/board_model.dart';
+import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 
 class BoardWritePage extends StatefulWidget {
   const BoardWritePage({super.key});
@@ -15,6 +20,9 @@ class BoardWritePage extends StatefulWidget {
 class _BoardWritePageState extends State<BoardWritePage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
+
+  final FocusNode titleFocusNode = FocusNode(); // 포커스 노드
+
   bool isButtonEnabled = false; // 작성 완료 버튼 상태
   bool isMustRead = false;
   bool isConfirmedVote = false;
@@ -23,14 +31,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
   List<bool> isCategory = [false, false, false, false]; // 공지 선택 불리안
   List<bool> isGrade = [false, false, false, false, false]; // 학년 선택 불리안
 
-  File? pickedImage; // 선택된 이미지 파일
-  FilePickerResult? pickedFile; // 선택된 파일
+  final List<File> pickedImages = [];
+  final List<File> pickedFiles = [];
+
   bool isPickingImage = false; // 이미지 선택 작업 진행 여부
   bool isMultiplied = false;
 
   DateTime? selectedEndDate; // 종료 날짜
-
-  String fileName = ''; // 선택한 파일명
 
   // 기본 3개의 텍스트폼필드의 컨트롤러
   List<TextEditingController> voteControllers = [
@@ -39,14 +46,13 @@ class _BoardWritePageState extends State<BoardWritePage> {
     TextEditingController()
   ]; // 투표 항목 컨트롤러 리스트
 
-  List<PlatformFile> selectedFileWidgets = [];
-
   @override
   void initState() {
     super.initState();
     // 텍스트 변경 감지 리스너 추가
     titleController.addListener(checkIfFormIsFilled);
     contentController.addListener(checkIfFormIsFilled);
+    titleFocusNode.addListener(_handleTitleFocus);
   }
 
   @override
@@ -58,6 +64,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
     for (var controller in voteControllers) {
       controller.dispose();
     }
+    titleFocusNode.removeListener(_handleTitleFocus);
     super.dispose();
   }
 
@@ -71,38 +78,58 @@ class _BoardWritePageState extends State<BoardWritePage> {
   }
 
   // 이미지 선택 함수
-  Future<void> _pickImage(ImageSource source) async {
+  Future<void> _pickImages() async {
     if (isPickingImage) return; // 이미지 선택 작업이 이미 진행 중이면 중단
 
     setState(() {
       isPickingImage = true;
     });
 
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
+    try {
+      final picker = ImagePicker();
+      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
       setState(() {
-        pickedImage = File(pickedFile.path);
+        if (pickedImage != null) {
+          pickedImages.add(File(pickedImage.path));
+        }
+      });
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      setState(() {
+        isPickingImage = false;
       });
     }
-
-    setState(() {
-      isPickingImage = false;
-    });
   }
 
   // 이미지 삭제 함수
-  void _deleteImage() {
+  void _deleteImage(int index) {
     setState(() {
-      pickedImage = null;
+      pickedImages.removeAt(index);
     });
   }
 
+  // 파일 선택 함수
+  Future<void> _pickFiles() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any, // 모든 파일을 선택 가능하게 설정
+      allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
+    );
+
+    if (result != null) {
+      setState(() {
+        pickedFiles.addAll(result.paths
+            .map((path) => File(path!))
+            .toList()); // 선택한 파일들을 pickedFiles에 저장
+      });
+      print('파일: $pickedFiles');
+    }
+  }
+
   // 파일 삭제 함수
-  void _deleteFile() {
+  void _deleteFile(int index) {
     setState(() {
-      pickedFile = null;
+      pickedFiles.removeAt(index);
     });
   }
 
@@ -129,6 +156,30 @@ class _BoardWritePageState extends State<BoardWritePage> {
   String formatDateTime(DateTime dateTime) {
     final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
     return formatter.format(dateTime);
+  }
+
+  // 제목 입력 필드가 포커스를 받을 때 대괄호([])를 자동으로 추가하는 함수
+  void _handleTitleFocus() {
+    // 제목 입력 필드가 포커스를 가지고 있고, 텍스트가 비어 있는지 확인
+    if (titleFocusNode.hasFocus && titleController.text.isEmpty) {
+      setState(() {
+        // 텍스트 필드에 대괄호([])를 추가
+        titleController.text = '[]';
+        // 커서를 대괄호 안으로 이동
+        titleController.selection = TextSelection.fromPosition(
+          const TextPosition(offset: 1),
+        );
+      });
+    }
+  }
+
+  // 알림 버튼 누를 시  FCM 토큰 발급 함수
+  Future<String> _getFCMToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+    // print('FCM 토큰: $token');
+
+    return token!;
   }
 
   @override
@@ -174,8 +225,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   width: 315,
                   child: TextFormField(
                     controller: titleController,
+                    focusNode: titleFocusNode,
                     decoration: InputDecoration(
-                      hintText: '제목을 입력해주세요',
+                      hintText: '제목을 작성해주세요(경진대회 공지일 경우 []안에 대회명을 작성해주세요)',
                       hintStyle: TextStyle(
                         color: Colors.black.withOpacity(0.25),
                       ),
@@ -238,7 +290,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                 textInputAction: TextInputAction.done,
                 controller: contentController,
                 decoration: InputDecoration(
-                  hintText: '내용을 입력해주세요',
+                  hintText: '내용을 작성해주세요',
                   hintStyle: TextStyle(
                     color: Colors.black.withOpacity(0.25),
                   ),
@@ -255,75 +307,83 @@ class _BoardWritePageState extends State<BoardWritePage> {
               children: [
                 // 이미지 버튼
                 imgFileBtn(
-                    onTap: () async {
-                      _showImageSource();
-                    },
+                    onTap: _pickImages,
                     title: '이미지',
                     icon: Icons.image), // void 함수는 async 작성
 
                 // 파일 버튼
                 imgFileBtn(
-                    onTap: _pickedFile,
+                    onTap: _pickFiles,
                     title: '파일',
                     icon: Icons.file_present), // Future 함수는 이름만 작성
               ],
             ),
             const SizedBox(height: 20),
 
-            // 선택된 사진
-            if (pickedImage != null)
+            // 선택된 사진들
+            if (pickedImages.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(left: 10),
-                child: Stack(
-                  alignment: Alignment.topRight,
-                  children: [
-                    Image.file(
-                      pickedImage!,
-                      height: 80,
-                      alignment: Alignment.centerLeft,
-                    ),
-                    IconButton(
-                      icon:
-                          const Icon(Icons.close_outlined, color: Colors.black),
-                      onPressed: _deleteImage,
-                    ),
-                  ],
+                child: Column(
+                  children: pickedImages.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    File pickedImage = entry.value;
+                    return Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Image.file(
+                          File(pickedImage.path),
+                          height: 80,
+                          alignment: Alignment.centerLeft,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_outlined,
+                              color: Colors.black),
+                          onPressed: () => _deleteImage(index),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             const SizedBox(height: 20),
 
             // 선택된 파일
-            if (selectedFileWidgets.isNotEmpty)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: selectedFileWidgets.map((selectedFile) {
-                    return Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.file_present),
-                            const SizedBox(width: 5),
-                            Text(selectedFile.name),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.close_outlined,
-                                color: Colors.black,
-                                size: 15,
+            if (pickedFiles.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  print('$pickedFiles');
+                },
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: pickedFiles.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      File pickedFile = entry.value;
+                      return Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.file_present),
+                              const SizedBox(width: 5),
+                              Text(path.basename(pickedFile.path)),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.close_outlined,
+                                  color: Colors.black,
+                                  size: 15,
+                                ),
+                                onPressed: () {
+                                  _deleteFile(index);
+                                },
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  selectedFileWidgets.remove(selectedFile);
-                                });
-                                print('현재 파일 : $selectedFileWidgets');
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }).toList(),
+                            ],
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             const SizedBox(height: 25),
@@ -384,7 +444,45 @@ class _BoardWritePageState extends State<BoardWritePage> {
         ),
       ),
       bottomNavigationBar: ElevatedButton(
-        onPressed: () {},
+        onPressed: () async {
+          try {
+            // 게시글
+            final board = Board(
+              announcementCategory: getSelectedCategoryText(),
+              announcementTitle: titleController.text,
+              announcementContent: contentController.text,
+              announcementImportant: isMustRead,
+              visible: true,
+              announcementLevel: getSelectedGradeInt(),
+            );
+
+            final boardId = await AnnouncementProvider()
+                .createBoard(board, pickedImages, pickedFiles);
+
+            String fcmToken = await _getFCMToken(); // fcm토큰 할당
+            DateTime dt = DateTime.now(); // 현재시간 할당
+
+            // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
+            // 공백(' ')을 T로 대체
+            String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
+
+            Map<String, dynamic> notificationData = {
+              "title": titleController.text,
+              "content": contentController.text,
+              "category": getSelectedCategoryText(),
+              "targetId": boardId, // 게시글 아이디
+              "createdAt": createdAt, // 생성일
+            };
+            await NotificationService()
+                .notification(notificationData, fcmToken);
+
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
+          } catch (e) {
+            print(e.toString());
+          }
+        },
         style: ElevatedButton.styleFrom(
           // 작성이 되면 버튼 색상 변경
           backgroundColor: isButtonEnabled
@@ -406,35 +504,6 @@ class _BoardWritePageState extends State<BoardWritePage> {
         ),
       ),
     );
-  }
-
-  // 파일 선택 함수
-  Future<void> _pickedFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any, // 모든 파일을 선택 가능하게 설정
-      allowMultiple: true, // 여러 개의 파일을 선택할 수 있도록 설정
-    );
-
-    if (result != null) {
-      // selectedFile: 선택한 파일들 중 하나의 파일
-      for (var selectedFile in result.files) {
-        setState(() {
-          pickedFile = result; // 선택한 파일들을 pickedFile에 저장
-          fileName = selectedFile.name; // 파일명
-
-          selectedFileWidgets.add(selectedFile); // 선택한 파일에 추가
-        });
-        print('파일: $pickedFile');
-        print('선택한 파일 리스트: $selectedFileWidgets');
-
-        // 선택된 파일의 경로를 File 객체 file에 저장
-        File file = File(selectedFile.path!);
-
-        // 선택된 엑셀 파일을 바이트 배열로 변환(readAsBytesSync)
-        var fileBytes = file.readAsBytesSync();
-        print('바이트 데이터: $fileBytes');
-      }
-    }
   }
 
   // 투표 바텀시트
@@ -670,25 +739,29 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   ),
                 ),
                 const SizedBox(height: 5),
-                const Text(
-                  '02/03  14:28',
-                  style: TextStyle(
-                    color: Color(0xFFA89F9F),
-                  ),
-                ),
+                // const Text(
+                //   '02/03  14:28',
+                //   style: TextStyle(
+                //     color: Color(0xFFA89F9F),
+                //   ),
+                // ),
                 const SizedBox(height: 15),
                 Text(
                   contentController.text,
                   style: const TextStyle(fontSize: 15),
                 ),
                 const SizedBox(height: 15),
-                if (pickedImage != null)
+                if (pickedImages.isNotEmpty)
                   Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10.0),
-                      child: Image.file(
-                        pickedImage!,
-                        height: 240,
+                      child: Column(
+                        children: pickedImages.map((pickedImage) {
+                          return Image.file(
+                            File(pickedImage.path),
+                            height: 240,
+                          );
+                        }).toList(),
                       ),
                     ),
                   ),
@@ -740,7 +813,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
   }) {
     return ElevatedButton.icon(
       onPressed: () {
-        _pickImage(source);
+        _pickImages();
       },
       icon: Icon(
         icon,
@@ -899,7 +972,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
             // categoryBtn이 true 혹은 false일 경우 어떤 버튼이 생성되는지
             children: categoryBtn
                 ? <Widget>[
-                    const Text('전체'),
+                    const Text('계절'),
                     const Text('학년'),
                     const Text('경진'),
                     const Text('기업'),
@@ -915,5 +988,34 @@ class _BoardWritePageState extends State<BoardWritePage> {
         ],
       ),
     );
+  }
+
+  String getSelectedCategoryText() {
+    List<String> categories = [
+      'SEASONAL_SYSTEM',
+      'CORPORATE_TOUR',
+      'CONTEST',
+      'ACADEMIC_ALL',
+    ];
+
+    for (int i = 0; i < isCategory.length; i++) {
+      if (isCategory[i]) {
+        return categories[i];
+      }
+    }
+
+    return '없음';
+  }
+
+  int getSelectedGradeInt() {
+    List<int> grades = [0, 1, 2, 3, 4]; // 전체는 0
+
+    for (int i = 0; i < isGrade.length; i++) {
+      if (isGrade[i]) {
+        return grades[i];
+      }
+    }
+
+    return 5;
   }
 }
