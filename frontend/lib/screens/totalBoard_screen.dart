@@ -17,6 +17,8 @@ enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
 class _TotalBoardPageState extends State<TotalBoardPage> {
   String userRole = '';
+  bool isHidDel = false;
+  Map<String, dynamic>? selectedBoard; // 선택된 게시글을 저장할 변수
 
   @override
   void initState() {
@@ -90,15 +92,83 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               ],
             ),
             const SizedBox(height: 20),
-            boardList.isEmpty
-                ? const Center(child: CircularProgressIndicator()) // 로딩 중일 때
-                : Board(
-                    boardList: boardList,
-                    total: false,
-                  ),
+            Expanded(
+              child: Board(
+                boardList: boardList,
+                total: true,
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel; // 숨김/삭제 버튼 표시
+                  });
+                },
+              ),
+            ),
           ],
         ),
       ),
+      // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
+      bottomNavigationBar: isHidDel
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '숨김',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .deletedBoard(selectedBoard!['id']);
+
+                      // 전체 boardList를 다시 불러옴
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchAllBoards();
+                      }
+                      setState(() {
+                        isHidDel = false; // 숨김/삭제 버튼 숨기기
+                        selectedBoard = null; // 선택된 게시글 초기화
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

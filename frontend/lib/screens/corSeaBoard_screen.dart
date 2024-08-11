@@ -22,6 +22,9 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
   List<Map<String, dynamic>> corporateBoardList = [];
   List<Map<String, dynamic>> seasonalBoardList = [];
 
+  bool isHidDel = false;
+  Map<String, dynamic>? selectedBoard;
+
   @override
   void initState() {
     super.initState();
@@ -117,15 +120,91 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
               ],
             ),
             const SizedBox(height: 20),
-            sumList.isEmpty
-                ? const Text('해당 공지가 없습니다.')
-                : Board(
-                    boardList: sumList,
-                    total: false,
-                  ),
+            Expanded(
+              child: Board(
+                boardList: sumList,
+                total: true,
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel;
+                  });
+                },
+              ),
+            ),
           ],
         ),
       ),
+
+      // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
+      bottomNavigationBar: isHidDel
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '숨김',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .deletedBoard(selectedBoard!['id']);
+
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory[0]);
+                      }
+
+                      if (context.mounted) {
+                        // 두 번째 카테고리 API 호출
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory[1]);
+                      }
+
+                      setState(() {
+                        selectedBoard = null;
+                        isHidDel = false;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

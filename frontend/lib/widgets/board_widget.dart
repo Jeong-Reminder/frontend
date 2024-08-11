@@ -6,8 +6,13 @@ class Board extends StatefulWidget {
   final List<Map<String, dynamic>> boardList;
   final bool
       total; // level과 memberLevel이 맞는 공지사항만 필터링하는 작업을 할 것인지 여부(true일 때 필터링 작업 진행)
+  final Function(Map<String, dynamic> board)? onBoardSelected; // 선택된 게시글 콜백 함수
 
-  const Board({required this.boardList, required this.total, super.key});
+  const Board(
+      {required this.boardList,
+      required this.total,
+      this.onBoardSelected,
+      super.key});
 
   @override
   State<Board> createState() => _BoardState();
@@ -19,6 +24,7 @@ class _BoardState extends State<Board> {
   int count = 4; // 좋아요 개수
   int? level;
   List<Map<String, dynamic>> filteredBoardList = [];
+  int? selectedBoardIndex; // 선택된 게시글의 인덱스를 저장할 변수
 
   @override
   void initState() {
@@ -59,6 +65,17 @@ class _BoardState extends State<Board> {
           ),
         );
       }
+    } else if (widget.boardList.isEmpty) {
+      return const Center(
+        child: Text(
+          '해당 학생의 공지가 없습니다.',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+      );
     }
 
     // 필터링된 공지사항 리스트를 화면에 표시
@@ -70,56 +87,74 @@ class _BoardState extends State<Board> {
         final board =
             widget.total ? filteredBoardList[index] : widget.boardList[index];
         final category = _getCategoryName(board['announcementCategory']);
+        final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
         return Column(
           children: [
-            Card(
-              color: const Color(0xFFFAFAFE),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 0.5,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 18.0),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              board['announcementTitle'],
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+            GestureDetector(
+              onLongPress: () async {
+                setState(() {
+                  selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
+                });
+                if (widget.onBoardSelected != null) {
+                  widget.onBoardSelected!(board); // 선택된 게시글 콜백 호출
+                }
+                print('selectedBoard: ${board['announcementTitle']}');
+              },
+              child: Card(
+                color: const Color(0xFFFAFAFE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                  // side: BorderSide(
+                  //   color: isSelected
+                  //       ? Colors.blue
+                  //       : Colors.transparent, // 선택된 경우 테두리 색상 적용
+                  //   width: 1.0,
+                  // ),
+                ),
+                elevation: 0.5,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 18.0),
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                board['announcementTitle'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              category,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Color(0xFF7D7D7F),
+                              const SizedBox(width: 5),
+                              Text(
+                                category,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0xFF7D7D7F),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 7),
-                    Text(
-                      board['announcementContent'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 7),
-                  ],
+                      const SizedBox(height: 7),
+                      Text(
+                        board['announcementContent'],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                    ],
+                  ),
                 ),
               ),
             ),

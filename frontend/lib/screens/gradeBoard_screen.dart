@@ -19,6 +19,7 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
   String selectedGrade = '1학년';
   bool isSelected = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
+  Map<String, dynamic>? selectedBoard; // 선택된 게시글을 저장할 변수
 
   String userRole = '';
   String boardCategory = 'ACADEMIC_ALL';
@@ -174,106 +175,81 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
 
             Expanded(
               child: Board(
-                boardList: filteredBoardList,
-                total: true,
-              ),
+                  boardList: filteredBoardList,
+                  total: false,
+                  onBoardSelected: (board) {
+                    setState(() {
+                      selectedBoard = board;
+                      isHidDel = !isHidDel;
+                    });
+                  }),
             ),
           ],
         ),
       ),
 
       // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
-      // bottomNavigationBar: isHidDel
-      //     ? Row(
-      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //         children: [
-      //           ElevatedButton(
-      //             onPressed: () {
-      //               setState(() {
-      //                 if (selectedGrade == '1학년') {
-      //                   // 리스트에서 isChecked 값이 true인 board만 hiddenList에 추가
-      //                   hiddenList.addAll(oneBoard // addAll : 리스트에 추가
-      //                       .where((board) =>
-      //                           board['isChecked'] ==
-      //                           true)); // where : 조건에 맞게 필터링
+      bottomNavigationBar: isHidDel
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '숨김',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .deletedBoard(selectedBoard!['id']);
 
-      //                   // isChecked 값이 true인 board만 BoardPage에서 제거
-      //                   oneBoard.removeWhere((board) =>
-      //                       board['isChecked'] ==
-      //                       true); // removeWhere : 조건에 맞게 제거
-      //                 } else if (selectedGrade == '2학년') {
-      //                   hiddenList.addAll(twoBoard
-      //                       .where((board) => board['isChecked'] == true));
-      //                   twoBoard
-      //                       .removeWhere((board) => board['isChecked'] == true);
-      //                 } else if (selectedGrade == '3학년') {
-      //                   hiddenList.addAll(threeBoard
-      //                       .where((board) => board['isChecked'] == true));
-      //                   threeBoard
-      //                       .removeWhere((board) => board['isChecked'] == true);
-      //                 } else if (selectedGrade == '4학년') {
-      //                   hiddenList.addAll(fourBoard
-      //                       .where((board) => board['isChecked'] == true));
-      //                   fourBoard
-      //                       .removeWhere((board) => board['isChecked'] == true);
-      //                 }
-      //                 isHidDel = false; // 숨김/삭제 버튼 비활성화
-      //               });
-      //             },
-      //             style: ElevatedButton.styleFrom(
-      //               backgroundColor: const Color(0xFFFAFAFE),
-      //               minimumSize: const Size(205, 75),
-      //               shape: RoundedRectangleBorder(
-      //                 borderRadius: BorderRadius.circular(0),
-      //               ),
-      //             ),
-      //             child: const Text(
-      //               '숨김',
-      //               style: TextStyle(
-      //                 color: Color(0xFF7D7D7F),
-      //                 fontSize: 20,
-      //                 fontWeight: FontWeight.bold,
-      //               ),
-      //             ),
-      //           ),
-      //           ElevatedButton(
-      //             onPressed: () {
-      //               // setState(() {
-      //               //   if (selectedGrade == '1학년') {
-      //               //     oneBoard
-      //               //         .removeWhere((board) => board['isChecked'] == true);
-      //               //   } else if (selectedGrade == '2학년') {
-      //               //     twoBoard
-      //               //         .removeWhere((board) => board['isChecked'] == true);
-      //               //   } else if (selectedGrade == '3학년') {
-      //               //     threeBoard
-      //               //         .removeWhere((board) => board['isChecked'] == true);
-      //               //   } else if (selectedGrade == '4학년') {
-      //               //     fourBoard
-      //               //         .removeWhere((board) => board['isChecked'] == true);
-      //               //   }
-      //               //   isHidDel = false; // 숨김/삭제 버튼 비활성화
-      //               // });
-      //             },
-      //             style: ElevatedButton.styleFrom(
-      //               backgroundColor: const Color(0xFFFAFAFE),
-      //               minimumSize: const Size(205, 75),
-      //               shape: RoundedRectangleBorder(
-      //                 borderRadius: BorderRadius.circular(0),
-      //               ),
-      //             ),
-      //             child: const Text(
-      //               '삭제',
-      //               style: TextStyle(
-      //                 color: Color(0xFF7D7D7F),
-      //                 fontSize: 20,
-      //                 fontWeight: FontWeight.bold,
-      //               ),
-      //             ),
-      //           ),
-      //         ],
-      //       )
-      //     : null,
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory);
+                      }
+
+                      setState(() {
+                        isHidDel = true;
+                        selectedBoard = null;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFAFAFE),
+                    minimumSize: const Size(205, 75),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      color: Color(0xFF7D7D7F),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

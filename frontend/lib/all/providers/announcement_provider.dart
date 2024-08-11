@@ -128,6 +128,31 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deletedBoard(int announcementId) async {
+    try {
+      final accessToken = await getToken();
+      if (accessToken == null) {
+        throw Exception('엑세스 토큰을 찾을 수 없음');
+      }
+
+      final url = Uri.parse('$baseUrl/$announcementId');
+      final response = await http.delete(
+        url,
+        headers: {
+          'access': accessToken,
+        },
+      );
+
+      if (response.statusCode == 204) {
+        print('삭제 성공: ${response.body}');
+      } else {
+        print('삭제 실패: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   // 카테고리별 조회
   Future<void> fetchCateBoard(String boardCategory) async {
     try {
