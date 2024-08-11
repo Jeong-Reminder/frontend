@@ -205,7 +205,25 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
+
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory);
+                      }
+
+                      setState(() {
+                        isHidDel = false; // 숨김/삭제 버튼 숨기기
+                        selectedBoard = null; // 선택된 게시글 초기화
+                      });
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),

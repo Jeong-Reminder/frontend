@@ -113,11 +113,19 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (selectedBoard != null) {
                       print('id: ${selectedBoard!['id']}');
-                      Provider.of<AnnouncementProvider>(context, listen: false)
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
                           .hiddenBoard(selectedBoard!, selectedBoard!['id']);
+
+                      // 전체 boardList를 다시 불러옴
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchAllBoards();
+                      }
                       setState(() {
                         isHidDel = false; // 숨김/삭제 버튼 숨기기
                         selectedBoard = null; // 선택된 게시글 초기화

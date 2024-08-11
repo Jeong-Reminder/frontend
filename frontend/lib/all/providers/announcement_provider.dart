@@ -250,8 +250,14 @@ class AnnouncementProvider with ChangeNotifier {
         },
       );
 
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response)
+          as Map<String, dynamic>; // JSON 문자열을 Map 객체로 변환
+
+      final dataResponse = jsonResponse['data']; // 'data' 키에 접근
+
       if (response.statusCode == 200) {
-        print('숨김 성공: ${response.body}');
+        print('숨김 성공: $dataResponse');
       } else {
         print('숨김 실패');
       }
