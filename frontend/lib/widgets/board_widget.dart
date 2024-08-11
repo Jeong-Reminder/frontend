@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Board extends StatefulWidget {
@@ -87,11 +89,26 @@ class _BoardState extends State<Board> {
         final board =
             widget.total ? filteredBoardList[index] : widget.boardList[index];
         final category = _getCategoryName(board['announcementCategory']);
-        final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
+        // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
         return Column(
           children: [
             GestureDetector(
+              // 게시글 들어갈 때
+              onTap: () async {
+                await Provider.of<AnnouncementProvider>(context, listen: false)
+                    .fetchOneBoard(board['id']);
+
+                if (context.mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    '/detail-board',
+                    arguments: board['id'],
+                  );
+                }
+              },
+
+              // 숨김/삭제 버튼 띄울 때
               onLongPress: () async {
                 setState(() {
                   selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장

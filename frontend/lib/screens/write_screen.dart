@@ -2,14 +2,13 @@ import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/models/board_model.dart';
-import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/all/providers/models/board_model.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:provider/provider.dart';
 
 class BoardWritePage extends StatefulWidget {
   const BoardWritePage({super.key});
