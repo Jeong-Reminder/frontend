@@ -10,10 +10,12 @@ class AnnouncementProvider with ChangeNotifier {
   final List<Map<String, dynamic>> _boardList = []; // 전체 공지 리스트
   final List<String> _categoryList = []; // 경진대회 카테고리 리스트
   final List<Map<String, dynamic>> _cateBoardList = []; // 카테고리별 리스트
+  Map<String, dynamic> _board = {}; // 하나의 게시글
 
   List<Map<String, dynamic>> get boardList => _boardList;
   List<String> get categoryList => _categoryList;
   List<Map<String, dynamic>> get cateBoardList => _cateBoardList;
+  Map<String, dynamic> get board => _board;
 
   // 엑세스 토큰 할당
   Future<String?> getToken() async {
@@ -117,7 +119,9 @@ class AnnouncementProvider with ChangeNotifier {
       final dataResponse = jsonResponse['data']; // 'data' 키에 접근
 
       if (response.statusCode == 200) {
-        print('조회 성공: $dataResponse');
+        _board = dataResponse;
+        notifyListeners();
+        print('조회 성공: $_board');
       } else {
         print('조회 실패: ${response.statusCode} - ${response.body}');
       }

@@ -194,7 +194,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),
-        '/detail-board': (context) => const BoardDetailPage(),
+        '/detail-board': (context) => BoardDetailPage(),
       },
     );
   }

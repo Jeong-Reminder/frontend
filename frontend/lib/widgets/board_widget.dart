@@ -100,7 +100,11 @@ class _BoardState extends State<Board> {
                     .fetchOneBoard(board['id']);
 
                 if (context.mounted) {
-                  Navigator.pushNamed(context, '/detail-board');
+                  Navigator.pushNamed(
+                    context,
+                    '/detail-board',
+                    arguments: board['id'],
+                  );
                 }
               },
 
