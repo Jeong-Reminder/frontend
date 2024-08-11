@@ -124,7 +124,8 @@ class _MyUserPageState extends State<MyUserPage> {
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/homepage'); // 홈 페이지로 이동
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/homepage', (route) => false); // 홈 페이지로 이동
             },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,

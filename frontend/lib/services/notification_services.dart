@@ -33,7 +33,7 @@ class NotificationService {
     );
 
     if (response.statusCode == 200) {
-      print('푸쉬 알림 성공');
+      print('푸쉬 알림 성공: ${response.body}');
     } else {
       print('푸쉬 알림 실패: ${response.statusCode} - ${response.body}');
     }
