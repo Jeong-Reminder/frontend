@@ -73,13 +73,11 @@ class AnnouncementProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         final Map<String, dynamic> responseBody = jsonDecode(responseString);
+        final Map<String, dynamic> dataResponse = responseBody['data'];
 
-        print('작성 성공: $responseBody');
-        _board = Board.fromJson(responseBody['data']);
-        print(_board);
-        notifyListeners();
+        print('작성 성공: $dataResponse - ${dataResponse['id']}');
 
-        return _board.id!;
+        return dataResponse['id'];
       } else {
         print('작성 실패: ${response.statusCode} - $responseString');
         throw Exception();

@@ -173,6 +173,7 @@ class _LoginPageState extends State<LoginPage> {
 
     return token!;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -353,7 +354,7 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         // userRole 값에 따라 다른 페이지로 이동
                         if (result['role'] == 'ROLE_ADMIN') {
-                          Navigator.pushNamed(context, '/dashboard');
+                          Navigator.pushNamed(context, '/homepage');
                         } else if (result['role'] == 'ROLE_USER') {
                           // techStack 값이 null이거나 값이 비어있는 경우
                           if (result['techStack'] == null ||
