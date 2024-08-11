@@ -594,8 +594,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: const [
-          Padding(
+        actions: [
+          const Padding(
             padding: EdgeInsets.only(right: 20.0),
             child: Icon(
               Icons.add_alert,
@@ -604,11 +604,16 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
+            padding: const EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/myuser');
+              },
+              child: const Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
             ),
           ),
         ],

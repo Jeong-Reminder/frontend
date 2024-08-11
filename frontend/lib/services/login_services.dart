@@ -15,9 +15,14 @@ class LoginAPI {
   // static const tokenRefreshAddress =
   //     'https://reminder.sungkyul.ac.kr/api/v1/reissue';
   // static const logoutAddress = 'https://reminder.sungkyul.ac.kr/api/v1/logout';
+
   static const loginAddress = 'http://10.0.2.2:9000/login';
   static const tokenRefreshAddress = 'http://10.0.2.2:9000/api/v1/reissue';
   static const logoutAddress = 'http://10.0.2.2:9000/api/v1/logout';
+
+  // static const loginAddress = 'http://127.0.0.1:9000/login';
+  // static const tokenRefreshAddress = 'http://127.0.0.1:9000/api/v1/reissue';
+  // static const logoutAddress = 'http://127.0.0.1:9000/api/v1/logout';
 
   LoginAPI() {
     _initCookieJar();
@@ -49,12 +54,16 @@ class LoginAPI {
     final status = prefs.getString('status'); // 상태 불러오기
     final password = prefs.getString('password');
     final autoLogin = prefs.getBool('isAutoLogin') ?? false;
+    final level = prefs.getInt('level');
+    final userRole = prefs.getString('userRole');
     return {
       'studentId': studentId,
       'name': name, // 이름 추가
       'status': status, // 상태 추가
       'password': password,
       'isAutoLogin': autoLogin,
+      'level': level,
+      'userRole': userRole,
     };
   }
 
@@ -153,8 +162,8 @@ class LoginAPI {
   }
 
   // 로그인 API
-  Future<Map<String, dynamic>> handleLogin(
-      BuildContext context, String studentId, String password, String fcmToken) async {
+  Future<Map<String, dynamic>> handleLogin(BuildContext context,
+      String studentId, String password, String fcmToken) async {
     // HttpOverrides 설정
     HttpOverrides.global = MyHttpOverrides();
 
@@ -181,6 +190,7 @@ class LoginAPI {
         final memberExperience = responseData['memberExperiences'];
         final name = responseData['name'];
         final status = responseData['status'];
+        final level = responseData['level'];
 
         final accessToken = response.headers['access']; // 액세스 토큰 추출
         final setCookieHeader = response.headers['set-cookie'];
@@ -199,6 +209,7 @@ class LoginAPI {
           await prefs.setString('studentId', studentId); // 학번 저장
           await prefs.setString('name', name); // 이름 저장
           await prefs.setString('status', status); // 재적상태 저장
+          await prefs.setInt('level', level);
 
           final uri = Uri.parse(loginAddress);
           cookieJar.saveFromResponse(
@@ -210,11 +221,13 @@ class LoginAPI {
           final savedStudentId = prefs.getString('studentId');
           final savedName = prefs.getString('name');
           final savedStatus = prefs.getString('status');
+          final savedLevel = prefs.getInt('level');
           print('저장된 액세스 토큰: $savedAccessToken');
           print('저장된 리프레시 토큰: $savedRefreshToken');
           print('저장된 학번: $savedStudentId');
           print('저장된 이름: $savedName');
           print('저장된 상태: $savedStatus');
+          print('저장된 학년: $savedLevel');
 
           // memberExperience 배열에서 id 값 추출하여 저장
           final memberExperienceIds = (memberExperience as List)

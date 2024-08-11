@@ -4,6 +4,8 @@ import 'package:frontend/providers/profile_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
+import 'package:frontend/screens/memberRecruit_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatefulWidget {
@@ -407,26 +409,50 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/board');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TotalBoardPage(),
+                            ),
+                          );
                         },
                         child: homeItem(
                             imgPath: 'assets/images/general.png',
                             title: '전체공지'),
                       ),
-                      homeItem(
-                          imgPath: 'assets/images/grade.png', title: '학년공지'),
-                      homeItem(
-                        imgPath: 'assets/images/competition.png',
-                        title: '경진대회',
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/grade-board');
+                        },
+                        child: homeItem(
+                            imgPath: 'assets/images/grade.png', title: '학년공지'),
                       ),
-                      homeItem(
-                          imgPath: 'assets/images/company.png', title: '기업탐방'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/contest-board',
+                          );
+                        },
+                        child: homeItem(
+                          imgPath: 'assets/images/competition.png',
+                          title: '경진대회',
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/corSea-board');
+                        },
+                        child: homeItem(
+                            imgPath: 'assets/images/company.png',
+                            title: '기업탐방'),
+                      ),
                       GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const MakeTeamPage(),
+                                builder: (context) => const MemberRecruitPage(),
                               ),
                             );
                           },

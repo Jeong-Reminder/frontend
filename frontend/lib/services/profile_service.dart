@@ -13,6 +13,7 @@ class ProfileService {
   // final String baseUrl =
   //     'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
   final String baseUrl = 'http://10.0.2.2:9000/api/v1/member-profile';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/member-profile';
 
   // 프로필 생성 API
   Future<int> createProfile(Profile profile) async {

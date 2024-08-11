@@ -337,11 +337,15 @@ class _LoginPageState extends State<LoginPage> {
               ElevatedButton(
                 onPressed: () async {
                   await _getFCMToken();
+
                   // 유효성 통과 시 홈 화면으로 이동
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
                     String password = pwController.text;
                     String fcmToken = await _getFCMToken(); // 토큰 발급
+
+                    print('fcmToken: $fcmToken');
+
                     LoginAPI()
                         .handleLogin(context, studentId, password, fcmToken)
                         .then((result) async {
