@@ -24,6 +24,7 @@ class AnnouncementProvider with ChangeNotifier {
   }
 
   final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
 
   // 게시글 작성
   Future<int> createBoard(
@@ -232,6 +233,40 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
+  // 게시글 숨김
+  Future<void> hiddenBoard(
+      Map<String, dynamic> board, int accouncementId) async {
+    try {
+      final accessToken = await getToken();
+      if (accessToken == null) {
+        throw Exception('엑세스 토큰을 찾을 수 없음');
+      }
+
+      final url = Uri.parse('$baseUrl/hide/$accouncementId');
+      final response = await http.put(
+        url,
+        headers: {
+          'access': accessToken,
+        },
+      );
+
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response)
+          as Map<String, dynamic>; // JSON 문자열을 Map 객체로 변환
+
+      final dataResponse = jsonResponse['data']; // 'data' 키에 접근
+
+      if (response.statusCode == 200) {
+        print('숨김 성공: $dataResponse');
+      } else {
+        print('숨김 실패');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  // 경진대회 카테고리 전체 조회
   Future<void> fetchContestCate() async {
     try {
       final accessToken = await getToken();

@@ -69,12 +69,17 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류 방지
         toolbarHeight: 70,
-        leading: const Padding(
-          padding: EdgeInsets.only(right: 40.0),
-          child: Icon(
-            Icons.arrow_back,
-            size: 30,
-            color: Colors.black,
+        leading: Padding(
+          padding: const EdgeInsets.only(right: 40.0),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              size: 30,
+              color: Colors.black,
+            ),
           ),
         ),
         leadingWidth: 120,
