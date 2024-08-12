@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/models/board_model.dart';
+import 'package:frontend/models/board_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
@@ -28,15 +28,16 @@ class AnnouncementProvider with ChangeNotifier {
   final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
   // final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
 
-  // 게시글 수정
-  Future<int> updateBoard(
-      Board board, List<File> pickedImages, List<File> pickedFiles) async {
+// 게시글 수정
+  Future<int> updateBoard(Board board, List<File> pickedImages,
+      List<File> pickedFiles, int announcementId) async {
     final accessToken = await getToken();
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse(baseUrl);
+    final url =
+        Uri.parse('$baseUrl/$announcementId'); // 서버의 PUT 요청을 보낼 URL로 변경 필요
     final boardInfo = http.MultipartRequest('PUT', url);
 
     // 엑세스 토큰 추가
@@ -65,10 +66,8 @@ class AnnouncementProvider with ChangeNotifier {
 
     // 일반 파일 추가
     if (pickedFiles.isNotEmpty) {
-      print('pickedFiles: $pickedFiles');
       for (var file in pickedFiles) {
         var bytes = await file.readAsBytes();
-
         var multipartFile = http.MultipartFile.fromBytes(
           'file',
           bytes,
@@ -82,20 +81,16 @@ class AnnouncementProvider with ChangeNotifier {
       final response = await boardInfo.send();
       final responseString = await response.stream.bytesToString();
 
-      if (response.statusCode == 201) {
-        final Map<String, dynamic> responseBody = jsonDecode(responseString);
-        final Map<String, dynamic> dataResponse = responseBody['data'];
-
-        print('작성 성공: $dataResponse - ${dataResponse['id']}');
-
-        return dataResponse['id'];
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('수정 성공: ${response.statusCode}');
+        return response.statusCode;
       } else {
-        print('작성 실패: ${response.statusCode} - $responseString');
-        throw Exception();
+        print('수정 실패: ${response.statusCode} - $responseString');
+        throw Exception('Failed to update board');
       }
     } catch (e) {
       print('Exception: $e');
-      throw Exception();
+      throw Exception('Exception occurred while updating board');
     }
   }
 

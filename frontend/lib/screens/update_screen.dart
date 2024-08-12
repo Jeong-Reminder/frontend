@@ -2,8 +2,8 @@ import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
-import 'package:frontend/all/providers/models/board_model.dart';
+import 'package:frontend/models/board_model.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
@@ -186,6 +186,8 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
     return token!;
   }
 
+  List<String> pickedImageUrls = [];
+
   void initializedBoard() {
     setState(() {
       titleController.text = widget.board['announcementTitle']; // 제목 초기화
@@ -211,20 +213,33 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
         isGrade[gradeLevel] = true;
       }
 
-      // 이미지 초기화
-      if (widget.board.containsKey('imgUrls')) {
-        List<String> imgUrls = List<String>.from(widget.board['imgUrls']);
-        // String URL 경로를 File로 변환하지 않고 그대로 사용하거나, 필요시 직접 다운로드하여 File로 변환 필요
-        pickedImages = imgUrls
-            .map((url) => File(url))
-            .toList(); // 가능하다면 File이 아닌 URL 리스트로 다루는 것이 안전
+      // 이미지 URL 초기화
+      if (widget.board['imgUrls'] != null) {
+        // localhost 대신 실제 서버의 IP 주소나 도메인 이름을 사용
+        if (Platform.isAndroid) {
+          pickedImageUrls = widget.board['imgUrls']
+              .map((url) {
+                return url.replaceFirst(
+                    "http://localhost:9000", "http://10.0.2.2:9000");
+              })
+              .cast<String>()
+              .toList();
+        } else if (Platform.isIOS) {
+          pickedImageUrls = widget.board['imgUrls']
+              .map((url) {
+                return url.replaceFirst(
+                    "http://localhost:9000", "http://127.0.0.1:9000");
+              })
+              .cast<String>()
+              .toList();
+        }
       }
 
       // 파일 초기화
-      if (widget.board.containsKey('files')) {
-        List<dynamic> files = widget.board['files'];
-        // 파일 경로 리스트가 제공되었다고 가정, File로 변환하지 않고 그대로 경로로 사용
-        pickedFiles = files.map((file) => File(file['savedPath'])).toList();
+      if (widget.board['files'] != null) {
+        for (var file in widget.board['files']) {
+          pickedFiles.add(File(file['orgNm'])); // 파일을 pickedFiles 리스트에 추가
+        }
       }
     });
   }
@@ -368,31 +383,37 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             const SizedBox(height: 20),
 
             // 선택된 사진들
-            if (pickedImages.isNotEmpty)
+            if (pickedImageUrls.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: Column(
-                  children: pickedImages.asMap().entries.map((entry) {
+                  children: pickedImageUrls.asMap().entries.map((entry) {
                     int index = entry.key;
-                    File pickedImage = entry.value;
+                    String imageUrl = entry.value;
                     return Stack(
                       alignment: Alignment.topRight,
                       children: [
-                        Image.file(
-                          File(pickedImage.path),
-                          height: 80,
-                          alignment: Alignment.centerLeft,
+                        Image.network(
+                          imageUrl,
+                          height: 150,
+                          errorBuilder: (BuildContext context, Object exception,
+                              StackTrace? stackTrace) {
+                            return const Text('이미지를 불러올 수 없습니다.');
+                          },
                         ),
                         IconButton(
                           icon: const Icon(Icons.close_outlined,
                               color: Colors.black),
-                          onPressed: () => _deleteImage(index),
+                          onPressed: () => setState(() {
+                            pickedImageUrls.removeAt(index);
+                          }),
                         ),
                       ],
                     );
                   }).toList(),
                 ),
               ),
+
             const SizedBox(height: 20),
 
             // 선택된 파일
@@ -504,7 +525,8 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             );
 
             await Provider.of<AnnouncementProvider>(context, listen: false)
-                .updateBoard(board, pickedImages, pickedFiles);
+                .updateBoard(
+                    board, pickedImages, pickedFiles, widget.board['id']);
 
             if (context.mounted) {
               Navigator.pop(context);
