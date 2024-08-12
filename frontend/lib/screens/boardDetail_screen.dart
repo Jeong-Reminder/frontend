@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
