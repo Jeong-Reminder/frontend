@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -99,14 +100,17 @@ class _BoardState extends State<Board> {
             GestureDetector(
               // 게시글 들어갈 때
               onTap: () async {
-                // await Provider.of<AnnouncementProvider>(context, listen: false)
-                //     .fetchOneBoard(board['id']);
+                await Provider.of<AnnouncementProvider>(context, listen: false)
+                    .fetchOneBoard(board['id']);
 
                 if (context.mounted) {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    '/detail-board',
-                    arguments: board['id'],
+                    MaterialPageRoute(
+                      builder: (context) => BoardDetailPage(
+                        announcementId: board['id'],
+                      ),
+                    ),
                   );
                 }
               },
