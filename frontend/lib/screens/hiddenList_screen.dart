@@ -4,15 +4,19 @@ import 'package:frontend/widgets/board_widget.dart';
 import 'package:provider/provider.dart';
 
 class HiddenPage extends StatefulWidget {
-  const HiddenPage({super.key});
+  String? category;
+  HiddenPage({this.category, super.key});
 
   @override
   State<HiddenPage> createState() => _HiddenPageState();
 }
 
 class _HiddenPageState extends State<HiddenPage> {
+  String? category;
   bool isShowed = false;
   List<Map<String, dynamic>> selectedHiddenItems = [];
+  Map<String, dynamic>? selectedBoard;
+  bool isHidDel = false;
 
   @override
   void initState() {
@@ -34,7 +38,15 @@ class _HiddenPageState extends State<HiddenPage> {
         toolbarHeight: 70,
         leading: BackButton(
           onPressed: () {
-            Navigator.pop(context);
+            if (widget.category == 'TOTAL') {
+              Navigator.popAndPushNamed(context, '/total-board');
+            } else if (widget.category == 'ACADEMIC_ALL') {
+              Navigator.popAndPushNamed(context, '/grade-board');
+            } else if (widget.category == 'CONTEST') {
+              Navigator.popAndPushNamed(context, '/contest-board');
+            } else if (widget.category == 'CORSEA') {
+              Navigator.popAndPushNamed(context, '/corSea-board');
+            }
           },
           color: Colors.black,
         ),
@@ -85,44 +97,54 @@ class _HiddenPageState extends State<HiddenPage> {
               child: Board(
                 boardList: hiddenList,
                 total: false,
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel;
+                  });
+                },
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: ElevatedButton(
-        onPressed: () {
-          // // selectedHiddenItems에 있는 항목들을 hiddenList에 제거해 숨김 목록 취소
-          // widget.onUnhide!(selectedHiddenItems);
-          // setState(() {
-          //   widget.hiddenList!.removeWhere((item) =>
-          //       selectedHiddenItems.contains(
-          //           item)); // selectedHiddenItems에 있는 항목들을 필터링해 숨김 목록 화면에 제거
-          //   // 그 이후에 selectedHiddenItems에 있는 항목들 제거
-          //   selectedHiddenItems.clear();
-          //   isShowed = false;
-          // });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: selectedHiddenItems.isNotEmpty
-              ? const Color(0xFF2B72E7)
-              : const Color(0xFFFAFAFE),
-          minimumSize: const Size(205, 75),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-        ),
-        child: Text(
-          '숨김 해제',
-          style: TextStyle(
-            color: selectedHiddenItems.isNotEmpty
-                ? Colors.white
-                : Colors.black.withOpacity(0.5),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      bottomNavigationBar: isHidDel
+          ? ElevatedButton(
+              onPressed: () async {
+                if (selectedBoard != null) {
+                  print('selectedBoardId: ${selectedBoard!['id']}');
+                  await Provider.of<AnnouncementProvider>(context,
+                          listen: false)
+                      .showedBoard(selectedBoard!['id']);
+
+                  if (context.mounted) {
+                    await Provider.of<AnnouncementProvider>(context,
+                            listen: false)
+                        .fetchHiddenBoard();
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: selectedHiddenItems.isNotEmpty
+                    ? const Color(0xFF2B72E7)
+                    : const Color(0xFFFAFAFE),
+                minimumSize: const Size(205, 75),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0),
+                ),
+              ),
+              child: Text(
+                '숨김 해제',
+                style: TextStyle(
+                  color: selectedHiddenItems.isNotEmpty
+                      ? Colors.white
+                      : Colors.black.withOpacity(0.5),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : null,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/boardAppbar_widget.dart';
@@ -110,7 +111,13 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
-                          Navigator.pushNamed(context, '/hidden-page');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  HiddenPage(category: 'CORSEA'),
+                            ),
+                          );
                         }),
                     ];
                   },

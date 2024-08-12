@@ -99,6 +99,35 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
+  // 게시글 보이기
+  Future<void> showedBoard(int announcementId) async {
+    try {
+      final accessToken = await getToken();
+      if (accessToken == null) {
+        throw Exception('엑세스 토큰을 찾을 수 없음');
+      }
+
+      final url = Uri.parse('$baseUrl/show/$announcementId');
+      final response = await http.put(
+        url,
+        headers: {
+          'access': accessToken,
+        },
+      );
+
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = jsonDecode(utf8Response);
+
+      if (response.statusCode == 200) {
+        print('숨김 보이기 성공: $jsonResponse');
+      } else {
+        print('숨김 보이기 실패: ${response.body}');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   // 하나의 게시글 조회
   Future<void> fetchOneBoard(int announcementId) async {
     try {
