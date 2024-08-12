@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/update_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
@@ -11,10 +12,11 @@ class BoardDetailPage extends StatefulWidget {
   State<BoardDetailPage> createState() => _BoardDetailPageState();
 }
 
-PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
+PopupMenuItem<PopUpItem> popUpItem(
+    String text, PopUpItem item, Function() onTap) {
   return PopupMenuItem<PopUpItem>(
     enabled: true, // 팝업메뉴 호출
-    onTap: () {},
+    onTap: onTap,
     value: item,
     height: 25,
     child: Center(
@@ -125,10 +127,18 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                     color: const Color(0xFFEFF0F2),
                     itemBuilder: (BuildContext context) {
                       return [
-                        popUpItem('URL 공유', PopUpItem.popUpItem1),
+                        popUpItem('URL 공유', PopUpItem.popUpItem1, () {}),
                         if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                         if (userRole == 'ROLE_ADMIN')
-                          popUpItem('수정', PopUpItem.popUpItem2),
+                          popUpItem('수정', PopUpItem.popUpItem2, () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    BoardUpdatePage(board: board),
+                              ),
+                            );
+                          }),
                       ];
                     },
                     child: const Icon(Icons.more_vert),

@@ -28,6 +28,77 @@ class AnnouncementProvider with ChangeNotifier {
   final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
   // final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
 
+  // 게시글 수정
+  Future<int> updateBoard(
+      Board board, List<File> pickedImages, List<File> pickedFiles) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final boardInfo = http.MultipartRequest('PUT', url);
+
+    // 엑세스 토큰 추가
+    boardInfo.headers['access'] = accessToken;
+
+    // 텍스트 데이터 추가
+    boardInfo.fields['announcementCategory'] = board.announcementCategory!;
+    boardInfo.fields['announcementTitle'] = board.announcementTitle!;
+    boardInfo.fields['announcementContent'] = board.announcementContent!;
+    boardInfo.fields['announcementImportant'] =
+        board.announcementImportant.toString();
+    boardInfo.fields['visible'] = board.visible.toString();
+    boardInfo.fields['announcementLevel'] = board.announcementLevel.toString();
+
+    // 이미지 파일 추가
+    if (pickedImages.isNotEmpty) {
+      for (var img in pickedImages) {
+        var multipartFile = await http.MultipartFile.fromPath(
+          'img',
+          img.path,
+          filename: path.basename(img.path),
+        );
+        boardInfo.files.add(multipartFile);
+      }
+    }
+
+    // 일반 파일 추가
+    if (pickedFiles.isNotEmpty) {
+      print('pickedFiles: $pickedFiles');
+      for (var file in pickedFiles) {
+        var bytes = await file.readAsBytes();
+
+        var multipartFile = http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: path.basename(file.path),
+        );
+        boardInfo.files.add(multipartFile);
+      }
+    }
+
+    try {
+      final response = await boardInfo.send();
+      final responseString = await response.stream.bytesToString();
+
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseBody = jsonDecode(responseString);
+        final Map<String, dynamic> dataResponse = responseBody['data'];
+
+        print('작성 성공: $dataResponse - ${dataResponse['id']}');
+
+        return dataResponse['id'];
+      } else {
+        print('작성 실패: ${response.statusCode} - $responseString');
+        throw Exception();
+      }
+    } catch (e) {
+      print('Exception: $e');
+      throw Exception();
+    }
+  }
+
   // 게시글 작성
   Future<int> createBoard(
       Board board, List<File> pickedImages, List<File> pickedFiles) async {
