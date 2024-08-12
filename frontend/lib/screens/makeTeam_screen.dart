@@ -7,7 +7,9 @@ import 'package:frontend/models/makeTeam_modal.dart';
 
 class MakeTeamPage extends StatefulWidget {
   final MakeTeam? makeTeam; // 수정할 팀원 모집글을 받아옴 (nullable)
-  const MakeTeamPage({super.key, this.makeTeam});
+  final String? initialCategory; // 초기 카테고리 전달
+
+  const MakeTeamPage({super.key, this.makeTeam, this.initialCategory});
 
   @override
   State<MakeTeamPage> createState() => _MakeTeamPageState();
@@ -51,6 +53,14 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     _contentController.addListener(_validateInputs);
     _chatUrlController.addListener(_validateInputs);
     _titleFocusNode.addListener(_handleTitleFocus);
+
+    if (widget.initialCategory != null && _titleController.text.isEmpty) {
+      _titleController.text =
+          '[${widget.initialCategory}] '; // [] 안에 전달받은 initialCategory 저장
+      _titleController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _titleController.text.length), // 커서 위치 [] 다음으로 고정
+      );
+    }
 
     if (widget.makeTeam != null) {
       _titleController.text = widget.makeTeam!.recruitmentTitle;

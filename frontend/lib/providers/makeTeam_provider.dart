@@ -36,6 +36,23 @@ class MakeTeamProvider with ChangeNotifier {
       // 서비스 호출하여 팀원 모집글 수정
       await service.updateMakeTeam(makeTeam);
       makeTeams.add(makeTeam);
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 팀원 모집글 조회
+  Future<void> fetchMakeTeam() async {
+    try {
+      MakeTeam? makeTeam = await service.fetchMakeTeam();
+      if (makeTeam != null) {
+        // 기존 리스트에서 중복되는 데이터 제거
+        makeTeams.removeWhere((team) => team.id == makeTeam.id);
+
+        makeTeams.add(makeTeam);
+        notifyListeners();
+      }
     } catch (e) {
       print(e);
     }

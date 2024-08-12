@@ -36,10 +36,13 @@ class MakeTeam {
       recruitmentTitle: json['recruitmentTitle'] as String,
       recruitmentContent: json['recruitmentContent'] as String,
       studentCount: json['studentCount'] as int,
-      hopeField: json['hopeField'] as String,
+      // hopeField가 리스트로 전달될 경우 이를 문자열로 변환
+      hopeField: (json['hopeField'] is List)
+          ? (json['hopeField'] as List<dynamic>).join(', ')
+          : json['hopeField'] as String,
       kakaoUrl: json['kakaoUrl'] as String,
       recruitmentStatus: json['recruitmentStatus'] as bool,
-      endTime: json['endTime'] as String,
+      endTime: json['endTime'].toString(),
       announcementId: json['announcementId'] as int,
     );
   }

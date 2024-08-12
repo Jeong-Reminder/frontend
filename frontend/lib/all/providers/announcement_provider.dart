@@ -23,7 +23,8 @@ class AnnouncementProvider with ChangeNotifier {
     return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
   }
 
-  final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
+  // final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
+  final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
 
   Future<int> createBoard(
       Board board, List<File> pickedImages, List<File> pickedFiles) async {
