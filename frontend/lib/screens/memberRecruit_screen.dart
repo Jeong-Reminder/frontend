@@ -181,6 +181,40 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     return _buildPostContent(_filteredMakeTeams);
   }
 
+  void selectCateMenu(BuildContext context) {
+    // AnnouncementProvider에서 카테고리 리스트를 가져옴
+    final categoryList =
+        Provider.of<AnnouncementProvider>(context, listen: false).categoryList;
+
+    // showMenu 함수를 사용하여 팝업 메뉴를 화면에 띄움
+    showMenu(
+      context: context,
+      // 메뉴가 화면에 나타나는 위치 RelativeRect
+      position: const RelativeRect.fromLTRB(287, 200, 900, 500),
+      // 팝업 메뉴에 들어갈 항목
+      items: <PopupMenuEntry<String>>[
+        // categoryList의 각 항목에 대해 반복 작업을 수행 후 팝업 메뉴 항목으로 추가
+        for (int i = 0; i < categoryList.length; i++)
+          popUpItem(categoryList[i], categoryList[i]),
+
+        // categoryList가 비어있지 않은 경우, 마지막에 Divider를 추가
+        if (categoryList.isNotEmpty) const PopupMenuDivider(),
+      ],
+    ).then((selectedItem) {
+      // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우
+      if (selectedItem != null && categoryList.contains(selectedItem)) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MakeTeamPage(
+              initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
+            ),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoryList =
@@ -263,37 +297,16 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                   PopupMenuButton<String>(
                     color: const Color(0xFFEFF0F2),
                     onSelected: (String item) {
-                      if (categoryList.contains(item)) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MakeTeamPage(
-                              initialCategory: item, // 초기 카테고리 전달
-                            ),
-                          ),
-                        );
+                      if (item == '모집글 작성') {
+                        selectCateMenu(context); // 새로운 팝업 메뉴 생성
                       }
                     },
                     itemBuilder: (BuildContext context) {
-                      final items = <PopupMenuEntry<String>>[
+                      return <PopupMenuEntry<String>>[
                         popUpItem('URL 공유', 'URL 공유'),
                         const PopupMenuDivider(),
                         popUpItem('모집글 작성', '모집글 작성'),
-                        const PopupMenuDivider(),
                       ];
-
-                      // categoryList의 각 항목에 대해 반복 작업 수행
-                      for (int i = 0; i < categoryList.length; i++) {
-                        // categoryList의 i번째 항목을 팝업 메뉴 항목으로 추가
-                        items.add(popUpItem(categoryList[i], categoryList[i]));
-
-                        // 마지막 항목이 아닌 경우, 항목 사이에 구분선(PopupMenuDivider)을 추가
-                        if (i < categoryList.length - 1) {
-                          items.add(const PopupMenuDivider());
-                        }
-                      }
-
-                      return items; // 팝업 메뉴 항목 리스트를 반환
                     },
                     child: const Icon(Icons.more_vert),
                   ),
