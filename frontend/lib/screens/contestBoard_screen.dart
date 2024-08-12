@@ -115,10 +115,9 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => const BoardWritePage()),
+                            'write-board',
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -126,7 +125,7 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
-                          // 숨김 페이지로 이동
+                          Navigator.pushNamed(context, '/hidden-board');
                         }),
                     ];
                   },

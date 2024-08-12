@@ -9,12 +9,15 @@ class Board extends StatefulWidget {
   final bool
       total; // level과 memberLevel이 맞는 공지사항만 필터링하는 작업을 할 것인지 여부(true일 때 필터링 작업 진행)
   final Function(Map<String, dynamic> board)? onBoardSelected; // 선택된 게시글 콜백 함수
+  // bool? isHidden =
+  //     false; // 숨긴 게시글인지 아닌지 여부(숨긴 게시글일 경우 detailBoard 페이지로 이동 못하게 설정)
 
-  const Board(
-      {required this.boardList,
-      required this.total,
-      this.onBoardSelected,
-      super.key});
+  const Board({
+    super.key,
+    required this.boardList,
+    required this.total,
+    this.onBoardSelected,
+  });
 
   @override
   State<Board> createState() => _BoardState();
@@ -96,8 +99,8 @@ class _BoardState extends State<Board> {
             GestureDetector(
               // 게시글 들어갈 때
               onTap: () async {
-                await Provider.of<AnnouncementProvider>(context, listen: false)
-                    .fetchOneBoard(board['id']);
+                // await Provider.of<AnnouncementProvider>(context, listen: false)
+                //     .fetchOneBoard(board['id']);
 
                 if (context.mounted) {
                   Navigator.pushNamed(
