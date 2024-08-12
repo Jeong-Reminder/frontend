@@ -9,6 +9,8 @@ import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
+import 'package:frontend/screens/hiddenList_screen.dart';
+import 'package:frontend/screens/write_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
@@ -191,10 +193,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/dashboard': (context) => const DashBoardPage(),
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
+        '/write-board': (context) => const BoardWritePage(),
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),
         '/detail-board': (context) => BoardDetailPage(),
+        '/hidden-board': (context) => const HiddenPage(),
       },
     );
   }

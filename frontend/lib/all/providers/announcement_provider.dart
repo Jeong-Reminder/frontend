@@ -11,11 +11,13 @@ class AnnouncementProvider with ChangeNotifier {
   final List<String> _categoryList = []; // 경진대회 카테고리 리스트
   final List<Map<String, dynamic>> _cateBoardList = []; // 카테고리별 리스트
   Map<String, dynamic> _board = {}; // 하나의 게시글
+  final List<Map<String, dynamic>> _hiddenList = []; // 숨김 게시글 리스트
 
   List<Map<String, dynamic>> get boardList => _boardList;
   List<String> get categoryList => _categoryList;
   List<Map<String, dynamic>> get cateBoardList => _cateBoardList;
   Map<String, dynamic> get board => _board;
+  List<Map<String, dynamic>> get hiddenList => _hiddenList;
 
   // 엑세스 토큰 할당
   Future<String?> getToken() async {
@@ -300,6 +302,44 @@ class AnnouncementProvider with ChangeNotifier {
         print('조회 실패');
       }
       notifyListeners();
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  // 숨김 게시글 목록 조회
+  Future<void> fetchHiddenBoard() async {
+    try {
+      final accessToken = await getToken();
+      if (accessToken == null) {
+        throw Exception('엑세스 토큰을 찾을 수 없음');
+      }
+
+      final url = Uri.parse('$baseUrl/hidden');
+      final response = await http.get(
+        url,
+        headers: {
+          'access': accessToken,
+        },
+      );
+
+      hiddenList.clear();
+
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = jsonDecode(utf8Response) as Map<String, dynamic>;
+
+      final dataResponse = jsonResponse['data'];
+
+      if (response.statusCode == 200) {
+        for (var data in dataResponse) {
+          _hiddenList.add(data);
+        }
+        notifyListeners();
+
+        print('숨김 조회 성공: $dataResponse');
+      } else {
+        print('숨김 조회 실패: ${response.statusCode} - ${response.body}');
+      }
     } catch (e) {
       print(e.toString());
     }

@@ -33,7 +33,7 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
 enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
 
 class _BoardDetailPageState extends State<BoardDetailPage> {
-  Map<String, dynamic> board = {};
+  // Map<String, dynamic> board = {};
   String userRole = '';
   bool isLiked = false;
   int likeCount = 5;
@@ -52,6 +52,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     super.initState();
     if (widget.announcementId != null) {
       print('id: ${widget.announcementId}');
+
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Provider.of<AnnouncementProvider>(context, listen: false)
             .fetchOneBoard(widget.announcementId!);
