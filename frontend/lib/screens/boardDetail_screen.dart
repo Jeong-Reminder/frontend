@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
@@ -33,7 +34,7 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
 enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
 
 class _BoardDetailPageState extends State<BoardDetailPage> {
-  // Map<String, dynamic> board = {};
+  Map<String, dynamic> board = {};
   String userRole = '';
   bool isLiked = false;
   int likeCount = 5;
@@ -57,6 +58,11 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         await Provider.of<AnnouncementProvider>(context, listen: false)
             .fetchOneBoard(widget.announcementId!);
       });
+
+      // WidgetsBinding.instance.addPostFrameCallback((_) async {
+      //   await Provider.of<VoteProvider>(context, listen: false)
+      //       .fetchVote(widget.announcementId!);
+      // });
     }
     _loadCredentials();
   }

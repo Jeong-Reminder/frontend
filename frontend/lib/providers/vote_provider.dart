@@ -47,4 +47,29 @@ class VoteProvider with ChangeNotifier {
       print(e.toString());
     }
   }
+
+  // 투표 조회
+  Future<void> fetchVote(int voteId) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl$voteId');
+    final response = await http.get(
+      url,
+      headers: {
+        'access': accessToken,
+      },
+    );
+
+    final utf8Response = utf8.decode(response.bodyBytes);
+    final jsonResponse = json.decode(utf8Response);
+
+    if (response.statusCode == 200) {
+      print('투표 조회 성공: ${response.body}');
+    } else {
+      print("투표 조회 실패: ${response.body}");
+    }
+  }
 }

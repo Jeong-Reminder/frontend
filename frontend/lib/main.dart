@@ -11,6 +11,7 @@ import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
+import 'package:frontend/screens/vote_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
@@ -201,6 +202,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/corSea-board': (context) => const CorSeaBoardPage(),
         '/detail-board': (context) => BoardDetailPage(),
         '/hidden-board': (context) => HiddenPage(),
+        '/board-deatil': (context) => BoardDetailPage(),
       },
     );
   }
@@ -223,6 +225,6 @@ Future<void> setupInteractedMessage() async {
 void _handleMessage(RemoteMessage message) {
   print('message = ${message.notification!.title}');
   if (message.data['type'] == 'chat') {
-    Get.toNamed('/homepage', arguments: message.data);
+    Get.toNamed('/board-deatil', arguments: message.data);
   }
 }

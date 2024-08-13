@@ -41,7 +41,7 @@
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
-              />
+            />
             <!-- Firebase 설정 추가 -->
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_icon"
