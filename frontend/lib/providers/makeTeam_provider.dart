@@ -7,6 +7,10 @@ class MakeTeamProvider with ChangeNotifier {
 
   List<MakeTeam> makeTeams = [];
 
+  final List<Map<String, dynamic>> _applyList = [];
+
+  List<Map<String, dynamic>> get applyList => _applyList;
+
   Future<List<MakeTeam>> getMakeTeam() async {
     return makeTeams;
   }
@@ -45,14 +49,14 @@ class MakeTeamProvider with ChangeNotifier {
   // 팀원 모집글 조회
   Future<void> fetchMakeTeam() async {
     try {
-      MakeTeam? makeTeam = await service.fetchMakeTeam();
-      if (makeTeam != null) {
-        // 기존 리스트에서 중복되는 데이터 제거
-        makeTeams.removeWhere((team) => team.id == makeTeam.id);
+      final applies = await service.fetchMakeTeam();
 
-        makeTeams.add(makeTeam);
-        notifyListeners();
+      _applyList.clear();
+
+      for (var apply in applies) {
+        _applyList.add(apply);
       }
+      notifyListeners();
     } catch (e) {
       print(e);
     }

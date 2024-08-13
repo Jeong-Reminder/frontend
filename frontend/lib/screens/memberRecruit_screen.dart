@@ -40,7 +40,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   // 버튼 클릭 시 팀원 모집글을 조회하는 함수
   void fetchMakeTeams() async {
-    await Provider.of<MakeTeamProvider>(context, listen: false).fetchMakeTeam();
+    // await Provider.of<MakeTeamProvider>(context, listen: false).fetchMakeTeam();
 
     setState(() {
       final makeTeams =
@@ -73,7 +73,9 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
             post.createdTime?.replaceAll(RegExp(r'\[|\]'), '').split(',');
 
         return GestureDetector(
-          onTap: () {
+          onTap: () async {
+            await Provider.of<MakeTeamProvider>(context, listen: false)
+                .fetchMakeTeam();
             Navigator.push(
               context,
               MaterialPageRoute(
