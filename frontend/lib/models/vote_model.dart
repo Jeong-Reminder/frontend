@@ -22,7 +22,11 @@ class Vote {
       additional: json['additional'],
       announcementId: json['announcementId'],
       endTime: json['endTime'],
-      voteItemIds: json['voteItemIds'],
+      // 전달받은 json 맵에서 각 필드를 추출하여 Vote 객체 생성
+      // voteItemIds는 List<dynamic> 형식으로 전달될 수 있기 때문에, 이를 List<int>로 변환하는 작업을 수행
+      voteItemIds: (json['voteItemIds'] as List<dynamic>?)
+          ?.map((item) => item as int)
+          .toList(),
     );
   }
 
@@ -33,12 +37,11 @@ class Vote {
       'additional': additional,
       'announcementId': announcementId,
       'endTime': endTime,
-      'voteItemIds': voteItemIds,
-    };
-  }
 
-  @override
-  String toString() {
-    return 'subjectTitle: $subjectTitle, repetition: $repetition, additional: $additional, announcementId: $announcementId. endTime: $endTime, voteItemIds: $voteItemIds';
+      // voteItemIds가 null이 아닐 때만 voteItemIds 필드를 JSON에 포함
+      // voteItemIds 리스트의 각 항목을 정수(int)로 변환하여 JSON 리스트로 생성
+      if (voteItemIds != null)
+        'voteItemIds': voteItemIds!.map((item) => item.toInt()).toList(),
+    };
   }
 }
