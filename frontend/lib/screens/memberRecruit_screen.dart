@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/makeTeam_modal.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
-import 'package:frontend/services/login_services.dart';
+import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
-import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 
 class MemberRecruitPage extends StatefulWidget {
@@ -35,25 +34,9 @@ PopupMenuItem<String> popUpItem(String text, String item) {
 
 class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String selectedButton = ''; // 초기에는 아무 페이지 선택이 안 되어있는 상태
-  String? name; // 사용자 이름을 저장할 변수 추가
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCredentials(); // 로그인 정보에서 이름을 가져옴
-  }
 
   // 조회된 팀원 모집글을 저장하는 리스트
   List<MakeTeam> _filteredMakeTeams = [];
-
-  // 로그인 정보에서 이름을 로드하는 메서드
-  Future<void> _loadCredentials() async {
-    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
-    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
-    setState(() {
-      name = credentials['name']; // 로그인 정보에서 name를 가져와 저장
-    });
-  }
 
   // 버튼 클릭 시 팀원 모집글을 조회하는 함수
   void fetchMakeTeams() async {
@@ -79,17 +62,27 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   // 모집글을 지정된 형식으로 빌드하는 함수
   Widget _buildPostContent(List<MakeTeam> posts) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const RecruitDetailPage()),
-        );
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: posts.map((post) {
-          return Container(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: posts.map((post) {
+        // endTime 리스트 형식으로 변환하여 월과 일만 추출
+        List<String> endTimeParts =
+            post.endTime.replaceAll(RegExp(r'\[|\]'), '').split(',');
+        // createdTime을 리스트 형식으로 변환하여 년, 월, 일만 추출
+        List<String>? createdTimeParts =
+            post.createdTime?.replaceAll(RegExp(r'\[|\]'), '').split(',');
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    RecruitDetailPage(makeTeam: post), // MakeTeam 객체 전달
+              ),
+            );
+          },
+          child: Container(
             width: 341,
             padding: const EdgeInsets.all(15),
             margin: const EdgeInsets.only(bottom: 10), // 포스트 간격 조정
@@ -109,9 +102,20 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 Row(
                   children: [
                     Text(
-                      name ?? 'Unknown', // 로그인 정보에서 가져온 이름을 표시
+                      post.memberName ?? 'Unknown', // 모집글 작성자 이름을 표시
                       style: const TextStyle(fontSize: 10),
                     ),
+                    const SizedBox(width: 4),
+                    if (createdTimeParts != null) ...[
+                      Text(
+                        '${createdTimeParts[0].trim()}/${createdTimeParts[1].trim()}/${createdTimeParts[2].trim()}',
+                        style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54),
+                      ),
+                      const SizedBox(height: 3),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -132,7 +136,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      post.endTime, // 모집 종료 시간
+                      '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -166,9 +170,9 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 ),
               ],
             ),
-          );
-        }).toList(),
-      ),
+          ),
+        );
+      }).toList(),
     );
   }
 

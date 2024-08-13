@@ -3,11 +3,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
+import 'package:frontend/screens/write_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
@@ -190,9 +193,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/dashboard': (context) => const DashBoardPage(),
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
+        '/total-board': (context) => const TotalBoardPage(),
+        '/write-board': (context) => const BoardWritePage(),
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),
+        '/detail-board': (context) => const BoardDetailPage(),
       },
     );
   }
@@ -215,6 +221,6 @@ Future<void> setupInteractedMessage() async {
 void _handleMessage(RemoteMessage message) {
   print('message = ${message.notification!.title}');
   if (message.data['type'] == 'chat') {
-    Get.toNamed('/homepage', arguments: message.data);
+    Get.toNamed('/board-deatil', arguments: message.data);
   }
 }
