@@ -7,8 +7,10 @@ import 'package:http/http.dart' as http;
 
 class VoteProvider with ChangeNotifier {
   final List<Vote> _voteList = [];
+  final List<Map<String, dynamic>> _contentList = [];
 
   List<Vote> get voteList => _voteList;
+  List<Map<String, dynamic>> get contentList => _contentList;
 
   // 엑세스 토큰 할당
   Future<String?> getToken() async {
@@ -51,6 +53,40 @@ class VoteProvider with ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  // 투표 항목 추가
+  Future<void> addVoteItem(int voteId, String content) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl$voteId/items');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'access': accessToken,
+      },
+      body: jsonEncode({'content': content}), // JSON 형식으로 데이터를 전달
+    );
+
+    final utf8Response = utf8.decode(response.bodyBytes);
+
+    if (response.statusCode == 201) {
+      final jsonResponse = json.decode(response.body);
+      final dataResponse = jsonResponse['data'];
+
+      _contentList.add(dataResponse);
+      notifyListeners();
+
+      // 투표 항목 추가 후 해당 투표 항목을 다시 조회하여 UI 갱신
+      await fetchVote(voteId);
+      print('투표 항목 추가 성공: $_contentList');
+    } else {
+      print('투표 항목 추가 실패: ${response.statusCode} - $utf8Response');
     }
   }
 

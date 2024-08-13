@@ -128,6 +128,8 @@ class _VoteWidgetState extends State<VoteWidget> {
     final voteList = Provider.of<VoteProvider>(context).voteList;
     print('투표 조회 성공: $voteList');
 
+    final contentList = Provider.of<VoteProvider>(context).contentList;
+
     return Material(
       child: SingleChildScrollView(
         child: ListView.builder(
@@ -174,89 +176,102 @@ class _VoteWidgetState extends State<VoteWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // for (int i = 0; i < _voteItems.length; i++)
-                          //   GestureDetector(
-                          //     onTap: () => _toggleIcon(i),
-                          //     child: Card(
-                          //       color: const Color(0xFFEFEFF2),
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(5.0),
-                          //       ),
-                          //       elevation: 0.5,
-                          //       child: Container(
-                          //         padding: const EdgeInsets.symmetric(
-                          //             horizontal: 20.0, vertical: 6.0),
-                          //         width: 171,
-                          //         height: 28,
-                          //         child: Row(
-                          //           mainAxisAlignment: MainAxisAlignment.start,
-                          //           children: [
-                          //             // 투표 아이콘이 선택되었고 이미 투표를 한 경우, 체크 아이콘을 표시
-                          //             if (_showIconList[i] && _hasVoted)
-                          //               Image.asset(
-                          //                 'assets/images/votecheck.png',
-                          //                 width: 12,
-                          //                 height: 12,
-                          //               )
-                          //             // 투표 아이콘만 선택된 경우, 터치 가능한 원 모양 아이콘을 표시하고 토글 기능 추가
-                          //             else if (_showIconList[i])
-                          //               InkWell(
-                          //                 onTap: () => _toggleIcon(i),
-                          //                 borderRadius:
-                          //                     BorderRadius.circular(10.0),
-                          //                 child: Container(
-                          //                   padding: const EdgeInsets.all(1.0),
-                          //                   decoration: BoxDecoration(
-                          //                     color: _circleColors[i],
-                          //                     shape: BoxShape.circle,
-                          //                   ),
-                          //                   child: CircleAvatar(
-                          //                     radius: 10.0,
-                          //                     backgroundColor: Colors.white,
-                          //                     child: Icon(
-                          //                       Icons.circle,
-                          //                       size: 6.0,
-                          //                       color: _circleColors[i],
-                          //                     ),
-                          //                   ),
-                          //                 ),
-                          //               ),
-                          //             const SizedBox(width: 8.0),
-                          //             Text(
-                          //               _voteItems[i], // 투표 항목 텍스트를 표시
-                          //               style: const TextStyle(
-                          //                 fontSize: 11,
-                          //                 fontWeight: FontWeight.bold,
-                          //                 color: Colors.black,
-                          //               ),
-                          //             ),
-                          //             const SizedBox(width: 20),
-                          //             // 이미 투표한 경우, 투표한 사람 수를 표시
-                          //             if (_hasVoted && _showIconList[i])
-                          //               GestureDetector(
-                          //                 onTap: () {
-                          //                   Navigator.push(
-                          //                     context,
-                          //                     MaterialPageRoute(
-                          //                       builder: (context) =>
-                          //                           const ViewVotePage(),
-                          //                     ),
-                          //                   );
-                          //                 },
-                          //                 child: Text(
-                          //                   '${_voteCounts[i]}명',
-                          //                   style: const TextStyle(
-                          //                     fontSize: 11,
-                          //                     fontWeight: FontWeight.bold,
-                          //                     color: Colors.black,
-                          //                   ),
-                          //                 ),
-                          //               ),
-                          //           ],
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ),
+                          if (vote.voteItemIds!.isNotEmpty &&
+                              contentList.isNotEmpty)
+                            for (int i = 0; i < vote.voteItemIds!.length; i++)
+                              GestureDetector(
+                                // onTap: () => _toggleIcon(i),
+                                child: Card(
+                                  color: const Color(0xFFEFEFF2),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                  elevation: 0.5,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0, vertical: 6.0),
+                                    width: 171,
+                                    height: 28,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          contentList[i]
+                                              ['content'], // 투표 항목 텍스트를 표시
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        // 투표 아이콘이 선택되었고 이미 투표를 한 경우, 체크 아이콘을 표시
+                                        // if (_showIconList[i] && _hasVoted)
+                                        //   Image.asset(
+                                        //     'assets/images/votecheck.png',
+                                        //     width: 12,
+                                        //     height: 12,
+                                        //   )
+                                        // // 투표 아이콘만 선택된 경우, 터치 가능한 원 모양 아이콘을 표시하고 토글 기능 추가
+                                        // else if (_showIconList[i])
+                                        //   InkWell(
+                                        //     onTap: () => _toggleIcon(i),
+                                        //     borderRadius:
+                                        //         BorderRadius.circular(10.0),
+                                        //     child: Container(
+                                        //       padding:
+                                        //           const EdgeInsets.all(1.0),
+                                        //       decoration: BoxDecoration(
+                                        //         color: _circleColors[i],
+                                        //         shape: BoxShape.circle,
+                                        //       ),
+                                        //       child: CircleAvatar(
+                                        //         radius: 10.0,
+                                        //         backgroundColor: Colors.white,
+                                        //         child: Icon(
+                                        //           Icons.circle,
+                                        //           size: 6.0,
+                                        //           color: _circleColors[i],
+                                        //         ),
+                                        //       ),
+                                        //     ),
+                                        //   ),
+                                        // const SizedBox(width: 8.0),
+                                        // Text(
+                                        //   _voteItems[i], // 투표 항목 텍스트를 표시
+                                        //   style: const TextStyle(
+                                        //     fontSize: 11,
+                                        //     fontWeight: FontWeight.bold,
+                                        //     color: Colors.black,
+                                        //   ),
+                                        // ),
+                                        // const SizedBox(width: 20),
+                                        // // 이미 투표한 경우, 투표한 사람 수를 표시
+                                        // if (_hasVoted && _showIconList[i])
+                                        //   GestureDetector(
+                                        //     onTap: () {
+                                        //       Navigator.push(
+                                        //         context,
+                                        //         MaterialPageRoute(
+                                        //           builder: (context) =>
+                                        //               const ViewVotePage(),
+                                        //         ),
+                                        //       );
+                                        //     },
+                                        //     child: Text(
+                                        //       '${_voteCounts[i]}명',
+                                        //       style: const TextStyle(
+                                        //         fontSize: 11,
+                                        //         fontWeight: FontWeight.bold,
+                                        //         color: Colors.black,
+                                        //       ),
+                                        //     ),
+                                        //   ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                           const SizedBox(height: 4.0),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -360,6 +375,12 @@ class _VoteWidgetState extends State<VoteWidget> {
                                                       true; // 항목이 가시적으로 보일 수 있도록
                                                 });
                                               },
+                                              onSaved: (val) {
+                                                setState(() {
+                                                  _itemInputControllers[i]
+                                                      .text = val!;
+                                                });
+                                              },
                                             ),
                                           ),
                                         ),
@@ -368,13 +389,36 @@ class _VoteWidgetState extends State<VoteWidget> {
                                       Expanded(
                                         flex: 2,
                                         child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isItemVisibleList[i] =
-                                                  false; // 항목을 가시적으로 숨김
-                                              _onConfirmButtonPressed(i);
-                                            });
+                                          // GestureDetector 안의 onTap 이벤트에서 항목 추가 메서드 호출하기
+                                          onTap: () async {
+                                            // 사용자 입력값 가져오기
+                                            final content =
+                                                _itemInputControllers[i].text;
+
+                                            // 값이 비어있지 않은지 확인
+                                            if (content.isNotEmpty) {
+                                              try {
+                                                // addVoteItem 메서드 호출, await로 비동기 처리
+                                                await Provider.of<VoteProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .addVoteItem(
+                                                        vote.id!, content);
+
+                                                // 성공적으로 추가된 경우, 리스트에서 항목 삭제
+                                                setState(() {
+                                                  _isItemVisibleList[i] = false;
+                                                  _itemInputControllers[i]
+                                                      .clear();
+                                                });
+                                              } catch (e) {
+                                                print('항목 추가 실패: $e');
+                                              }
+                                            } else {
+                                              print('항목을 입력해주세요');
+                                            }
                                           },
+
                                           child: Card(
                                             color: const Color(0xFFEFEFF2),
                                             shape: RoundedRectangleBorder(
