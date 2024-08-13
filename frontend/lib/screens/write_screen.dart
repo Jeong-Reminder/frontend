@@ -443,16 +443,21 @@ class _BoardWritePageState extends State<BoardWritePage> {
             final boardId = await AnnouncementProvider()
                 .createBoard(board, pickedImages, pickedFiles);
 
-            // 투표 생성 API
-            final vote = Vote(
-              subjectTitle: voteTitleController.text,
-              repetition: isMultiplied,
-              additional: true,
-              announcementId: boardId,
-              endTime: formatDateTime(selectedEndDate!),
-            );
+            print('boardId: $boardId');
 
-            await VoteProvider().createVote(vote);
+            if (isConfirmedVote) {
+              // 투표 생성 API
+              final vote = Vote(
+                subjectTitle: voteTitleController.text,
+                repetition: isMultiplied,
+                additional: true,
+                announcementId: boardId,
+                endTime: formatDateTime(selectedEndDate!),
+                // voteItemIds: [],
+              );
+
+              await VoteProvider().createVote(vote);
+            }
 
             // 알림 API
             String fcmToken = await _getFCMToken(); // fcm토큰 할당
@@ -472,9 +477,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
             await NotificationService()
                 .notification(notificationData, fcmToken);
 
-            if (context.mounted) {
-              Navigator.pop(context);
-            }
+            // if (context.mounted) {
+            //   Navigator.pop(context);
+            // }
           } catch (e) {
             print(e.toString());
           }
@@ -554,6 +559,11 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 5.0),
                       ),
+                      onSaved: (val) {
+                        setState() {
+                          voteTitleController.text = val!;
+                        }
+                      },
                     ),
                     const SizedBox(height: 19),
                     const Divider(),
@@ -642,6 +652,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                           setState(() {
                             isConfirmedVote = true;
                           });
+                          print('$isConfirmedVote');
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(

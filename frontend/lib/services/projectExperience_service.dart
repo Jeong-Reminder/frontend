@@ -17,7 +17,8 @@ class ProjectExperienceService {
   // 프로젝트 경험 추가 API
   Future<void> createProjectExperience(
       ProjectExperience projectExperience) async {
-    const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
+    // const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
+    const String baseUrl = 'http://10.0.0.2:9000/api/v1/member-experience';
 
     final token = await getToken();
     if (token == null) {
