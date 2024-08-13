@@ -7,6 +7,10 @@ class MakeTeamProvider with ChangeNotifier {
 
   List<MakeTeam> makeTeams = [];
 
+  final List<Map<String, dynamic>> _applyList = [];
+
+  List<Map<String, dynamic>> get applyList => _applyList;
+
   Future<List<MakeTeam>> getMakeTeam() async {
     return makeTeams;
   }
@@ -36,6 +40,23 @@ class MakeTeamProvider with ChangeNotifier {
       // 서비스 호출하여 팀원 모집글 수정
       await service.updateMakeTeam(makeTeam);
       makeTeams.add(makeTeam);
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 팀원 모집글 조회
+  Future<void> fetchMakeTeam() async {
+    try {
+      final applies = await service.fetchMakeTeam();
+
+      _applyList.clear();
+
+      for (var apply in applies) {
+        _applyList.add(apply);
+      }
+      notifyListeners();
     } catch (e) {
       print(e);
     }
