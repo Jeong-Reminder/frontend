@@ -56,7 +56,7 @@ class MakeTeamService {
   }
 
   // 팀원 모집글 아이디로 조회 API
-  Future<MakeTeam?> fetchMakeTeam() async {
+  Future<List<Map<String, dynamic>>> fetchMakeTeam() async {
     final int? id = await getId();
     if (id == null) {
       throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
@@ -78,17 +78,15 @@ class MakeTeamService {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-      print('팀원 모집글 조회 성공: $responseData');
+      final dataResponse = responseData['data'];
+      final List<dynamic> applyResponse = dataResponse['teamApplicationList'];
 
-      MakeTeam makeTeam = MakeTeam.fromJson(responseData['data']);
+      print('팀원 모집글 조회 성공: $applyResponse');
 
-      // 필요한 경우 ID를 저장
-      await saveId(makeTeam.id!);
-
-      return makeTeam;
+      return applyResponse.map((item) => item as Map<String, dynamic>).toList();
     } else {
       print('팀원 모집글 조회 실패: ${response.body}');
-      return null;
+      throw Exception();
     }
   }
 

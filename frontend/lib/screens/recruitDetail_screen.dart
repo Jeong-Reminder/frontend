@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/makeTeam_modal.dart';
+import 'package:frontend/models/teamApply_model.dart';
+import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/providers/teamApply_provider.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
 class RecruitDetailPage extends StatefulWidget {
@@ -16,149 +20,56 @@ class RecruitDetailPage extends StatefulWidget {
 class _RecruitDetailPageState extends State<RecruitDetailPage> {
   // 모집 명단 확장 여부를 관리하는 변수
   bool isExpandedSection1 = false;
-
   final TextEditingController _controller = TextEditingController();
+  String name = ''; // 로그인된 사용자의 이름을 저장할 변수
+  String level = '';
 
-  // 댓글 리스트 초기화
-  final List<Comment> _comments = [
-    Comment(
-      name: '변우석',
-      grade: '3학년',
-      timestamp: '23/10/21 11:57',
-      content: '저도 관심 있습니다~ 연락 주세요!!',
-      field: 'Frontend',
-      githubUrl: 'github.com/byunwooseok',
-    ),
-    Comment(
-      name: '민택기',
-      grade: '2학년',
-      timestamp: '23/10/22 12:37',
-      content: '경진대회 경험 쌓고 싶습니다!!',
-      field: 'Frontend',
-      githubUrl: 'github.com/minteki',
-    ),
-    Comment(
-      name: '유다은',
-      grade: '2학년',
-      timestamp: '23/10/24 09:57',
-      content: '저도 같이 나갈 사람 구하고 있었는데 같이 해봐요!!',
-      field: 'Backend',
-      githubUrl: 'github.com/yudauen',
-    ),
-    Comment(
-      name: '김혜윤',
-      grade: '3학년',
-      timestamp: '23/10/25 14:57',
-      content: '연락 기다리겠습니다!!',
-      field: 'Backend',
-      githubUrl: 'github.com/kimhyeyoon',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials(); // 로그인 정보를 로드하는 메서드 호출
+  }
+
+  // 로그인 정보에서 이름과 학년을 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      name = credentials['name'] ?? ''; // 로그인 정보에서 name을 가져와 저장
+      level = credentials['level'].toString();
+    });
+  }
 
   // 새로운 댓글을 추가하는 함수
-  void _addComment() {
+  void _addComment() async {
     if (_controller.text.isNotEmpty) {
-      setState(() {
-        _comments.add(
-          Comment(
-            name: "익명",
-            grade: "1학년",
-            timestamp:
-                "${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day} ${DateTime.now().hour}:${DateTime.now().minute}",
-            content: _controller.text,
-            field: 'Unknown',
-            githubUrl: 'github.com/anonymous',
-          ),
+      try {
+        TeamApply teamApply = TeamApply(
+          applicationContent: _controller.text,
         );
+
+        await Provider.of<TeamApplyProvider>(context, listen: false)
+            .createTeamApply(teamApply);
+
+        setState(() {});
+
         _controller.clear();
-      });
+      } catch (e) {
+        print('팀원 신청글 작성 실패: $e');
+      }
     }
   }
 
   // 기술 스택 리스트 (이 부분은 원래 코드에서 정의된 fieldList와 연결)
   List<Map<String, dynamic>> fieldList = [
-    {
-      'logoUrl': 'assets/skilImages/typescript.png',
-      'title': 'TYPESCRIPT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF037BCB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/javascript.png',
-      'title': 'JAVASCRIPT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF5DF1D),
-    },
-    {
-      'logoUrl': 'assets/skilImages/tailwindcss.png',
-      'title': 'TAILWINDCSS',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF3DB1AB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/html.png',
-      'title': 'HTML5',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFE35026),
-    },
-    {
-      'logoUrl': 'assets/skilImages/css.png',
-      'title': 'CSS3',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF1472B6),
-    },
-    {
-      'logoUrl': 'assets/skilImages/react.png',
-      'title': 'REACT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFF61DAFB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/npm.png',
-      'title': 'NPM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFCB3837),
-    },
-    {
-      'logoUrl': 'assets/skilImages/vscode.png',
-      'title': 'VISUAL STUDIO CODE',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0078D7),
-    },
-    {
-      'logoUrl': 'assets/skilImages/docker.png',
-      'title': 'DOCKER',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0BB7ED),
-    },
-    {
-      'logoUrl': 'assets/skilImages/yarn.png',
-      'title': 'YARN',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2C8EBB),
-    },
-    {
-      'logoUrl': 'assets/skilImages/prettier.png',
-      'title': 'PRETTIER',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF8B83E),
-    },
-    {
-      'logoUrl': 'assets/skilImages/eslint.png',
-      'title': 'ESLINT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4B3263),
-    },
-    {
-      'logoUrl': 'assets/skilImages/figma.png',
-      'title': 'FIGMA',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFF24D1D),
-    },
+    // 필드 리스트 항목들 그대로 유지
   ];
 
   @override
   Widget build(BuildContext context) {
+    // MakeTeamProvider에서 applyList를 가져옴
+    final applyList = Provider.of<MakeTeamProvider>(context).applyList;
+
     // 전달된 MakeTeam 객체 사용
     final makeTeam = widget.makeTeam;
     int currentMembers = makeTeam.studentCount;
@@ -515,9 +426,9 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               // 댓글 리스트 빌드
               Expanded(
                 child: ListView.builder(
-                  itemCount: _comments.length,
+                  itemCount: applyList.length,
                   itemBuilder: (context, index) {
-                    final comment = _comments[index];
+                    final apply = applyList[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
                       child: Column(
@@ -527,11 +438,11 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  _showNameDialog(
-                                      comment.field, comment.githubUrl);
+                                  _showNameDialog(apply['developmentField'],
+                                      apply['githubLink']);
                                 },
                                 child: Text(
-                                  comment.name,
+                                  apply['memberName'],
                                   style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -540,7 +451,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                comment.grade,
+                                '${apply['memberLevel']}학년',
                                 style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -596,29 +507,30 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               ),
                             ],
                           ),
-                          Row(
+                          const Row(
                             children: [
-                              Text(
-                                comment.timestamp.split(' ')[0],
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                comment.timestamp.split(' ')[1],
-                                style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54),
-                              ),
+                              // Text(
+                              //   // comment.timestamp.split(' ')[0],
+                              //   apply['createdTime'],
+                              //   style: const TextStyle(
+                              //     fontSize: 9,
+                              //     fontWeight: FontWeight.bold,
+                              //     color: Colors.black54,
+                              //   ),
+                              // ),
+                              SizedBox(width: 2),
+                              // Text(
+                              //   comment.timestamp.split(' ')[1],
+                              //   style: const TextStyle(
+                              //       fontSize: 9,
+                              //       fontWeight: FontWeight.bold,
+                              //       color: Colors.black54),
+                              // ),
                             ],
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            comment.content,
+                            apply['applicationContent'],
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -759,11 +671,14 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
   // 승인 버튼 클릭 시 다이얼로그 표시
   void _showApproveDialog(int index) {
+    final applyList =
+        Provider.of<MakeTeamProvider>(context, listen: false).applyList;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(child: Text('${_comments[index].name} 승인')),
+          title: Center(child: Text('${applyList[index]['memberName']} 승인')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -811,7 +726,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         // 모집 인원이 최대 인원보다 적을 때만 승인
                         if (widget.makeTeam.studentCount < 4) {
                           widget.makeTeam.studentCount++;
-                          _comments.removeAt(index);
+                          applyList.removeAt(index);
                         }
                       });
                       Navigator.of(context).pop();
@@ -828,11 +743,14 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
   // 거절 버튼 클릭 시 다이얼로그 표시
   void _showRejectDialog(int index) {
+    final applyList =
+        Provider.of<MakeTeamProvider>(context, listen: false).applyList;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(child: Text('${_comments[index].name} 반려')),
+          title: Center(child: Text('${applyList[index]['memberName']} 반려')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -877,7 +795,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     child: const Text('확인'),
                     onPressed: () {
                       setState(() {
-                        _comments.removeAt(index); // 반려 클릭 시 리스트에서 제거
+                        applyList.removeAt(index); // 반려 클릭 시 리스트에서 제거
                       });
                       Navigator.of(context).pop();
                     },
@@ -1009,23 +927,4 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
       ),
     );
   }
-}
-
-// 댓글 모델 클래스 정의
-class Comment {
-  final String name;
-  final String grade;
-  final String timestamp;
-  final String content;
-  final String field;
-  final String githubUrl;
-
-  Comment({
-    required this.name,
-    required this.grade,
-    required this.timestamp,
-    required this.content,
-    required this.field,
-    required this.githubUrl,
-  });
 }

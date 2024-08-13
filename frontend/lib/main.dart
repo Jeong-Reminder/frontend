@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/teamApply_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -105,6 +106,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
+        ChangeNotifierProvider(create: (_) => TeamApplyProvider()),
       ],
       child: const MyApp(),
     ),
@@ -201,7 +203,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/corSea-board': (context) => const CorSeaBoardPage(),
         '/detail-board': (context) => BoardDetailPage(),
         '/hidden-board': (context) => HiddenPage(),
-
       },
     );
   }
