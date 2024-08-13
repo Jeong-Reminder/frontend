@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -11,7 +12,7 @@ import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
-import 'package:frontend/screens/vote_screen.dart';
+import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
@@ -106,6 +107,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
+        ChangeNotifierProvider(create: (_) => VoteProvider()),
       ],
       child: const MyApp(),
     ),
@@ -200,9 +202,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),
-        '/detail-board': (context) => BoardDetailPage(),
+        '/detail-board': (context) => const BoardDetailPage(),
         '/hidden-board': (context) => HiddenPage(),
-        '/board-deatil': (context) => BoardDetailPage(),
+        '/board-deatil': (context) => const BoardDetailPage(),
       },
     );
   }
