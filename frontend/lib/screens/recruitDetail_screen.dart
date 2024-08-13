@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:frontend/screens/experience_screen.dart';
+import 'package:frontend/models/makeTeam_modal.dart';
+import 'package:frontend/providers/profile_provider.dart';
+import 'package:provider/provider.dart';
 
 class RecruitDetailPage extends StatefulWidget {
-  const RecruitDetailPage({super.key});
+  final MakeTeam makeTeam; // MakeTeam 객체를 전달받음
+
+  const RecruitDetailPage({super.key, required this.makeTeam});
 
   @override
   State<RecruitDetailPage> createState() => _RecruitDetailPageState();
@@ -12,11 +16,9 @@ class RecruitDetailPage extends StatefulWidget {
 class _RecruitDetailPageState extends State<RecruitDetailPage> {
   // 모집 명단 확장 여부를 관리하는 변수
   bool isExpandedSection1 = false;
-  // 현재 모집된 인원 수
-  int currentMembers = 2;
-  // 최대 모집 인원 수
-  int maxMembers = 4;
+
   final TextEditingController _controller = TextEditingController();
+
   // 댓글 리스트 초기화
   final List<Comment> _comments = [
     Comment(
@@ -61,7 +63,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           Comment(
             name: "익명",
             grade: "1학년",
-            timestamp: // DateTime 매서드로 실시간 년도, 월, 일, 시간, 분 설정
+            timestamp:
                 "${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day} ${DateTime.now().hour}:${DateTime.now().minute}",
             content: _controller.text,
             field: 'Unknown',
@@ -73,7 +75,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     }
   }
 
-  // 기술 스택 리스트
+  // 기술 스택 리스트 (이 부분은 원래 코드에서 정의된 fieldList와 연결)
   List<Map<String, dynamic>> fieldList = [
     {
       'logoUrl': 'assets/skilImages/typescript.png',
@@ -155,298 +157,20 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     },
   ];
 
-  // 승인 버튼 클릭 시 다이얼로그 표시
-  void _showApproveDialog(int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(child: Text('${_comments[index].name} 승인')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const Align(
-                alignment: Alignment.center,
-                child: Text('정말로 승인하시겠습니까?'),
-              ),
-              const SizedBox(height: 20.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/images/billiard.png',
-                    width: 16,
-                    height: 16,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    '한 번 승인하면 되돌릴 수 없습니다',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextButton(
-                    child: const Text('취소'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton(
-                    child: const Text('확인'),
-                    onPressed: () {
-                      setState(() {
-                        // 모집 인원이 최대 인원보다 적을 때만 승인
-                        if (currentMembers < maxMembers) {
-                          currentMembers++;
-                          _comments.removeAt(index);
-                        }
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 거절 버튼 클릭 시 다이얼로그 표시
-  void _showRejectDialog(int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(child: Text('${_comments[index].name} 반려')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const Align(
-                alignment: Alignment.center,
-                child: Text('정말로 반려하시겠습니까?'),
-              ),
-              const SizedBox(height: 20.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/images/billiard.png',
-                    width: 16,
-                    height: 16,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    '한 번 반려하면 되돌릴 수 없습니다',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextButton(
-                    child: const Text('취소'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton(
-                    child: const Text('확인'),
-                    onPressed: () {
-                      setState(() {
-                        _comments.removeAt(index); // 반려 클릭 시 리스트에서 제거
-                      });
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 댓글 단 사람 이름 클릭 시 다이얼로그 표시
-  void _showNameDialog(String field, String githubUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(field),
-              Directionality(
-                textDirection: TextDirection.rtl,
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ExperiencePage(
-                          experiences: [],
-                          name: '',
-                        ),
-                      ),
-                    );
-                  },
-                  label: const Text(
-                    '경험 보러가기',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  icon: const Icon(Icons.chevron_left),
-                ),
-              ),
-            ],
-          ),
-          titleTextStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: fieldList.map((field) {
-                    return badge(
-                      field['logoUrl'] ?? '',
-                      field['title'] ?? '',
-                      field['titleColor'] ?? Colors.black,
-                      field['badgeColor'] ?? Colors.grey,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                RichText(
-                  text: TextSpan(
-                    text: 'Github: ',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: githubUrl,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('닫기'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 글쓴 사람의 기술 스택 다이얼로그 표시
-  void _showAuthorStackDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('이승욱님의 기술 스택'),
-          titleTextStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: fieldList.map((field) {
-                    return badge(
-                      field['logoUrl'] ?? '',
-                      field['title'] ?? '',
-                      field['titleColor'] ?? Colors.black,
-                      field['badgeColor'] ?? Colors.grey,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                RichText(
-                  text: const TextSpan(
-                    text: 'Github: ',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: 'github.com/seungwooklee',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('닫기'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    // 전달된 MakeTeam 객체 사용
+    final makeTeam = widget.makeTeam;
+    int currentMembers = makeTeam.studentCount;
+    int maxMembers = 4;
+
+    // endTime이 문자열 형식으로 저장된 리스트를 나타내는 경우
+    List<String> endTimeParts =
+        makeTeam.endTime.replaceAll(RegExp(r'\[|\]'), '').split(',');
+    // createdTime이 문자열 형식으로 저장된 리스트를 나타내는 경우
+    List<String>? createdTimeParts =
+        makeTeam.createdTime?.replaceAll(RegExp(r'\[|\]'), '').split(',');
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -491,61 +215,58 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '[ IoT 통합 설계 경진대회 ] 팀원 모집합니다!!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                makeTeam.recruitmentTitle,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 3),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      _showAuthorStackDialog(); // 글쓴 사람 기술 스택 다이얼로그 표시
-                    },
-                    child: const Text(
-                      '이승욱',
-                      style: TextStyle(fontSize: 10),
-                    ),
+
+              Row(children: [
+                GestureDetector(
+                  onTap: () {
+                    _showAuthorStackDialog(); // 글쓴 사람 기술 스택 다이얼로그 표시
+                  },
+                  child: Text(
+                    makeTeam.memberName ?? 'Unknown',
+                    style: const TextStyle(fontSize: 10),
                   ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    '23/10/21 ',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                  const Text(
-                    '10:57 ',
-                    style: TextStyle(
-                        fontSize: 11,
+                ),
+                const SizedBox(width: 4),
+                if (createdTimeParts != null) ...[
+                  Text(
+                    '${createdTimeParts[0].trim()}/${createdTimeParts[1].trim()}/${createdTimeParts[2].trim()}',
+                    style: const TextStyle(
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: Colors.black54),
                   ),
                 ],
-              ),
+              ]),
               const SizedBox(height: 10),
-              const Text(
-                '경진대회 나가고 싶은데 인원이 부족해서 관심 있으신 분들과 같이 나가고 싶어요',
-                style: TextStyle(fontSize: 12),
+              Text(
+                makeTeam.recruitmentContent,
+                style: const TextStyle(fontSize: 12),
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Text(
-                    '모집 인원 $currentMembers/$maxMembers',
+                    '모집 인원 ${makeTeam.studentCount}/4',
                     style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: Colors.black54),
                   ),
                   const SizedBox(width: 4),
-                  const Text(
-                    '~10/28까지',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
+                  // 월과 일을 추출하여 표시
+                  Text(
+                    '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   Expanded(
@@ -626,9 +347,9 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Text(
-                      '소진수',
-                      style: TextStyle(
+                    Text(
+                      makeTeam.memberName ?? 'Unknown',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -656,35 +377,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      '장찬현',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      height: 20,
-                      width: 70,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEA4E44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        child: const Text(
-                          '팀원',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // 팀원 목록을 여기에 추가할 수 있습니다.
                   ],
                 ),
               ],
@@ -717,7 +410,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         ),
                       ),
                       child: Text(
-                        '$currentMembers명',
+                        '${makeTeam.studentCount}명',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -743,73 +436,34 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 20,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDBE7FB),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '백엔드',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                    children: makeTeam.hopeField.split(',').map((field) {
+                      return Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              height: 20,
+                              width: 80, // 각 Container의 너비 조정
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFDBE7FB),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  field.trim(),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 20,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDBE7FB),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '프론트',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 20,
-                          width: 90,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDBE7FB),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              '디자이너',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                          const SizedBox(width: 4),
+                        ],
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
@@ -843,9 +497,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        _addComment();
-                      },
+                      onTap: _addComment,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: Image.asset(
@@ -958,10 +610,9 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               Text(
                                 comment.timestamp.split(' ')[1],
                                 style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black54,
-                                ),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black54),
                               ),
                             ],
                           ),
@@ -986,10 +637,340 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   },
                 ),
               ),
+              if (currentMembers == maxMembers) // 모집 인원과 최대 인원이 같을 때
+                GestureDetector(
+                  onTap: () {
+                    // 팀 생성 로직 추가
+                  },
+                  child: Container(
+                    height: 20,
+                    width: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A72E7),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '팀 생성하기',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  // 글쓴 사람의 기술 스택을 표시하는 다이얼로그를 보여주는 함수
+  void _showAuthorStackDialog() async {
+    // ProfileProvider를 사용하여 글쓴 사람의 프로필 정보를 가져옴
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+
+    await profileProvider.fetchProfile(widget.makeTeam.memberId!);
+
+    // 가져온 프로필 정보에서 기술 스택 정보를 추출
+    final techStack = profileProvider.techStack;
+
+    final githubLink = techStack['githubLink'];
+
+    // 개발 분야를 콤마(,)로 구분된 문자열로부터 리스트로 변환
+    final developmentFields = (techStack['developmentField'] as String)
+        .split(',')
+        .map((field) => field.trim()) // 각 항목의 앞뒤 공백을 제거
+        .toList();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('${widget.makeTeam.memberName}님의 기술 스택'),
+          titleTextStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 개발 분야를 배지 형태로 표시하는 위젯
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: developmentFields.map((field) {
+                    // 각 개발 분야에 대한 정보를 fieldList에서 찾음
+                    final fieldData = fieldList.firstWhere(
+                      (element) => element['title'] == field,
+                    );
+                    // 배지를 반환하여 화면에 표시
+                    return badge(
+                      fieldData['logoUrl'] ?? '',
+                      fieldData['title'] ?? '',
+                      fieldData['titleColor'] ?? Colors.black,
+                      fieldData['badgeColor'] ?? Colors.grey,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+
+                RichText(
+                  text: TextSpan(
+                    text: 'Github: ',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: githubLink,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 승인 버튼 클릭 시 다이얼로그 표시
+  void _showApproveDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(child: Text('${_comments[index].name} 승인')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 승인하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/billiard.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 승인하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 8.0),
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        // 모집 인원이 최대 인원보다 적을 때만 승인
+                        if (widget.makeTeam.studentCount < 4) {
+                          widget.makeTeam.studentCount++;
+                          _comments.removeAt(index);
+                        }
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 거절 버튼 클릭 시 다이얼로그 표시
+  void _showRejectDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(child: Text('${_comments[index].name} 반려')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 반려하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/billiard.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 반려하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('취소'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 8.0),
+                  TextButton(
+                    child: const Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        _comments.removeAt(index); // 반려 클릭 시 리스트에서 제거
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 댓글 단 사람 이름 클릭 시 다이얼로그 표시
+  void _showNameDialog(String field, String githubUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(field),
+              Directionality(
+                textDirection: TextDirection.rtl,
+                child: TextButton.icon(
+                  onPressed: () {
+                    // 경험 보러가기 버튼 클릭 시 다른 페이지로 이동
+                  },
+                  label: const Text(
+                    '경험 보러가기',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  icon: const Icon(Icons.chevron_left),
+                ),
+              ),
+            ],
+          ),
+          titleTextStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: fieldList.map((field) {
+                    return badge(
+                      field['logoUrl'] ?? '',
+                      field['title'] ?? '',
+                      field['titleColor'] ?? Colors.black,
+                      field['badgeColor'] ?? Colors.grey,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                RichText(
+                  text: TextSpan(
+                    text: 'Github: ',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: githubUrl,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

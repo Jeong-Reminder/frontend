@@ -16,9 +16,7 @@ class MakeTeamService {
 
   Future<int?> getId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? id = prefs.getInt('makeTeamId');
-
-    return id;
+    return prefs.getInt('makeTeamId');
   }
 
   // 팀원 모집글 작성 API
@@ -51,12 +49,46 @@ class MakeTeamService {
 
       await saveId(id); // 반환된 ID를 SharedPreferences에 저장
 
-      int? savedId = await getId(); // 저장된 ID를 다시 불러와서 확인
-      print('Re-fetched ID after save: $savedId'); // 확인된 ID 출력
-
       return id;
     } else {
       throw Exception('팀원 모집글 작성 실패: ${response.body}');
+    }
+  }
+
+  // 팀원 모집글 아이디로 조회 API
+  Future<MakeTeam?> fetchMakeTeam() async {
+    final int? id = await getId();
+    if (id == null) {
+      throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
+    }
+    final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    final response = await http.get(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      print('팀원 모집글 조회 성공: $responseData');
+
+      MakeTeam makeTeam = MakeTeam.fromJson(responseData['data']);
+
+      // 필요한 경우 ID를 저장
+      await saveId(makeTeam.id!);
+
+      return makeTeam;
+    } else {
+      print('팀원 모집글 조회 실패: ${response.body}');
+      return null;
     }
   }
 
@@ -77,7 +109,7 @@ class MakeTeamService {
     final requestBody = makeTeam.toJson();
     requestBody.remove('id');
 
-    print('Request Body: ${jsonEncode(makeTeam.toJson())}');
+    print('Request Body: ${jsonEncode(requestBody)}');
 
     final response = await http.put(
       Uri.parse(baseUrl),
@@ -85,7 +117,7 @@ class MakeTeamService {
         'Content-Type': 'application/json',
         'access': token,
       },
-      body: jsonEncode(makeTeam.toJson()),
+      body: jsonEncode(requestBody),
     );
 
     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
