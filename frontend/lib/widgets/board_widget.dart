@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Board extends StatefulWidget {
@@ -7,12 +10,15 @@ class Board extends StatefulWidget {
   final bool
       total; // level과 memberLevel이 맞는 공지사항만 필터링하는 작업을 할 것인지 여부(true일 때 필터링 작업 진행)
   final Function(Map<String, dynamic> board)? onBoardSelected; // 선택된 게시글 콜백 함수
+  // bool? isHidden =
+  //     false; // 숨긴 게시글인지 아닌지 여부(숨긴 게시글일 경우 detailBoard 페이지로 이동 못하게 설정)
 
-  const Board(
-      {required this.boardList,
-      required this.total,
-      this.onBoardSelected,
-      super.key});
+  const Board({
+    super.key,
+    required this.boardList,
+    required this.total,
+    this.onBoardSelected,
+  });
 
   @override
   State<Board> createState() => _BoardState();
@@ -87,11 +93,29 @@ class _BoardState extends State<Board> {
         final board =
             widget.total ? filteredBoardList[index] : widget.boardList[index];
         final category = _getCategoryName(board['announcementCategory']);
-        final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
+        // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
         return Column(
           children: [
             GestureDetector(
+              // 게시글 들어갈 때
+              onTap: () async {
+                await Provider.of<AnnouncementProvider>(context, listen: false)
+                    .fetchOneBoard(board['id']);
+
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BoardDetailPage(
+                        announcementId: board['id'],
+                      ),
+                    ),
+                  );
+                }
+              },
+
+              // 숨김/삭제 버튼 띄울 때
               onLongPress: () async {
                 setState(() {
                   selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장

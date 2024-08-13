@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/boardAppbar_widget.dart';
@@ -44,7 +45,6 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
   @override
   Widget build(BuildContext context) {
     final boardList = Provider.of<AnnouncementProvider>(context).boardList;
-    print('boardList: $boardList');
 
     return Scaffold(
       appBar: const BoardAppbar(),
@@ -72,10 +72,9 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => const BoardWritePage()),
+                            '/write-board',
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -83,7 +82,13 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
-                          // 숨김 페이지로 이동
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  HiddenPage(category: 'TOTAL'),
+                            ),
+                          );
                         }),
                     ];
                   },
@@ -113,7 +118,25 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
+
+                      // 전체 boardList를 다시 불러옴
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchAllBoards();
+                      }
+                      setState(() {
+                        isHidDel = false; // 숨김/삭제 버튼 숨기기
+                        selectedBoard = null; // 선택된 게시글 초기화
+                      });
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),

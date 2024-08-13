@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/boardAppbar_widget.dart';
@@ -100,10 +101,9 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => const BoardWritePage()),
+                            '/write-board',
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -111,7 +111,13 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('숨김 관리', PopUpItem.popUpItem3, () {
-                          // 숨김 페이지로 이동
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  HiddenPage(category: 'CORSEA'),
+                            ),
+                          );
                         }),
                     ];
                   },
@@ -142,7 +148,32 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (selectedBoard != null) {
+                      print('id: ${selectedBoard!['id']}');
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
+
+                      if (context.mounted) {
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory[0]);
+                      }
+
+                      if (context.mounted) {
+                        // 두 번째 카테고리 API 호출
+                        await Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchCateBoard(boardCategory[1]);
+                      }
+
+                      setState(() {
+                        isHidDel = false; // 숨김/삭제 버튼 숨기기
+                        selectedBoard = null; // 선택된 게시글 초기화
+                      });
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAFAFE),
                     minimumSize: const Size(205, 75),
