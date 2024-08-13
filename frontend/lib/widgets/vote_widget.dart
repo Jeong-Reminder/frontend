@@ -360,6 +360,12 @@ class _VoteWidgetState extends State<VoteWidget> {
                                                       true; // 항목이 가시적으로 보일 수 있도록
                                                 });
                                               },
+                                              onSaved: (val) {
+                                                setState(() {
+                                                  _itemInputControllers[i]
+                                                      .text = val!;
+                                                });
+                                              },
                                             ),
                                           ),
                                         ),
@@ -368,13 +374,43 @@ class _VoteWidgetState extends State<VoteWidget> {
                                       Expanded(
                                         flex: 2,
                                         child: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isItemVisibleList[i] =
-                                                  false; // 항목을 가시적으로 숨김
-                                              _onConfirmButtonPressed(i);
-                                            });
+                                          // GestureDetector 안의 onTap 이벤트에서 항목 추가 메서드 호출하기
+                                          onTap: () async {
+                                            // 사용자 입력값 가져오기
+                                            final content =
+                                                _itemInputControllers[i].text;
+
+                                            // 값이 비어있지 않은지 확인
+                                            if (content.isNotEmpty) {
+                                              try {
+                                                // addVoteItem 메서드 호출, await로 비동기 처리
+                                                await Provider.of<VoteProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .addVoteItem(
+                                                        vote.id!, content);
+
+                                                // 성공적으로 추가된 경우, 리스트에서 항목 삭제
+                                                setState(() {
+                                                  _isItemVisibleList[i] = false;
+                                                  _itemInputControllers[i]
+                                                      .clear();
+                                                });
+
+                                                if (context.mounted) {
+                                                  Provider.of<VoteProvider>(
+                                                          context,
+                                                          listen: false)
+                                                      .fetchVote(vote.id!);
+                                                }
+                                              } catch (e) {
+                                                print('항목 추가 실패: $e');
+                                              }
+                                            } else {
+                                              print('항목을 입력해주세요');
+                                            }
                                           },
+
                                           child: Card(
                                             color: const Color(0xFFEFEFF2),
                                             shape: RoundedRectangleBorder(
