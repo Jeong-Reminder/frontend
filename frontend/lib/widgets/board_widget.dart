@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/recommend_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,9 @@ class _BoardState extends State<Board> {
   int? level;
   List<Map<String, dynamic>> filteredBoardList = [];
   int? selectedBoardIndex; // 선택된 게시글의 인덱스를 저장할 변수
+
+  bool isLiked = false;
+  int likeCount = 0;
 
   @override
   void initState() {
@@ -169,12 +173,51 @@ class _BoardState extends State<Board> {
                         ],
                       ),
                       const SizedBox(height: 7),
-                      Text(
-                        board['announcementContent'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            board['announcementContent'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                  onPressed: () async {
+                                    try {
+                                      bool suucess = await RecommendProvider()
+                                          .recommend(board['id']);
+                                      if (suucess) {
+                                        setState(() {
+                                          isLiked = !isLiked;
+                                          likeCount += 1;
+                                        });
+                                      }
+                                    } catch (e) {
+                                      print(e.toString());
+                                    }
+                                  },
+                                  icon: isLiked
+                                      ? const Icon(Icons.favorite)
+                                      : const Icon(Icons.favorite_border),
+                                  color: isLiked ? Colors.red : Colors.grey,
+                                  style: IconButton.styleFrom(
+                                    iconSize: 30,
+                                  )),
+                              Text(
+                                '$likeCount',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
                       ),
                       const SizedBox(height: 7),
                     ],

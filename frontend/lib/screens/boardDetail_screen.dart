@@ -162,40 +162,40 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              Row(
+              const Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () async {
-                      try {
-                        bool suucess =
-                            await RecommendProvider().recommend(board['id']);
-                        if (suucess) {
-                          setState(() {
-                            isLiked = !isLiked;
-                            likeCount += 1;
-                          });
-                        }
-                      } catch (e) {
-                        print(e.toString());
-                      }
-                    },
-                    child: Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: isLiked ? Colors.red : Colors.grey,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '$likeCount',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: () async {
+                  //     try {
+                  //       bool suucess =
+                  //           await RecommendProvider().recommend(board['id']);
+                  //       if (suucess) {
+                  //         setState(() {
+                  //           isLiked = !isLiked;
+                  //           likeCount += 1;
+                  //         });
+                  //       }
+                  //     } catch (e) {
+                  //       print(e.toString());
+                  //     }
+                  //   },
+                  //   child: Icon(
+                  //     isLiked ? Icons.favorite : Icons.favorite_border,
+                  //     color: isLiked ? Colors.red : Colors.grey,
+                  //     size: 20,
+                  //   ),
+                  // ),
+                  // const SizedBox(width: 2),
+                  // Text(
+                  //   '$likeCount',
+                  //   style: const TextStyle(
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Colors.black,
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 20),

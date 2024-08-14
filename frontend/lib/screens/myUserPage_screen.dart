@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/providers/recommend_provider.dart';
 import 'package:frontend/screens/favorite_screen.dart';
 import 'package:frontend/screens/userInfo_screen.dart';
 import 'package:frontend/services/login_services.dart';
@@ -28,6 +29,8 @@ class _MyUserPageState extends State<MyUserPage> {
 
   List<String> stringToListToolList = [];
   List<Map<String, dynamic>> developmentTool = [];
+
+  List<int> announcementIds = [];
 
   @override
   void initState() {
@@ -142,11 +145,26 @@ class _MyUserPageState extends State<MyUserPage> {
             ),
           ),
           IconButton(
-            onPressed: () {
+            onPressed: () async {
+              await Provider.of<RecommendProvider>(context, listen: false)
+                  .fetchRecommend();
+
+              List<Map<String, dynamic>> recommendList =
+                  Provider.of<RecommendProvider>(context, listen: false)
+                      .recommendList;
+
+              setState(() {
+                for (var recommend in recommendList) {
+                  announcementIds.add(recommend['announcementId']);
+                }
+              });
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FavoritePage(), // 즐겨찾기 페이지로 이동
+                  builder: (context) => FavoritePage(
+                    announcementIds: announcementIds,
+                  ), // 즐겨찾기 페이지로 이동
                 ),
               );
             },

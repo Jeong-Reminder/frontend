@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/recommend_provider.dart';
+import 'package:provider/provider.dart';
 
 class FavoritePage extends StatefulWidget {
-  const FavoritePage({super.key});
+  List<int> announcementIds;
+  FavoritePage({required this.announcementIds, super.key});
 
   @override
   State<FavoritePage> createState() => _FavoritePageState();
@@ -10,6 +14,7 @@ class FavoritePage extends StatefulWidget {
 class _FavoritePageState extends State<FavoritePage> {
   bool chosenBtn = false; // 선택 버튼 눌렀을 때 불리안
   int deletedCount = 0; // 좋아요 삭제한 갯수
+  List<Map<String, dynamic>> boardList = [];
 
   List<Map<String, dynamic>> favoriteList = [
     {
@@ -40,6 +45,27 @@ class _FavoritePageState extends State<FavoritePage> {
       'isDeleted': false,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    boardList.clear();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      for (var announcementId in widget.announcementIds) {
+        await Provider.of<AnnouncementProvider>(context, listen: false)
+            .fetchOneBoard(announcementId);
+
+        setState(() {
+          boardList.add(
+              Provider.of<AnnouncementProvider>(context, listen: false).board);
+        });
+      }
+    });
+
+    print(boardList);
+  }
 
   @override
   Widget build(BuildContext context) {
