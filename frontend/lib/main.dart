@@ -13,6 +13,7 @@ import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/screens/write_screen.dart';
@@ -192,6 +193,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
         '/myuser': (context) => const MyUserPage(),
+        '/myowner': (context) => const MyOwnerPage(),
         '/member-experience': (context) => const SettingProfile2Page(),
         '/experience': (context) => const ExperiencePage(
               experiences: [],

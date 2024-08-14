@@ -477,9 +477,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
             await NotificationService()
                 .notification(notificationData, fcmToken);
 
-            // if (context.mounted) {
-            //   Navigator.pop(context);
-            // }
+            if (context.mounted) {
+              Navigator.popAndPushNamed(context, '/total-board');
+            }
           } catch (e) {
             print(e.toString());
           }

@@ -76,7 +76,7 @@ class VoteProvider with ChangeNotifier {
     final utf8Response = utf8.decode(response.bodyBytes);
 
     if (response.statusCode == 201) {
-      final jsonResponse = json.decode(response.body);
+      final jsonResponse = json.decode(utf8Response);
       final dataResponse = jsonResponse['data'];
 
       _contentList.add(dataResponse);
@@ -125,6 +125,28 @@ class VoteProvider with ChangeNotifier {
       print('투표 조회 성공: $_voteList');
     } else {
       print("투표 조회 실패: ${response.body}");
+    }
+  }
+
+  // 투표하기
+  Future<void> vote(int voteId, int voteItemId) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl$voteId/vote/$voteItemId');
+    final response = await http.post(
+      url,
+      headers: {
+        'access': accessToken,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('투표 성공: ${response.body}');
+    } else {
+      print('투표 실패: ${response.statusCode} - ${response.body}');
     }
   }
 }
