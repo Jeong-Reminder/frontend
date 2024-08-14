@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/models/vote_model.dart';
+import 'package:frontend/providers/recommend_provider.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
@@ -40,7 +41,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
   Map<String, dynamic> voteMap = {}; // 투표 조회 변수
   String userRole = '';
   bool isLiked = false;
-  int likeCount = 5;
+  int likeCount = 0;
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -166,11 +167,19 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isLiked = !isLiked;
-                        likeCount += isLiked ? 1 : -1;
-                      });
+                    onTap: () async {
+                      try {
+                        bool suucess =
+                            await RecommendProvider().recommend(board['id']);
+                        if (suucess) {
+                          setState(() {
+                            isLiked = !isLiked;
+                            likeCount += 1;
+                          });
+                        }
+                      } catch (e) {
+                        print(e.toString());
+                      }
                     },
                     child: Icon(
                       isLiked ? Icons.favorite : Icons.favorite_border,
