@@ -6,7 +6,7 @@ import 'package:frontend/models/projectExperience_model.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 
 class SettingProfile2Page extends StatefulWidget {
-  const SettingProfile2Page({Key? key}) : super(key: key);
+  const SettingProfile2Page({super.key});
 
   @override
   State<SettingProfile2Page> createState() => _SettingProfile2PageState();
@@ -104,12 +104,14 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
       await provider.createProjectExperience(newExperience);
 
       // 홈 페이지로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      }
     } else {
       print('입력 사항을 모두 작성해주세요.');
     }
