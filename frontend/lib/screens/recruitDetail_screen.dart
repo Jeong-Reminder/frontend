@@ -72,6 +72,25 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
   List<Map<String, dynamic>> fieldList = [];
 
+  // 팝업 메뉴 아이템을 생성하는 함수
+  PopupMenuItem<String> popUpItem(String text, String item) {
+    return PopupMenuItem<String>(
+      enabled: true,
+      value: item,
+      height: 25,
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.black.withOpacity(0.5),
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final makeTeam = widget.makeTeam;
@@ -499,6 +518,21 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                     ),
                                   ),
                                 ),
+                              ),
+                              const Spacer(),
+                              PopupMenuButton<String>(
+                                color: const Color(0xFFEFF0F2),
+                                onSelected: (String item) {
+                                  if (item == '수정') {}
+                                },
+                                itemBuilder: (BuildContext context) {
+                                  return <PopupMenuEntry<String>>[
+                                    popUpItem('수정', '수정'),
+                                    const PopupMenuDivider(),
+                                    popUpItem('삭제', '삭제'),
+                                  ];
+                                },
+                                child: const Icon(Icons.more_vert),
                               ),
                             ],
                           ),
