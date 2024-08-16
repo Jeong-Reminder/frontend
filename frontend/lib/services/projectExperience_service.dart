@@ -20,6 +20,7 @@ class ProjectExperienceService {
     const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
     // const String baseUrl = 'http://10.0.2.2:9000/api/v1/member-experience';
 
+
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');

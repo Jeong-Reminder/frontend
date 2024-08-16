@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/models/vote_model.dart';
+import 'package:frontend/providers/recommend_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
+import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
 class BoardDetailPage extends StatefulWidget {
-  int? announcementId;
-  BoardDetailPage({this.announcementId, super.key});
+  final int? announcementId;
+  const BoardDetailPage({this.announcementId, super.key});
 
   @override
   State<BoardDetailPage> createState() => _BoardDetailPageState();
@@ -33,10 +37,11 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
 enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
 
 class _BoardDetailPageState extends State<BoardDetailPage> {
-  // Map<String, dynamic> board = {};
+  Map<String, dynamic> board = {};
+  Map<String, dynamic> voteMap = {}; // 투표 조회 변수
   String userRole = '';
   bool isLiked = false;
-  int likeCount = 5;
+  int likeCount = 0;
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -135,27 +140,6 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                   ),
                 ],
               ),
-              // const Row(
-              //   children: [
-              //     Text(
-              //       '02/03',
-              //       style: TextStyle(
-              //         fontSize: 12,
-              //         fontWeight: FontWeight.normal,
-              //         color: Color(0xFFA89F9F),
-              //       ),
-              //     ),
-              //     SizedBox(width: 7),
-              //     Text(
-              //       '14:28',
-              //       style: TextStyle(
-              //         fontSize: 12,
-              //         fontWeight: FontWeight.normal,
-              //         color: Color(0xFFA89F9F),
-              //       ),
-              //     ),
-              //   ],
-              // ),
               const SizedBox(height: 20),
               Text(
                 board['announcementContent'],
@@ -172,7 +156,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                   width: 341,
                   height: 296,
                   child: Image.asset(
-                    'assets/images/classselect.png', // 파일 다운로드 api 때 적용해봐야 할 것 같음
+                    'assets/images/classselect.png',
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -183,11 +167,19 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isLiked = !isLiked;
-                        likeCount += isLiked ? 1 : -1;
-                      });
+                    onTap: () async {
+                      try {
+                        bool suucess =
+                            await RecommendProvider().recommend(board['id']);
+                        if (suucess) {
+                          setState(() {
+                            isLiked = !isLiked;
+                            likeCount += 1;
+                          });
+                        }
+                      } catch (e) {
+                        print(e.toString());
+                      }
                     },
                     child: Icon(
                       isLiked ? Icons.favorite : Icons.favorite_border,
@@ -195,7 +187,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 2), // 아이콘과 텍스트 사이의 간격 조절
+                  const SizedBox(width: 2),
                   Text(
                     '$likeCount',
                     style: const TextStyle(
@@ -207,6 +199,26 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 ],
               ),
               const SizedBox(height: 20),
+
+              // 투표 보기
+              if (board['votes'].isNotEmpty)
+                Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    title: const Text('투표 보기'),
+                    children: [
+                      VoteWidget(
+                        votes: (board['votes'] as List<dynamic>)
+                            .map((vote) =>
+                                Vote.fromJson(vote as Map<String, dynamic>))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 10),
               const Center(
                 child: Text(
                   '댓글을 작성할 수 없는 게시물입니다.',
