@@ -134,16 +134,20 @@ class _VoteWidgetState extends State<VoteWidget> {
             .fetchVote(vote.id!);
 
         // 투표 정보 가져온 후, 해당 투표의 항목 개수에 맞게 리스트 초기화
-        setState(() {
-          _showIconList =
-              List<bool>.from(List.filled(vote.voteItemIds!.length, false));
-          _circleColors = List<Color>.from(
-              List.filled(vote.voteItemIds!.length, Colors.black));
-          _hasVotedList =
-              List<bool>.from(List.filled(vote.voteItemIds!.length, false));
-          _voteCounts =
-              List<int>.from(List.filled(vote.voteItemIds!.length, 0));
-        });
+        if (mounted) {
+          // mounted: setState가 호출되는 시점에 위젯이 이미 화면에 존재하지 않아 발생하는 예외를 방지하기 위해
+          // mounted를 통해 확인
+          setState(() {
+            _showIconList =
+                List<bool>.from(List.filled(vote.voteItemIds!.length, false));
+            _circleColors = List<Color>.from(
+                List.filled(vote.voteItemIds!.length, Colors.black));
+            _hasVotedList =
+                List<bool>.from(List.filled(vote.voteItemIds!.length, false));
+            _voteCounts =
+                List<int>.from(List.filled(vote.voteItemIds!.length, 0));
+          });
+        }
       }
     });
 
@@ -218,104 +222,149 @@ class _VoteWidgetState extends State<VoteWidget> {
                               contentList.isNotEmpty)
                             for (int i = 0; i < vote.voteItemIds!.length; i++)
                               if (i < contentList.length)
-                                InkWell(
-                                  // GestureDetector를 InkWell로 대체
-                                  onTap: () => _toggleIcon(
-                                      i,
-                                      vote.voteItemIds![i],
-                                      vote.repetition!), // 아이콘 토글 함수 호출
-                                  child: Card(
-                                    color: const Color(0xFFEFEFF2),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                    elevation: 0.5,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 20.0, vertical: 6.0),
-                                      width: 171,
-                                      height: 28,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          // 이미 투표를 완료한 경우 체크 아이콘 표시
-                                          if (i < _showIconList.length &&
-                                              _showIconList[i] &&
-                                              _hasVoted)
-                                            Image.asset(
-                                              'assets/images/votecheck.png',
-                                              width: 12,
-                                              height: 12,
-                                            )
-                                          // 투표 아이콘만 선택된 경우, 터치 가능한 원 모양 아이콘 표시
-                                          else if (i < _showIconList.length &&
-                                              _showIconList[i])
-                                            InkWell(
-                                              onTap: () => _toggleIcon(
-                                                  i,
-                                                  vote.voteItemIds![i],
-                                                  vote.repetition!),
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(1.0),
-                                                decoration: BoxDecoration(
-                                                  color: _circleColors[i],
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: CircleAvatar(
-                                                  radius: 10.0,
-                                                  backgroundColor: Colors.white,
-                                                  child: Icon(
-                                                    Icons.circle,
-                                                    size: 6.0,
-                                                    color: _circleColors[i],
+                                Row(
+                                  children: [
+                                    InkWell(
+                                      // GestureDetector를 InkWell로 대체
+                                      onTap: () => _toggleIcon(
+                                          i,
+                                          vote.voteItemIds![i],
+                                          vote.repetition!), // 아이콘 토글 함수 호출
+                                      child: Card(
+                                        color: const Color(0xFFEFEFF2),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5.0),
+                                        ),
+                                        elevation: 0.5,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0, vertical: 6.0),
+                                          width: 171,
+                                          height: 28,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              // 이미 투표를 완료한 경우 체크 아이콘 표시
+                                              if (i < _showIconList.length &&
+                                                  _showIconList[i] &&
+                                                  _hasVoted)
+                                                Image.asset(
+                                                  'assets/images/votecheck.png',
+                                                  width: 12,
+                                                  height: 12,
+                                                )
+                                              // 투표 아이콘만 선택된 경우, 터치 가능한 원 모양 아이콘 표시
+                                              else if (i <
+                                                      _showIconList.length &&
+                                                  _showIconList[i])
+                                                InkWell(
+                                                  onTap: () => _toggleIcon(
+                                                      i,
+                                                      vote.voteItemIds![i],
+                                                      vote.repetition!),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            1.0),
+                                                    decoration: BoxDecoration(
+                                                      color: _circleColors[i],
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: CircleAvatar(
+                                                      radius: 10.0,
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      child: Icon(
+                                                        Icons.circle,
+                                                        size: 6.0,
+                                                        color: _circleColors[i],
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                          const SizedBox(width: 8.0),
-                                          // 투표 항목 내용 표시
-                                          Text(
-                                            contentList[i]['content'],
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 20),
-                                          // 투표 완료한 경우 투표 인원 표시
-                                          if (_hasVoted &&
-                                              i < _showIconList.length &&
-                                              _showIconList[i])
-                                            GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const ViewVotePage(),
-                                                  ),
-                                                );
-                                              },
-                                              child: Text(
-                                                '${_voteCounts[i]}명',
+                                              const SizedBox(width: 8.0),
+                                              // 투표 항목 내용 표시
+                                              Text(
+                                                contentList[i]['content'],
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black,
                                                 ),
                                               ),
-                                            ),
-                                        ],
+                                              const SizedBox(width: 20),
+                                              // 투표 완료한 경우 투표 인원 표시
+                                              if (_hasVoted &&
+                                                  i < _showIconList.length &&
+                                                  _showIconList[i])
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const ViewVotePage(),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    '${_voteCounts[i]}명',
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+
+                                    // 삭제 버튼(관리자만 보이게 설정)
+                                    if (userRole == 'ROLE_ADMIN')
+                                      IconButton(
+                                        onPressed: () async {
+                                          // 투표 항목 강제 삭제 API
+                                          await Provider.of<VoteProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .deleteVoteItem(
+                                                  vote.voteItemIds![i]);
+
+                                          setState(() {
+                                            // 항목을 삭제하면서 상태 리스트에서도 제거
+                                            vote.voteItemIds!.removeAt(i);
+                                            _showIconList.removeAt(i);
+                                            _circleColors.removeAt(i);
+                                            _hasVotedList.removeAt(i);
+                                            _voteCounts.removeAt(i);
+                                          });
+
+                                          // 투표 조회 API
+                                          if (context.mounted) {
+                                            await Provider.of<VoteProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .fetchVote(vote.id!);
+                                          }
+                                        },
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Color(0xFF2B72E7),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                           const SizedBox(height: 4.0),
+
                           // 항목 추가 및 투표 인원 표시
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -384,6 +433,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                               ),
                             ],
                           ),
+
                           // 새로 추가된 항목 입력 필드 생성
                           for (int i = 0; i < _isItemVisibleList.length; i++)
                             if (_isItemVisibleList[i])
@@ -434,7 +484,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                     ),
                                   ),
                                   const SizedBox(width: 8.0),
-                                  // 확인 버튼
+
+                                  // 확인 버튼(항목 추가)
                                   Expanded(
                                     flex: 2,
                                     child: GestureDetector(
@@ -442,6 +493,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                         final content =
                                             _itemInputControllers[i].text;
 
+                                        // 투표 항목 추가 API
                                         if (content.isNotEmpty) {
                                           await Provider.of<VoteProvider>(
                                                   context,
@@ -486,6 +538,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                     ),
                                   ),
                                   const SizedBox(width: 8.0),
+
                                   // 취소 버튼
                                   Expanded(
                                     flex: 2,
@@ -524,6 +577,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                 ],
                               ),
                           const SizedBox(height: 6.0),
+
                           // 투표하기 버튼
                           Center(
                             child: SizedBox(

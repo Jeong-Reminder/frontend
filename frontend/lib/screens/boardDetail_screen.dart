@@ -3,6 +3,8 @@ import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/recommend_provider.dart';
 import 'package:frontend/providers/vote_provider.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
@@ -89,8 +91,8 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: const [
-          Padding(
+        actions: [
+          const Padding(
             padding: EdgeInsets.only(right: 20.0),
             child: Icon(
               Icons.add_alert,
@@ -99,11 +101,23 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
+            padding: const EdgeInsets.only(right: 20.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => (userRole == 'ROLE_ADMIN')
+                        ? const MyOwnerPage()
+                        : const MyUserPage(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
             ),
           ),
         ],
@@ -150,17 +164,17 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: SizedBox(
-                  width: 341,
-                  height: 296,
-                  child: Image.asset(
-                    'assets/images/classselect.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              // ClipRRect(
+              //   borderRadius: BorderRadius.circular(10.0),
+              //   child: SizedBox(
+              //     width: 341,
+              //     height: 296,
+              //     child: Image.asset(
+              //       'assets/images/classselect.png',
+              //       fit: BoxFit.cover,
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 15),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,

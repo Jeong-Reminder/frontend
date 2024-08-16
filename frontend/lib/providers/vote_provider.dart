@@ -149,4 +149,28 @@ class VoteProvider with ChangeNotifier {
       print('투표 실패: ${response.statusCode} - ${response.body}');
     }
   }
+
+  // 투표 항목 강제 삭제
+  Future<void> deleteVoteItem(int voteItemId) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}items/$voteItemId');
+    final response = await http.delete(
+      url,
+      headers: {
+        'access': accessToken,
+      },
+    );
+
+    if (response.statusCode == 204) {
+      // 응답데이터 수정되면 작성 예정
+
+      print('투표 항목 강제 삭제 성공');
+    } else {
+      print('투표 항목 강제 삭제 실패');
+    }
+  }
 }
