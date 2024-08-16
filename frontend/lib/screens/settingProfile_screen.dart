@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
-import 'package:frontend/widgets/badge_widget.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/profile_service.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 
 class SettingProfilePage extends StatefulWidget {
   final String githubLink;
@@ -150,13 +150,10 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
       'isSelected': false,
     }
   ];
-
   List<Map<String, dynamic>> selectedFields = []; // 선택된 Field 리스트
   List<Map<String, dynamic>> selectedTools = []; // 선택된 Tools 리스트
-
   bool completedField = false; // Field 선택 완료 불리안
   double percent = 0.5;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -175,17 +172,13 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
               ),
             ),
             Center(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return LinearPercentIndicator(
-                    padding: EdgeInsets.zero,
-                    percent: percent,
-                    lineHeight: 20,
-                    backgroundColor: const Color(0xFFD9D9D9),
-                    progressColor: const Color(0xFF2A72E7),
-                    width: constraints.maxWidth,
-                  );
-                },
+              child: LinearPercentIndicator(
+                padding: EdgeInsets.zero,
+                percent: percent,
+                lineHeight: 20,
+                backgroundColor: const Color(0xFFD9D9D9),
+                progressColor: const Color(0xFF2A72E7),
+                width: 370,
               ),
             ),
             const SizedBox(height: 60),
@@ -228,83 +221,19 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
             ),
             const SizedBox(height: 32),
             completedField
-                ? Row(
-                    children: [
-                      const Text(
-                        '2. DEVELOPMENT TOOLS 선택',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          // 선택한 Tool이 없으면 없음 버튼에서 프로필 생성 api 연동
-                          developmentTool = '없음';
-
-                          // body에 집어넣을 프로필 model
-                          final profile = Profile(
-                            hopeJob: widget.hopeJob,
-                            githubLink: widget.githubLink,
-                            developmentField: developmentField,
-                            developmentTool: developmentTool,
-                          );
-
-                          try {
-                            int profileId =
-                                await ProfileProvider().createProfile(profile);
-
-                            if (context.mounted) {
-                              Provider.of<ProfileProvider>(context,
-                                      listen: false)
-                                  .memberId = profileId;
-                            }
-
-                            if (context.mounted) {
-                              Navigator.pushNamed(
-                                  context, '/member-experience');
-                            }
-                          } catch (e) {
-                            print(e.toString());
-                          }
-                        },
-                        child: const Text(
-                          '없음',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                ? const Text(
+                    '2. DEVELOPMENT TOOLS 선택',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   )
-                : Row(
-                    children: [
-                      const Text(
-                        '1. DEVELOPMENT FIELD 선택',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            developmentField = '없음';
-                            completedField = true;
-                          });
-                        },
-                        child: const Text(
-                          '없음',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                : const Text(
+                    '1. DEVELOPMENT FIELD 선택',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
             const SizedBox(height: 28),
             AnimatedSwitcher(
@@ -349,12 +278,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             });
                             print('${tools['title']} : ${tools['isSelected']}');
                           },
-                          child: DevelopmentBadge(
-                            logoUrl: tools['logoUrl'],
-                            title: tools['title'],
-                            titleColor: tools['titleColor'],
-                            badgeColor: tools['badgeColor'],
-                            isSelected: tools['isSelected'],
+                          child: badge(
+                            tools['logoUrl'],
+                            tools['title'],
+                            tools['titleColor'],
+                            tools['badgeColor'],
+                            tools['isSelected'],
                           ),
                         );
                       }).toList(),
@@ -378,12 +307,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             });
                             print('${field['title']} : ${field['isSelected']}');
                           },
-                          child: DevelopmentBadge(
-                            logoUrl: field['logoUrl'],
-                            title: field['title'],
-                            titleColor: field['titleColor'],
-                            badgeColor: field['badgeColor'],
-                            isSelected: field['isSelected'],
+                          child: badge(
+                            field['logoUrl'],
+                            field['title'],
+                            field['titleColor'],
+                            field['badgeColor'],
+                            field['isSelected'],
                           ),
                         );
                       }).toList(),
@@ -422,12 +351,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             spacing: 10,
                             runSpacing: 10,
                             children: selectedTools.map((tools) {
-                              return DevelopmentBadge(
-                                logoUrl: tools['logoUrl'],
-                                title: tools['title'],
-                                titleColor: tools['titleColor'],
-                                badgeColor: tools['badgeColor'],
-                                isSelected: tools['isSelected'],
+                              return badge(
+                                tools['logoUrl'],
+                                tools['title'],
+                                tools['titleColor'],
+                                tools['badgeColor'],
+                                tools['isSelected'],
                               );
                             }).toList(),
                           )
@@ -436,12 +365,12 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                             spacing: 10,
                             runSpacing: 10,
                             children: selectedFields.map((stack) {
-                              return DevelopmentBadge(
-                                logoUrl: stack['logoUrl'],
-                                title: stack['title'],
-                                titleColor: stack['titleColor'],
-                                badgeColor: stack['badgeColor'],
-                                isSelected: stack['isSelected'],
+                              return badge(
+                                stack['logoUrl'],
+                                stack['title'],
+                                stack['titleColor'],
+                                stack['badgeColor'],
+                                stack['isSelected'],
                               );
                             }).toList(),
                           ),
@@ -459,13 +388,10 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                     } else {
                       setState(() {
                         // selectedFields에서 title들을 가져와 하나의 문자열로 생성
-                        if (developmentField.isNotEmpty) {
-                          developmentField = selectedFields
-                              .map((f) => f['title'])
-                              .toList()
-                              .join(',');
-                        }
-                        developmentField = '없음';
+                        developmentField = selectedFields
+                            .map((f) => f['title'])
+                            .toList()
+                            .join(',');
 
                         // selectedTools에서 title들을 가져와 하나의 문자열로 생성
                         developmentTool = selectedTools
@@ -482,15 +408,17 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                         developmentTool: developmentTool,
                       );
 
-                      try {
-                        // 처음에 프로필 생성할 때 바로 조회할려면 생성 api의 응답데이터를 가져와서 저장하도록 작성
-                        int profileId =
-                            await ProfileProvider().createProfile(profile);
+                      print('profile: $profile');
 
-                        Provider.of<ProfileProvider>(context, listen: false)
-                            .memberId = profileId;
+                      try {
+                        await ProfileProvider().createProfile(profile);
                         if (context.mounted) {
-                          Navigator.pushNamed(context, '/member-experience');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomePage(),
+                            ),
+                          );
                         }
                       } catch (e) {
                         print(e.toString());
@@ -517,6 +445,48 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  // 기술 스택 배지
+  Widget badge(
+    String logoUrl,
+    String title,
+    Color titleColor,
+    Color badgeColor,
+    bool isSelected,
+  ) {
+    return badges.Badge(
+      badgeContent: IntrinsicWidth(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              logoUrl,
+              width: 20,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: titleColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+      badgeStyle: badges.BadgeStyle(
+        badgeColor: badgeColor,
+        shape: badges.BadgeShape.square,
+        borderSide: isSelected
+            ? const BorderSide(
+                color: Color(0xFF2A72E7),
+                width: 5.0,
+              )
+            : BorderSide.none,
       ),
     );
   }

@@ -34,48 +34,65 @@ PopupMenuItem<String> popUpItem(String text, String item) {
 
 class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String selectedButton = ''; // 초기에는 아무 페이지 선택이 안 되어있는 상태
+  String boardCategory = 'CONTEST';
+
+  List<Map<String, dynamic>> filteredBoardList = [];
 
   // 조회된 팀원 모집글을 저장하는 리스트
-  List<MakeTeam> _filteredMakeTeams = [];
+  List<Map<String, dynamic>> recruitList = [];
 
-  // 버튼 클릭 시 팀원 모집글을 조회하는 함수
-  void fetchMakeTeams() async {
-    // await Provider.of<MakeTeamProvider>(context, listen: false).fetchMakeTeam();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<AnnouncementProvider>(context, listen: false)
+          .fetchCateBoard(boardCategory);
 
-    setState(() {
-      final makeTeams =
-          Provider.of<MakeTeamProvider>(context, listen: false).makeTeams;
-
-      // 선택된 버튼에 따라 필터링
-      _filteredMakeTeams = makeTeams.where((team) {
-        return selectedButton.isEmpty ||
-            team.recruitmentCategory == selectedButton;
-      }).toList();
+      if (context.mounted) {
+        Provider.of<AnnouncementProvider>(context, listen: false)
+            .fetchContestCate();
+      }
     });
+  }
 
-    if (_filteredMakeTeams.isEmpty) {
-      print('선택된 카테고리에 모집글이 없습니다.');
-    } else {
-      print('Filtered MakeTeams: ${_filteredMakeTeams.length}');
+  // 글 제목에서 대괄호([]) 안의 카테고리 이름을 추출하는 함수
+  String _parseCategoryName(String title) {
+    final RegExp regExp = RegExp(
+      r'\[(.*?)\]',
+      caseSensitive: false, // 대소문자 구분 없이 매칭
+    );
+
+    final match = regExp.firstMatch(title);
+
+    if (match != null) {
+      return match.group(1)?.trim() ?? ''; // 대괄호 안의 문자열을 반환하며, 공백 제거
     }
+    return '';
   }
 
   // 모집글을 지정된 형식으로 빌드하는 함수
-  Widget _buildPostContent(List<MakeTeam> posts) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: posts.map((post) {
-        // endTime 리스트 형식으로 변환하여 월과 일만 추출
-        List<String> endTimeParts =
-            post.endTime.replaceAll(RegExp(r'\[|\]'), '').split(',');
-        // createdTime을 리스트 형식으로 변환하여 년, 월, 일만 추출
-        List<String>? createdTimeParts =
-            post.createdTime?.replaceAll(RegExp(r'\[|\]'), '').split(',');
+  Widget _buildPostContent(List<Map<String, dynamic>> posts) {
+    return ListView.builder(
+      shrinkWrap: true, // 부모 위젯의 크기에 맞추기 위해 shrinkWrap 사용
+      physics: const NeverScrollableScrollPhysics(), // 스크롤 문제를 방지하기 위해 비활성화
+      itemCount: posts.length,
+      itemBuilder: (context, index) {
+        final post = posts[index];
+
+        List<String> endTimeParts = [];
+        if (post['endTime'] is List) {
+          endTimeParts =
+              List<String>.from(post['endTime'].map((e) => e.toString()));
+        }
+
+        List<String>? createdTimeParts;
+        if (post['createdTime'] is List) {
+          createdTimeParts =
+              List<String>.from(post['createdTime'].map((e) => e.toString()));
+        }
 
         return GestureDetector(
           onTap: () async {
-            await Provider.of<MakeTeamProvider>(context, listen: false)
-                .fetchMakeTeam();
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -96,7 +113,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  post.recruitmentTitle, // 모집글 제목
+                  post['recruitmentTitle'], // 모집글 제목
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.bold),
                 ),
@@ -104,11 +121,12 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 Row(
                   children: [
                     Text(
-                      post.memberName ?? 'Unknown', // 모집글 작성자 이름을 표시
+                      post['memberName'] ?? 'Unknown', // 모집글 작성자 이름을 표시
                       style: const TextStyle(fontSize: 10),
                     ),
                     const SizedBox(width: 4),
-                    if (createdTimeParts != null) ...[
+                    if (createdTimeParts != null &&
+                        createdTimeParts.length >= 3) ...[
                       Text(
                         '${createdTimeParts[0].trim()}/${createdTimeParts[1].trim()}/${createdTimeParts[2].trim()}',
                         style: const TextStyle(
@@ -122,14 +140,14 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  post.recruitmentContent, // 모집글 내용
+                  post['recruitmentContent'], // 모집글 내용
                   style: const TextStyle(fontSize: 12),
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     Text(
-                      '모집 인원 ${post.studentCount}/4', // 모집 인원
+                      '모집 인원 ${post['studentCount'].toString()}/4', // 모집 인원
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -137,36 +155,37 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
+                    if (endTimeParts.isNotEmpty && endTimeParts.length >= 3)
+                      Text(
+                        '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
+                        style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54),
                       ),
-                    ),
                     const SizedBox(width: 6),
                     // hopeField를 개별적으로 처리하여 위젯 생성
                     Wrap(
                       spacing: 6.0,
-                      children: post.hopeField.split(',').map((field) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDBE7FB),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            field.trim(), // 각 hopeField 항목
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                      children: post['hopeField']
+                          .split(',')
+                          .map<Widget>((field) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDBE7FB),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  field.trim(), // 각 hopeField 항목
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ))
+                          .toList(), // Make sure this is List<Widget>
                     ),
                   ],
                 ),
@@ -174,17 +193,17 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
             ),
           ),
         );
-      }).toList(),
+      },
     );
   }
 
   // 선택된 버튼에 따라 다른 콘텐츠를 반환하는 함수
   Widget buildContent() {
-    if (_filteredMakeTeams.isEmpty) {
+    if (recruitList.isEmpty) {
       return const Center(child: Text('선택된 카테고리에 모집글이 없습니다.'));
     }
 
-    return _buildPostContent(_filteredMakeTeams);
+    return _buildPostContent(recruitList);
   }
 
   void selectCateMenu(BuildContext context) {
@@ -221,10 +240,28 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     });
   }
 
+  Future<void> fetchRecruitData(int boardId) async {
+    // 데이터를 비동기로 불러오고, 이후 setState를 호출합니다.
+    try {
+      await Provider.of<MakeTeamProvider>(context, listen: false)
+          .fetchcateMakeTeam(boardId);
+
+      setState(() {
+        recruitList =
+            Provider.of<MakeTeamProvider>(context, listen: false).cateList;
+      });
+    } catch (e) {
+      print("Error fetching recruit data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoryList =
         Provider.of<AnnouncementProvider>(context).categoryList;
+
+    final cateBoardList =
+        Provider.of<AnnouncementProvider>(context).cateBoardList;
 
     return Scaffold(
       appBar: AppBar(
@@ -326,9 +363,25 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        selectedButton = label; // 버튼 클릭 시 선택된 버튼으로 업데이트
-                        fetchMakeTeams(); // 필터링할 때마다 조회
+                        selectedButton = label;
                       });
+
+                      filteredBoardList.clear();
+
+                      for (var board in cateBoardList) {
+                        if (board['announcementTitle']
+                            .contains('[$selectedButton]')) {
+                          filteredBoardList.add(board);
+                        }
+                      }
+
+                      if (filteredBoardList.isNotEmpty) {
+                        final boardId = filteredBoardList[0]['id'] is int
+                            ? filteredBoardList[0]['id'] as int
+                            : int.parse(filteredBoardList[0]['id'].toString());
+
+                        fetchRecruitData(boardId);
+                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2.0),

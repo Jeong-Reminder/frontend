@@ -233,6 +233,6 @@ Future<void> setupInteractedMessage() async {
 void _handleMessage(RemoteMessage message) {
   print('message = ${message.notification!.title}');
   if (message.data['type'] == 'chat') {
-    Get.toNamed('/board-deatil', arguments: message.data);
+    Get.toNamed('/detail-board', arguments: message.data);
   }
 }
