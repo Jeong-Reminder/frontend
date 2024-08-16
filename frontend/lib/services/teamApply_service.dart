@@ -27,6 +27,8 @@ class TeamApplyService {
     }
     final String baseUrl =
         'http://127.0.0.1:9000/api/v1/recruitment/team-application/$id';
+    // final String baseUrl =
+    //     'http://10.0.2.2:9000/api/v1/recruitment/team-application/$id';
 
     final token = await getToken();
     if (token == null) {
@@ -47,12 +49,22 @@ class TeamApplyService {
     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
 
     if (response.statusCode == 200) {
-      print('팀원 신청글 작성 성공');
-      print('responseData: $responseData');
+      // 서버 응답에서 필요한 데이터 추출
+      final dataResponse = responseData['data'];
+
+      // teamApplicationList가 null일 수 있으므로 null 체크 추가
+      final List<dynamic> applyResponse =
+          dataResponse['teamApplicationList'] ?? [];
+
+      print('팀원 신청글 작성 성공 : $dataResponse');
+
+      // teamApplicationList를 출력
+      for (var application in applyResponse) {
+        print('Application: ${jsonEncode(application)}');
+      }
 
       // 서버 응답에서 id 추출 (응답 구조에 따라 수정)
-      int applicationId = responseData['data']['id'];
-      print('Returned Application ID: $applicationId');
+      int applicationId = dataResponse['id'];
 
       return applicationId;
     } else {

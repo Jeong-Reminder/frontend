@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:frontend/models/makeTeam_modal.dart';
 import 'package:frontend/models/teamApply_model.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/profile_provider.dart';
-import 'package:frontend/providers/teamApply_provider.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:frontend/services/teamApply_service.dart';
 import 'package:provider/provider.dart';
 
 class RecruitDetailPage extends StatefulWidget {
-  final MakeTeam makeTeam; // MakeTeam 객체를 전달받음
+  final Map<String, dynamic> makeTeam;
 
   const RecruitDetailPage({super.key, required this.makeTeam});
 
@@ -18,69 +17,73 @@ class RecruitDetailPage extends StatefulWidget {
 }
 
 class _RecruitDetailPageState extends State<RecruitDetailPage> {
-  // 모집 명단 확장 여부를 관리하는 변수
   bool isExpandedSection1 = false;
   final TextEditingController _controller = TextEditingController();
-  String name = ''; // 로그인된 사용자의 이름을 저장할 변수
+  String name = '';
   String level = '';
+  List<Map<String, dynamic>> applyList = [];
 
   @override
   void initState() {
     super.initState();
-    _loadCredentials(); // 로그인 정보를 로드하는 메서드 호출
+    _loadCredentials();
+    _fetchApplyList();
   }
 
-  // 로그인 정보에서 이름과 학년을 로드하는 메서드
   Future<void> _loadCredentials() async {
-    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
-    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    final loginAPI = LoginAPI();
+    final credentials = await loginAPI.loadCredentials();
     setState(() {
-      name = credentials['name'] ?? ''; // 로그인 정보에서 name을 가져와 저장
+      name = credentials['name'] ?? '';
       level = credentials['level'].toString();
     });
   }
 
-  // 새로운 댓글을 추가하는 함수
-  void _addComment() async {
+  Future<void> _fetchApplyList() async {
+    try {
+      final provider = Provider.of<MakeTeamProvider>(context, listen: false);
+      await provider.fetchMakeTeam();
+      setState(() {
+        applyList = provider.applyList;
+      });
+    } catch (e) {
+      print('팀 신청 리스트를 불러오는 데 실패했습니다: $e');
+    }
+  }
+
+  Future<void> _addComment() async {
     if (_controller.text.isNotEmpty) {
       try {
         TeamApply teamApply = TeamApply(
           applicationContent: _controller.text,
         );
 
-        await Provider.of<TeamApplyProvider>(context, listen: false)
-            .createTeamApply(teamApply);
-
-        setState(() {});
+        final teamApplyService = TeamApplyService();
+        int applicationId = await teamApplyService.createTeamApply(teamApply);
 
         _controller.clear();
+        await _fetchApplyList();
+        print('팀원 신청글 작성 성공: $applicationId');
       } catch (e) {
         print('팀원 신청글 작성 실패: $e');
       }
     }
   }
 
-  // 기술 스택 리스트 (이 부분은 원래 코드에서 정의된 fieldList와 연결)
-  List<Map<String, dynamic>> fieldList = [
-    // 필드 리스트 항목들 그대로 유지
-  ];
+  List<Map<String, dynamic>> fieldList = [];
 
   @override
   Widget build(BuildContext context) {
-    // MakeTeamProvider에서 applyList를 가져옴
-    final applyList = Provider.of<MakeTeamProvider>(context).applyList;
-
-    // 전달된 MakeTeam 객체 사용
     final makeTeam = widget.makeTeam;
-    int currentMembers = makeTeam.studentCount;
+    int currentMembers = makeTeam['studentCount'];
     int maxMembers = 4;
 
-    // endTime이 문자열 형식으로 저장된 리스트를 나타내는 경우
-    List<String> endTimeParts =
-        makeTeam.endTime.replaceAll(RegExp(r'\[|\]'), '').split(',');
-    // createdTime이 문자열 형식으로 저장된 리스트를 나타내는 경우
-    List<String>? createdTimeParts =
-        makeTeam.createdTime?.replaceAll(RegExp(r'\[|\]'), '').split(',');
+    List<String> endTimeParts = (makeTeam['endTime'] as List<dynamic>)
+        .map((e) => e.toString())
+        .toList();
+    List<String>? createdTimeParts = (makeTeam['createdTime'] as List<dynamic>?)
+        ?.map((e) => e.toString())
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -127,57 +130,52 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                makeTeam.recruitmentTitle,
+                makeTeam['recruitmentTitle'],
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 3),
-
               Row(children: [
                 GestureDetector(
                   onTap: () {
-                    _showAuthorStackDialog(); // 글쓴 사람 기술 스택 다이얼로그 표시
+                    _showAuthorStackDialog();
                   },
                   child: Text(
-                    makeTeam.memberName ?? 'Unknown',
+                    makeTeam['memberName'] ?? 'Unknown',
                     style: const TextStyle(fontSize: 10),
                   ),
                 ),
                 const SizedBox(width: 4),
-                if (createdTimeParts != null) ...[
-                  Text(
-                    '${createdTimeParts[0].trim()}/${createdTimeParts[1].trim()}/${createdTimeParts[2].trim()}',
-                    style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54),
-                  ),
-                ],
+                Text(
+                  '${createdTimeParts![0]}/${createdTimeParts[1]}/${createdTimeParts[2]}',
+                  style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54),
+                ),
               ]),
               const SizedBox(height: 10),
               Text(
-                makeTeam.recruitmentContent,
+                makeTeam['recruitmentContent'],
                 style: const TextStyle(fontSize: 12),
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Text(
-                    '모집 인원 ${makeTeam.studentCount}/4',
+                    '모집 인원 ${makeTeam['studentCount']}/4',
                     style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: Colors.black54),
                   ),
                   const SizedBox(width: 4),
-                  // 월과 일을 추출하여 표시
                   Text(
                     '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
                     style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54),
                   ),
                   const SizedBox(width: 6),
                   Expanded(
@@ -225,8 +223,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          if (currentMembers ==
-                              maxMembers) // 모집 인원과 최대 인원이 같을 때
+                          if (currentMembers == maxMembers)
                             GestureDetector(
                               onTap: () {},
                               child: Container(
@@ -259,7 +256,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 Row(
                   children: [
                     Text(
-                      makeTeam.memberName ?? 'Unknown',
+                      makeTeam['memberName'] ?? 'Unknown',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -287,8 +284,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    // 팀원 목록을 여기에 추가할 수 있습니다.
                   ],
                 ),
               ],
@@ -321,7 +316,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         ),
                       ),
                       child: Text(
-                        '${makeTeam.studentCount}명',
+                        '${makeTeam['studentCount']}명',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -347,14 +342,15 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: makeTeam.hopeField.split(',').map((field) {
+                    children:
+                        makeTeam['hopeField'].split(',').map<Widget>((field) {
                       return Row(
                         children: [
                           GestureDetector(
                             onTap: () {},
                             child: Container(
                               height: 20,
-                              width: 80, // 각 Container의 너비 조정
+                              width: 80,
                               decoration: BoxDecoration(
                                 color: const Color(0xFFDBE7FB),
                                 borderRadius: BorderRadius.circular(6),
@@ -423,7 +419,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // 댓글 리스트 빌드
               Expanded(
                 child: ListView.builder(
                   itemCount: applyList.length,
@@ -460,7 +455,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               const SizedBox(width: 4),
                               GestureDetector(
                                 onTap: () {
-                                  _showApproveDialog(index); // 승인 버튼 클릭 시 적용
+                                  _showApproveDialog(index);
                                 },
                                 child: Container(
                                   height: 20,
@@ -484,7 +479,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               const SizedBox(width: 4),
                               GestureDetector(
                                 onTap: () {
-                                  _showRejectDialog(index); // 반려 버튼 클릭 시 적용
+                                  _showRejectDialog(index);
                                 },
                                 child: Container(
                                   height: 20,
@@ -505,27 +500,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          const Row(
-                            children: [
-                              // Text(
-                              //   // comment.timestamp.split(' ')[0],
-                              //   apply['createdTime'],
-                              //   style: const TextStyle(
-                              //     fontSize: 9,
-                              //     fontWeight: FontWeight.bold,
-                              //     color: Colors.black54,
-                              //   ),
-                              // ),
-                              SizedBox(width: 2),
-                              // Text(
-                              //   comment.timestamp.split(' ')[1],
-                              //   style: const TextStyle(
-                              //       fontSize: 9,
-                              //       fontWeight: FontWeight.bold,
-                              //       color: Colors.black54),
-                              // ),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -549,7 +523,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   },
                 ),
               ),
-              if (currentMembers == maxMembers) // 모집 인원과 최대 인원이 같을 때
+              if (currentMembers == maxMembers)
                 GestureDetector(
                   onTap: () {
                     // 팀 생성 로직 추가
@@ -580,30 +554,24 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
-  // 글쓴 사람의 기술 스택을 표시하는 다이얼로그를 보여주는 함수
-  void _showAuthorStackDialog() async {
-    // ProfileProvider를 사용하여 글쓴 사람의 프로필 정보를 가져옴
+  Future<void> _showAuthorStackDialog() async {
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
 
-    await profileProvider.fetchProfile(widget.makeTeam.memberId!);
+    await profileProvider.fetchProfile(widget.makeTeam['memberId']!);
 
-    // 가져온 프로필 정보에서 기술 스택 정보를 추출
     final techStack = profileProvider.techStack;
-
     final githubLink = techStack['githubLink'];
-
-    // 개발 분야를 콤마(,)로 구분된 문자열로부터 리스트로 변환
     final developmentFields = (techStack['developmentField'] as String)
         .split(',')
-        .map((field) => field.trim()) // 각 항목의 앞뒤 공백을 제거
+        .map((field) => field.trim())
         .toList();
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${widget.makeTeam.memberName}님의 기술 스택'),
+          title: Text('${widget.makeTeam['memberName']}님의 기술 스택'),
           titleTextStyle: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
@@ -613,16 +581,13 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 개발 분야를 배지 형태로 표시하는 위젯
                 Wrap(
                   spacing: 8.0,
                   runSpacing: 4.0,
-                  children: developmentFields.map((field) {
-                    // 각 개발 분야에 대한 정보를 fieldList에서 찾음
+                  children: developmentFields.map<Widget>((field) {
                     final fieldData = fieldList.firstWhere(
                       (element) => element['title'] == field,
                     );
-                    // 배지를 반환하여 화면에 표시
                     return badge(
                       fieldData['logoUrl'] ?? '',
                       fieldData['title'] ?? '',
@@ -632,7 +597,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-
                 RichText(
                   text: TextSpan(
                     text: 'Github: ',
@@ -669,11 +633,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
-  // 승인 버튼 클릭 시 다이얼로그 표시
   void _showApproveDialog(int index) {
-    final applyList =
-        Provider.of<MakeTeamProvider>(context, listen: false).applyList;
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -723,9 +683,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     child: const Text('확인'),
                     onPressed: () {
                       setState(() {
-                        // 모집 인원이 최대 인원보다 적을 때만 승인
-                        if (widget.makeTeam.studentCount < 4) {
-                          widget.makeTeam.studentCount++;
+                        if (widget.makeTeam['studentCount'] < 4) {
+                          widget.makeTeam['studentCount']++;
                           applyList.removeAt(index);
                         }
                       });
@@ -741,11 +700,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
-  // 거절 버튼 클릭 시 다이얼로그 표시
   void _showRejectDialog(int index) {
-    final applyList =
-        Provider.of<MakeTeamProvider>(context, listen: false).applyList;
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -795,7 +750,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     child: const Text('확인'),
                     onPressed: () {
                       setState(() {
-                        applyList.removeAt(index); // 반려 클릭 시 리스트에서 제거
+                        applyList.removeAt(index);
                       });
                       Navigator.of(context).pop();
                     },
@@ -809,7 +764,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
-  // 댓글 단 사람 이름 클릭 시 다이얼로그 표시
   void _showNameDialog(String field, String githubUrl) {
     showDialog(
       context: context,
@@ -846,7 +800,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 Wrap(
                   spacing: 8.0,
                   runSpacing: 4.0,
-                  children: fieldList.map((field) {
+                  children: fieldList.map<Widget>((field) {
                     return badge(
                       field['logoUrl'] ?? '',
                       field['title'] ?? '',
@@ -870,7 +824,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.blue,
-                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ],
@@ -893,14 +847,12 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   }
 
   Widget badge(
-    // badge 스타일 적용
     String logoUrl,
     String title,
     Color titleColor,
     Color badgeColor,
   ) {
     return badges.Badge(
-      // IntrinsicWidth : 자식 요소에 맞게 자동으로 너비 조절하는 위젯
       badgeContent: IntrinsicWidth(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
