@@ -143,10 +143,33 @@ class VoteProvider with ChangeNotifier {
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 204) {
       print('투표 성공: ${response.body}');
     } else {
       print('투표 실패: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  // 투표 종료
+  Future<void> endVote(int voteId) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl$voteId/end');
+    final response = await http.post(
+      url,
+      headers: {
+        'access': accessToken,
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      // 응답이 비어있을 경우 decode 작업을 수행하면 오류가 발생
+      print('투표 종료 성공: ${response.bodyBytes}');
+    } else {
+      print('투표 종료 실패: ${response.bodyBytes}');
     }
   }
 }

@@ -187,19 +187,38 @@ class _VoteWidgetState extends State<VoteWidget> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          vote.subjectTitle ?? 'No Title',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              vote.subjectTitle ?? 'No Title',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              vote.endTime != null && vote.endTime!.isNotEmpty
+                                  ? DateFormat("d일 H시 mm분까지")
+                                      .format(DateTime.parse(vote.endTime!))
+                                  : 'No End Time',
+                              style: const TextStyle(
+                                color: Color(0xFF7D7D7F),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // 투표 종료 버튼
+                        if (userRole == 'ROLE_ADMIN')
+                          TextButton(
+                            onPressed: () async {
+                              // 투표 종료 API 메서드 호출
+                              await VoteProvider().endVote(vote.id!);
+                            },
+                            child: const Text('종료'),
                           ),
-                        ),
-                        Text(
-                          vote.endTime != null && vote.endTime!.isNotEmpty
-                              ? DateFormat("d일 H시 mm분까지")
-                                  .format(DateTime.parse(vote.endTime!))
-                              : 'No End Time',
-                        ),
                       ],
                     ),
                     const SizedBox(height: 17),
