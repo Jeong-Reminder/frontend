@@ -22,14 +22,14 @@ class VoteProvider with ChangeNotifier {
   // final String baseUrl = 'http://127.0.0.1:9000/api/v1/votes/';
 
   // 투표 생성
-  Future<void> createVote(Vote vote) async {
+  Future<void> createVote(Vote vote, int announcementId) async {
     try {
       final accessToken = await getToken();
       if (accessToken == null) {
         throw Exception('엑세스 토큰을 찾을 수 없음');
       }
 
-      final url = Uri.parse(baseUrl);
+      final url = Uri.parse('$baseUrl$announcementId');
       final response = await http.post(
         url,
         headers: {
@@ -79,12 +79,9 @@ class VoteProvider with ChangeNotifier {
       final jsonResponse = json.decode(utf8Response);
       final dataResponse = jsonResponse['data'];
 
-      _contentList.add(dataResponse);
-      notifyListeners();
-
       // 투표 항목 추가 후 해당 투표 항목을 다시 조회하여 UI 갱신
       await fetchVote(voteId);
-      print('투표 항목 추가 성공: $_contentList');
+      print('투표 항목 추가 성공: $dataResponse');
     } else {
       print('투표 항목 추가 실패: ${response.statusCode} - $utf8Response');
     }
@@ -113,22 +110,18 @@ class VoteProvider with ChangeNotifier {
 
       final dataResponse = jsonResponse['data'];
 
-      if (dataResponse is List) {
-        // dataResponse가 List일 경우 각각의 item을 Vote 객체로 변환
-        for (var data in dataResponse) {
-          _voteList.add(Vote.fromJson(data));
-        }
-      } else if (dataResponse is Map<String, dynamic>) {
-        // dataResponse가 Map일 경우 직접 Vote 객체로 변환하여 추가
-        _voteList.add(Vote.fromJson(dataResponse));
-      }
-      print('투표 조회 성공: $_voteList');
+      // dataResponse가 Map일 경우 직접 Vote 객체로 변환하여 추가
+      _voteList.add(Vote.fromJson(dataResponse));
+
+      notifyListeners();
+
+      print('투표 조회 성공: ${Vote.fromJson(dataResponse)} - $dataResponse');
     } else {
       print("투표 조회 실패: ${response.body}");
     }
   }
 
-  // 투표하기
+  // 투표 하기
   Future<void> vote(int voteId, int voteItemId) async {
     final accessToken = await getToken();
     if (accessToken == null) {
@@ -151,7 +144,7 @@ class VoteProvider with ChangeNotifier {
   }
 
   // 투표 항목 강제 삭제
-  Future<void> deleteVoteItem(int voteItemId) async {
+  Future<void> deleteVoteItem(int voteId, int voteItemId) async {
     final accessToken = await getToken();
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
@@ -168,6 +161,7 @@ class VoteProvider with ChangeNotifier {
     if (response.statusCode == 204) {
       // 응답데이터 수정되면 작성 예정
 
+      await fetchVote(voteId);
       print('투표 항목 강제 삭제 성공');
     } else {
       print('투표 항목 강제 삭제 실패');

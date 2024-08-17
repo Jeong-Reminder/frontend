@@ -16,10 +16,11 @@ class VoteWidget extends StatefulWidget {
 }
 
 // 팝업 메뉴 항목 구성 함수
-PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
+PopupMenuItem<PopUpItem> popUpItem(
+    String text, PopUpItem item, Function() onTap) {
   return PopupMenuItem<PopUpItem>(
     enabled: true,
-    onTap: () {},
+    onTap: onTap,
     value: item,
     height: 25,
     child: Center(
@@ -137,16 +138,18 @@ class _VoteWidgetState extends State<VoteWidget> {
         if (mounted) {
           // mounted: setState가 호출되는 시점에 위젯이 이미 화면에 존재하지 않아 발생하는 예외를 방지하기 위해
           // mounted를 통해 확인
-          setState(() {
-            _showIconList =
-                List<bool>.from(List.filled(vote.voteItemIds!.length, false));
-            _circleColors = List<Color>.from(
-                List.filled(vote.voteItemIds!.length, Colors.black));
-            _hasVotedList =
-                List<bool>.from(List.filled(vote.voteItemIds!.length, false));
-            _voteCounts =
-                List<int>.from(List.filled(vote.voteItemIds!.length, 0));
-          });
+          if (vote.voteItemIds != null && vote.voteItemIds!.isNotEmpty) {
+            setState(() {
+              _showIconList =
+                  List<bool>.from(List.filled(vote.voteItemIds!.length, false));
+              _circleColors = List<Color>.from(
+                  List.filled(vote.voteItemIds!.length, Colors.black));
+              _hasVotedList =
+                  List<bool>.from(List.filled(vote.voteItemIds!.length, false));
+              _voteCounts =
+                  List<int>.from(List.filled(vote.voteItemIds!.length, 0));
+            });
+          }
         }
       }
     });
@@ -167,7 +170,8 @@ class _VoteWidgetState extends State<VoteWidget> {
   Widget build(BuildContext context) {
     final voteList =
         Provider.of<VoteProvider>(context).voteList; // 투표 리스트를 제공받음
-    print('투표 조회 성공: $voteList');
+
+    // print('투표 조회 성공: $voteList');
 
     final contentList =
         Provider.of<VoteProvider>(context).contentList; // 항목 내용 리스트를 제공받음
@@ -191,19 +195,40 @@ class _VoteWidgetState extends State<VoteWidget> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          vote.subjectTitle ?? 'No Title',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              vote.subjectTitle ?? 'No Title',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              vote.endDateTime != null &&
+                                      vote.endDateTime!.isNotEmpty
+                                  ? DateFormat("d일 H시 mm분까지")
+                                      .format(DateTime.parse(vote.endDateTime!))
+                                  : 'No End Time',
+                            ),
+                          ],
+                        ),
+
+                        // 투표 삭제/종료 버튼
+                        if (userRole == 'ROLE_ADMIN')
+                          // 팝업 메뉴 창
+                          PopupMenuButton<PopUpItem>(
+                            color: const Color(0xFFEFF0F2),
+                            itemBuilder: (BuildContext context) {
+                              return [
+                                popUpItem('종료', PopUpItem.popUpItem1, () {}),
+                                const PopupMenuDivider(),
+                                popUpItem('삭제', PopUpItem.popUpItem2, () {}),
+                              ];
+                            },
+                            child: const Icon(Icons.more_vert),
                           ),
-                        ),
-                        Text(
-                          vote.endTime != null && vote.endTime!.isNotEmpty
-                              ? DateFormat("d일 H시 mm분까지")
-                                  .format(DateTime.parse(vote.endTime!))
-                              : 'No End Time',
-                        ),
                       ],
                     ),
                     const SizedBox(height: 17),
@@ -218,10 +243,9 @@ class _VoteWidgetState extends State<VoteWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 투표 항목을 동적으로 생성하여 표시
-                          if (vote.voteItemIds!.isNotEmpty &&
-                              contentList.isNotEmpty)
-                            for (int i = 0; i < vote.voteItemIds!.length; i++)
-                              if (i < contentList.length)
+                          if (vote.voteItems!.isNotEmpty)
+                            for (int i = 0; i < vote.voteItems!.length; i++)
+                              if (i < vote.voteItems!.length)
                                 Row(
                                   children: [
                                     InkWell(
@@ -290,7 +314,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                               const SizedBox(width: 8.0),
                                               // 투표 항목 내용 표시
                                               Text(
-                                                contentList[i]['content'],
+                                                vote.voteItems![i]['content'],
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
@@ -336,7 +360,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                           await Provider.of<VoteProvider>(
                                                   context,
                                                   listen: false)
-                                              .deleteVoteItem(
+                                              .deleteVoteItem(vote.id!,
                                                   vote.voteItemIds![i]);
 
                                           setState(() {
