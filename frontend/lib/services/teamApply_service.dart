@@ -27,8 +27,6 @@ class TeamApplyService {
     }
     final String baseUrl =
         'http://127.0.0.1:9000/api/v1/recruitment/team-application/$id';
-    // final String baseUrl =
-    //     'http://10.0.2.2:9000/api/v1/recruitment/team-application/$id';
 
     final token = await getToken();
     if (token == null) {
@@ -49,7 +47,6 @@ class TeamApplyService {
     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
 
     if (response.statusCode == 200) {
-      // 서버 응답에서 필요한 데이터 추출
       final dataResponse = responseData['data'];
 
       // teamApplicationList가 null일 수 있으므로 null 체크 추가
@@ -58,7 +55,6 @@ class TeamApplyService {
 
       print('팀원 신청글 작성 성공 : $dataResponse');
 
-      // teamApplicationList를 출력
       for (var application in applyResponse) {
         print('Application: ${jsonEncode(application)}');
       }
@@ -69,6 +65,38 @@ class TeamApplyService {
       return applicationId;
     } else {
       throw Exception('팀원 신청글 작성 실패: ${response.body}');
+    }
+  }
+
+  // 팀원 신청글 수정 API
+  Future<Map<String, dynamic>> updateTeamApply(
+      int applicationId, TeamApply teamapply) async {
+    final String baseUrl =
+        'http://127.0.0.1:9000/api/v1/recruitment/team-application/$applicationId';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    print('Request Body: ${jsonEncode(teamapply.toJson())}');
+
+    final response = await http.put(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+      body: jsonEncode(teamapply.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      print('팀원 신청글 수정 성공: $responseData');
+
+      return responseData;
+    } else {
+      throw Exception('팀원 신청글 수정 실패: ${response.body}');
     }
   }
 }

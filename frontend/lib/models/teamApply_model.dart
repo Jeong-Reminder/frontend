@@ -1,12 +1,17 @@
 class TeamApply {
+  int? id;
   String applicationContent;
 
   TeamApply({
     required this.applicationContent,
+    this.id,
   });
 
   factory TeamApply.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as int?;
+
     return TeamApply(
+      id: id,
       applicationContent: json['applicationContent'] as String,
     );
   }
@@ -21,6 +26,6 @@ class TeamApply {
 
   @override
   String toString() {
-    return 'applicationContent: $applicationContent';
+    return 'applicationContent: $applicationContent, id: $id';
   }
 }

@@ -17,11 +17,13 @@ class RecruitDetailPage extends StatefulWidget {
 }
 
 class _RecruitDetailPageState extends State<RecruitDetailPage> {
-  bool isExpandedSection1 = false;
+  bool isExpandedSection1 = false; // 팀원 명단 섹션이 확장되었는지 여부
+
   final TextEditingController _controller = TextEditingController();
   String name = '';
   String level = '';
-  List<Map<String, dynamic>> applyList = [];
+
+  List<Map<String, dynamic>> applyList = []; // 팀원 신청 리스트를 저장할 변수
 
   @override
   void initState() {
@@ -30,27 +32,30 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     _fetchApplyList();
   }
 
+  // 사용자의 자격 증명을 불러오는 함수
   Future<void> _loadCredentials() async {
     final loginAPI = LoginAPI();
     final credentials = await loginAPI.loadCredentials();
     setState(() {
-      name = credentials['name'] ?? '';
-      level = credentials['level'].toString();
+      name = credentials['name'] ?? ''; // 사용자의 이름
+      level = credentials['level'].toString(); // 사용자의 학년
     });
   }
 
+  // 팀원 신청 리스트를 불러오는 함수
   Future<void> _fetchApplyList() async {
     try {
       final provider = Provider.of<MakeTeamProvider>(context, listen: false);
       await provider.fetchMakeTeam();
       setState(() {
-        applyList = provider.applyList;
+        applyList = provider.applyList; // 불러온 신청 리스트를 상태에 저장
       });
     } catch (e) {
       print('팀 신청 리스트를 불러오는 데 실패했습니다: $e');
     }
   }
 
+  // 새로운 댓글을 추가하는 함수
   Future<void> _addComment() async {
     if (_controller.text.isNotEmpty) {
       try {
@@ -72,7 +77,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
   List<Map<String, dynamic>> fieldList = [];
 
-  // 팝업 메뉴 아이템을 생성하는 함수
+  // 팝업 메뉴 항목을 생성하는 함수
   PopupMenuItem<String> popUpItem(String text, String item) {
     return PopupMenuItem<String>(
       enabled: true,
@@ -89,6 +94,32 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         ),
       ),
     );
+  }
+
+  // 신청글 내용을 업데이트하는 함수
+  void _updateContent(int index, String newContent) async {
+    try {
+      final apply = applyList[index];
+      final int applicationId = apply['id'];
+
+      // 새로운 내용으로 신청글 객체를 업데이트
+      TeamApply updatedApply = TeamApply(
+        id: applicationId,
+        applicationContent: newContent,
+      );
+
+      final teamApplyService = TeamApplyService();
+      await teamApplyService.updateTeamApply(applicationId, updatedApply);
+
+      // 상태를 업데이트하여 UI에 반영합니다.
+      setState(() {
+        applyList[index]['applicationContent'] = newContent;
+      });
+
+      print('신청글 수정 성공: $applicationId');
+    } catch (e) {
+      print('신청글 수정 실패: $e');
+    }
   }
 
   @override
@@ -243,6 +274,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           ),
                           const SizedBox(width: 6),
                           if (currentMembers == maxMembers)
+                            // 팀원이 최대 인원에 도달하면 팀 생성 버튼을 보여 줌
                             GestureDetector(
                               onTap: () {},
                               child: Container(
@@ -422,6 +454,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         ),
                       ),
                     ),
+                    // 댓글 입력 후 전송 버튼입니다.
                     GestureDetector(
                       onTap: _addComment,
                       child: Padding(
@@ -438,11 +471,14 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 ),
               ),
               const SizedBox(height: 20),
+              // 팀원 신청 리스트를 보여주는 ListView
               Expanded(
                 child: ListView.builder(
                   itemCount: applyList.length,
                   itemBuilder: (context, index) {
                     final apply = applyList[index];
+                    final bool isCurrentUser = apply['memberName'] == name;
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
                       child: Column(
@@ -520,20 +556,28 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                 ),
                               ),
                               const Spacer(),
-                              PopupMenuButton<String>(
-                                color: const Color(0xFFEFF0F2),
-                                onSelected: (String item) {
-                                  if (item == '수정') {}
-                                },
-                                itemBuilder: (BuildContext context) {
-                                  return <PopupMenuEntry<String>>[
-                                    popUpItem('수정', '수정'),
-                                    const PopupMenuDivider(),
-                                    popUpItem('삭제', '삭제'),
-                                  ];
-                                },
-                                child: const Icon(Icons.more_vert),
-                              ),
+                              // 현재 사용자가 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
+                              if (isCurrentUser)
+                                PopupMenuButton<String>(
+                                  color: const Color(0xFFEFF0F2),
+                                  onSelected: (String item) {
+                                    if (item == '수정') {
+                                      _showEditDialog(
+                                          context,
+                                          applyList[index]
+                                              ['applicationContent'],
+                                          index);
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) {
+                                    return <PopupMenuEntry<String>>[
+                                      popUpItem('수정', '수정'),
+                                      const PopupMenuDivider(),
+                                      popUpItem('삭제', '삭제'),
+                                    ];
+                                  },
+                                  child: const Icon(Icons.more_vert),
+                                ),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -557,30 +601,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   },
                 ),
               ),
-              if (currentMembers == maxMembers)
-                GestureDetector(
-                  onTap: () {
-                    // 팀 생성 로직 추가
-                  },
-                  child: Container(
-                    height: 20,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A72E7),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        '팀 생성하기',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -588,6 +608,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
+  // 글쓴 사람의 기술 스택을 보여주는 다이얼로그
   Future<void> _showAuthorStackDialog() async {
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
@@ -667,6 +688,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
+  // 승인 확인 다이얼로그
   void _showApproveDialog(int index) {
     showDialog(
       context: context,
@@ -734,6 +756,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
+  // 반려 확인 다이얼로그
   void _showRejectDialog(int index) {
     showDialog(
       context: context,
@@ -798,6 +821,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
+  // 신청자의 기술 스택 및 Github 정보를 보여주는 다이얼로그
   void _showNameDialog(String field, String githubUrl) {
     showDialog(
       context: context,
@@ -880,6 +904,44 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
+  // 댓글 수정 다이얼로그
+  void _showEditDialog(BuildContext context, String initialContent, int index) {
+    final TextEditingController controller =
+        TextEditingController(text: initialContent);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            '댓글 수정',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: "새로운 댓글을 입력하세요"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _updateContent(index, controller.text);
+              },
+              child: const Text('수정'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 기술 스택 배지를 생성하는 함수
   Widget badge(
     String logoUrl,
     String title,
