@@ -99,4 +99,30 @@ class TeamApplyService {
       throw Exception('팀원 신청글 수정 실패: ${response.body}');
     }
   }
+
+  // 팀원 신청글 삭제 API
+  Future<void> deleteTeamApply(int applicationId) async {
+    final String baseUrl =
+        'http://127.0.0.1:9000/api/v1/recruitment/team-application/$applicationId';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    final response = await http.delete(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      print('팀원 신청글 삭제 성공: $responseData');
+    } else {
+      throw Exception('팀원 신청글 삭제 실패: ${response.body}');
+    }
+  }
 }

@@ -46,4 +46,19 @@ class TeamApplyProvider with ChangeNotifier {
       print(e);
     }
   }
+
+  // 팀원 신청글 삭제
+  Future<void> deleteTeamApply(int applicationId) async {
+    try {
+      await service.deleteTeamApply(applicationId);
+      print(
+          'Application ID: $applicationId deleted successfully'); // 디버깅을 위한 로그
+
+      // 로컬 리스트에서 해당 신청글을 삭제하고 리스너들에게 알림
+      teamApplys.removeWhere((app) => app.id == applicationId);
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
 }

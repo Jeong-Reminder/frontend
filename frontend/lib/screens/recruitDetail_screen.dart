@@ -122,6 +122,25 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     }
   }
 
+  // 신청글 삭제하는 함수
+  void _deleteContent(int index) async {
+    try {
+      final apply = applyList[index];
+      final int applicationId = apply['id'];
+
+      final teamApplyService = TeamApplyService();
+      await teamApplyService.deleteTeamApply(applicationId);
+
+      setState(() {
+        applyList.removeAt(index); // 로컬 리스트에서 해당 신청글을 제거
+      });
+
+      print('신청글 삭제 성공: $applicationId');
+    } catch (e) {
+      print('신청글 삭제 실패: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final makeTeam = widget.makeTeam;
@@ -567,6 +586,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                           applyList[index]
                                               ['applicationContent'],
                                           index);
+                                    } else if (item == '삭제') {
+                                      _deleteContent(index);
                                     }
                                   },
                                   itemBuilder: (BuildContext context) {
