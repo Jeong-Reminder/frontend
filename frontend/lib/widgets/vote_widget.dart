@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
@@ -123,6 +125,8 @@ class _VoteWidgetState extends State<VoteWidget> {
     });
   }
 
+  // 위젯이 처음 생성될 때 한 번만 실행되므로, 타이머를 불필요하게 여러 번 설정하는 문제를 피할 수 있음
+  // 또한, 초기화 작업을 여기서 처리하면 코드가 더 간결해지고, 관리하기 용이
   @override
   void initState() {
     super.initState();
@@ -144,6 +148,21 @@ class _VoteWidgetState extends State<VoteWidget> {
           _voteCounts =
               List<int>.from(List.filled(vote.voteItemIds!.length, 0));
         });
+
+        // 종료 시간이 지났는지 확인하고, 남은 시간만큼 타이머 설정
+        final now = DateTime.now();
+        final endTime = DateTime.parse(vote.endDateTime!);
+
+        if (now.isAfter(endTime)) {
+          // 종료 시간이 이미 지난 경우 바로 종료 처리
+          await _endVoteAndUpdateUI(vote);
+        } else {
+          // 종료 시간이 아직 남아있다면, 해당 시간 후에 종료 처리
+          final remainingDuration = endTime.difference(now);
+          Timer(remainingDuration, () async {
+            await _endVoteAndUpdateUI(vote);
+          });
+        }
       }
     });
 
@@ -157,6 +176,15 @@ class _VoteWidgetState extends State<VoteWidget> {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  // 투표 종료 API 호출 및 UI 업데이트 함수
+  Future<void> _endVoteAndUpdateUI(Vote vote) async {
+    await Provider.of<VoteProvider>(context, listen: false).endVote(vote.id!);
+
+    setState(() {
+      vote.voteEnded = true; // 종료 처리 후 UI 업데이트
+    });
   }
 
   @override
