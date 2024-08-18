@@ -138,7 +138,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
   // 시간 포맷팅 함수
   String formatDateTime(DateTime dateTime) {
-    final DateFormat formatter = DateFormat('yyyy-MM-ddTHH:mm:ss');
+    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
     return formatter.format(dateTime);
   }
 
@@ -452,11 +452,11 @@ class _BoardWritePageState extends State<BoardWritePage> {
                 repetition: isMultiplied,
                 additional: true,
                 announcementId: boardId,
-                endTime: formatDateTime(selectedEndDate!),
+                endDateTime: formatDateTime(selectedEndDate!),
                 // voteItemIds: [],
               );
 
-              await VoteProvider().createVote(vote);
+              await VoteProvider().createVote(vote, boardId);
             }
 
             // 알림 API

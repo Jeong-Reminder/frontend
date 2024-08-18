@@ -3,7 +3,6 @@ import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/viewVote_screen.dart';
 import 'package:frontend/services/login_services.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -16,10 +15,11 @@ class VoteWidget extends StatefulWidget {
 }
 
 // 팝업 메뉴 항목 구성 함수
-PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
+PopupMenuItem<PopUpItem> popUpItem(
+    String text, PopUpItem item, Function() onTap) {
   return PopupMenuItem<PopUpItem>(
     enabled: true,
-    onTap: () {},
+    onTap: onTap,
     value: item,
     height: 25,
     child: Center(
@@ -163,7 +163,6 @@ class _VoteWidgetState extends State<VoteWidget> {
   Widget build(BuildContext context) {
     final voteList =
         Provider.of<VoteProvider>(context).voteList; // 투표 리스트를 제공받음
-    print('투표 조회 성공: $voteList');
 
     final contentList =
         Provider.of<VoteProvider>(context).contentList; // 항목 내용 리스트를 제공받음
@@ -198,30 +197,43 @@ class _VoteWidgetState extends State<VoteWidget> {
                               ),
                             ),
                             Text(
-                              vote.endTime != null && vote.endTime!.isNotEmpty
+                              vote.endDateTime != null &&
+                                      vote.endDateTime!.isNotEmpty
                                   ? DateFormat("d일 H시 mm분까지")
-                                      .format(DateTime.parse(vote.endTime!))
+                                      .format(DateTime.parse(vote.endDateTime!))
                                   : 'No End Time',
-                              style: const TextStyle(
-                                color: Color(0xFF7D7D7F),
-                                fontSize: 12,
-                              ),
                             ),
                           ],
                         ),
 
-                        // 투표 종료 버튼
+                        // 투표 삭제/종료 버튼
                         if (userRole == 'ROLE_ADMIN')
-                          TextButton(
-                            onPressed: () async {
-                              // 투표 종료 API 메서드 호출
-                              await VoteProvider().endVote(vote.id!);
-                            },
-                            child: const Text('종료'),
-                          ),
+                          // 팝업 메뉴 창
+                          vote.voteEnded!
+                              ? const SizedBox.shrink()
+                              : PopupMenuButton<PopUpItem>(
+                                  color: const Color(0xFFEFF0F2),
+                                  itemBuilder: (BuildContext context) {
+                                    return [
+                                      popUpItem('종료', PopUpItem.popUpItem1,
+                                          () async {
+                                        // 투표 종료 API 호출
+                                        await Provider.of<VoteProvider>(context,
+                                                listen: false)
+                                            .endVote(vote.id!);
+                                      }),
+                                      const PopupMenuDivider(),
+                                      popUpItem(
+                                          '삭제', PopUpItem.popUpItem2, () {}),
+                                    ];
+                                  },
+                                  child: const Icon(Icons.more_vert),
+                                ),
                       ],
                     ),
                     const SizedBox(height: 17),
+
+                    // 추가된 항목 카드
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFFFAFAFE), // 박스 배경색
@@ -296,6 +308,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                               ),
                                             ),
                                           const SizedBox(width: 8.0),
+
                                           // 투표 항목 내용 표시
                                           Text(
                                             contentList[i]['content'],
@@ -306,6 +319,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                             ),
                                           ),
                                           const SizedBox(width: 20),
+
                                           // 투표 완료한 경우 투표 인원 표시
                                           if (_hasVoted &&
                                               i < _showIconList.length &&
@@ -335,74 +349,55 @@ class _VoteWidgetState extends State<VoteWidget> {
                                   ),
                                 ),
                           const SizedBox(height: 4.0),
+
                           // 항목 추가 및 투표 인원 표시
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/addsquare.png',
-                                    width: 16.0,
-                                    height: 16.0,
-                                  ),
-                                  const SizedBox(width: 4.0),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (userRole == 'ROLE_USER') {
-                                          _isItemVisibleList
-                                              .add(true); // 새 항목 입력 필드 표시
-                                          _itemInputControllers.add(
-                                              TextEditingController()); // 입력 컨트롤러 추가
-                                        } else if (userRole == 'ROLE_ADMIN') {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            //SnackBar 구현하는법 context는 위에 BuildContext에 있는 객체를 그대로 가져오면 됨.
-                                            const SnackBar(
-                                              content: Text(
-                                                  '관리자는 사용하실 수 없습니다.'), //snack bar의 내용. icon, button같은것도 가능하다.
-                                              duration: Duration(
-                                                  seconds: 3), //올라와있는 시간
-                                            ),
-                                          );
-                                        }
-                                      });
-                                    },
-                                    style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: const Size(0, 0)),
-                                    child: const Text(
-                                      '항목 추가',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF2B72E7),
+                          vote.voteEnded!
+                              ? Container() // 종료일 경우 아무것도 없음
+                              : Row(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/addsquare.png',
+                                      width: 16.0,
+                                      height: 16.0,
+                                    ),
+                                    const SizedBox(width: 4.0),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (userRole == 'ROLE_USER') {
+                                            _isItemVisibleList
+                                                .add(true); // 새 항목 입력 필드 표시
+                                            _itemInputControllers.add(
+                                                TextEditingController()); // 입력 컨트롤러 추가
+                                          } else if (userRole == 'ROLE_ADMIN') {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              //SnackBar 구현하는법 context는 위에 BuildContext에 있는 객체를 그대로 가져오면 됨.
+                                              const SnackBar(
+                                                content: Text(
+                                                    '관리자는 사용하실 수 없습니다.'), //snack bar의 내용. icon, button같은것도 가능하다.
+                                                duration: Duration(
+                                                    seconds: 3), //올라와있는 시간
+                                              ),
+                                            );
+                                          }
+                                        });
+                                      },
+                                      style: TextButton.styleFrom(
+                                          padding: EdgeInsets.zero,
+                                          minimumSize: const Size(0, 0)),
+                                      child: const Text(
+                                        '항목 추가',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF2B72E7),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/good.png',
-                                    width: 16.0,
-                                    height: 16.0,
-                                  ),
-                                  const SizedBox(width: 4.0),
-                                  const Text(
-                                    '9명',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                  ],
+                                ),
+
                           // 새로 추가된 항목 입력 필드 생성
                           for (int i = 0; i < _isItemVisibleList.length; i++)
                             if (_isItemVisibleList[i])
@@ -453,7 +448,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                     ),
                                   ),
                                   const SizedBox(width: 8.0),
-                                  // 확인 버튼
+
+                                  // 확인 버튼(투표 항목 추가)
                                   Expanded(
                                     flex: 2,
                                     child: GestureDetector(
@@ -505,7 +501,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                     ),
                                   ),
                                   const SizedBox(width: 8.0),
-                                  // 취소 버튼
+
+                                  // 취소 버튼(투표 항목 취소)
                                   Expanded(
                                     flex: 2,
                                     child: GestureDetector(
@@ -543,40 +540,43 @@ class _VoteWidgetState extends State<VoteWidget> {
                                 ],
                               ),
                           const SizedBox(height: 6.0),
+
                           // 투표하기 버튼
                           Center(
                             child: SizedBox(
                               height: 32,
                               width: 227,
                               child: TextButton(
-                                onPressed: (userRole == 'ROLE_USER')
-                                    ? _isVoteBoxSelected
-                                        ? () async {
-                                            setState(() {
-                                              _hasVoted = !_hasVoted;
-                                            });
+                                onPressed: (vote.voteEnded!)
+                                    ? () {} // 투표 종료일 경우 아무 작업이 없게 설정
+                                    : (userRole == 'ROLE_USER')
+                                        ? _isVoteBoxSelected
+                                            ? () async {
+                                                setState(() {
+                                                  _hasVoted = !_hasVoted;
+                                                });
 
-                                            print(
-                                                'voteId: ${vote.id} \n itemId: $itemIdList');
+                                                print(
+                                                    'voteId: ${vote.id} \n itemId: $itemIdList');
 
-                                            for (int itemId in itemIdList) {
-                                              await VoteProvider()
-                                                  .vote(vote.id!, itemId);
-                                            }
-                                          }
-                                        : null
-                                    : () {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          //SnackBar 구현하는법 context는 위에 BuildContext에 있는 객체를 그대로 가져오면 됨.
-                                          const SnackBar(
-                                            content: Text(
-                                                '관리자는 사용하실 수 없습니다.'), //snack bar의 내용. icon, button같은것도 가능하다.
-                                            duration:
-                                                Duration(seconds: 3), //올라와있는 시간
-                                          ),
-                                        );
-                                      },
+                                                for (int itemId in itemIdList) {
+                                                  await VoteProvider()
+                                                      .vote(vote.id!, itemId);
+                                                }
+                                              }
+                                            : null
+                                        : () {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              //SnackBar 구현하는법 context는 위에 BuildContext에 있는 객체를 그대로 가져오면 됨.
+                                              const SnackBar(
+                                                content: Text(
+                                                    '관리자는 사용하실 수 없습니다.'), //snack bar의 내용. icon, button같은것도 가능하다.
+                                                duration: Duration(
+                                                    seconds: 3), //올라와있는 시간
+                                              ),
+                                            );
+                                          },
                                 style: TextButton.styleFrom(
                                   backgroundColor: _isVoteBoxSelected
                                       ? const Color(0xff2A72E7)
@@ -586,7 +586,11 @@ class _VoteWidgetState extends State<VoteWidget> {
                                   ),
                                 ),
                                 child: Text(
-                                  _hasVoted ? '다시 투표하기' : '투표하기',
+                                  vote.voteEnded!
+                                      ? '투표 종료'
+                                      : _hasVoted
+                                          ? '다시 투표하기'
+                                          : '투표하기',
                                   style: TextStyle(
                                     color: _isVoteBoxSelected
                                         ? Colors.white
