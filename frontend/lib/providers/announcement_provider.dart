@@ -27,6 +27,7 @@ class AnnouncementProvider with ChangeNotifier {
 
   final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
   // final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
+  // final String baseUrl = 'http://172.30.1.8:9000/api/v1/announcement';
 
 // 게시글 수정
   Future<int> updateBoard(Board board, List<File> pickedImages,

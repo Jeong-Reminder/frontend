@@ -1,14 +1,18 @@
+import 'dart:convert';
+import 'dart:typed_data'; // Uint8List를 사용하기 위해 필요
 import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class BoardUpdatePage extends StatefulWidget {
@@ -106,13 +110,6 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
     }
   }
 
-  // 이미지 삭제 함수
-  void _deleteImage(int index) {
-    setState(() {
-      pickedImages.removeAt(index);
-    });
-  }
-
   // 파일 선택 함수
   Future<void> _pickFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -130,11 +127,24 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
     }
   }
 
-  // 파일 삭제 함수
+  // 이미지 삭제 함수
+  void _deleteImage(int index) {
+    if (index >= 0 && index < pickedImages.length) {
+      setState(() {
+        pickedImages.removeAt(index);
+        print('pickedImages: $pickedImages');
+      });
+    }
+  }
+
+// 파일 삭제 함수
   void _deleteFile(int index) {
-    setState(() {
-      pickedFiles.removeAt(index);
-    });
+    if (index >= 0 && index < pickedFiles.length) {
+      setState(() {
+        pickedFiles.removeAt(index);
+        print('pickedFiles: $pickedFiles');
+      });
+    }
   }
 
   // voteController 추가 함수
@@ -186,9 +196,9 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
     return token!;
   }
 
-  List<String> pickedImageUrls = [];
+  List<Uint8List> pickedImageUrls = [];
 
-  void initializedBoard() {
+  void initializedBoard() async {
     setState(() {
       titleController.text = widget.board['announcementTitle']; // 제목 초기화
       contentController.text = widget.board['announcementContent']; // 내용 초기화
@@ -198,9 +208,9 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
       String category = widget.board['announcementCategory'];
       List<String> categories = [
         'SEASONAL_SYSTEM',
-        'CORPORATE_TOUR',
-        'CONTEST',
         'ACADEMIC_ALL',
+        'CONTEST',
+        'CORPORATE_TOUR',
       ];
       int categoryIndex = categories.indexOf(category);
       if (categoryIndex != -1) {
@@ -212,36 +222,50 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
       if (gradeLevel >= 0 && gradeLevel < isGrade.length) {
         isGrade[gradeLevel] = true;
       }
-
-      // 이미지 URL 초기화
-      if (widget.board['imgUrls'] != null) {
-        // localhost 대신 실제 서버의 IP 주소나 도메인 이름을 사용
-        if (Platform.isAndroid) {
-          pickedImageUrls = widget.board['imgUrls']
-              .map((url) {
-                return url.replaceFirst(
-                    "http://localhost:9000", "http://10.0.2.2:9000");
-              })
-              .cast<String>()
-              .toList();
-        } else if (Platform.isIOS) {
-          pickedImageUrls = widget.board['imgUrls']
-              .map((url) {
-                return url.replaceFirst(
-                    "http://localhost:9000", "http://127.0.0.1:9000");
-              })
-              .cast<String>()
-              .toList();
-        }
-      }
-
-      // 파일 초기화
-      if (widget.board['files'] != null) {
-        for (var file in widget.board['files']) {
-          pickedFiles.add(File(file['orgNm'])); // 파일을 pickedFiles 리스트에 추가
-        }
-      }
     });
+
+    // 이미지 URL 초기화
+    if (widget.board['images'] != null) {
+      for (var image in widget.board['images']) {
+        // Base64로 인코딩된 imageData를 디코딩
+        Uint8List decodedBytes = base64Decode(image['imageData']);
+        File file = await saveImageToFile(decodedBytes);
+        setState(() {
+          pickedImages.add(file);
+        });
+      }
+    }
+
+    // 파일 URL 초기화
+    if (widget.board['files'] != null) {
+      for (var f in widget.board['files']) {
+        // Base64로 인코딩된 fileData를 디코딩
+        File file =
+            await saveFileFromBase64(f['fileData'], f['originalFilename']);
+        setState(() {
+          pickedFiles.add(file);
+        });
+      }
+    }
+  }
+
+  // Uint8List를 파일로 저장하는 함수
+  Future<File> saveImageToFile(Uint8List imageData) async {
+    final tempDir = await getTemporaryDirectory();
+    final file = await File(
+            '${tempDir.path}/temp_image_${DateTime.now().millisecondsSinceEpoch}.png')
+        .create();
+    file.writeAsBytesSync(imageData);
+    return file;
+  }
+
+  // Base64 파일 데이터를 받아 파일로 저장하는 함수
+  Future<File> saveFileFromBase64(String base64Data, String filename) async {
+    Uint8List decodedBytes = base64Decode(base64Data);
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/$filename').create();
+    await file.writeAsBytes(decodedBytes);
+    return file;
   }
 
   @override
@@ -382,71 +406,35 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             ),
             const SizedBox(height: 20),
 
-            // 선택된 사진들
-            if (pickedImageUrls.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Column(
-                  children: pickedImageUrls.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    String imageUrl = entry.value;
-                    return Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Image.network(
-                          imageUrl,
-                          height: 150,
-                          errorBuilder: (BuildContext context, Object exception,
-                              StackTrace? stackTrace) {
-                            return const Text('이미지를 불러올 수 없습니다.');
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close_outlined,
-                              color: Colors.black),
-                          onPressed: () => setState(() {
-                            pickedImageUrls.removeAt(index);
-                          }),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-
-            const SizedBox(height: 20),
-
-            // 선택된 파일
-            if (pickedFiles.isNotEmpty)
-              GestureDetector(
-                onTap: () {
-                  print('$pickedFiles');
-                },
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
+            // 선택된 이미지 혹은 저장된 이미지
+            if (pickedImages.isNotEmpty)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
                   child: Row(
-                    children: pickedFiles.asMap().entries.map((entry) {
+                    children: pickedImages.asMap().entries.map((entry) {
                       int index = entry.key;
-                      File pickedFile = entry.value;
+                      File imageFile = entry.value;
                       return Stack(
                         alignment: Alignment.topRight,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.file_present),
-                              const SizedBox(width: 5),
-                              Text(path.basename(pickedFile.path)),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.close_outlined,
-                                  color: Colors.black,
-                                  size: 15,
-                                ),
-                                onPressed: () {
-                                  _deleteFile(index);
-                                },
-                              ),
-                            ],
+                          Image.file(
+                            imageFile,
+                            height: 150,
+                            errorBuilder: (BuildContext context,
+                                Object exception, StackTrace? stackTrace) {
+                              return const Text('이미지를 불러올 수 없습니다.');
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_outlined,
+                                color: Colors.black),
+                            onPressed: () {
+                              _deleteImage(index);
+
+                              print('Remaining Images: ${pickedImages.length}');
+                            },
                           ),
                         ],
                       );
@@ -454,6 +442,54 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                   ),
                 ),
               ),
+
+            const SizedBox(height: 20),
+
+            // 선택된 파일 혹은 저장된 파일
+            if (pickedFiles.isNotEmpty)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Row(
+                    children: pickedFiles.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      File file = entry.value;
+                      return Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Column(
+                              children: [
+                                const Icon(
+                                  Icons.insert_drive_file,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                                Text(
+                                  path.basename(file.path),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_outlined,
+                                color: Colors.black),
+                            onPressed: () {
+                              _deleteFile(index);
+
+                              print('Remaining Files: ${pickedFiles.length}');
+                            },
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+
             const SizedBox(height: 25),
 
             // 설정
@@ -529,7 +565,14 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                     board, pickedImages, pickedFiles, widget.board['id']);
 
             if (context.mounted) {
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BoardDetailPage(
+                    announcementId: widget.board['id'],
+                  ),
+                ),
+              );
             }
           } catch (e) {
             print(e.toString());
