@@ -1,10 +1,14 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/models/vote_model.dart';
-import 'package:frontend/providers/recommend_provider.dart';
-import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class BoardDetailPage extends StatefulWidget {
@@ -38,10 +42,12 @@ enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
 
 class _BoardDetailPageState extends State<BoardDetailPage> {
   Map<String, dynamic> board = {};
-  Map<String, dynamic> voteMap = {}; // 투표 조회 변수
   String userRole = '';
   bool isLiked = false;
   int likeCount = 0;
+
+  List<File> pickedImages = [];
+  List<File> pickedFiles = [];
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -50,6 +56,52 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     setState(() {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
     });
+  }
+
+  // Uint8List를 파일로 저장하는 함수
+  Future<File> saveImageToFile(Uint8List imageData) async {
+    final tempDir = await getTemporaryDirectory();
+    final file = await File(
+            '${tempDir.path}/temp_image_${DateTime.now().millisecondsSinceEpoch}.png')
+        .create();
+    file.writeAsBytesSync(imageData);
+    return file;
+  }
+
+  // Base64 파일 데이터를 받아 파일로 저장하는 함수
+  Future<File> saveFileFromBase64(String base64Data, String filename) async {
+    Uint8List decodedBytes = base64Decode(base64Data);
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/$filename').create();
+    await file.writeAsBytes(decodedBytes);
+    return file;
+  }
+
+  // 이미지와 파일 초기화 메서드
+  Future<void> _initializeFilesAndImages(Map<String, dynamic> board) async {
+    // 이미지 URL 초기화
+    if (board['images'] != null) {
+      for (var image in board['images']) {
+        // Base64로 인코딩된 imageData를 디코딩
+        Uint8List decodedBytes = base64Decode(image['imageData']);
+        File file = await saveImageToFile(decodedBytes);
+        setState(() {
+          pickedImages.add(file);
+        });
+      }
+    }
+
+    // 파일 URL 초기화
+    if (board['files'] != null) {
+      for (var f in board['files']) {
+        // Base64로 인코딩된 fileData를 디코딩
+        File file =
+            await saveFileFromBase64(f['fileData'], f['originalFilename']);
+        setState(() {
+          pickedFiles.add(file);
+        });
+      }
+    }
   }
 
   @override
@@ -61,15 +113,21 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Provider.of<AnnouncementProvider>(context, listen: false)
             .fetchOneBoard(widget.announcementId!);
+
+        setState(() {
+          board =
+              Provider.of<AnnouncementProvider>(context, listen: false).board;
+        });
+
+        await _initializeFilesAndImages(board); // 파일 및 이미지 초기화
       });
     }
+
     _loadCredentials();
   }
 
   @override
   Widget build(BuildContext context) {
-    final board = Provider.of<AnnouncementProvider>(context).board;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -118,13 +176,15 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // 게시글 제목
                   Text(
-                    board['announcementTitle'],
+                    board['announcementTitle'] ?? '',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   // 팝업 메뉴 창
                   PopupMenuButton<PopUpItem>(
                     color: const Color(0xFFEFF0F2),
@@ -141,8 +201,10 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 ],
               ),
               const SizedBox(height: 20),
+
+              // 게시글 내용
               Text(
-                board['announcementContent'],
+                board['announcementContent'] ?? '',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.normal,
@@ -150,58 +212,105 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: SizedBox(
-                  width: 341,
-                  height: 296,
-                  child: Image.asset(
-                    'assets/images/classselect.png',
-                    fit: BoxFit.cover,
+
+              // 게시글 이미지
+              if (pickedImages.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: pickedImages.asMap().entries.map((entry) {
+                      File imageFile = entry.value;
+                      return Row(
+                        children: [
+                          Center(
+                            child: Image.file(
+                              imageFile,
+                              width: MediaQuery.of(context).size.width,
+                              fit: BoxFit.cover, // 이미지를 컨테이너에 맞게 채움
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                return const Text('이미지를 불러올 수 없습니다.');
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                      );
+                    }).toList(),
                   ),
                 ),
-              ),
-              const SizedBox(height: 15),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      try {
-                        bool suucess =
-                            await RecommendProvider().recommend(board['id']);
-                        if (suucess) {
-                          setState(() {
-                            isLiked = !isLiked;
-                            likeCount += 1;
-                          });
-                        }
-                      } catch (e) {
-                        print(e.toString());
-                      }
-                    },
-                    child: Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: isLiked ? Colors.red : Colors.grey,
-                      size: 20,
-                    ),
+              const SizedBox(height: 20),
+
+              // 게시글 파일
+              if (pickedFiles.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: pickedFiles.asMap().entries.map((entry) {
+                      File file = entry.value;
+                      return GestureDetector(
+                        onTap: () {},
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.insert_drive_file,
+                              size: 25,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              path.basename(file.path),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '$likeCount',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              const SizedBox(height: 20),
+
+              // Row(
+              //   crossAxisAlignment: CrossAxisAlignment.center,
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     GestureDetector(
+              //       onTap: () async {
+              //         try {
+              //           bool suucess =
+              //               await RecommendProvider().recommend(board['id']);
+              //           if (suucess) {
+              //             setState(() {
+              //               isLiked = !isLiked;
+              //               likeCount += 1;
+              //             });
+              //           }
+              //         } catch (e) {
+              //           print(e.toString());
+              //         }
+              //       },
+              //       child: Icon(
+              //         isLiked ? Icons.favorite : Icons.favorite_border,
+              //         color: isLiked ? Colors.red : Colors.grey,
+              //         size: 20,
+              //       ),
+              //     ),
+              //     const SizedBox(width: 2),
+              //     Text(
+              //       '$likeCount',
+              //       style: const TextStyle(
+              //         fontSize: 14,
+              //         fontWeight: FontWeight.bold,
+              //         color: Colors.black,
+              //       ),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 20),
 
               // 투표 보기
-              if (board['votes'].isNotEmpty)
+              if (board['votes'] != null && (board['votes'] as List).isNotEmpty)
                 Theme(
                   data: Theme.of(context)
                       .copyWith(dividerColor: Colors.transparent),
@@ -217,8 +326,9 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                     ],
                   ),
                 ),
-
               const SizedBox(height: 10),
+
+              // 댓글 작성 제한 메세지
               const Center(
                 child: Text(
                   '댓글을 작성할 수 없는 게시물입니다.',

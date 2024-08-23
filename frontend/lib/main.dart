@@ -3,9 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
-import 'package:frontend/providers/recommend_provider.dart';
-import 'package:frontend/providers/vote_provider.dart';
-import 'package:frontend/providers/teamApply_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -13,9 +10,7 @@ import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/editField_screen.dart';
 import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
-import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
-import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
@@ -81,15 +76,28 @@ void main() async {
     print("Firebase initialization error: $e");
   }
 
+  // iOS 알림 권한 요청
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
   // 백그라운드 메시지 핸들러 등록
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // 알림 초기화 설정
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-  const DarwinInitializationSettings initializationSettingsDarwin =
-      DarwinInitializationSettings();
-  const InitializationSettings initializationSettings = InitializationSettings(
+  DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings(
+    onDidReceiveLocalNotification: (id, title, body, payload) async {
+      // iOS에서 로컬 알림을 받을 때 처리할 작업
+      print('Notification received: $title $body');
+      // 여기에 필요한 동작을 추가하세요.
+    },
+  );
+  InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsDarwin,
   );
@@ -110,9 +118,6 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
-        ChangeNotifierProvider(create: (_) => VoteProvider()),
-        ChangeNotifierProvider(create: (_) => TeamApplyProvider()),
-        ChangeNotifierProvider(create: (_) => RecommendProvider()),
       ],
       child: const MyApp(),
     ),
@@ -193,7 +198,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/user-info': (context) => const UserInfoPage(),
         '/setting-profile': (context) => const SettingProfile1Page(),
         '/myuser': (context) => const MyUserPage(),
-        '/myowner': (context) => const MyOwnerPage(),
         '/member-experience': (context) => const SettingProfile2Page(),
         '/experience': (context) => const ExperiencePage(
               experiences: [],
@@ -210,7 +214,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/corSea-board': (context) => const CorSeaBoardPage(),
         '/detail-board': (context) => const BoardDetailPage(),
         '/hidden-board': (context) => HiddenPage(),
-        '/board-deatil': (context) => const BoardDetailPage(),
       },
     );
   }
