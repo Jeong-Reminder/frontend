@@ -42,6 +42,7 @@ enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 class _VoteWidgetState extends State<VoteWidget> {
   String userRole = ''; // 사용자 역할
   bool isOpened = false; // 항목 입력 칸 열고 닫기 여부
+  bool isRecastedVote = false; // 재투표 여부
   int? selectedIndex; // 선택된 항목의 인덱스를 추적하기 위한 변수
   List<int> selectedIndexList = []; // 중복일 경우 이 변수를 사용
   TextEditingController voteItemController =
@@ -213,8 +214,9 @@ class _VoteWidgetState extends State<VoteWidget> {
                                             children: [
                                               // 이미 투표를 완료한 경우 체크 아이콘 표시
                                               // 투표 항목 선택 리스트가 비어있지 않을 경우 보이게 설정
-
-                                              vote.voteItems![i]['hasVoted']
+                                              // vote.hasVoted도 설정을 해야 재투표할때 선택 아이콘이 보임
+                                              (vote.voteItems![i]['hasVoted'] &&
+                                                      vote.hasVoted!)
                                                   ? Image.asset(
                                                       'assets/images/votecheck.png',
                                                       width: 12,
@@ -513,45 +515,111 @@ class _VoteWidgetState extends State<VoteWidget> {
                               width: 227,
                               child: TextButton(
                                 onPressed: () async {
-                                  // 선택한 투표 항목이 있을 경우에만 투표 API 호출
-                                  if (selectedIndexList.isNotEmpty ||
-                                      selectedIndex != null) {
-                                    if (vote.repetition!) {
-                                      await VoteProvider()
-                                          .vote(vote.id!, selectedIndexList);
+                                  if (!vote.hasVoted!) {
+                                    // 선택한 투표 항목이 있을 경우에만 투표 API 호출
+                                    if (selectedIndexList.isNotEmpty ||
+                                        selectedIndex != null) {
+                                      if (vote.repetition!) {
+                                        // 재투표 여부가 true일 때 재투표 API 호출
+                                        if (isRecastedVote) {
+                                          await VoteProvider().recastVote(
+                                              vote.id!, selectedIndexList);
 
-                                      if (context.mounted) {
-                                        await Provider.of<VoteProvider>(context,
-                                                listen: false)
-                                            .fetchVote(vote.id!);
+                                          setState(() {
+                                            // 다시 원상복구(다시 재투표할 때 로직대로 수행 가능)
+                                            isRecastedVote = false;
+                                            vote.hasVoted = true;
+                                          });
+                                        } else {
+                                          await VoteProvider().vote(
+                                              vote.id!, selectedIndexList);
+                                        }
+
+                                        if (context.mounted) {
+                                          await Provider.of<VoteProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .fetchVote(vote.id!);
+                                        }
+
+                                        setState(() {
+                                          // 선택된 항목 클리어(재투표할때 선택된 항목만 투표가 가능)
+                                          selectedIndexList.clear();
+                                        });
+                                      } else {
+                                        final indexList = selectedIndex
+                                            .toString()
+                                            .split('')
+                                            .map(int.parse)
+                                            .toList();
+
+                                        if (isRecastedVote) {
+                                          await VoteProvider()
+                                              .vote(vote.id!, indexList);
+
+                                          setState(() {
+                                            isRecastedVote = false;
+                                            vote.hasVoted = true;
+                                          });
+                                        }
+
+                                        if (context.mounted) {
+                                          await Provider.of<VoteProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .fetchVote(vote.id!);
+                                        }
+
+                                        setState(() {
+                                          indexList.clear();
+                                          selectedIndex = null;
+                                        });
                                       }
-
-                                      setState(() {
-                                        // 선택된 항목 클리어(재투표할때 선택된 항목만 투표가 가능)
-                                        selectedIndexList.clear();
-                                      });
-                                    } else {
-                                      final indexList = selectedIndex
-                                          .toString()
-                                          .split('')
-                                          .map(int.parse)
-                                          .toList();
-                                      await VoteProvider()
-                                          .vote(vote.id!, indexList);
-
-                                      if (context.mounted) {
-                                        await Provider.of<VoteProvider>(context,
-                                                listen: false)
-                                            .fetchVote(vote.id!);
-                                      }
-
-                                      setState(() {
-                                        indexList.clear();
-                                        selectedIndex = null;
-                                      });
                                     }
                                   } else {
-                                    alertSnackBar(context, '투표 항목을 선택해주세요.');
+                                    setState(() {
+                                      vote.hasVoted = false;
+                                      isRecastedVote = true;
+                                    });
+                                    // if (selectedIndexList.isNotEmpty ||
+                                    //     selectedIndex != null) {
+                                    //   if (vote.repetition!) {
+                                    //     await VoteProvider().recastVote(
+                                    //         vote.id!, selectedIndexList);
+
+                                    //     if (context.mounted) {
+                                    //       await Provider.of<VoteProvider>(
+                                    //               context,
+                                    //               listen: false)
+                                    //           .fetchVote(vote.id!);
+                                    //     }
+
+                                    //     setState(() {
+                                    //       // 선택된 항목 클리어(재투표할때 선택된 항목만 투표가 가능)
+                                    //       selectedIndexList.clear();
+                                    //     });
+                                    //   } else {
+                                    //     final indexList = selectedIndex
+                                    //         .toString()
+                                    //         .split('')
+                                    //         .map(int.parse)
+                                    //         .toList();
+                                    //     await VoteProvider()
+                                    //         .recastVote(vote.id!, indexList);
+
+                                    //     if (context.mounted) {
+                                    //       await Provider.of<VoteProvider>(
+                                    //               context,
+                                    //               listen: false)
+                                    //           .fetchVote(vote.id!);
+                                    //     }
+
+                                    //     setState(() {
+                                    //       indexList.clear();
+                                    //       selectedIndex = null;
+                                    //     });
+                                    //   }
+                                    // }
                                   }
                                 },
                                 style: TextButton.styleFrom(

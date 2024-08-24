@@ -18,8 +18,8 @@ class VoteProvider with ChangeNotifier {
     return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
   }
 
-  final String baseUrl = 'http://10.0.2.2:9000/api/v1/votes/';
-  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/votes/';
+  final String baseUrl = 'http://10.0.2.2:9000/api/v1/votes';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/votes';
 
   // 투표 생성
   Future<void> createVote(Vote vote, int announcementId) async {
@@ -29,7 +29,7 @@ class VoteProvider with ChangeNotifier {
         throw Exception('엑세스 토큰을 찾을 수 없음');
       }
 
-      final url = Uri.parse('$baseUrl$announcementId');
+      final url = Uri.parse('$baseUrl/$announcementId');
       final response = await http.post(
         url,
         headers: {
@@ -63,7 +63,7 @@ class VoteProvider with ChangeNotifier {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse('$baseUrl$voteId/items');
+    final url = Uri.parse('$baseUrl/$voteId/items');
     final response = await http.post(
       url,
       headers: {
@@ -92,7 +92,7 @@ class VoteProvider with ChangeNotifier {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse('$baseUrl$voteId');
+    final url = Uri.parse('$baseUrl/$voteId');
     final response = await http.get(
       url,
       headers: {
@@ -126,7 +126,7 @@ class VoteProvider with ChangeNotifier {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse('$baseUrl$voteId/vote');
+    final url = Uri.parse('$baseUrl/$voteId/vote');
     final response = await http.post(
       url,
       headers: {
@@ -153,18 +153,40 @@ class VoteProvider with ChangeNotifier {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse('${baseUrl}items/$voteItemId');
+    final url = Uri.parse('$baseUrl/items/$voteItemId');
     final response = await http.delete(
       url,
-      headers: {
-        'access': accessToken,
-      },
+      headers: {'access': accessToken},
     );
 
     if (response.statusCode == 204) {
       print('투표 항목 강제 삭제 성공');
     } else {
       print('투표 항목 강제 삭제 실패');
+    }
+  }
+
+  // 투표 재투표
+  Future<void> recastVote(int voteId, List<int> voteItemIds) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl/$voteId/recast');
+    final response = await http.post(
+      url,
+      headers: {
+        'access': accessToken,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(voteItemIds),
+    );
+
+    if (response.statusCode == 200) {
+      print('투표 재투표 성공: ${response.body}');
+    } else {
+      print('투표 재투표 실패: ${response.body}');
     }
   }
 }
