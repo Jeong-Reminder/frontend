@@ -5,6 +5,8 @@ class Vote {
   bool? additional;
   int? announcementId;
   String? endDateTime;
+  bool? voteEnded;
+  bool? hasVoted;
   List<int>? voteItemIds;
   List<Map<String, dynamic>>? voteItems;
 
@@ -15,6 +17,8 @@ class Vote {
     required this.additional,
     required this.announcementId,
     required this.endDateTime,
+    this.voteEnded,
+    this.hasVoted,
     this.voteItemIds,
     this.voteItems,
   });
@@ -27,7 +31,17 @@ class Vote {
       repetition: json['repetition'],
       additional: json['additional'],
       announcementId: json['announcementId'],
-      endDateTime: json['endDateTime'] as String?,
+
+      // endTime이 List<int> 형식으로 전달되는 경우, 이를 DateTime으로 변환 후 String으로 변환
+      endDateTime: json['endDateTime']
+          as String?, // DateTime 객체를 ISO 8601 형식의 String으로 변환
+
+      voteEnded: json['voteEnded'],
+
+      hasVoted: json['hasVoted'],
+
+      // 전달받은 json 맵에서 각 필드를 추출하여 Vote 객체 생성
+      // voteItemIds는 List<dynamic> 형식으로 전달될 수 있기 때문에, 이를 List<int>로 변환하는 작업을 수행
       voteItemIds: (json['voteItemIds'] as List<dynamic>?)
           ?.map((item) => item as int)
           .toList(),
@@ -47,18 +61,6 @@ class Vote {
       'additional': additional,
       'announcementId': announcementId,
       'endDateTime': endDateTime,
-
-      // voteItemIds가 null이 아닐 때만 voteItemIds 필드를 JSON에 포함
-      // voteItemIds 리스트의 각 항목을 정수(int)로 변환하여 JSON 리스트로 생성
-      if (voteItemIds != null)
-        'voteItemIds': voteItemIds!.map((item) => item.toInt()).toList(),
-
-      if (voteItems != null) 'voteItems': voteItems,
     };
-  }
-
-  @override
-  String toString() {
-    return '{id: $id, subjectTitle: $subjectTitle, repetition: $repetition, additional: $additional, announcementId: $announcementId, endDateTime: $endDateTime, voteItemIds: $voteItemIds}';
   }
 }

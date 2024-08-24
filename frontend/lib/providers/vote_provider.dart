@@ -122,22 +122,27 @@ class VoteProvider with ChangeNotifier {
   }
 
   // 투표 하기
-  Future<void> vote(int voteId, int voteItemId) async {
+  Future<void> vote(int voteId, List<int> voteItemIds) async {
     final accessToken = await getToken();
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse('$baseUrl$voteId/vote/$voteItemId');
+    final url = Uri.parse('$baseUrl$voteId/vote');
     final response = await http.post(
       url,
       headers: {
         'access': accessToken,
+        'Content-Type': 'application/json',
       },
+      body: jsonEncode({"voteItemIds": voteItemIds}), // 리스트를 JSON 문자열로 변환
     );
 
     if (response.statusCode == 200) {
-      print('투표 성공: ${response.body}');
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response);
+
+      print('투표 성공: ${jsonResponse['data']}');
     } else {
       print('투표 실패: ${response.statusCode} - ${response.body}');
     }
@@ -159,9 +164,6 @@ class VoteProvider with ChangeNotifier {
     );
 
     if (response.statusCode == 204) {
-      // 응답데이터 수정되면 작성 예정
-
-      await fetchVote(voteId);
       print('투표 항목 강제 삭제 성공');
     } else {
       print('투표 항목 강제 삭제 실패');
