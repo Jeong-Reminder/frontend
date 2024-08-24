@@ -119,6 +119,30 @@ class VoteProvider with ChangeNotifier {
     }
   }
 
+  // 투표 삭제
+  Future<void> deleteVote(int voteId) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl/$voteId');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response);
+
+      final dataResponse = jsonResponse['data'];
+      print('투표 삭제 성공: $dataResponse');
+    } else {
+      print('투표 삭제 실패: ${response.body}');
+    }
+  }
+
   // 투표 하기
   Future<void> vote(int voteId, List<int> voteItemIds) async {
     final accessToken = await getToken();
@@ -159,7 +183,7 @@ class VoteProvider with ChangeNotifier {
       headers: {'access': accessToken},
     );
 
-    if (response.statusCode == 204) {
+    if (response.statusCode == 200) {
       print('투표 항목 강제 삭제 성공');
     } else {
       print('투표 항목 강제 삭제 실패');

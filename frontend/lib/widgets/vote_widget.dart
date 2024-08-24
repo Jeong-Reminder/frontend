@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/viewVote_screen.dart';
@@ -77,6 +78,86 @@ class _VoteWidgetState extends State<VoteWidget> {
     super.dispose();
   }
 
+  // 투표 삭제 다이얼로그
+  Future<void> deleteVoteDialog(
+      BuildContext context, int voteId, int announcementId) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          icon: const Icon(
+            Icons.question_mark_rounded,
+            size: 40,
+            color: Color(0xFF2A72E7),
+          ),
+          // 메인 타이틀
+          title: const Column(
+            children: [
+              Text(
+                "정말 삭제하시겠습니까?",
+                style: TextStyle(fontSize: 20),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size(100, 20),
+                  ),
+                  child: const Text(
+                    '닫기',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2A72E7),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await VoteProvider().deleteVote(voteId);
+
+                    if (context.mounted) {
+                      await Provider.of<AnnouncementProvider>(context,
+                              listen: false)
+                          .fetchOneBoard(announcementId);
+                    }
+
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size(100, 20),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2A72E7),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final voteList =
@@ -132,7 +213,10 @@ class _VoteWidgetState extends State<VoteWidget> {
                               return [
                                 popUpItem('종료', PopUpItem.popUpItem1, () {}),
                                 const PopupMenuDivider(),
-                                popUpItem('삭제', PopUpItem.popUpItem2, () {}),
+                                popUpItem('삭제', PopUpItem.popUpItem2, () {
+                                  deleteVoteDialog(
+                                      context, vote.id!, vote.announcementId!);
+                                }),
                               ];
                             },
                             child: const Icon(Icons.more_vert),
@@ -195,7 +279,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                             }
                                           }
                                         });
-                                      }, // 아이콘 토글 함수 호출
+                                      },
                                       child: Card(
                                         color: const Color(0xFFEFEFF2),
                                         shape: RoundedRectangleBorder(
@@ -281,7 +365,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                               const SizedBox(width: 20),
 
                                               // 투표 완료한 경우 투표 인원 표시
-                                              (vote.voteItems![i]['hasVoted'])
+                                              (vote.voteItems![i]['hasVoted'] ||
+                                                      userRole == 'ROLE_ADMIN')
                                                   ? GestureDetector(
                                                       onTap: () {
                                                         Navigator.push(
@@ -338,39 +423,35 @@ class _VoteWidgetState extends State<VoteWidget> {
                           const SizedBox(height: 4.0),
 
                           // 항목 추가
-                          Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/addsquare.png',
-                                width: 16.0,
-                                height: 16.0,
-                              ),
-                              const SizedBox(width: 4.0),
-                              TextButton(
-                                onPressed: () {
-                                  if (userRole == 'ROLE_ADMIN' ||
-                                      vote.hasVoted!) {
-                                    alertSnackBar(context, '항목을 추가할 수 없습니다.');
-                                  } else {
+                          if (userRole == 'ROLE_USER')
+                            Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/addsquare.png',
+                                  width: 16.0,
+                                  height: 16.0,
+                                ),
+                                const SizedBox(width: 4.0),
+                                TextButton(
+                                  onPressed: () {
                                     setState(() {
                                       isOpened = !isOpened;
                                     });
-                                  }
-                                },
-                                style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: const Size(0, 0)),
-                                child: const Text(
-                                  '항목 추가',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2B72E7),
+                                  },
+                                  style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: const Size(0, 0)),
+                                  child: const Text(
+                                    '항목 추가',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2B72E7),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
 
                           // 항목 입력, 확인과 취소 버튼
                           isOpened
@@ -509,144 +590,106 @@ class _VoteWidgetState extends State<VoteWidget> {
                           const SizedBox(height: 15),
 
                           // 투표하기 버튼
-                          Center(
-                            child: SizedBox(
-                              height: 32,
-                              width: 227,
-                              child: TextButton(
-                                onPressed: () async {
-                                  if (!vote.hasVoted!) {
-                                    // 선택한 투표 항목이 있을 경우에만 투표 API 호출
-                                    if (selectedIndexList.isNotEmpty ||
-                                        selectedIndex != null) {
-                                      if (vote.repetition!) {
-                                        // 재투표 여부가 true일 때 재투표 API 호출
-                                        if (isRecastedVote) {
-                                          await VoteProvider().recastVote(
-                                              vote.id!, selectedIndexList);
+                          if (userRole == 'ROLE_USER')
+                            Center(
+                              child: SizedBox(
+                                height: 32,
+                                width: 227,
+                                child: TextButton(
+                                  onPressed: () async {
+                                    if (!vote.hasVoted!) {
+                                      // 선택한 투표 항목이 있을 경우에만 투표 API 호출
+                                      if (selectedIndexList.isNotEmpty ||
+                                          selectedIndex != null) {
+                                        if (vote.repetition!) {
+                                          // 재투표 여부가 true일 때 재투표 API 호출
+                                          if (isRecastedVote) {
+                                            await VoteProvider().recastVote(
+                                                vote.id!, selectedIndexList);
+
+                                            setState(() {
+                                              // 다시 원상복구(다시 재투표할 때 로직대로 수행 가능)
+                                              isRecastedVote = false;
+                                              vote.hasVoted = true;
+                                            });
+                                          } else {
+                                            await VoteProvider().vote(
+                                                vote.id!, selectedIndexList);
+                                          }
+
+                                          if (context.mounted) {
+                                            await Provider.of<VoteProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .fetchVote(vote.id!);
+                                          }
 
                                           setState(() {
-                                            // 다시 원상복구(다시 재투표할 때 로직대로 수행 가능)
-                                            isRecastedVote = false;
-                                            vote.hasVoted = true;
+                                            // 선택된 항목 클리어(재투표할때 선택된 항목만 투표가 가능)
+                                            selectedIndexList.clear();
                                           });
                                         } else {
-                                          await VoteProvider().vote(
-                                              vote.id!, selectedIndexList);
-                                        }
+                                          final indexList = selectedIndex
+                                              .toString()
+                                              .split('')
+                                              .map(int.parse)
+                                              .toList();
 
-                                        if (context.mounted) {
-                                          await Provider.of<VoteProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .fetchVote(vote.id!);
-                                        }
+                                          if (isRecastedVote) {
+                                            await VoteProvider()
+                                                .vote(vote.id!, indexList);
 
-                                        setState(() {
-                                          // 선택된 항목 클리어(재투표할때 선택된 항목만 투표가 가능)
-                                          selectedIndexList.clear();
-                                        });
-                                      } else {
-                                        final indexList = selectedIndex
-                                            .toString()
-                                            .split('')
-                                            .map(int.parse)
-                                            .toList();
+                                            setState(() {
+                                              isRecastedVote = false;
+                                              vote.hasVoted = true;
+                                            });
+                                          }
 
-                                        if (isRecastedVote) {
-                                          await VoteProvider()
-                                              .vote(vote.id!, indexList);
+                                          if (context.mounted) {
+                                            await Provider.of<VoteProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .fetchVote(vote.id!);
+                                          }
 
                                           setState(() {
-                                            isRecastedVote = false;
-                                            vote.hasVoted = true;
+                                            indexList.clear();
+                                            selectedIndex = null;
                                           });
                                         }
-
-                                        if (context.mounted) {
-                                          await Provider.of<VoteProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .fetchVote(vote.id!);
-                                        }
-
-                                        setState(() {
-                                          indexList.clear();
-                                          selectedIndex = null;
-                                        });
                                       }
+                                    } else {
+                                      setState(() {
+                                        vote.hasVoted = false;
+                                        isRecastedVote = true;
+                                      });
                                     }
-                                  } else {
-                                    setState(() {
-                                      vote.hasVoted = false;
-                                      isRecastedVote = true;
-                                    });
-                                    // if (selectedIndexList.isNotEmpty ||
-                                    //     selectedIndex != null) {
-                                    //   if (vote.repetition!) {
-                                    //     await VoteProvider().recastVote(
-                                    //         vote.id!, selectedIndexList);
-
-                                    //     if (context.mounted) {
-                                    //       await Provider.of<VoteProvider>(
-                                    //               context,
-                                    //               listen: false)
-                                    //           .fetchVote(vote.id!);
-                                    //     }
-
-                                    //     setState(() {
-                                    //       // 선택된 항목 클리어(재투표할때 선택된 항목만 투표가 가능)
-                                    //       selectedIndexList.clear();
-                                    //     });
-                                    //   } else {
-                                    //     final indexList = selectedIndex
-                                    //         .toString()
-                                    //         .split('')
-                                    //         .map(int.parse)
-                                    //         .toList();
-                                    //     await VoteProvider()
-                                    //         .recastVote(vote.id!, indexList);
-
-                                    //     if (context.mounted) {
-                                    //       await Provider.of<VoteProvider>(
-                                    //               context,
-                                    //               listen: false)
-                                    //           .fetchVote(vote.id!);
-                                    //     }
-
-                                    //     setState(() {
-                                    //       indexList.clear();
-                                    //       selectedIndex = null;
-                                    //     });
-                                    //   }
-                                    // }
-                                  }
-                                },
-                                style: TextButton.styleFrom(
-                                  // 선택한 항목이 있으면 파란색으로 변경
-                                  backgroundColor: (selectedIndex != null ||
-                                          selectedIndexList.isNotEmpty)
-                                      ? const Color(0xff2A72E7)
-                                      : const Color(0xFFEFEFF2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
-                                child: Text(
-                                  (vote.hasVoted!) ? '재투표하기' : '투표하기',
-                                  style: TextStyle(
-                                    // 선택한 항목이 있으면 하얀색으로 변경
-                                    color: (selectedIndex != null ||
+                                  },
+                                  style: TextButton.styleFrom(
+                                    // 선택한 항목이 있으면 파란색으로 변경
+                                    backgroundColor: (selectedIndex != null ||
                                             selectedIndexList.isNotEmpty)
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                        ? const Color(0xff2A72E7)
+                                        : const Color(0xFFEFEFF2),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    (vote.hasVoted!) ? '재투표하기' : '투표하기',
+                                    style: TextStyle(
+                                      // 선택한 항목이 있으면 하얀색으로 변경
+                                      color: (selectedIndex != null ||
+                                              selectedIndexList.isNotEmpty)
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
