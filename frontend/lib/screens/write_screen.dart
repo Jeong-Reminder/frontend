@@ -460,22 +460,22 @@ class _BoardWritePageState extends State<BoardWritePage> {
             }
 
             // 알림 API
-            String fcmToken = await _getFCMToken(); // fcm토큰 할당
-            DateTime dt = DateTime.now(); // 현재시간 할당
+            // String fcmToken = await _getFCMToken(); // fcm토큰 할당
+            // DateTime dt = DateTime.now(); // 현재시간 할당
 
-            // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
-            // 공백(' ')을 T로 대체
-            String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
+            // // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
+            // // 공백(' ')을 T로 대체
+            // String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
 
-            Map<String, dynamic> notificationData = {
-              "title": titleController.text,
-              "content": contentController.text,
-              "category": getSelectedCategoryText(),
-              "targetId": boardId, // 게시글 아이디
-              "createdAt": createdAt, // 생성일
-            };
-            await NotificationService()
-                .notification(notificationData, fcmToken);
+            // Map<String, dynamic> notificationData = {
+            //   "title": titleController.text,
+            //   "content": contentController.text,
+            //   "category": getSelectedCategoryText(),
+            //   "targetId": boardId, // 게시글 아이디
+            //   "createdAt": createdAt, // 생성일
+            // };
+            // await NotificationService()
+            //     .notification(notificationData, fcmToken);
 
             if (context.mounted) {
               Navigator.popAndPushNamed(context, '/total-board');
