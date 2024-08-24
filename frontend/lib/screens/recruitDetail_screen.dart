@@ -590,29 +590,32 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                     color: Color(0xFF808080)),
                               ),
                               const SizedBox(width: 4),
-                              GestureDetector(
-                                onTap: () {
-                                  _showApproveDialog(index);
-                                },
-                                child: Container(
-                                  height: 20,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2A72E7),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      '승인',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                              // userRole이 'USER'일 경우에만 댓글 창을 보여줌
+                              if (userRole == 'ROLE_USER') ...[
+                                GestureDetector(
+                                  onTap: () {
+                                    _showApproveDialog(index);
+                                  },
+                                  child: Container(
+                                    height: 20,
+                                    width: 50,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF2A72E7),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Center(
+                                      child: Text(
+                                        '승인',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                               const Spacer(),
                               // 현재 사용자가 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
                               if (isCurrentUser)
