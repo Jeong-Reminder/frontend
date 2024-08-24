@@ -79,8 +79,6 @@ class VoteProvider with ChangeNotifier {
       final jsonResponse = json.decode(utf8Response);
       final dataResponse = jsonResponse['data'];
 
-      // 투표 항목 추가 후 해당 투표 항목을 다시 조회하여 UI 갱신
-      await fetchVote(voteId);
       print('투표 항목 추가 성공: $dataResponse');
     } else {
       print('투표 항목 추가 실패: ${response.statusCode} - $utf8Response');
