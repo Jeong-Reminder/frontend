@@ -61,4 +61,20 @@ class TeamApplyProvider with ChangeNotifier {
       print(e);
     }
   }
+
+  // 팀원 신청글 수락 및 거절
+  Future<void> processTeamApply(
+      int memberId, int recruitmentId, bool accept) async {
+    try {
+      await service.processTeamApply(memberId, recruitmentId, accept);
+      print('Team member processed: $memberId for recruitment: $recruitmentId');
+
+      // 처리된 팀원 신청글을 리스트에서 제거하고 리스너들에게 알림
+      teamApplys.removeWhere(
+          (app) => app.id == memberId); // ID 비교 로직은 실제 응답에 따라 수정 가능
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
 }

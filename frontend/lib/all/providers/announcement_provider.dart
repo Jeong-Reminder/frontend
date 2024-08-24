@@ -305,7 +305,7 @@ class AnnouncementProvider with ChangeNotifier {
         throw Exception('엑세스 토큰을 찾을 수 없음');
       }
 
-      final url = Uri.parse('$baseUrl/contest-categort-name');
+      final url = Uri.parse('$baseUrl/contest-category-name');
       final response = await http.get(
         url,
         headers: {
@@ -316,19 +316,18 @@ class AnnouncementProvider with ChangeNotifier {
       // 호출됐을 때 새로운 데이터를 추가할 때 중복방지를 위해 clear 메소드로 구현
       _categoryList.clear();
 
-      final utf8Response = utf8.decode(response.bodyBytes);
-      final jsonResponse = json.decode(utf8Response) as Map<String, dynamic>;
-
-      final dataResponse = jsonResponse['data'];
-
       if (response.statusCode == 200) {
+        final utf8Response = utf8.decode(response.bodyBytes);
+        final jsonResponse = json.decode(utf8Response) as Map<String, dynamic>;
+
+        final dataResponse = jsonResponse['data'];
         for (var data in dataResponse) {
           _categoryList.add(data);
         }
 
         print('조회 성공: $_categoryList');
       } else {
-        print('조회 실패');
+        print('조회 실패 : ${response.body}');
       }
       notifyListeners();
     } catch (e) {

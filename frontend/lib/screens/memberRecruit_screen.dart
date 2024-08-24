@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/makeTeam_modal.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:provider/provider.dart';
@@ -37,9 +36,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String boardCategory = 'CONTEST';
 
   List<Map<String, dynamic>> filteredBoardList = [];
-
-  // 조회된 팀원 모집글을 저장하는 리스트
-  List<Map<String, dynamic>> recruitList = [];
+  List<Map<String, dynamic>> recruitList = []; // 조회된 팀원 모집글을 저장하는 리스트
 
   @override
   void initState() {
@@ -70,6 +67,18 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     return '';
   }
 
+  // 날짜를 "MM/DD일" 형식으로 변환하는 함수
+  String formatToMonthDay(String dateString) {
+    DateTime parsedDate = DateTime.parse(dateString);
+    return "${parsedDate.month}/${parsedDate.day}일";
+  }
+
+  // 날짜를 "YYYY/MM/DD" 형식으로 변환하는 함수
+  String formatToYearMonthDay(String dateString) {
+    DateTime parsedDate = DateTime.parse(dateString);
+    return "${parsedDate.year}/${parsedDate.month}/${parsedDate.day}";
+  }
+
   // 모집글을 지정된 형식으로 빌드하는 함수
   Widget _buildPostContent(List<Map<String, dynamic>> posts) {
     return ListView.builder(
@@ -79,27 +88,26 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       itemBuilder: (context, index) {
         final post = posts[index];
 
-        List<String> endTimeParts = [];
-        if (post['endTime'] is List) {
-          endTimeParts =
-              List<String>.from(post['endTime'].map((e) => e.toString()));
-        }
-
-        List<String>? createdTimeParts;
-        if (post['createdTime'] is List) {
-          createdTimeParts =
-              List<String>.from(post['createdTime'].map((e) => e.toString()));
-        }
+        String endTime = formatToMonthDay(post['endTime'] as String);
+        String createdTime =
+            formatToYearMonthDay(post['createdTime'] as String);
 
         return GestureDetector(
           onTap: () async {
-            Navigator.push(
+            // RecruitDetailPage로 이동할 때, await로 결과를 기다림
+            final updatedAcceptMemberList = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    RecruitDetailPage(makeTeam: post), // MakeTeam 객체 전달
+                builder: (context) => RecruitDetailPage(makeTeam: post),
               ),
             );
+
+            // 만약 전달받은 acceptMemberList가 null이 아니라면, UI를 업데이트
+            if (updatedAcceptMemberList != null) {
+              setState(() {
+                post['acceptMemberList'] = updatedAcceptMemberList;
+              });
+            }
           },
           child: Container(
             width: 341,
@@ -125,17 +133,13 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       style: const TextStyle(fontSize: 10),
                     ),
                     const SizedBox(width: 4),
-                    if (createdTimeParts != null &&
-                        createdTimeParts.length >= 3) ...[
-                      Text(
-                        '${createdTimeParts[0].trim()}/${createdTimeParts[1].trim()}/${createdTimeParts[2].trim()}',
-                        style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54),
-                      ),
-                      const SizedBox(height: 3),
-                    ],
+                    Text(
+                      createdTime, // 생성된 시간 표시
+                      style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -147,7 +151,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 Row(
                   children: [
                     Text(
-                      '모집 인원 ${post['studentCount'].toString()}/4', // 모집 인원
+                      '모집 인원 ${post['acceptMemberList']?.length ?? 0}/${post['studentCount'].toString()}', // 모집 인원
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -155,14 +159,13 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    if (endTimeParts.isNotEmpty && endTimeParts.length >= 3)
-                      Text(
-                        '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
-                        style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54),
-                      ),
+                    Text(
+                      '~$endTime까지', // 종료 시간 표시
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
                     const SizedBox(width: 6),
                     // hopeField를 개별적으로 처리하여 위젯 생성
                     Wrap(
@@ -240,8 +243,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     });
   }
 
+  // 팀원 모집글 데이터를 불러오는 함수
   Future<void> fetchRecruitData(int boardId) async {
-    // 데이터를 비동기로 불러오고, 이후 setState를 호출합니다.
     try {
       await Provider.of<MakeTeamProvider>(context, listen: false)
           .fetchcateMakeTeam(boardId);
