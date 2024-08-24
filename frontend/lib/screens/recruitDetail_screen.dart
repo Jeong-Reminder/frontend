@@ -22,6 +22,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   final TextEditingController _controller = TextEditingController();
   String name = '';
   String level = '';
+  String? userRole; // 사용자의 역할을 저장할 변수
 
   List<Map<String, dynamic>> applyList = []; // 팀원 신청 리스트를 저장할 변수
   List<Map<String, dynamic>> acceptMemberList = []; // 승인된 팀원 리스트
@@ -41,6 +42,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     setState(() {
       name = credentials['name'] ?? ''; // 사용자의 이름
       level = credentials['level'].toString(); // 사용자의 학년
+      userRole = credentials['userRole']; // 로그인 정보에 있는 userRole을 가져와 저장
     });
   }
 
@@ -508,43 +510,48 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 height: 30,
               ),
               const SizedBox(height: 10),
-              Container(
-                height: 40,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFEFF2),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF848488)),
-                        textAlignVertical: TextAlignVertical.top,
-                        decoration: const InputDecoration(
-                          hintText: '댓글을 입력하세요',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+              // userRole이 'USER'일 경우에만 댓글 창을 보여줌
+              if (userRole == 'ROLE_USER') ...[
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFEFF2),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF848488)),
+                          textAlignVertical: TextAlignVertical.top,
+                          decoration: const InputDecoration(
+                            hintText: '댓글을 입력하세요',
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 10),
+                          ),
                         ),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: _addComment,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Image.asset(
-                          'assets/images/send.png',
-                          width: 16,
-                          height: 16,
-                          color: const Color(0xFF2A72E7),
+                      GestureDetector(
+                        onTap: _addComment,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Image.asset(
+                            'assets/images/send.png',
+                            width: 16,
+                            height: 16,
+                            color: const Color(0xFF2A72E7),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+              ],
               const SizedBox(height: 20),
               // 팀원 신청 리스트를 보여주는 ListView
               Expanded(
