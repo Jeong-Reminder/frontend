@@ -60,7 +60,7 @@ class VoteProvider with ChangeNotifier {
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
-    
+
     final url = Uri.parse('$baseUrl/$voteId/items');
     final response = await http.post(
       url,
@@ -170,7 +170,7 @@ class VoteProvider with ChangeNotifier {
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
-    
+
     final url = Uri.parse('$baseUrl/items/$voteItemId');
     final response = await http.delete(
       url,
@@ -207,7 +207,7 @@ class VoteProvider with ChangeNotifier {
       print('투표 재투표 실패: ${response.body}');
     }
   }
-  
+
   // 투표 종료
   Future<void> endVote(int voteId) async {
     final accessToken = await getToken();
@@ -215,7 +215,7 @@ class VoteProvider with ChangeNotifier {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
 
-    final url = Uri.parse('$baseUrl$voteId/end');
+    final url = Uri.parse('$baseUrl/$voteId/end');
     final response = await http.post(
       url,
       headers: {
@@ -224,8 +224,6 @@ class VoteProvider with ChangeNotifier {
     );
 
     if (response.statusCode == 200) {
-      // 종료 성공 시 투표 조회 호출
-      await fetchVote(voteId);
       print('투표 종료 성공');
     } else {
       print('투표 종료 실패: ${response.bodyBytes}');
