@@ -1,10 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/viewVote_screen.dart';
 import 'package:frontend/services/login_services.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -58,6 +59,8 @@ class _VoteWidgetState extends State<VoteWidget> {
     });
   }
 
+  // 위젯이 처음 생성될 때 한 번만 실행되므로, 타이머를 불필요하게 여러 번 설정하는 문제를 피할 수 있음
+  // 또한, 초기화 작업을 여기서 처리하면 코드가 더 간결해지고, 관리하기 용이
   @override
   void initState() {
     super.initState();
@@ -156,6 +159,14 @@ class _VoteWidgetState extends State<VoteWidget> {
         );
       },
     );
+  
+  // 투표 종료 API 호출 및 UI 업데이트 함수
+  Future<void> _endVoteAndUpdateUI(Vote vote) async {
+    await Provider.of<VoteProvider>(context, listen: false).endVote(vote.id!);
+
+    setState(() {
+      vote.voteEnded = true; // 종료 처리 후 UI 업데이트
+    });
   }
 
   @override
@@ -207,20 +218,28 @@ class _VoteWidgetState extends State<VoteWidget> {
                         // 투표 삭제/종료 버튼
                         if (userRole == 'ROLE_ADMIN')
                           // 팝업 메뉴 창
-                          PopupMenuButton<PopUpItem>(
-                            color: const Color(0xFFEFF0F2),
-                            itemBuilder: (BuildContext context) {
-                              return [
-                                popUpItem('종료', PopUpItem.popUpItem1, () {}),
-                                const PopupMenuDivider(),
-                                popUpItem('삭제', PopUpItem.popUpItem2, () {
-                                  deleteVoteDialog(
-                                      context, vote.id!, vote.announcementId!);
-                                }),
-                              ];
-                            },
-                            child: const Icon(Icons.more_vert),
-                          ),
+                          vote.voteEnded!
+                              ? const SizedBox.shrink()
+                              : PopupMenuButton<PopUpItem>(
+                                  color: const Color(0xFFEFF0F2),
+                                  itemBuilder: (BuildContext context) {
+                                    return [
+                                      popUpItem('종료', PopUpItem.popUpItem1,
+                                          () async {
+                                        // 투표 종료 API 호출
+                                        await Provider.of<VoteProvider>(context,
+                                                listen: false)
+                                            .endVote(vote.id!);
+                                      }),
+                                      const PopupMenuDivider(),
+                                      popUpItem('삭제', PopUpItem.popUpItem2, () {
+                                        deleteVoteDialog(
+                                            context, vote.id!, vote.announcementId!);
+                                      }),
+                                    ];
+                                  },
+                                  child: const Icon(Icons.more_vert),
+                                ),
                       ],
                     ),
                     const SizedBox(height: 17),
@@ -424,34 +443,36 @@ class _VoteWidgetState extends State<VoteWidget> {
 
                           // 항목 추가
                           if (userRole == 'ROLE_USER')
-                            Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/addsquare.png',
-                                  width: 16.0,
-                                  height: 16.0,
-                                ),
-                                const SizedBox(width: 4.0),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      isOpened = !isOpened;
-                                    });
-                                  },
-                                  style: TextButton.styleFrom(
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size(0, 0)),
-                                  child: const Text(
-                                    '항목 추가',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF2B72E7),
+                            vote.voteEnded!
+                              ? Container() // 종료일 경우 아무것도 없음
+                              : Row(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/addsquare.png',
+                                      width: 16.0,
+                                      height: 16.0,
                                     ),
-                                  ),
+                                    const SizedBox(width: 4.0),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          isOpened = !isOpened;
+                                        });
+                                      },
+                                      style: TextButton.styleFrom(
+                                          padding: EdgeInsets.zero,
+                                          minimumSize: const Size(0, 0)),
+                                      child: const Text(
+                                        '항목 추가',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF2B72E7),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
 
                           // 항목 입력, 확인과 취소 버튼
                           isOpened
@@ -596,7 +617,9 @@ class _VoteWidgetState extends State<VoteWidget> {
                                 height: 32,
                                 width: 227,
                                 child: TextButton(
-                                  onPressed: () async {
+                                  onPressed: (vote.voteEnded!)
+                                    ? () {}
+                                    : () async {
                                     if (!vote.hasVoted!) {
                                       // 선택한 투표 항목이 있을 경우에만 투표 API 호출
                                       if (selectedIndexList.isNotEmpty ||
@@ -664,6 +687,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                         isRecastedVote = true;
                                       });
                                     }
+                                  
+                                  
                                   },
                                   style: TextButton.styleFrom(
                                     // 선택한 항목이 있으면 파란색으로 변경
@@ -676,7 +701,9 @@ class _VoteWidgetState extends State<VoteWidget> {
                                     ),
                                   ),
                                   child: Text(
-                                    (vote.hasVoted!) ? '재투표하기' : '투표하기',
+                                    vote.voteEnded!
+                                      ? '투표 종료'
+                                      : (vote.hasVoted!) ? '재투표하기' : '투표하기',
                                     style: TextStyle(
                                       // 선택한 항목이 있으면 하얀색으로 변경
                                       color: (selectedIndex != null ||

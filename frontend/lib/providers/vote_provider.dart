@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,7 +37,6 @@ class VoteProvider with ChangeNotifier {
         },
         body: jsonEncode(vote.toJson()),
       );
-
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
@@ -62,7 +60,7 @@ class VoteProvider with ChangeNotifier {
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
-
+    
     final url = Uri.parse('$baseUrl/$voteId/items');
     final response = await http.post(
       url,
@@ -72,9 +70,7 @@ class VoteProvider with ChangeNotifier {
       },
       body: jsonEncode({'content': content}), // JSON 형식으로 데이터를 전달
     );
-
     final utf8Response = utf8.decode(response.bodyBytes);
-
     if (response.statusCode == 201) {
       final jsonResponse = json.decode(utf8Response);
       final dataResponse = jsonResponse['data'];
@@ -99,7 +95,6 @@ class VoteProvider with ChangeNotifier {
         'access': accessToken,
       },
     );
-
     _voteList.clear();
 
     if (response.statusCode == 200) {
@@ -159,7 +154,6 @@ class VoteProvider with ChangeNotifier {
       },
       body: jsonEncode({"voteItemIds": voteItemIds}), // 리스트를 JSON 문자열로 변환
     );
-
     if (response.statusCode == 200) {
       final utf8Response = utf8.decode(response.bodyBytes);
       final jsonResponse = json.decode(utf8Response);
@@ -176,7 +170,7 @@ class VoteProvider with ChangeNotifier {
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
     }
-
+    
     final url = Uri.parse('$baseUrl/items/$voteItemId');
     final response = await http.delete(
       url,
@@ -211,6 +205,30 @@ class VoteProvider with ChangeNotifier {
       print('투표 재투표 성공: ${response.body}');
     } else {
       print('투표 재투표 실패: ${response.body}');
+    }
+  }
+  
+  // 투표 종료
+  Future<void> endVote(int voteId) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('$baseUrl$voteId/end');
+    final response = await http.post(
+      url,
+      headers: {
+        'access': accessToken,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // 종료 성공 시 투표 조회 호출
+      await fetchVote(voteId);
+      print('투표 종료 성공');
+    } else {
+      print('투표 종료 실패: ${response.bodyBytes}');
     }
   }
 }

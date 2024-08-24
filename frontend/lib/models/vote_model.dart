@@ -40,6 +40,7 @@ class Vote {
 
       hasVoted: json['hasVoted'],
 
+
       // 전달받은 json 맵에서 각 필드를 추출하여 Vote 객체 생성
       // voteItemIds는 List<dynamic> 형식으로 전달될 수 있기 때문에, 이를 List<int>로 변환하는 작업을 수행
       voteItemIds: (json['voteItemIds'] as List<dynamic>?)
