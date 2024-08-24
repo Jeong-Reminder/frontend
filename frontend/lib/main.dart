@@ -76,15 +76,28 @@ void main() async {
     print("Firebase initialization error: $e");
   }
 
+  // iOS 알림 권한 요청
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
   // 백그라운드 메시지 핸들러 등록
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // 알림 초기화 설정
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-  const DarwinInitializationSettings initializationSettingsDarwin =
-      DarwinInitializationSettings();
-  const InitializationSettings initializationSettings = InitializationSettings(
+  DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings(
+    onDidReceiveLocalNotification: (id, title, body, payload) async {
+      // iOS에서 로컬 알림을 받을 때 처리할 작업
+      print('Notification received: $title $body');
+      // 여기에 필요한 동작을 추가하세요.
+    },
+  );
+  InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsDarwin,
   );
@@ -199,7 +212,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),
-        '/detail-board': (context) => BoardDetailPage(),
+        '/detail-board': (context) => const BoardDetailPage(),
         '/hidden-board': (context) => HiddenPage(),
       },
     );
@@ -223,6 +236,6 @@ Future<void> setupInteractedMessage() async {
 void _handleMessage(RemoteMessage message) {
   print('message = ${message.notification!.title}');
   if (message.data['type'] == 'chat') {
-    Get.toNamed('/homepage', arguments: message.data);
+    Get.toNamed('/detail-board', arguments: message.data);
   }
 }

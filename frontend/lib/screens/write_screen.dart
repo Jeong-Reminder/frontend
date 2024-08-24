@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/models/board_model.dart';
+import 'package:frontend/models/vote_model.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
@@ -18,8 +20,9 @@ class BoardWritePage extends StatefulWidget {
 }
 
 class _BoardWritePageState extends State<BoardWritePage> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = TextEditingController();
+  TextEditingController titleController = TextEditingController(); // 게시글 제목
+  TextEditingController contentController = TextEditingController(); // 게시글 내용
+  TextEditingController voteTitleController = TextEditingController(); // 투표 제목
 
   final FocusNode titleFocusNode = FocusNode(); // 포커스 노드
 
@@ -130,25 +133,6 @@ class _BoardWritePageState extends State<BoardWritePage> {
   void _deleteFile(int index) {
     setState(() {
       pickedFiles.removeAt(index);
-    });
-  }
-
-  // voteController 추가 함수
-  void _addVoteItem() {
-    setState(() {
-      voteControllers.add(TextEditingController());
-    });
-  }
-
-  // 아이템 재정렬 함수
-  void _reorderVoteItems(int oldIndex, int newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-      // 새 위치를 추가하고 이전 위치는 제거해서 순서 변경
-      final item = voteControllers.removeAt(oldIndex);
-      voteControllers.insert(newIndex, item);
     });
   }
 
@@ -446,7 +430,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () async {
           try {
-            // 게시글
+            // 게시글 작성 API
             final board = Board(
               announcementCategory: getSelectedCategoryText(),
               announcementTitle: titleController.text,
@@ -459,25 +443,42 @@ class _BoardWritePageState extends State<BoardWritePage> {
             final boardId = await AnnouncementProvider()
                 .createBoard(board, pickedImages, pickedFiles);
 
-            String fcmToken = await _getFCMToken(); // fcm토큰 할당
-            DateTime dt = DateTime.now(); // 현재시간 할당
+            print('boardId: $boardId');
 
-            // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
-            // 공백(' ')을 T로 대체
-            String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
+            if (isConfirmedVote) {
+              // 투표 생성 API
+              final vote = Vote(
+                subjectTitle: voteTitleController.text,
+                repetition: isMultiplied,
+                additional: true,
+                announcementId: boardId,
+                endDateTime: formatDateTime(selectedEndDate!),
+                // voteItemIds: [],
+              );
 
-            Map<String, dynamic> notificationData = {
-              "title": titleController.text,
-              "content": contentController.text,
-              "category": getSelectedCategoryText(),
-              "targetId": boardId, // 게시글 아이디
-              "createdAt": createdAt, // 생성일
-            };
-            await NotificationService()
-                .notification(notificationData, fcmToken);
+              await VoteProvider().createVote(vote, boardId);
+            }
+
+            // 알림 API
+            // String fcmToken = await _getFCMToken(); // fcm토큰 할당
+            // DateTime dt = DateTime.now(); // 현재시간 할당
+
+            // // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
+            // // 공백(' ')을 T로 대체
+            // String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
+
+            // Map<String, dynamic> notificationData = {
+            //   "title": titleController.text,
+            //   "content": contentController.text,
+            //   "category": getSelectedCategoryText(),
+            //   "targetId": boardId, // 게시글 아이디
+            //   "createdAt": createdAt, // 생성일
+            // };
+            // await NotificationService()
+            //     .notification(notificationData, fcmToken);
 
             if (context.mounted) {
-              Navigator.pop(context);
+              Navigator.popAndPushNamed(context, '/total-board');
             }
           } catch (e) {
             print(e.toString());
@@ -509,13 +510,16 @@ class _BoardWritePageState extends State<BoardWritePage> {
   // 투표 바텀시트
   void _showVoteSheet(BuildContext context) {
     showModalBottomSheet(
-      context: context,
       isScrollControlled: true,
+      context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.7,
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom:
+                    MediaQuery.of(context).viewInsets.bottom, // 키보드 높이만큼 패딩 추가
+              ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 22.0, vertical: 40.0),
@@ -524,8 +528,25 @@ class _BoardWritePageState extends State<BoardWritePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.how_to_vote),
+                        SizedBox(width: 10),
+                        Text(
+                          '투표 제목',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+
                     // 제목 입력 필드
                     TextFormField(
+                      controller: voteTitleController,
                       decoration: InputDecoration(
                         hintText: '제목을 입력해주세요',
                         hintStyle: const TextStyle(
@@ -538,73 +559,32 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10.0, vertical: 5.0),
                       ),
+                      onSaved: (val) {
+                        setState() {
+                          voteTitleController.text = val!;
+                        }
+                      },
                     ),
                     const SizedBox(height: 19),
+                    const Divider(),
+                    const SizedBox(height: 10),
 
-                    // 투표 항목 입력 필드
-                    // 목록의 순서를 재배열시켜주는 위젯
-                    ReorderableListView(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-
-                      // 아이템을 재정렬할 때 호출
-                      // 아이템을 이동할 때 함수를 사용해서 아이템의 순서를 업데이트
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          _reorderVoteItems(oldIndex, newIndex);
-                        });
-                      },
+                    // 설정 제목
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        for (int index = 0;
-                            index < voteControllers.length;
-                            index++)
-
-                          // 드래그가 되지 않아 ListTile로 구현
-                          // 투표 항목
-                          ListTile(
-                            key: ValueKey(index),
-                            title: TextFormField(
-                              controller: voteControllers[index],
-                              decoration: InputDecoration(
-                                hintText: '${index + 1}. 항목을 입력하세요',
-                                hintStyle: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFFC5C5C7),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0, vertical: 5.0),
-                              ),
-                            ),
-                            trailing: const Icon(Icons.menu),
+                        Icon(Icons.settings),
+                        SizedBox(width: 5),
+                        Text(
+                          ' 설정',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
+                        ),
                       ],
                     ),
-
-                    // 항목 추가 버튼
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _addVoteItem(); // 투표 항목 추가 함수 호출
-                        });
-                      },
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.black,
-                        size: 20,
-                      ),
-                      label: const Text(
-                        '항목 추가',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    const Divider(),
                     const SizedBox(height: 15),
 
                     // 복수 선택 허용 체크박스
@@ -627,15 +607,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 25),
-                    const Text(
-                      '종료일 설정',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 5),
 
                     // 종료일 설정
                     Row(
@@ -662,7 +634,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         // 지정한 종료 날짜
                         Text(
                           selectedEndDate != null
-                              ? (formatDateTime(selectedEndDate!))
+                              ? selectedEndDate.toString().split('.')[0]
                               : '',
                           style: const TextStyle(
                             fontSize: 16,
@@ -680,6 +652,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                           setState(() {
                             isConfirmedVote = true;
                           });
+                          print('$isConfirmedVote');
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(

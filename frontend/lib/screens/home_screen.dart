@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
@@ -45,6 +46,8 @@ class _HomePageState extends State<HomePage> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
+  String userRole = '';
+
   List<Map<String, dynamic>> voteList = [
     {
       "name": "1차 증원 투표",
@@ -68,6 +71,17 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _selectedDay = _focuseDay;
+
+    _loadCredentials();
+  }
+
+  // 역할을 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
+    });
   }
 
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
@@ -224,12 +238,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: IconButton(
-                onPressed: () async {
-                  String fcmToken = await _getFCMToken();
-
-                  await NotificationService()
-                      .notification(notificationData, fcmToken);
-                },
+                onPressed: () {},
                 // badge 패키지 사용해서 다시 작성 예정
                 icon: const Icon(
                   Icons.add_alert,
@@ -242,20 +251,29 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () async {
-                  final memberId =
-                      Provider.of<ProfileProvider>(context, listen: false)
-                          .memberId;
+                  if (userRole == 'ROLE_USER') {
+                    final memberId =
+                        Provider.of<ProfileProvider>(context, listen: false)
+                            .memberId;
 
-                  if (memberId > 0) {
-                    await Provider.of<ProfileProvider>(context, listen: false)
-                        .fetchProfile(memberId);
-                  }
+                    if (memberId > 0) {
+                      await Provider.of<ProfileProvider>(context, listen: false)
+                          .fetchProfile(memberId);
+                    }
 
-                  if (context.mounted) {
-                    Navigator.pushNamed(
-                      context,
-                      '/myuser',
-                    );
+                    if (context.mounted) {
+                      Navigator.pushNamed(
+                        context,
+                        '/myuser',
+                      );
+                    }
+                  } else if (userRole == 'ROLE_ADMIN') {
+                    if (context.mounted) {
+                      Navigator.pushNamed(
+                        context,
+                        '/myowner',
+                      );
+                    }
                   }
                 },
                 child: const Icon(
