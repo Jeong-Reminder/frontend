@@ -239,10 +239,12 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       position: const RelativeRect.fromLTRB(287, 200, 900, 500),
       // 팝업 메뉴에 들어갈 항목
       items: <PopupMenuEntry<String>>[
-        // categoryList의 각 항목에 대해 반복 작업을 수행 후 팝업 메뉴 항목으로 추가
-        for (int i = 0; i < categoryList.length; i++)
+        for (int i = 0; i < categoryList.length; i++) ...[
+          // 각 카테고리에 대해 메뉴 아이템 추가
           popUpItem(categoryList[i], categoryList[i]),
-
+          // 마지막 아이템이 아니면 Divider를 추가
+          if (i < categoryList.length - 1) const PopupMenuDivider(),
+        ],
         // categoryList가 비어있지 않은 경우, 마지막에 Divider를 추가
         if (categoryList.isNotEmpty) const PopupMenuDivider(),
       ],
