@@ -214,8 +214,14 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   // 선택된 버튼에 따라 다른 콘텐츠를 반환하는 함수
   Widget buildContent() {
+    // 사용자가 아무 버튼도 선택하지 않은 경우
+    if (selectedButton.isEmpty) {
+      return const Center(child: Text('원하는 카테고리를 선택하세요'));
+    }
+
+    // 선택한 카테고리에 모집글이 없는 경우
     if (recruitList.isEmpty) {
-      return const Center(child: Text('선택된 카테고리에 모집글이 없습니다.'));
+      return const Center(child: Text('선택한 카테고리에 작성된 모집글이 없습니다'));
     }
 
     return _buildPostContent(recruitList);
