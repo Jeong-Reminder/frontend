@@ -6,6 +6,7 @@ class Vote {
   int? announcementId;
   String? endDateTime;
   bool? voteEnded;
+  bool? hasVoted;
   List<int>? voteItemIds;
   List<Map<String, dynamic>>? voteItems;
 
@@ -17,6 +18,7 @@ class Vote {
     required this.announcementId,
     required this.endDateTime,
     this.voteEnded,
+    this.hasVoted,
     this.voteItemIds,
     this.voteItems,
   });
@@ -35,6 +37,9 @@ class Vote {
           as String?, // DateTime 객체를 ISO 8601 형식의 String으로 변환
 
       voteEnded: json['voteEnded'],
+
+      hasVoted: json['hasVoted'],
+
 
       // 전달받은 json 맵에서 각 필드를 추출하여 Vote 객체 생성
       // voteItemIds는 List<dynamic> 형식으로 전달될 수 있기 때문에, 이를 List<int>로 변환하는 작업을 수행
