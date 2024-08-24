@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
@@ -34,6 +35,7 @@ PopupMenuItem<String> popUpItem(String text, String item) {
 class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String selectedButton = ''; // 초기에는 아무 페이지 선택이 안 되어있는 상태
   String boardCategory = 'CONTEST';
+  String? userRole; // 사용자의 역할을 저장할 변수
 
   List<Map<String, dynamic>> filteredBoardList = [];
   List<Map<String, dynamic>> recruitList = []; // 조회된 팀원 모집글을 저장하는 리스트
@@ -41,6 +43,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   @override
   void initState() {
     super.initState();
+    _loadCredentials(); // 사용자 자격증명 로드
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchCateBoard(boardCategory);
@@ -49,6 +52,15 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         Provider.of<AnnouncementProvider>(context, listen: false)
             .fetchContestCate();
       }
+    });
+  }
+
+  // 회원 정보를 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      userRole = credentials['userRole']; // 로그인 정보에 있는 userRole을 가져와 저장
     });
   }
 
@@ -348,11 +360,19 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       }
                     },
                     itemBuilder: (BuildContext context) {
-                      return <PopupMenuEntry<String>>[
-                        popUpItem('URL 공유', 'URL 공유'),
-                        const PopupMenuDivider(),
-                        popUpItem('모집글 작성', '모집글 작성'),
-                      ];
+                      // userRole에 따라 메뉴 항목을 다르게 표시
+                      if (userRole == 'ROLE_ADMIN') {
+                        return <PopupMenuEntry<String>>[
+                          popUpItem('URL 공유', 'URL 공유'),
+                          const PopupMenuDivider(),
+                        ];
+                      } else {
+                        return <PopupMenuEntry<String>>[
+                          popUpItem('URL 공유', 'URL 공유'),
+                          const PopupMenuDivider(),
+                          popUpItem('모집글 작성', '모집글 작성'),
+                        ];
+                      }
                     },
                     child: const Icon(Icons.more_vert),
                   ),
