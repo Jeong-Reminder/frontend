@@ -612,7 +612,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: recruitList['recruitmentStatus'] != true
+                        onTap: recruitList['recruitmentStatus'] == true
                             ? _addComment
                             : null, // 상태가 true이면 onTap 비활성화
                         child: Padding(
@@ -621,7 +621,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                             'assets/images/send.png',
                             width: 16,
                             height: 16,
-                            color: recruitList['recruitmentStatus'] != true
+                            color: recruitList['recruitmentStatus'] == true
                                 ? const Color(0xFF2A72E7)
                                 : Colors.grey, // 비활성화 시 아이콘 색상 변경
                           ),
@@ -641,6 +641,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   itemBuilder: (context, index) {
                     final apply = applyList[index];
                     final bool isCurrentUser = apply['memberName'] == name;
+                    bool isAuthor = makeTeam['memberName'] ==
+                        name; // 글쓴 사람의 이름과 현재 사용자의 이름을 비교
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
@@ -671,32 +673,36 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                     color: Color(0xFF808080)),
                               ),
                               const SizedBox(width: 4),
+
                               // userRole이 'USER'일 경우에만 댓글 창을 보여줌
                               if (userRole == 'ROLE_USER') ...[
-                                GestureDetector(
-                                  onTap: () {
-                                    _showApproveDialog(index);
-                                  },
-                                  child: Container(
-                                    height: 20,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF2A72E7),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: const Center(
-                                      child: Text(
-                                        '승인',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                // 승인 버튼은 글쓴 사람만 볼 수 있도록 설정
+                                if (isAuthor)
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showApproveDialog(index);
+                                    },
+                                    child: Container(
+                                      height: 20,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A72E7),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          '승인',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
+
                               const Spacer(),
                               // 현재 사용자가 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
                               if (isCurrentUser)
