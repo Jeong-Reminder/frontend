@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/services/notification_services.dart';
@@ -220,7 +221,12 @@ class _HomePageState extends State<HomePage> {
           leading: Padding(
             padding: const EdgeInsets.only(left: 12.0),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                if (userRole == 'ROLE_ADMIN') {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/dashboard', (route) => false);
+                }
+              },
               icon: Image.asset('assets/images/logo.png'),
               color: Colors.black,
             ),
@@ -269,9 +275,11 @@ class _HomePageState extends State<HomePage> {
                     }
                   } else if (userRole == 'ROLE_ADMIN') {
                     if (context.mounted) {
-                      Navigator.pushNamed(
+                      Navigator.push(
                         context,
-                        '/myowner',
+                        MaterialPageRoute(
+                          builder: (context) => const MyOwnerPage(),
+                        ),
                       );
                     }
                   }
