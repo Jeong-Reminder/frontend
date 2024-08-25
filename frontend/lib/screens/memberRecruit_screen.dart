@@ -364,7 +364,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                     color: const Color(0xFFEFF0F2),
                     onSelected: (String item) {
                       if (item == '모집글 작성') {
-                        selectCateMenu(context); // 새로운 팝업 메뉴 생성
+                        selectCateMenu(context); // 새로운 팝업 메뉴 생성 `
                       }
                     },
                     itemBuilder: (BuildContext context) {
@@ -372,7 +372,6 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       if (userRole == 'ROLE_ADMIN') {
                         return <PopupMenuEntry<String>>[
                           popUpItem('URL 공유', 'URL 공유'),
-                          const PopupMenuDivider(),
                         ];
                       } else {
                         return <PopupMenuEntry<String>>[
