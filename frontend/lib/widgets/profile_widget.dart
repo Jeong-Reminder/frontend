@@ -69,15 +69,18 @@ class Profile extends StatelessWidget {
                             // 가져온 프로젝트 경험 데이터를 리스트로 저장
                             List<ProjectExperience> experiences =
                                 projectExperienceProvider.projectExperiences;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ExperiencePage(
-                                  experiences: experiences,
-                                  name: name,
+
+                            if (context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExperiencePage(
+                                    experiences: experiences,
+                                    name: name,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: Container(
                             height: 20,

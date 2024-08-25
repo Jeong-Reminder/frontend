@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class AdminProvider with ChangeNotifier {
   final UserService userService = UserService();
@@ -18,6 +17,15 @@ class AdminProvider with ChangeNotifier {
     await fetchMembers();
     return admins;
   }
+
+  // 엑세스 토큰 할당
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
+  }
+
+  final String baseUrl = 'http://10.0.2.2:9000/api/v1/admin/';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/admin//';
 
   // 회원 추가
   Future<void> createUser(Admin admin) async {
@@ -93,5 +101,25 @@ class AdminProvider with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', token); // access token 키 저장
     notifyListeners();
+  }
+
+  // recruitment 전체 삭제
+  Future<void> deleteAllRecruitments() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}recruitment-delete-all');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      print('모집글 전체 삭제 성공: ${response.body}');
+    } else {
+      print('모집글 전체 삭제 실패: ${response.body}');
+    }
   }
 }

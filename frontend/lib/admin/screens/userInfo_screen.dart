@@ -268,8 +268,14 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        toolbarHeight: 70,
+        backgroundColor: Colors.white,
+        leading: const BackButton(),
+      ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 23.0, vertical: 133.0),
+        padding: const EdgeInsets.symmetric(horizontal: 23.0, vertical: 50.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
