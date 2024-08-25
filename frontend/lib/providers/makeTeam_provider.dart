@@ -10,10 +10,12 @@ class MakeTeamProvider with ChangeNotifier {
   final List<Map<String, dynamic>> _applyList = [];
   final List<Map<String, dynamic>> _cateList = [];
   final List<Map<String, dynamic>> _acceptMemberList = [];
+  Map<String, dynamic> _recruitList = {};
 
   List<Map<String, dynamic>> get applyList => _applyList;
   List<Map<String, dynamic>> get cateList => _cateList;
   List<Map<String, dynamic>> get acceptMemberList => _acceptMemberList;
+  Map<String, dynamic> get recruitList => _recruitList;
 
   Future<List<MakeTeam>> getMakeTeam() async {
     return makeTeams;
@@ -40,6 +42,7 @@ class MakeTeamProvider with ChangeNotifier {
       // applyResponse와 acceptMemberList를 분리해서 처리
       final applies = result['applyResponse'] as List<Map<String, dynamic>>;
       final acceptMemberList = result['acceptMemberList'] as List<dynamic>;
+      final data = result['data'] as Map<String, dynamic>;
 
       _applyList.clear();
       _applyList.addAll(applies);
@@ -48,6 +51,9 @@ class MakeTeamProvider with ChangeNotifier {
       // 예시: _acceptMemberList라는 내부 변수에 저장한다고 가정
       _acceptMemberList.clear();
       _acceptMemberList.addAll(acceptMemberList.cast<Map<String, dynamic>>());
+
+      _recruitList.clear;
+      _recruitList = data;
 
       notifyListeners();
     } catch (e) {

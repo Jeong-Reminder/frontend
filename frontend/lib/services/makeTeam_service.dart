@@ -95,6 +95,7 @@ class MakeTeamService {
       return {
         'applyResponse': applyResponse,
         'acceptMemberList': acceptMemberList,
+        'data': dataResponse,
       };
     } else {
       print('팀원 모집글 조회 실패: ${response.body}');

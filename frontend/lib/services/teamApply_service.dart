@@ -159,4 +159,39 @@ class TeamApplyService {
       throw Exception('팀원 신청글 수락, 거절 실패: ${response.body}');
     }
   }
+
+  // 팀 생성 API
+  Future<void> createTeam(
+      int recruitmentId, String teamName, String kakaoUrl) async {
+    String baseUrl = 'http://127.0.0.1:9000/api/v1/team';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    print(
+        'Processing with recruitmentId: $recruitmentId, teamName: $teamName, kakaoUrl: $kakaoUrl');
+
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+      body: jsonEncode({
+        'recruitmentId': recruitmentId,
+        'teamName': teamName,
+        'kakaoUrl': kakaoUrl,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+      print('팀 생성 성공: $responseData');
+    } else {
+      throw Exception('팀 생성 실패: ${response.body}');
+    }
+  }
 }

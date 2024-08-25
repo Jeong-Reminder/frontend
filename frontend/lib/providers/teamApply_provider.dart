@@ -77,4 +77,19 @@ class TeamApplyProvider with ChangeNotifier {
       print(e);
     }
   }
+
+  // 팀 생성
+  Future<void> createTeam(
+      int recruitmentId, String teamName, String kakaoUrl) async {
+    try {
+      await service.createTeam(recruitmentId, teamName, kakaoUrl);
+      print('Team created successfully for recruitment: $recruitmentId');
+
+      // 팀 생성 후 추가적인 로직 (필요에 따라)
+      notifyListeners();
+    } catch (e) {
+      print('Failed to create team: $e');
+      rethrow;
+    }
+  }
 }

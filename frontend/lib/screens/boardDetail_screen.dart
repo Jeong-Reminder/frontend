@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/vote_model.dart';
 import 'package:path/path.dart' as path;
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/providers/recommend_provider.dart';
