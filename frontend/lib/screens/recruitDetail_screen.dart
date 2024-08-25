@@ -362,29 +362,54 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           const SizedBox(width: 6),
                           if (acceptMemberList.length ==
                               makeTeam['studentCount'])
-                            GestureDetector(
-                              onTap: () {
-                                _showCreateTeamDialog(recruitList['id']);
-                              },
-                              child: Container(
-                                height: 20,
-                                width: 80,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF2A72E7),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    '팀 생성하기',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                            (recruitList['recruitmentStatus'] == true)
+                                ? GestureDetector(
+                                    onTap: () async {
+                                      // 팀 생성 다이얼로그 호출
+                                      _showCreateTeamDialog(recruitList['id']);
+
+                                      setState(() {
+                                        recruitList['recruitmentStatus'] =
+                                            true; // 팀 생성 성공 시 상태 업데이트
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 20,
+                                      width: 80,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A72E7),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          '팀 생성하기',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    height: 20,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54, // 모집 완료 상태의 색상
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Center(
+                                      child: Text(
+                                        '모집 완료',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
