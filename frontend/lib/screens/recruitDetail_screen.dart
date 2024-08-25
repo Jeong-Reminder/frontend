@@ -26,6 +26,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
   List<Map<String, dynamic>> applyList = []; // 팀원 신청 리스트를 저장할 변수
   List<Map<String, dynamic>> acceptMemberList = []; // 승인된 팀원 리스트
+  Map<String, dynamic> recruitList = {};
 
   @override
   void initState() {
@@ -56,7 +57,11 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         // 각 요소를 명시적으로 Map<String, dynamic>으로 변환하여 저장
         acceptMemberList =
             provider.acceptMemberList.map((item) => item).toList();
+
+        recruitList =
+            Provider.of<MakeTeamProvider>(context, listen: false).recruitList;
       });
+      print('applyList : $applyList');
     } catch (e) {
       print('팀 신청 리스트를 불러오는 데 실패했습니다: $e');
     }
@@ -229,8 +234,12 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                print('applyList : $applyList');
                 print('acceptMemberList : $acceptMemberList');
+                // print('makeTeams: ${MakeTeamProvider().makeTeams}');
+                // print(
+                //     'makeTeams: ${Provider.of<MakeTeamProvider>(context, listen: false).makeTeams}');
+
+                print('recruitList: $recruitList');
               },
               child: const Icon(
                 Icons.add_alert,
@@ -261,25 +270,27 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 3),
-              Row(children: [
-                GestureDetector(
-                  onTap: () {
-                    _showAuthorStackDialog();
-                  },
-                  child: Text(
-                    makeTeam['memberName'] ?? 'Unknown',
-                    style: const TextStyle(fontSize: 10),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _showAuthorStackDialog();
+                    },
+                    child: Text(
+                      makeTeam['memberName'] ?? 'Unknown',
+                      style: const TextStyle(fontSize: 10),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  createdTime,
-                  style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54),
-                ),
-              ]),
+                  const SizedBox(width: 4),
+                  Text(
+                    createdTime,
+                    style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               Text(
                 makeTeam['recruitmentContent'],
@@ -351,9 +362,10 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           const SizedBox(width: 6),
                           if (acceptMemberList.length ==
                               makeTeam['studentCount'])
-                            // 팀원이 최대 인원에 도달하면 팀 생성 버튼을 보여 줌
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                _showCreateTeamDialog(recruitList['id']);
+                              },
                               child: Container(
                                 height: 20,
                                 width: 80,
@@ -381,41 +393,74 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               ),
               if (isExpandedSection1) ...[
                 const SizedBox(height: 10),
-                for (var member in acceptMemberList)
-                  Row(
-                    children: [
-                      Text(
-                        member['memberName'] ?? 'Unknown',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: 20,
-                        width: 70,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFEA4E44),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          child: const Text(
-                            '팀장',
-                            style: TextStyle(
-                              fontSize: 12,
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: acceptMemberList.map((member) {
+                    return SizedBox(
+                      width: (MediaQuery.of(context).size.width / 2) -
+                          40, // 2x2 나열 적용
+                      child: Row(
+                        children: [
+                          Text(
+                            member['memberName'] ?? 'Unknown',
+                            style: const TextStyle(
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          if (member['memberRole'] == 'LEADER')
+                            SizedBox(
+                              height: 20,
+                              width: 90,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFEA4E44),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: Text(
+                                  member['memberRole'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (member['memberRole'] == 'MEMBER')
+                            SizedBox(
+                              height: 20,
+                              width: 94,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2A72E7),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: Text(
+                                  member['memberRole'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  }).toList(),
+                ),
               ],
+
               const SizedBox(height: 20),
               const Divider(
                 color: Color(0xFFC5C5C7),
@@ -743,6 +788,95 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               child: const Text('닫기'),
               onPressed: () {
                 Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 팀 생성하기 버튼 클릭 시 보이는 다이얼로그
+  void _showCreateTeamDialog(int recruitmentId) {
+    final TextEditingController teamNameController = TextEditingController();
+    final TextEditingController kakaoUrlController = TextEditingController(
+      text: recruitList['kakaoUrl'] ?? '', // recruitList['kakaoUrl'] 값을 미리 채워줌
+    );
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            '팀 생성하기',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: teamNameController,
+                  decoration: const InputDecoration(
+                    hintText: '원하는 팀 이름을 입력하세요',
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '팀 이름을 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: kakaoUrlController,
+                  decoration: const InputDecoration(
+                    hintText: '카카오톡 URL을 입력하세요',
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '카카오톡 URL을 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('생성'),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  try {
+                    final teamApplyService = TeamApplyService();
+                    await teamApplyService.createTeam(
+                      recruitmentId,
+                      teamNameController.text,
+                      kakaoUrlController.text,
+                    );
+
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('팀 생성 성공!')),
+                    );
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('팀 생성 실패: $e')),
+                    );
+                  }
+                }
               },
             ),
           ],
