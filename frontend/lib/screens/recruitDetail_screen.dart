@@ -594,8 +594,14 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       Expanded(
                         child: TextField(
                           controller: _controller,
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF848488)),
+                          enabled: recruitList['recruitmentStatus'] ==
+                              true, // 상태가 true이면 비활성화
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: recruitList['recruitmentStatus'] == true
+                                ? Colors.black54
+                                : Colors.grey, // 비활성화 시 텍스트 색상 변경
+                          ),
                           textAlignVertical: TextAlignVertical.top,
                           decoration: const InputDecoration(
                             hintText: '댓글을 입력하세요',
@@ -606,14 +612,18 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: _addComment,
+                        onTap: recruitList['recruitmentStatus'] != true
+                            ? _addComment
+                            : null, // 상태가 true이면 onTap 비활성화
                         child: Padding(
                           padding: const EdgeInsets.only(right: 10),
                           child: Image.asset(
                             'assets/images/send.png',
                             width: 16,
                             height: 16,
-                            color: const Color(0xFF2A72E7),
+                            color: recruitList['recruitmentStatus'] != true
+                                ? const Color(0xFF2A72E7)
+                                : Colors.grey, // 비활성화 시 아이콘 색상 변경
                           ),
                         ),
                       ),
@@ -622,6 +632,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 ),
                 const SizedBox(height: 20),
               ],
+
               const SizedBox(height: 20),
               // 팀원 신청 리스트를 보여주는 ListView
               Expanded(
