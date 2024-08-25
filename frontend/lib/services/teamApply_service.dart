@@ -125,4 +125,38 @@ class TeamApplyService {
       throw Exception('팀원 신청글 삭제 실패: ${response.body}');
     }
   }
+
+  // 팀원 신청글 수락, 거절 API
+  Future<void> processTeamApply(
+      int memberId, int recruitmentId, bool accept) async {
+    String baseUrl =
+        'http://127.0.0.1:9000/api/v1/accept-member?accept=$accept';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    print('Processing with recruitmentId: $recruitmentId, memberId: $memberId');
+
+    final response = await http.put(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+      body: jsonEncode({
+        'memberId': memberId,
+        'recruitmentId': recruitmentId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+      print('팀원 신청글 수락, 거절 성공: $responseData');
+    } else {
+      throw Exception('팀원 신청글 수락, 거절 실패: ${response.body}');
+    }
+  }
 }

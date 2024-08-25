@@ -644,7 +644,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 ),
                 const SizedBox(height: 14),
                 const Text(
-                  '인원 수',
+                  '경진대회 총 인원 수',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -652,16 +652,21 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    _buildPeopleCountButton(1),
-                    const SizedBox(width: 6),
-                    _buildPeopleCountButton(2),
-                    const SizedBox(width: 6),
-                    _buildPeopleCountButton(3),
-                    const SizedBox(width: 6),
-                    _buildPeopleCountButton(4),
-                  ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildPeopleCountButton(1),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(2),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(3),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(4),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(5),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Row(

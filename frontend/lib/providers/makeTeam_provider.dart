@@ -9,9 +9,11 @@ class MakeTeamProvider with ChangeNotifier {
 
   final List<Map<String, dynamic>> _applyList = [];
   final List<Map<String, dynamic>> _cateList = [];
+  final List<Map<String, dynamic>> _acceptMemberList = [];
 
   List<Map<String, dynamic>> get applyList => _applyList;
   List<Map<String, dynamic>> get cateList => _cateList;
+  List<Map<String, dynamic>> get acceptMemberList => _acceptMemberList;
 
   Future<List<MakeTeam>> getMakeTeam() async {
     return makeTeams;
@@ -32,10 +34,20 @@ class MakeTeamProvider with ChangeNotifier {
   // 팀원 모집글 아이디로 조회
   Future<void> fetchMakeTeam() async {
     try {
-      final applies = await service.fetchMakeTeam();
+      // fetchMakeTeam 메서드에서 applyResponse와 acceptMemberList를 모두 가져옴
+      final result = await service.fetchMakeTeam();
+
+      // applyResponse와 acceptMemberList를 분리해서 처리
+      final applies = result['applyResponse'] as List<Map<String, dynamic>>;
+      final acceptMemberList = result['acceptMemberList'] as List<dynamic>;
 
       _applyList.clear();
       _applyList.addAll(applies);
+
+      // acceptMemberList를 필요한 곳에서 처리
+      // 예시: _acceptMemberList라는 내부 변수에 저장한다고 가정
+      _acceptMemberList.clear();
+      _acceptMemberList.addAll(acceptMemberList.cast<Map<String, dynamic>>());
 
       notifyListeners();
     } catch (e) {
