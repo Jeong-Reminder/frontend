@@ -237,6 +237,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     return _buildPostContent(recruitList);
   }
 
+  // 선택한 카테고리 팝업 메뉴
   void selectCateMenu(BuildContext context) {
     // AnnouncementProvider에서 카테고리 리스트를 가져옴
     final categoryList =
@@ -261,14 +262,16 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     ).then((selectedItem) {
       // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우
       if (selectedItem != null && categoryList.contains(selectedItem)) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MakeTeamPage(
-              initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
+        if (userRole == 'ROLE_USER') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MakeTeamPage(
+                initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
+              ),
             ),
-          ),
-        );
+          );
+        } else if (userRole == 'ROLE_ADMIN') {}
       }
     });
   }
@@ -375,7 +378,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                   PopupMenuButton<String>(
                     color: const Color(0xFFEFF0F2),
                     onSelected: (String item) async {
-                      if (item == '모집글 작성') {
+                      if (item == '모집글 작성' || item == '개별 삭제') {
                         selectCateMenu(context); // 새로운 팝업 메뉴 생성 `
                       }
                       if (item == '모집글 전체 삭제') {
@@ -389,6 +392,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                           popUpItem('URL 공유', 'URL 공유'),
                           const PopupMenuDivider(),
                           popUpItem('모집글 전체 삭제', '모집글 전체 삭제'),
+                          const PopupMenuDivider(),
+                          popUpItem('개별 삭제', '개별 삭제'),
                         ];
                       } else {
                         return <PopupMenuEntry<String>>[
