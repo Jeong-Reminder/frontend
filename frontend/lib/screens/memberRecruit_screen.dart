@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/services/login_services.dart';
@@ -39,6 +40,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   List<Map<String, dynamic>> filteredBoardList = [];
   List<Map<String, dynamic>> recruitList = []; // 조회된 팀원 모집글을 저장하는 리스트
+  List<Map<String, dynamic>> cateBoardList = [];
 
   @override
   void initState() {
@@ -51,6 +53,14 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       if (context.mounted) {
         Provider.of<AnnouncementProvider>(context, listen: false)
             .fetchContestCate();
+
+        setState(() {
+          cateBoardList =
+              Provider.of<AnnouncementProvider>(context, listen: false)
+                  .cateBoardList;
+        });
+
+        print('cateBoardList: $cateBoardList');
       }
     });
   }
@@ -360,11 +370,16 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       ),
                     ],
                   ),
+
+                  // 팝업 메뉴
                   PopupMenuButton<String>(
                     color: const Color(0xFFEFF0F2),
-                    onSelected: (String item) {
+                    onSelected: (String item) async {
                       if (item == '모집글 작성') {
                         selectCateMenu(context); // 새로운 팝업 메뉴 생성 `
+                      }
+                      if (item == '모집글 전체 삭제') {
+                        deleteDialog(context);
                       }
                     },
                     itemBuilder: (BuildContext context) {
@@ -372,6 +387,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       if (userRole == 'ROLE_ADMIN') {
                         return <PopupMenuEntry<String>>[
                           popUpItem('URL 공유', 'URL 공유'),
+                          const PopupMenuDivider(),
+                          popUpItem('모집글 전체 삭제', '모집글 전체 삭제'),
                         ];
                       } else {
                         return <PopupMenuEntry<String>>[
@@ -443,6 +460,99 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
           ),
         ),
       ),
+    );
+  }
+
+  // recruitment 전체 삭제 다이얼로그
+  Future<dynamic> deleteDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          icon: const Icon(
+            Icons.question_mark_rounded,
+            size: 40,
+            color: Color(0xFF2A72E7),
+          ),
+          // 메인 타이틀
+          title: const Column(
+            children: [
+              Text("정말 삭제하시겠습니까?"),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "실수일 수도 있으니까요",
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size(100, 20),
+                  ),
+                  child: const Text(
+                    '닫기',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2A72E7),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await AdminProvider().deleteAllRecruitments();
+
+                    if (context.mounted) {
+                      // Future.wait : 여러 비동기 작업을 병렬로 실행
+                      await Future.wait([
+                        Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchContestCate(),
+
+                        // for문을 돌려 계속 카테고리별 조회 api를 사용해서 id만 가져와 fetchcateMakeTeam api 호출
+                        for (var cateBoard in cateBoardList)
+                          Provider.of<MakeTeamProvider>(context, listen: false)
+                              .fetchcateMakeTeam(cateBoard['id']),
+                      ]);
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size(100, 20),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2A72E7),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
