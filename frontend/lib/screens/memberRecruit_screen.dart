@@ -248,6 +248,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       context: context,
       // 메뉴가 화면에 나타나는 위치 RelativeRect
       position: const RelativeRect.fromLTRB(287, 200, 900, 500),
+      color: const Color(0xFFDFDEE5),
       // 팝업 메뉴에 들어갈 항목
       items: <PopupMenuEntry<String>>[
         for (int i = 0; i < categoryList.length; i++) ...[
@@ -259,7 +260,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         // categoryList가 비어있지 않은 경우, 마지막에 Divider를 추가
         if (categoryList.isNotEmpty) const PopupMenuDivider(),
       ],
-    ).then((selectedItem) {
+    ).then((selectedItem) async {
       // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우
       if (selectedItem != null && categoryList.contains(selectedItem)) {
         if (userRole == 'ROLE_USER') {
@@ -271,7 +272,9 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
               ),
             ),
           );
-        } else if (userRole == 'ROLE_ADMIN') {}
+        } else if (userRole == 'ROLE_ADMIN') {
+          deleteDialog(context, 'individual', selectedItem);
+        }
       }
     });
   }
@@ -382,7 +385,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                         selectCateMenu(context); // 새로운 팝업 메뉴 생성 `
                       }
                       if (item == '모집글 전체 삭제') {
-                        deleteDialog(context);
+                        deleteDialog(context, 'total');
                       }
                     },
                     itemBuilder: (BuildContext context) {
@@ -469,7 +472,9 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   }
 
   // recruitment 전체 삭제 다이얼로그
-  Future<dynamic> deleteDialog(BuildContext context) {
+  // 파라미터에 [ ]를 덮어서 작성하는 것은 선택적으로, 즉 필요할 때 값을 줄 수 있도록 설정하는 것
+  Future<dynamic> deleteDialog(BuildContext context, String range,
+      [String? category]) {
     return showDialog(
       context: context,
       barrierDismissible: true,
@@ -521,7 +526,14 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    await AdminProvider().deleteAllRecruitments();
+                    // 전체 삭제일 경우
+                    if (range == 'total') {
+                      await AdminProvider().deleteAllRecruitments();
+                    }
+                    // 개별 삭제일 경우
+                    else if (range == 'individual' && category != null) {
+                      await AdminProvider().deleteCateRecruitment(category);
+                    }
 
                     if (context.mounted) {
                       // Future.wait : 여러 비동기 작업을 병렬로 실행

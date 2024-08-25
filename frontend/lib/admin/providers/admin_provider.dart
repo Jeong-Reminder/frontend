@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
@@ -120,6 +122,26 @@ class AdminProvider with ChangeNotifier {
       print('모집글 전체 삭제 성공: ${response.body}');
     } else {
       print('모집글 전체 삭제 실패: ${response.body}');
+    }
+  }
+
+  // recruitment 카테고리 별 삭제
+  Future<void> deleteCateRecruitment(String contestCate) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}recruitment-delete?category=$contestCate');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      print('카테고리 별 삭제 성공: ${response.body}');
+    } else {
+      print('카테고리 별 삭제 실패: ${response.body}');
     }
   }
 }
