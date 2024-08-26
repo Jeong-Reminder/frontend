@@ -2,8 +2,8 @@ import 'dart:io'; // 파일을 다루기 위해 필요
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
-import 'package:frontend/all/providers/models/board_model.dart';
+import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/models/board_model.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/services/notification_services.dart';

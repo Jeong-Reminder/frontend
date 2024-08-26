@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/services/login_services.dart';
