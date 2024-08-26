@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 
 class MemberRecruitPage extends StatefulWidget {
