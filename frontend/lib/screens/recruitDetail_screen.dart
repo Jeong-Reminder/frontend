@@ -22,14 +22,18 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   final TextEditingController _controller = TextEditingController();
   String name = '';
   String level = '';
+  String? userRole; // 사용자의 역할을 저장할 변수
 
   List<Map<String, dynamic>> applyList = []; // 팀원 신청 리스트를 저장할 변수
+  List<Map<String, dynamic>> acceptMemberList = []; // 승인된 팀원 리스트
+  Map<String, dynamic> recruitList = {};
 
   @override
   void initState() {
     super.initState();
     _loadCredentials();
     _fetchApplyList();
+    _initializeAcceptMemberList();
   }
 
   // 사용자의 자격 증명을 불러오는 함수
@@ -39,20 +43,35 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     setState(() {
       name = credentials['name'] ?? ''; // 사용자의 이름
       level = credentials['level'].toString(); // 사용자의 학년
+      userRole = credentials['userRole']; // 로그인 정보에 있는 userRole을 가져와 저장
     });
   }
 
-  // 팀원 신청 리스트를 불러오는 함수
+  // 팀원 신청 리스트와 승인된 팀원 리스트를 불러오는 함수
   Future<void> _fetchApplyList() async {
     try {
       final provider = Provider.of<MakeTeamProvider>(context, listen: false);
       await provider.fetchMakeTeam();
       setState(() {
         applyList = provider.applyList; // 불러온 신청 리스트를 상태에 저장
+        // 각 요소를 명시적으로 Map<String, dynamic>으로 변환하여 저장
+        acceptMemberList =
+            provider.acceptMemberList.map((item) => item).toList();
+
+        recruitList =
+            Provider.of<MakeTeamProvider>(context, listen: false).recruitList;
       });
+      print('applyList : $applyList');
     } catch (e) {
       print('팀 신청 리스트를 불러오는 데 실패했습니다: $e');
     }
+  }
+
+  // 승인된 팀원 리스트 초기화
+  Future<void> _initializeAcceptMemberList() async {
+    setState(() {
+      acceptMemberList = widget.makeTeam['acceptMemberList'] ?? [];
+    });
   }
 
   // 새로운 댓글을 추가하는 함수
@@ -141,18 +160,55 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     }
   }
 
+  // 팀원 신청글 승인 처리 함수
+  Future<void> _processApplication(int index) async {
+    try {
+      if (applyList.isEmpty || index < 0 || index >= applyList.length) {
+        print('Invalid index: $index');
+        return;
+      }
+
+      final apply = applyList[index];
+      final memberId = apply['memberId'] as int?;
+      final recruitmentId = apply['recruitmentId'] as int?;
+
+      if (memberId == null || recruitmentId == null) {
+        throw Exception('memberId or recruitmentId is null');
+      }
+
+      final teamApplyService = TeamApplyService();
+      await teamApplyService.processTeamApply(
+          memberId, recruitmentId, true); // true는 승인 처리
+
+      setState(() {
+        acceptMemberList.add(apply); // 승인된 팀원 리스트에 추가
+        applyList.removeAt(index);
+        print('승인 처리 성공: $memberId');
+      });
+    } catch (e) {
+      print('승인 처리 실패: $e');
+    }
+  }
+
+  // 종료 날짜를 "MM/DD일" 형식으로 변환하는 함수
+  String formatToMonthDay(String dateString) {
+    DateTime parsedDate = DateTime.parse(dateString);
+    return "${parsedDate.month}/${parsedDate.day}일";
+  }
+
+  // 생성 날짜를 "YYYY/MM/DD" 형식으로 변환하는 함수
+  String formatToYearMonthDay(String dateString) {
+    DateTime parsedDate = DateTime.parse(dateString);
+    return "${parsedDate.year}/${parsedDate.month}/${parsedDate.day}";
+  }
+
   @override
   Widget build(BuildContext context) {
     final makeTeam = widget.makeTeam;
-    int currentMembers = makeTeam['studentCount'];
-    int maxMembers = 4;
 
-    List<String> endTimeParts = (makeTeam['endTime'] as List<dynamic>)
-        .map((e) => e.toString())
-        .toList();
-    List<String>? createdTimeParts = (makeTeam['createdTime'] as List<dynamic>?)
-        ?.map((e) => e.toString())
-        .toList();
+    String endTime = formatToMonthDay(makeTeam['endTime'] as String);
+    String createdTime =
+        formatToYearMonthDay(makeTeam['createdTime'] as String);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -168,21 +224,31 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               color: Colors.black,
             ),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context, acceptMemberList);
             },
           ),
         ),
         leadingWidth: 120,
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
+            padding: const EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                print('acceptMemberList : $acceptMemberList');
+                // print('makeTeams: ${MakeTeamProvider().makeTeams}');
+                // print(
+                //     'makeTeams: ${Provider.of<MakeTeamProvider>(context, listen: false).makeTeams}');
+
+                print('recruitList: $recruitList');
+              },
+              child: const Icon(
+                Icons.add_alert,
+                size: 30,
+                color: Colors.black,
+              ),
             ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(right: 20.0),
             child: Icon(
               Icons.account_circle,
@@ -204,25 +270,27 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 3),
-              Row(children: [
-                GestureDetector(
-                  onTap: () {
-                    _showAuthorStackDialog();
-                  },
-                  child: Text(
-                    makeTeam['memberName'] ?? 'Unknown',
-                    style: const TextStyle(fontSize: 10),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _showAuthorStackDialog();
+                    },
+                    child: Text(
+                      makeTeam['memberName'] ?? 'Unknown',
+                      style: const TextStyle(fontSize: 10),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${createdTimeParts![0]}/${createdTimeParts[1]}/${createdTimeParts[2]}',
-                  style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54),
-                ),
-              ]),
+                  const SizedBox(width: 4),
+                  Text(
+                    createdTime,
+                    style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               Text(
                 makeTeam['recruitmentContent'],
@@ -232,7 +300,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               Row(
                 children: [
                   Text(
-                    '모집 인원 ${makeTeam['studentCount']}/4',
+                    '모집 인원 ${acceptMemberList.length}/${makeTeam['studentCount']}',
                     style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -240,7 +308,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
+                    '~$endTime까지',
                     style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -292,29 +360,56 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          if (currentMembers == maxMembers)
-                            // 팀원이 최대 인원에 도달하면 팀 생성 버튼을 보여 줌
-                            GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                height: 20,
-                                width: 80,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF2A72E7),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    '팀 생성하기',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                          if (acceptMemberList.length ==
+                              makeTeam['studentCount'])
+                            (recruitList['recruitmentStatus'] == true)
+                                ? GestureDetector(
+                                    onTap: () async {
+                                      // 팀 생성 다이얼로그 호출
+                                      _showCreateTeamDialog(recruitList['id']);
+
+                                      setState(() {
+                                        recruitList['recruitmentStatus'] =
+                                            true; // 팀 생성 성공 시 상태 업데이트
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 20,
+                                      width: 80,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A72E7),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          '팀 생성하기',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    height: 20,
+                                    width: 80,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54, // 모집 완료 상태의 색상
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Center(
+                                      child: Text(
+                                        '모집 완료',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
@@ -323,40 +418,74 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               ),
               if (isExpandedSection1) ...[
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text(
-                      makeTeam['memberName'] ?? 'Unknown',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      height: 20,
-                      width: 70,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEA4E44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: acceptMemberList.map((member) {
+                    return SizedBox(
+                      width: (MediaQuery.of(context).size.width / 2) -
+                          40, // 2x2 나열 적용
+                      child: Row(
+                        children: [
+                          Text(
+                            member['memberName'] ?? 'Unknown',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          '팀장',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                          const SizedBox(width: 8),
+                          if (member['memberRole'] == 'LEADER')
+                            SizedBox(
+                              height: 20,
+                              width: 90,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFEA4E44),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: Text(
+                                  member['memberRole'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (member['memberRole'] == 'MEMBER')
+                            SizedBox(
+                              height: 20,
+                              width: 94,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2A72E7),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: Text(
+                                  member['memberRole'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                  ],
+                    );
+                  }).toList(),
                 ),
               ],
+
               const SizedBox(height: 20),
               const Divider(
                 color: Color(0xFFC5C5C7),
@@ -367,7 +496,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    '인원 수',
+                    '경진대회 총 인원 수',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -451,44 +580,59 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 height: 30,
               ),
               const SizedBox(height: 10),
-              Container(
-                height: 40,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFEFF2),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF848488)),
-                        textAlignVertical: TextAlignVertical.top,
-                        decoration: const InputDecoration(
-                          hintText: '댓글을 입력하세요',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+              // userRole이 'USER'일 경우에만 댓글 창을 보여줌
+              if (userRole == 'ROLE_USER') ...[
+                Container(
+                  height: 40,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFEFF2),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          enabled: recruitList['recruitmentStatus'] ==
+                              true, // 상태가 true이면 비활성화
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: recruitList['recruitmentStatus'] == true
+                                ? Colors.black54
+                                : Colors.grey, // 비활성화 시 텍스트 색상 변경
+                          ),
+                          textAlignVertical: TextAlignVertical.top,
+                          decoration: const InputDecoration(
+                            hintText: '댓글을 입력하세요',
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 10),
+                          ),
                         ),
                       ),
-                    ),
-                    // 댓글 입력 후 전송 버튼입니다.
-                    GestureDetector(
-                      onTap: _addComment,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Image.asset(
-                          'assets/images/send.png',
-                          width: 16,
-                          height: 16,
-                          color: const Color(0xFF2A72E7),
+                      GestureDetector(
+                        onTap: recruitList['recruitmentStatus'] == true
+                            ? _addComment
+                            : null, // 상태가 true이면 onTap 비활성화
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Image.asset(
+                            'assets/images/send.png',
+                            width: 16,
+                            height: 16,
+                            color: recruitList['recruitmentStatus'] == true
+                                ? const Color(0xFF2A72E7)
+                                : Colors.grey, // 비활성화 시 아이콘 색상 변경
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+              ],
+
               const SizedBox(height: 20),
               // 팀원 신청 리스트를 보여주는 ListView
               Expanded(
@@ -497,6 +641,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   itemBuilder: (context, index) {
                     final apply = applyList[index];
                     final bool isCurrentUser = apply['memberName'] == name;
+                    bool isAuthor = makeTeam['memberName'] ==
+                        name; // 글쓴 사람의 이름과 현재 사용자의 이름을 비교
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
@@ -511,7 +657,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                       apply['githubLink']);
                                 },
                                 child: Text(
-                                  apply['memberName'],
+                                  apply['memberName'] ?? 'Unknown',
                                   style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -527,53 +673,36 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                     color: Color(0xFF808080)),
                               ),
                               const SizedBox(width: 4),
-                              GestureDetector(
-                                onTap: () {
-                                  _showApproveDialog(index);
-                                },
-                                child: Container(
-                                  height: 20,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2A72E7),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      '승인',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+
+                              // userRole이 'USER'일 경우에만 댓글 창을 보여줌
+                              if (userRole == 'ROLE_USER') ...[
+                                // 승인 버튼은 글쓴 사람만 볼 수 있도록 설정
+                                if (isAuthor)
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showApproveDialog(index);
+                                    },
+                                    child: Container(
+                                      height: 20,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A72E7),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          '승인',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              GestureDetector(
-                                onTap: () {
-                                  _showRejectDialog(index);
-                                },
-                                child: Container(
-                                  height: 20,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      '반려',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              ],
+
                               const Spacer(),
                               // 현재 사용자가 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
                               if (isCurrentUser)
@@ -603,7 +732,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            apply['applicationContent'],
+                            apply['applicationContent'] ?? '',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -709,6 +838,95 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     );
   }
 
+  // 팀 생성하기 버튼 클릭 시 보이는 다이얼로그
+  void _showCreateTeamDialog(int recruitmentId) {
+    final TextEditingController teamNameController = TextEditingController();
+    final TextEditingController kakaoUrlController = TextEditingController(
+      text: recruitList['kakaoUrl'] ?? '', // recruitList['kakaoUrl'] 값을 미리 채워줌
+    );
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            '팀 생성하기',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: teamNameController,
+                  decoration: const InputDecoration(
+                    hintText: '원하는 팀 이름을 입력하세요',
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '팀 이름을 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: kakaoUrlController,
+                  decoration: const InputDecoration(
+                    hintText: '카카오톡 URL을 입력하세요',
+                  ),
+                  style: const TextStyle(fontSize: 12),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '카카오톡 URL을 입력해주세요';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('생성'),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  try {
+                    final teamApplyService = TeamApplyService();
+                    await teamApplyService.createTeam(
+                      recruitmentId,
+                      teamNameController.text,
+                      kakaoUrlController.text,
+                    );
+
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('팀 생성 성공!')),
+                    );
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('팀 생성 실패: $e')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // 승인 확인 다이얼로그
   void _showApproveDialog(int index) {
     showDialog(
@@ -759,78 +977,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   TextButton(
                     child: const Text('확인'),
                     onPressed: () {
-                      setState(() {
-                        if (widget.makeTeam['studentCount'] < 4) {
-                          widget.makeTeam['studentCount']++;
-                          applyList.removeAt(index);
-                        }
-                      });
                       Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // 반려 확인 다이얼로그
-  void _showRejectDialog(int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(child: Text('${applyList[index]['memberName']} 반려')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const Align(
-                alignment: Alignment.center,
-                child: Text('정말로 반려하시겠습니까?'),
-              ),
-              const SizedBox(height: 20.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/images/billiard.png',
-                    width: 16,
-                    height: 16,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    '한 번 반려하면 되돌릴 수 없습니다',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextButton(
-                    child: const Text('취소'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton(
-                    child: const Text('확인'),
-                    onPressed: () {
-                      setState(() {
-                        applyList.removeAt(index);
-                      });
-                      Navigator.of(context).pop();
+                      _processApplication(index);
                     },
                   ),
                 ],

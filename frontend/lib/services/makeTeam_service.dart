@@ -40,10 +40,9 @@ class MakeTeamService {
       body: jsonEncode(makeTeam.toJson()),
     );
 
-    final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-
     if (response.statusCode == 200) {
-      print('팀원 모집글 작성 성공');
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      print('팀원 모집글 작성 성공 $responseData');
       int id = responseData['data']['id']; // 백엔드에서 반환된 id 추출
       print('Returned ID: $id'); // 반환된 id 출력
 
@@ -56,13 +55,12 @@ class MakeTeamService {
   }
 
   // 팀원 모집글 아이디로 조회 API
-  Future<List<Map<String, dynamic>>> fetchMakeTeam() async {
+  Future<Map<String, dynamic>> fetchMakeTeam() async {
     final int? id = await getId();
     if (id == null) {
       throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
     }
     final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
-    // final String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment/$id';
 
     final token = await getToken();
     if (token == null) {
@@ -80,11 +78,25 @@ class MakeTeamService {
     if (response.statusCode == 200) {
       final responseData = jsonDecode(utf8.decode(response.bodyBytes));
       final dataResponse = responseData['data'];
-      final List<dynamic> applyResponse = dataResponse['teamApplicationList'];
+
+      // acceptMemberList 추출
+      final List<dynamic> acceptMemberList =
+          dataResponse['acceptMemberList'] ?? [];
+
+      final List<Map<String, dynamic>> applyResponse =
+          (dataResponse['teamApplicationList'] as List)
+              .map((item) => item as Map<String, dynamic>)
+              .toList();
 
       print('팀원 모집글 조회 성공: $responseData');
+      print('acceptMemberlist : $acceptMemberList');
 
-      return applyResponse.map((item) => item as Map<String, dynamic>).toList();
+      // acceptMemberList와 다른 데이터를 포함한 Map 반환
+      return {
+        'applyResponse': applyResponse,
+        'acceptMemberList': acceptMemberList,
+        'data': dataResponse,
+      };
     } else {
       print('팀원 모집글 조회 실패: ${response.body}');
       throw Exception();
@@ -127,6 +139,14 @@ class MakeTeamService {
 
                     if (innerMap.containsKey('memberId') &&
                         innerMap.containsKey('recruitmentTitle')) {
+                      // acceptMemberList를 추출
+                      final List<Map<String, dynamic>> acceptMemberList =
+                          (innerMap['acceptMemberList'] as List<dynamic>?)
+                                  ?.map((member) =>
+                                      member as Map<String, dynamic>)
+                                  .toList() ??
+                              [];
+
                       fullDetailsList.add({
                         'memberId': innerMap['memberId'] as int,
                         'recruitmentTitle':
@@ -139,6 +159,8 @@ class MakeTeamService {
                             innerMap['recruitmentContent'] ?? '',
                         'studentCount': innerMap['studentCount'] ?? 0,
                         'hopeField': innerMap['hopeField'] ?? '',
+                        'acceptMemberList':
+                            acceptMemberList, // acceptMemberList 추가
                       });
                     }
                     // 최종적으로 현재 항목(innerMap)을 반환

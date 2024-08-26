@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/makeTeam_modal.dart';
+import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
@@ -35,15 +36,16 @@ PopupMenuItem<String> popUpItem(String text, String item) {
 class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String selectedButton = ''; // 초기에는 아무 페이지 선택이 안 되어있는 상태
   String boardCategory = 'CONTEST';
+  String? userRole; // 사용자의 역할을 저장할 변수
 
   List<Map<String, dynamic>> filteredBoardList = [];
-
-  // 조회된 팀원 모집글을 저장하는 리스트
-  List<Map<String, dynamic>> recruitList = [];
+  List<Map<String, dynamic>> recruitList = []; // 조회된 팀원 모집글을 저장하는 리스트
+  List<Map<String, dynamic>> cateBoardList = [];
 
   @override
   void initState() {
     super.initState();
+    _loadCredentials(); // 사용자 자격증명 로드
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchCateBoard(boardCategory);
@@ -51,7 +53,24 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       if (context.mounted) {
         Provider.of<AnnouncementProvider>(context, listen: false)
             .fetchContestCate();
+
+        setState(() {
+          cateBoardList =
+              Provider.of<AnnouncementProvider>(context, listen: false)
+                  .cateBoardList;
+        });
+
+        print('cateBoardList: $cateBoardList');
       }
+    });
+  }
+
+  // 회원 정보를 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      userRole = credentials['userRole']; // 로그인 정보에 있는 userRole을 가져와 저장
     });
   }
 
@@ -70,6 +89,18 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     return '';
   }
 
+  // 날짜를 "MM/DD일" 형식으로 변환하는 함수
+  String formatToMonthDay(String dateString) {
+    DateTime parsedDate = DateTime.parse(dateString);
+    return "${parsedDate.month}/${parsedDate.day}일";
+  }
+
+  // 날짜를 "YYYY/MM/DD" 형식으로 변환하는 함수
+  String formatToYearMonthDay(String dateString) {
+    DateTime parsedDate = DateTime.parse(dateString);
+    return "${parsedDate.year}/${parsedDate.month}/${parsedDate.day}";
+  }
+
   // 모집글을 지정된 형식으로 빌드하는 함수
   Widget _buildPostContent(List<Map<String, dynamic>> posts) {
     return ListView.builder(
@@ -79,27 +110,26 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       itemBuilder: (context, index) {
         final post = posts[index];
 
-        List<String> endTimeParts = [];
-        if (post['endTime'] is List) {
-          endTimeParts =
-              List<String>.from(post['endTime'].map((e) => e.toString()));
-        }
-
-        List<String>? createdTimeParts;
-        if (post['createdTime'] is List) {
-          createdTimeParts =
-              List<String>.from(post['createdTime'].map((e) => e.toString()));
-        }
+        String endTime = formatToMonthDay(post['endTime'] as String);
+        String createdTime =
+            formatToYearMonthDay(post['createdTime'] as String);
 
         return GestureDetector(
           onTap: () async {
-            Navigator.push(
+            // RecruitDetailPage로 이동할 때, await로 결과를 기다림
+            final updatedAcceptMemberList = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    RecruitDetailPage(makeTeam: post), // MakeTeam 객체 전달
+                builder: (context) => RecruitDetailPage(makeTeam: post),
               ),
             );
+
+            // 만약 전달받은 acceptMemberList가 null이 아니라면, UI를 업데이트
+            if (updatedAcceptMemberList != null) {
+              setState(() {
+                post['acceptMemberList'] = updatedAcceptMemberList;
+              });
+            }
           },
           child: Container(
             width: 341,
@@ -125,17 +155,13 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       style: const TextStyle(fontSize: 10),
                     ),
                     const SizedBox(width: 4),
-                    if (createdTimeParts != null &&
-                        createdTimeParts.length >= 3) ...[
-                      Text(
-                        '${createdTimeParts[0].trim()}/${createdTimeParts[1].trim()}/${createdTimeParts[2].trim()}',
-                        style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54),
-                      ),
-                      const SizedBox(height: 3),
-                    ],
+                    Text(
+                      createdTime, // 생성된 시간 표시
+                      style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -147,7 +173,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 Row(
                   children: [
                     Text(
-                      '모집 인원 ${post['studentCount'].toString()}/4', // 모집 인원
+                      '모집 인원 ${post['acceptMemberList']?.length ?? 0}/${post['studentCount'].toString()}', // 모집 인원
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -155,14 +181,13 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    if (endTimeParts.isNotEmpty && endTimeParts.length >= 3)
-                      Text(
-                        '~${endTimeParts[1].trim()}/${endTimeParts[2].trim()}까지',
-                        style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54),
-                      ),
+                    Text(
+                      '~$endTime까지', // 종료 시간 표시
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54),
+                    ),
                     const SizedBox(width: 6),
                     // hopeField를 개별적으로 처리하여 위젯 생성
                     Wrap(
@@ -199,13 +224,20 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   // 선택된 버튼에 따라 다른 콘텐츠를 반환하는 함수
   Widget buildContent() {
+    // 사용자가 아무 버튼도 선택하지 않은 경우
+    if (selectedButton.isEmpty) {
+      return const Center(child: Text('원하는 카테고리를 선택하세요'));
+    }
+
+    // 선택한 카테고리에 모집글이 없는 경우
     if (recruitList.isEmpty) {
-      return const Center(child: Text('선택된 카테고리에 모집글이 없습니다.'));
+      return const Center(child: Text('선택한 카테고리에 작성된 모집글이 없습니다'));
     }
 
     return _buildPostContent(recruitList);
   }
 
+  // 선택한 카테고리 팝업 메뉴
   void selectCateMenu(BuildContext context) {
     // AnnouncementProvider에서 카테고리 리스트를 가져옴
     final categoryList =
@@ -216,32 +248,39 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       context: context,
       // 메뉴가 화면에 나타나는 위치 RelativeRect
       position: const RelativeRect.fromLTRB(287, 200, 900, 500),
+      color: const Color(0xFFDFDEE5),
       // 팝업 메뉴에 들어갈 항목
       items: <PopupMenuEntry<String>>[
-        // categoryList의 각 항목에 대해 반복 작업을 수행 후 팝업 메뉴 항목으로 추가
-        for (int i = 0; i < categoryList.length; i++)
+        for (int i = 0; i < categoryList.length; i++) ...[
+          // 각 카테고리에 대해 메뉴 아이템 추가
           popUpItem(categoryList[i], categoryList[i]),
-
+          // 마지막 아이템이 아니면 Divider를 추가
+          if (i < categoryList.length - 1) const PopupMenuDivider(),
+        ],
         // categoryList가 비어있지 않은 경우, 마지막에 Divider를 추가
         if (categoryList.isNotEmpty) const PopupMenuDivider(),
       ],
-    ).then((selectedItem) {
+    ).then((selectedItem) async {
       // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우
       if (selectedItem != null && categoryList.contains(selectedItem)) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MakeTeamPage(
-              initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
+        if (userRole == 'ROLE_USER') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MakeTeamPage(
+                initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
+              ),
             ),
-          ),
-        );
+          );
+        } else if (userRole == 'ROLE_ADMIN') {
+          deleteDialog(context, 'individual', selectedItem);
+        }
       }
     });
   }
 
+  // 팀원 모집글 데이터를 불러오는 함수
   Future<void> fetchRecruitData(int boardId) async {
-    // 데이터를 비동기로 불러오고, 이후 setState를 호출합니다.
     try {
       await Provider.of<MakeTeamProvider>(context, listen: false)
           .fetchcateMakeTeam(boardId);
@@ -337,19 +376,35 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       ),
                     ],
                   ),
+
+                  // 팝업 메뉴
                   PopupMenuButton<String>(
                     color: const Color(0xFFEFF0F2),
-                    onSelected: (String item) {
-                      if (item == '모집글 작성') {
-                        selectCateMenu(context); // 새로운 팝업 메뉴 생성
+                    onSelected: (String item) async {
+                      if (item == '모집글 작성' || item == '개별 삭제') {
+                        selectCateMenu(context); // 새로운 팝업 메뉴 생성 `
+                      }
+                      if (item == '모집글 전체 삭제') {
+                        deleteDialog(context, 'total');
                       }
                     },
                     itemBuilder: (BuildContext context) {
-                      return <PopupMenuEntry<String>>[
-                        popUpItem('URL 공유', 'URL 공유'),
-                        const PopupMenuDivider(),
-                        popUpItem('모집글 작성', '모집글 작성'),
-                      ];
+                      // userRole에 따라 메뉴 항목을 다르게 표시
+                      if (userRole == 'ROLE_ADMIN') {
+                        return <PopupMenuEntry<String>>[
+                          popUpItem('URL 공유', 'URL 공유'),
+                          const PopupMenuDivider(),
+                          popUpItem('모집글 전체 삭제', '모집글 전체 삭제'),
+                          const PopupMenuDivider(),
+                          popUpItem('개별 삭제', '개별 삭제'),
+                        ];
+                      } else {
+                        return <PopupMenuEntry<String>>[
+                          popUpItem('URL 공유', 'URL 공유'),
+                          const PopupMenuDivider(),
+                          popUpItem('모집글 작성', '모집글 작성'),
+                        ];
+                      }
                     },
                     child: const Icon(Icons.more_vert),
                   ),
@@ -413,6 +468,108 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
           ),
         ),
       ),
+    );
+  }
+
+  // recruitment 전체 삭제 다이얼로그
+  // 파라미터에 [ ]를 덮어서 작성하는 것은 선택적으로, 즉 필요할 때 값을 줄 수 있도록 설정하는 것
+  Future<dynamic> deleteDialog(BuildContext context, String range,
+      [String? category]) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          icon: const Icon(
+            Icons.question_mark_rounded,
+            size: 40,
+            color: Color(0xFF2A72E7),
+          ),
+          // 메인 타이틀
+          title: const Column(
+            children: [
+              Text("정말 삭제하시겠습니까?"),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "실수일 수도 있으니까요",
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size(100, 20),
+                  ),
+                  child: const Text(
+                    '닫기',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2A72E7),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // 전체 삭제일 경우
+                    if (range == 'total') {
+                      await AdminProvider().deleteAllRecruitments();
+                    }
+                    // 개별 삭제일 경우
+                    else if (range == 'individual' && category != null) {
+                      await AdminProvider().deleteCateRecruitment(category);
+                    }
+
+                    if (context.mounted) {
+                      // Future.wait : 여러 비동기 작업을 병렬로 실행
+                      await Future.wait([
+                        Provider.of<AnnouncementProvider>(context,
+                                listen: false)
+                            .fetchContestCate(),
+
+                        // for문을 돌려 계속 카테고리별 조회 api를 사용해서 id만 가져와 fetchcateMakeTeam api 호출
+                        for (var cateBoard in cateBoardList)
+                          Provider.of<MakeTeamProvider>(context, listen: false)
+                              .fetchcateMakeTeam(cateBoard['id']),
+                      ]);
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    fixedSize: const Size(100, 20),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2A72E7),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

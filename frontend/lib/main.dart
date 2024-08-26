@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/providers/teamApply_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -118,6 +120,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
+        ChangeNotifierProvider(create: (_) => VoteProvider()),
+        ChangeNotifierProvider(create: (_) => TeamApplyProvider()),
       ],
       child: const MyApp(),
     ),
