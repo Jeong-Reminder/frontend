@@ -9,6 +9,7 @@ import 'package:frontend/widgets/field_list.dart';
 import 'package:frontend/widgets/profile_widget.dart';
 import 'package:frontend/widgets/tool_list.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/providers/teamApply_provider.dart';
 
 class MyUserPage extends StatefulWidget {
   const MyUserPage({super.key});
@@ -35,6 +36,8 @@ class _MyUserPageState extends State<MyUserPage> {
     getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
     getTool();
     _loadCredentials(); // 학번을 로드하는 메서드 호출
+
+    _fetchTeamData(4);
   }
 
   // 학번, 이름, 재적상태를 로드하는 메서드
@@ -46,6 +49,13 @@ class _MyUserPageState extends State<MyUserPage> {
       name = credentials['name'] ?? ''; // 이름 설정, 없으면 빈 문자열로 설정
       status = credentials['status'] ?? ''; // 상태 설정, 없으면 빈 문자열로 설정
     });
+  }
+
+  Future<void> _fetchTeamData(int teamId) async {
+    final teamApplyProvider =
+        Provider.of<TeamApplyProvider>(context, listen: false);
+
+    await teamApplyProvider.fetchTeams(teamId);
   }
 
   // 문자열을 리스트로 변환하는 메소드
@@ -100,20 +110,11 @@ class _MyUserPageState extends State<MyUserPage> {
     });
   }
 
-  void profileDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return const Column();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final techStack =
         Provider.of<ProfileProvider>(context, listen: false).techStack;
+    final teamApplyProvider = Provider.of<TeamApplyProvider>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -203,7 +204,6 @@ class _MyUserPageState extends State<MyUserPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
               // Development Field 배지
               // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
               Wrap(
@@ -211,7 +211,6 @@ class _MyUserPageState extends State<MyUserPage> {
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: developmentField.map((field) {
                   // 괄호 안에 있는 변수는 리스트를 map한 이름
@@ -232,14 +231,12 @@ class _MyUserPageState extends State<MyUserPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
               // Development Tools 배지
               Wrap(
                 direction: Axis.horizontal,
                 alignment: WrapAlignment.start,
                 spacing: 10,
                 runSpacing: 10,
-
                 // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
                 children: developmentTool.map((tools) {
                   return badge(
@@ -251,8 +248,6 @@ class _MyUserPageState extends State<MyUserPage> {
                 }).toList(),
               ),
               const SizedBox(height: 26),
-
-              // 내 팀 현황
               Row(
                 children: [
                   const Text(
@@ -264,8 +259,6 @@ class _MyUserPageState extends State<MyUserPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // getField();
-                      print(developmentField);
                       setState(() {
                         isExpanded = !isExpanded;
                       });
@@ -276,63 +269,59 @@ class _MyUserPageState extends State<MyUserPage> {
                   ),
                 ],
               ),
-
-              // 확장할 시 내 팀 현황 박스 보여주기
-              if (isExpanded == true) showMyTeam(),
+              if (isExpanded)
+                teamApplyProvider.teams.isEmpty
+                    ? const Text('생성된 팀이 없습니다.')
+                    : Card(
+                        color: const Color(0xFFECECEC),
+                        elevation: 1.0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 5.0),
+                          child: ListTile(
+                            title: Text(
+                              teamApplyProvider.teams['teamName'] ?? '팀 이름 없음',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Row(
+                              children: [
+                                Text(
+                                  teamApplyProvider.teams['teamCategory'] ??
+                                      '카테고리 없음',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF808080),
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFEA4E44),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    minimumSize: const Size(33, 20),
+                                  ),
+                                  child: const Text(
+                                    '팀원',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
               const SizedBox(height: 20),
-
               // 계정(비밀번호 변경, 로그아웃) 위젯
               const AccountWidget(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 내 팀 현황 박스
-  Card showMyTeam() {
-    return Card(
-      color: const Color(0xFFECECEC),
-      elevation: 1.0,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5.0),
-        child: ListTile(
-          title: const Text(
-            'IoT 박사',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Row(
-            children: [
-              const Text(
-                'IOT 경진대회',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF808080),
-                ),
-              ),
-              const SizedBox(width: 14),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEA4E44),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  minimumSize: const Size(33, 20),
-                ),
-                child: const Text(
-                  '팀원',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
