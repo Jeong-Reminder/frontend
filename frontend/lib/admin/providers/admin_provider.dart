@@ -10,6 +10,9 @@ class AdminProvider with ChangeNotifier {
   final UserService userService = UserService();
 
   List<Admin> admins = []; // Datatable에 표시할 회원 정보 리스트
+  final List<Map<String, dynamic>> _teamList = [];
+
+  List<Map<String, dynamic>> get teamList => _teamList;
 
   // 학생들 정보를 담는 메소드를 호출(그래야만 학생들 정보를 admins에 담고 반환할 수 있음)
   // admins 반환
@@ -158,11 +161,18 @@ class AdminProvider with ChangeNotifier {
       headers: {'access': accessToken},
     );
 
+    _teamList.clear();
+
     if (response.statusCode == 200) {
       final utf8Response = utf8.decode(response.bodyBytes);
       final jsonResponse = json.decode(utf8Response);
       final dataResponse = jsonResponse['data'];
-      print('팀 전체 조회 성공: $dataResponse');
+
+      for (var data in dataResponse) {
+        _teamList.add(data);
+      }
+      notifyListeners();
+      print('팀 전체 조회 성공: $_teamList');
     } else {
       print('팀 전체 조회 실패: ${response.body}');
     }
