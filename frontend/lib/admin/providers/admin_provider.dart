@@ -144,4 +144,27 @@ class AdminProvider with ChangeNotifier {
       print('카테고리 별 삭제 실패: ${response.body}');
     }
   }
+
+  // 팀 전제 초회
+  Future<void> fetchAllTeams() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}team-get');
+    final response = await http.get(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response);
+      final dataResponse = jsonResponse['data'];
+      print('팀 전체 조회 성공: $dataResponse');
+    } else {
+      print('팀 전체 조회 실패: ${response.body}');
+    }
+  }
 }

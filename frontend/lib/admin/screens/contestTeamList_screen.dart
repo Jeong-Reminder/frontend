@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:intl/intl.dart';
 
 class ContestTeamListPage extends StatefulWidget {
@@ -214,6 +215,14 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
       default:
         return '경진대회';
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await AdminProvider().fetchAllTeams();
+    });
   }
 
   @override
