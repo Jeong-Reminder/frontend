@@ -110,7 +110,7 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
               width: 74,
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
@@ -133,9 +133,25 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
               width: 74,
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  final adminProvider =
+                      Provider.of<AdminProvider>(context, listen: false);
+
+                  if (selectedCategory != '경진대회') {
+                    await adminProvider.delCategoryTeam(selectedCategory);
+
+                    if (context.mounted) {
+                      await adminProvider.fetchAllTeams();
+
+                      // 다시 전체보기로 변경
+                      setState(() {
+                        selectedCategory = '경진대회';
+                        filteredTeamList = teamList;
+                      });
+                    }
+                  }
+
                   Navigator.of(context).pop();
-                  // 이 부분에서 삭제 메서드를 호출
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEA4E44),
@@ -176,20 +192,6 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
   // 특정 열을 클릭했을 때 실행되는 메서드
   void _onColumnTap(String column) {
     print('$column column tapped');
-  }
-
-  // 선택된 팝업 아이템의 텍스트를 반환하는 메서드
-  String _getSelectedItemText() {
-    switch (_selectedPopUpItem) {
-      case PopUpItem.popUpItem1:
-        return '경진대회';
-      case PopUpItem.popUpItem2:
-        return 'IOT';
-      case PopUpItem.popUpItem3:
-        return '뉴테크';
-      default:
-        return '경진대회';
-    }
   }
 
   @override
