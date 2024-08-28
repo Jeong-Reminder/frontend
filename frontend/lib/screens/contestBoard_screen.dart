@@ -20,7 +20,6 @@ enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 class _ContestBoardPageState extends State<ContestBoardPage> {
   String boardCategory = 'CONTEST';
   String userRole = '';
-  String contestCategory = ''; // 경진대회 카테고리 버튼을 눌렀을 때 해당하는 카테고리를 저장하는 변수
   bool isHidDel = false;
   Map<String, dynamic>? selectedBoard;
 
@@ -36,16 +35,6 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
             .fetchContestCate();
       }
     });
-
-    // 첫 번째 카테고리를 선택하여 초기화
-    final categoryList =
-        Provider.of<AnnouncementProvider>(context, listen: false).categoryList;
-    if (categoryList.isNotEmpty) {
-      setState(() {
-        contestCategory = categoryList.first;
-        print('초기 contestCategory: $contestCategory');
-      });
-    }
 
     _loadCredentials();
   }
@@ -81,14 +70,6 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
   Widget build(BuildContext context) {
     final cateBoardList =
         Provider.of<AnnouncementProvider>(context).cateBoardList;
-    final categoryList =
-        Provider.of<AnnouncementProvider>(context).categoryList;
-
-    // contestCategory와 일치하는 공지만 필터링
-    final filteredBoardList = cateBoardList.where((board) {
-      final competitionName = _parseCompetitionName(board['announcementTitle']);
-      return contestCategory.isEmpty || competitionName == contestCategory;
-    }).toList();
 
     return Scaffold(
       appBar: const BoardAppbar(),
@@ -116,9 +97,12 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            'write-board',
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BoardWritePage(category: 'CONTEST'),
+                            ),
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -142,56 +126,11 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
             ),
             const SizedBox(height: 20),
 
-            // 카테고리 버튼
-            SizedBox(
-              height: 30,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: categoryList.length,
-                itemBuilder: (context, index) {
-                  final category = categoryList[index];
-
-                  return Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            contestCategory = category;
-                            print('contestCategory = $contestCategory');
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDBE7FB),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          surfaceTintColor: const Color(0xFFAFCAF6),
-                        ),
-                        child: Text(
-                          category,
-                          style: TextStyle(
-                            color: (contestCategory == category)
-                                ? Colors.black
-                                : Colors.black.withOpacity(0.5),
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-
             // Board 위젯 안에 Listview.builder()가 있기 때문에
             // 여기서 Listview.builder() 작성할 필요가 없음
-
             Expanded(
               child: Board(
-                boardList: filteredBoardList,
+                boardList: cateBoardList,
                 total: true, // true일 경우에는 특정 학년 게시글만 보여줌
                 onBoardSelected: (board) {
                   setState(() {
@@ -210,75 +149,83 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
           ? Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
-
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchCateBoard(boardCategory);
-                      }
+                            .hiddenBoard(selectedBoard!, selectedBoard!['id']);
 
-                      setState(() {
-                        isHidDel = false; // 숨김/삭제 버튼 숨기기
-                        selectedBoard = null; // 선택된 게시글 초기화
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory);
+                        }
+
+                        setState(() {
+                          isHidDel = false; // 숨김/삭제 버튼 숨기기
+                          selectedBoard = null; // 선택된 게시글 초기화
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '숨김',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '숨김',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .deletedBoard(selectedBoard!['id']);
-
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchCateBoard(boardCategory);
-                      }
+                            .deletedBoard(selectedBoard!['id']);
 
-                      setState(() {
-                        selectedBoard = null;
-                        isHidDel = false;
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory);
+                        }
+
+                        setState(() {
+                          selectedBoard = null;
+                          isHidDel = false;
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '삭제',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '삭제',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

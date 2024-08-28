@@ -167,125 +167,136 @@ class _MyUserPageState extends State<MyUserPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 프로필
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserInfoPage(
-                        profile: techStack,
+      // AccountWidget을 화면의 하단에 고정시키고 스크롤 가능한 콘텐츠 위에 항상 표시되기 위해
+      // Column과 Expanded를 사용
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 26.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 프로필
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserInfoPage(
+                              profile: techStack,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Profile(
+                        profileUrl: 'assets/images/profile.png',
+                        name: '${techStack['memberName']}', // 이름 전달
+                        status: status ?? '', // 상태 전달
+                        showSubTitle: true,
+                        showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                        studentId: studentId ?? '', // 학번 전달
                       ),
                     ),
-                  );
-                },
-                child: Profile(
-                  profileUrl: 'assets/images/profile.png',
-                  name: '${techStack['memberName']}', // 이름 전달
-                  status: status ?? '', // 상태 전달
-                  showSubTitle: true,
-                  showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
-                  studentId: studentId ?? '', // 학번 전달
-                ),
-              ),
-              const SizedBox(height: 25),
-              const Text(
-                'DEVELOPMENT FIELD',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Development Field 배지
-              // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
-              Wrap(
-                direction: Axis.horizontal,
-                alignment: WrapAlignment.start,
-                spacing: 10,
-                runSpacing: 10,
-
-                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                children: developmentField.map((field) {
-                  // 괄호 안에 있는 변수는 리스트를 map한 이름
-                  return badge(
-                    field['logoUrl'],
-                    field['title'],
-                    field['titleColor'],
-                    field['badgeColor'],
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 26),
-              const Text(
-                'DEVELOPMENT TOOLS',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Development Tools 배지
-              Wrap(
-                direction: Axis.horizontal,
-                alignment: WrapAlignment.start,
-                spacing: 10,
-                runSpacing: 10,
-
-                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                children: developmentTool.map((tools) {
-                  return badge(
-                    tools['logoUrl'],
-                    tools['title'],
-                    tools['titleColor'],
-                    tools['badgeColor'],
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 26),
-
-              // 내 팀 현황
-              Row(
-                children: [
-                  const Text(
-                    '내 팀 현황',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 25),
+                    const Text(
+                      'DEVELOPMENT FIELD',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      // getField();
-                      print(developmentField);
-                      setState(() {
-                        isExpanded = !isExpanded;
-                      });
-                    },
-                    icon: Icon(
-                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                    const SizedBox(height: 20),
+
+                    // Development Field 배지
+                    // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
+                    Wrap(
+                      direction: Axis.horizontal,
+                      alignment: WrapAlignment.start,
+                      spacing: 10,
+                      runSpacing: 10,
+
+                      // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                      children: developmentField.map((field) {
+                        // 괄호 안에 있는 변수는 리스트를 map한 이름
+                        return badge(
+                          field['logoUrl'],
+                          field['title'],
+                          field['titleColor'],
+                          field['badgeColor'],
+                        );
+                      }).toList(),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 26),
+                    const Text(
+                      'DEVELOPMENT TOOLS',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Development Tools 배지
+                    Wrap(
+                      direction: Axis.horizontal,
+                      alignment: WrapAlignment.start,
+                      spacing: 10,
+                      runSpacing: 10,
+
+                      // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                      children: developmentTool.map((tools) {
+                        return badge(
+                          tools['logoUrl'],
+                          tools['title'],
+                          tools['titleColor'],
+                          tools['badgeColor'],
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 26),
+
+                    // 내 팀 현황
+                    Row(
+                      children: [
+                        const Text(
+                          '내 팀 현황',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            // getField();
+                            print(developmentField);
+                            setState(() {
+                              isExpanded = !isExpanded;
+                            });
+                          },
+                          icon: Icon(
+                            isExpanded ? Icons.expand_less : Icons.expand_more,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // 확장할 시 내 팀 현황 박스 보여주기
+                    if (isExpanded == true) showMyTeam(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-
-              // 확장할 시 내 팀 현황 박스 보여주기
-              if (isExpanded == true) showMyTeam(),
-              const SizedBox(height: 20),
-
-              // 계정(비밀번호 변경, 로그아웃) 위젯
-              const AccountWidget(),
-            ],
+            ),
           ),
-        ),
+          // 계정 위젯 고정
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            child: AccountWidget(),
+          ), // AccountWidget을 화면 하단에 고정
+        ],
       ),
     );
   }

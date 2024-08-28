@@ -109,9 +109,12 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            '/write-board',
+                            MaterialPageRoute(
+                              builder: (context) => const BoardWritePage(
+                                  category: 'ACADEMIC_ALL'),
+                            ),
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -199,75 +202,83 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
           ? Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
-
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchCateBoard(boardCategory);
-                      }
+                            .hiddenBoard(selectedBoard!, selectedBoard!['id']);
 
-                      setState(() {
-                        isHidDel = false; // 숨김/삭제 버튼 숨기기
-                        selectedBoard = null; // 선택된 게시글 초기화
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory);
+                        }
+
+                        setState(() {
+                          isHidDel = false; // 숨김/삭제 버튼 숨기기
+                          selectedBoard = null; // 선택된 게시글 초기화
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '숨김',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '숨김',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .deletedBoard(selectedBoard!['id']);
-
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchCateBoard(boardCategory);
-                      }
+                            .deletedBoard(selectedBoard!['id']);
 
-                      setState(() {
-                        isHidDel = true;
-                        selectedBoard = null;
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory);
+                        }
+
+                        setState(() {
+                          isHidDel = true;
+                          selectedBoard = null;
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '삭제',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '삭제',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
