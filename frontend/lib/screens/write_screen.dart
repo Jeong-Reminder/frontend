@@ -13,7 +13,8 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 class BoardWritePage extends StatefulWidget {
-  const BoardWritePage({super.key});
+  final String category;
+  const BoardWritePage({required this.category, super.key});
 
   @override
   State<BoardWritePage> createState() => _BoardWritePageState();
@@ -478,7 +479,15 @@ class _BoardWritePageState extends State<BoardWritePage> {
             //     .notification(notificationData, fcmToken);
 
             if (context.mounted) {
-              Navigator.popAndPushNamed(context, '/total-board');
+              if (widget.category == 'TOTAL') {
+                Navigator.popAndPushNamed(context, '/total-board');
+              } else if (widget.category == 'ACADEMIC_ALL') {
+                Navigator.popAndPushNamed(context, '/grade-board');
+              } else if (widget.category == 'CONTEST') {
+                Navigator.popAndPushNamed(context, '/contest-board');
+              } else if (widget.category == 'CORSEA') {
+                Navigator.popAndPushNamed(context, '/corSea-board');
+              }
             }
           } catch (e) {
             print(e.toString());

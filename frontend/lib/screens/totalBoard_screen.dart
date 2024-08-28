@@ -72,9 +72,12 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            '/write-board',
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BoardWritePage(category: 'TOTAL'),
+                            ),
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),

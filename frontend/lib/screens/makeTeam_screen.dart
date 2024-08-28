@@ -8,8 +8,10 @@ import 'package:frontend/models/makeTeam_modal.dart';
 class MakeTeamPage extends StatefulWidget {
   final MakeTeam? makeTeam; // 수정할 팀원 모집글을 받아옴 (nullable)
   final String? initialCategory; // 초기 카테고리 전달
+  final int? announcementId;
 
-  const MakeTeamPage({super.key, this.makeTeam, this.initialCategory});
+  const MakeTeamPage(
+      {super.key, this.makeTeam, this.initialCategory, this.announcementId});
 
   @override
   State<MakeTeamPage> createState() => _MakeTeamPageState();
@@ -591,7 +593,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                                   ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                       .format(selectedEndDate!)
                                   : '',
-                              announcementId: 1,
+                              announcementId: widget.announcementId!,
                             );
 
                             _showUpdateConfirmationDialog(makeTeam);
@@ -896,6 +898,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 TextField(
                   controller: _contentController,
                   maxLines: null,
+                  keyboardType: TextInputType.multiline, // 줄바꿈 가능한 키보드
+                  textInputAction: TextInputAction.done, // 키보드에 '확인' 버튼을 추가
                   decoration: const InputDecoration(
                     hintText: '내용을 작성해주세요',
                     hintStyle: TextStyle(
@@ -940,7 +944,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                             ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                 .format(selectedEndDate!)
                             : '',
-                        announcementId: 1,
+                        announcementId: widget.announcementId!,
                       );
 
                       if (widget.makeTeam != null) {

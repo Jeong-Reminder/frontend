@@ -212,7 +212,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
         '/total-board': (context) => const TotalBoardPage(),
-        '/write-board': (context) => const BoardWritePage(),
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),

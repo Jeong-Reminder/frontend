@@ -101,9 +101,12 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            '/write-board',
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BoardWritePage(category: 'CORSEA'),
+                            ),
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -147,89 +150,97 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
           ? Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
-
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchCateBoard(boardCategory[0]);
-                      }
+                            .hiddenBoard(selectedBoard!, selectedBoard!['id']);
 
-                      if (context.mounted) {
-                        // 두 번째 카테고리 API 호출
-                        await Provider.of<AnnouncementProvider>(context,
-                                listen: false)
-                            .fetchCateBoard(boardCategory[1]);
-                      }
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory[0]);
+                        }
 
-                      setState(() {
-                        isHidDel = false; // 숨김/삭제 버튼 숨기기
-                        selectedBoard = null; // 선택된 게시글 초기화
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                        if (context.mounted) {
+                          // 두 번째 카테고리 API 호출
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory[1]);
+                        }
+
+                        setState(() {
+                          isHidDel = false; // 숨김/삭제 버튼 숨기기
+                          selectedBoard = null; // 선택된 게시글 초기화
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '숨김',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '숨김',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .deletedBoard(selectedBoard!['id']);
-
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchCateBoard(boardCategory[0]);
-                      }
+                            .deletedBoard(selectedBoard!['id']);
 
-                      if (context.mounted) {
-                        // 두 번째 카테고리 API 호출
-                        await Provider.of<AnnouncementProvider>(context,
-                                listen: false)
-                            .fetchCateBoard(boardCategory[1]);
-                      }
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory[0]);
+                        }
 
-                      setState(() {
-                        selectedBoard = null;
-                        isHidDel = false;
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                        if (context.mounted) {
+                          // 두 번째 카테고리 API 호출
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory[1]);
+                        }
+
+                        setState(() {
+                          selectedBoard = null;
+                          isHidDel = false;
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '삭제',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '삭제',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
