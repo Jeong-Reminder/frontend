@@ -196,4 +196,24 @@ class AdminProvider with ChangeNotifier {
       print('Team 카테고리별 삭제 실패: ${response.body}');
     }
   }
+
+  // Team 전체 삭제
+  Future<void> deleteAllTeams() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}team-delete-all');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      print('Team 카테고리별 삭제 성공: ${response.body}');
+    } else {
+      print('Team 카테고리별 삭제 실패: ${response.body}');
+    }
+  }
 }

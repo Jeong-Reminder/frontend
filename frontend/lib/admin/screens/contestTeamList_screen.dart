@@ -137,21 +137,31 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                   final adminProvider =
                       Provider.of<AdminProvider>(context, listen: false);
 
+                  // 카테고리별로 삭제
                   if (selectedCategory != '경진대회') {
                     await adminProvider.delCategoryTeam(selectedCategory);
 
                     if (context.mounted) {
                       await adminProvider.fetchAllTeams();
+                    }
+                  }
+                  // 전체 삭제
+                  else if (selectedCategory == '경진대회') {
+                    await adminProvider.deleteAllTeams();
 
-                      // 다시 전체보기로 변경
-                      setState(() {
-                        selectedCategory = '경진대회';
-                        filteredTeamList = teamList;
-                      });
+                    if (context.mounted) {
+                      await adminProvider.fetchAllTeams();
                     }
                   }
 
-                  Navigator.of(context).pop();
+                  // 다시 전체보기로 변경
+                  setState(() {
+                    selectedCategory = '경진대회';
+                    filteredTeamList = teamList;
+                  });
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEA4E44),
@@ -455,7 +465,17 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
             const SizedBox(height: 10),
 
             filteredTeamList.isEmpty
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(
+                    child: Column(
+                      children: [
+                        Image.asset('assets/images/frust.png', scale: 4.0),
+                        const Text(
+                          '생성된 팀이 없습니다',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  )
                 : SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: SingleChildScrollView(
