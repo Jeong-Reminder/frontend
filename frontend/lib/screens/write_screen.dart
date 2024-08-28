@@ -28,7 +28,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
   bool isButtonEnabled = false; // 작성 완료 버튼 상태
   bool isMustRead = false;
-  bool isConfirmedVote = false;
+  bool isConfirmedVote = false; // 투표 설정 여부
 
   bool categoryBtn = true; // 공지 혹은 학년 버튼 여부
   List<bool> isCategory = [false, false, false, false]; // 공지 선택 불리안
@@ -508,8 +508,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
   }
 
   // 투표 바텀시트
-  void _showVoteSheet(BuildContext context) {
-    showModalBottomSheet(
+  // 그 값을 이전 화면에서 받아서 상태를 업데이트해서 다이얼로그가 닫힐 때 isConfirmedVote 값을 반환
+  Future<void> _showVoteSheet(BuildContext context) async {
+    final result = await showModalBottomSheet<bool>(
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
@@ -652,8 +653,8 @@ class _BoardWritePageState extends State<BoardWritePage> {
                           setState(() {
                             isConfirmedVote = true;
                           });
-                          print('$isConfirmedVote');
-                          Navigator.pop(context);
+
+                          Navigator.pop(context, isConfirmedVote);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFDBE7FB),
@@ -682,6 +683,12 @@ class _BoardWritePageState extends State<BoardWritePage> {
         );
       },
     );
+
+    if (result == true) {
+      setState(() {
+        isConfirmedVote = true;
+      });
+    }
   }
 
   // 미리보기 함수
@@ -935,6 +942,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   }
                 }
               });
+              print('isCategory: $isCategory');
             },
             borderRadius: BorderRadius.circular(10.0),
             constraints: const BoxConstraints(
@@ -965,10 +973,10 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
   String getSelectedCategoryText() {
     List<String> categories = [
-      'SEASONAL_SYSTEM',
-      'CORPORATE_TOUR',
-      'CONTEST',
-      'ACADEMIC_ALL',
+      'SEASONAL_SYSTEM', // 계절
+      'ACADEMIC_ALL', // 학년
+      'CONTEST', // 경진
+      'CORPORATE_TOUR', // 학년
     ];
 
     for (int i = 0; i < isCategory.length; i++) {
