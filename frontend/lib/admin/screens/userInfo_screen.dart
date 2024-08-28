@@ -427,7 +427,16 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     } else if (snapshot.hasError) {
                       return const Center(child: Text('에러 로딩 데이터'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('저장된 멤버가 없습니다'));
+                      return Center(
+                          child: Column(
+                        children: [
+                          Image.asset('assets/images/frust.png', scale: 4.0),
+                          const Text(
+                            '저장된 멤버가 없습니다',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ));
                     }
 
                     List<Admin> userListData = snapshot.data!;
