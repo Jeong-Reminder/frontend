@@ -211,8 +211,8 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                   TextFormField(
                     controller: projectExperienceController,
                     maxLines: 4,
-                    textInputAction:
-                        TextInputAction.done, // 키패드 완료 버튼으로(키보드 창에서 나가도록 설정)
+                    keyboardType: TextInputType.multiline, // 줄바꿈 가능한 키보드
+                    textInputAction: TextInputAction.done, // 키보드에 '확인' 버튼을 추가
                     decoration: const InputDecoration(
                       labelText: '프로젝트 경험을 입력해주세요',
                       labelStyle: TextStyle(
