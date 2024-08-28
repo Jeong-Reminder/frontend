@@ -5,14 +5,14 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:frontend/models/projectExperience_model.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 
-class SettingProfile2Page extends StatefulWidget {
-  const SettingProfile2Page({super.key});
+class SetExperiencePage extends StatefulWidget {
+  const SetExperiencePage({super.key});
 
   @override
-  State<SettingProfile2Page> createState() => _SettingProfile2PageState();
+  State<SetExperiencePage> createState() => _SetExperiencePageState();
 }
 
-class _SettingProfile2PageState extends State<SettingProfile2Page> {
+class _SetExperiencePageState extends State<SetExperiencePage> {
   double percent = 0; // 프로그레스 바 진행률
   TextEditingController projectNameController =
       TextEditingController(); // 프로젝트명 입력 컨트롤러
