@@ -9,6 +9,7 @@ import 'package:frontend/widgets/field_list.dart';
 import 'package:frontend/widgets/profile_widget.dart';
 import 'package:frontend/widgets/tool_list.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/providers/teamApply_provider.dart';
 
 class MyUserPage extends StatefulWidget {
   const MyUserPage({super.key});
@@ -35,6 +36,7 @@ class _MyUserPageState extends State<MyUserPage> {
     getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
     getTool();
     _loadCredentials(); // 학번을 로드하는 메서드 호출
+    _fetchProfileData(); // 프로필 데이터를 불러오는 메서드 호출
   }
 
   // 학번, 이름, 재적상태를 로드하는 메서드
@@ -46,6 +48,16 @@ class _MyUserPageState extends State<MyUserPage> {
       name = credentials['name'] ?? ''; // 이름 설정, 없으면 빈 문자열로 설정
       status = credentials['status'] ?? ''; // 상태 설정, 없으면 빈 문자열로 설정
     });
+  }
+
+  Future<void> _fetchProfileData() async {
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    await profileProvider.fetchProfile(profileProvider.memberId);
+
+    final teamApplyProvider =
+        Provider.of<TeamApplyProvider>(context, listen: false);
+    await teamApplyProvider.fetchTeamsFromProfile(profileProvider);
   }
 
   // 문자열을 리스트로 변환하는 메소드
@@ -100,20 +112,11 @@ class _MyUserPageState extends State<MyUserPage> {
     });
   }
 
-  void profileDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return const Column();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final techStack =
         Provider.of<ProfileProvider>(context, listen: false).techStack;
+    final teamApplyProvider = Provider.of<TeamApplyProvider>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -167,183 +170,183 @@ class _MyUserPageState extends State<MyUserPage> {
           ),
         ],
       ),
-      // AccountWidget을 화면의 하단에 고정시키고 스크롤 가능한 콘텐츠 위에 항상 표시되기 위해
-      // Column과 Expanded를 사용
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 26.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 프로필
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => UserInfoPage(
-                              profile: techStack,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Profile(
-                        profileUrl: 'assets/images/profile.png',
-                        name: '${techStack['memberName']}', // 이름 전달
-                        status: status ?? '', // 상태 전달
-                        showSubTitle: true,
-                        showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
-                        studentId: studentId ?? '', // 학번 전달
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    const Text(
-                      'DEVELOPMENT FIELD',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Development Field 배지
-                    // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
-                    Wrap(
-                      direction: Axis.horizontal,
-                      alignment: WrapAlignment.start,
-                      spacing: 10,
-                      runSpacing: 10,
-
-                      // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                      children: developmentField.map((field) {
-                        // 괄호 안에 있는 변수는 리스트를 map한 이름
-                        return badge(
-                          field['logoUrl'],
-                          field['title'],
-                          field['titleColor'],
-                          field['badgeColor'],
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 26),
-                    const Text(
-                      'DEVELOPMENT TOOLS',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Development Tools 배지
-                    Wrap(
-                      direction: Axis.horizontal,
-                      alignment: WrapAlignment.start,
-                      spacing: 10,
-                      runSpacing: 10,
-
-                      // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                      children: developmentTool.map((tools) {
-                        return badge(
-                          tools['logoUrl'],
-                          tools['title'],
-                          tools['titleColor'],
-                          tools['badgeColor'],
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 26),
-
-                    // 내 팀 현황
-                    Row(
-                      children: [
-                        const Text(
-                          '내 팀 현황',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            // getField();
-                            print(developmentField);
-                            setState(() {
-                              isExpanded = !isExpanded;
-                            });
-                          },
-                          icon: Icon(
-                            isExpanded ? Icons.expand_less : Icons.expand_more,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // 확장할 시 내 팀 현황 박스 보여주기
-                    if (isExpanded == true) showMyTeam(),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // 계정 위젯 고정
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-            child: AccountWidget(),
-          ), // AccountWidget을 화면 하단에 고정
-        ],
-      ),
-    );
-  }
-
-  // 내 팀 현황 박스
-  Card showMyTeam() {
-    return Card(
-      color: const Color(0xFFECECEC),
-      elevation: 1.0,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5.0),
-        child: ListTile(
-          title: const Text(
-            'IoT 박사',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Row(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 프로필
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserInfoPage(
+                        profile: techStack,
+                      ),
+                    ),
+                  );
+                },
+                child: Profile(
+                  profileUrl: 'assets/images/profile.png',
+                  name: '${techStack['memberName']}', // 이름 전달
+                  status: status ?? '', // 상태 전달
+                  showSubTitle: true,
+                  showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                  studentId: studentId ?? '', // 학번 전달
+                ),
+              ),
+              const SizedBox(height: 25),
               const Text(
-                'IOT 경진대회',
+                'DEVELOPMENT FIELD',
                 style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF808080),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 14),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEA4E44),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  minimumSize: const Size(33, 20),
-                ),
-                child: const Text(
-                  '팀원',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+              const SizedBox(height: 20),
+              // Development Field 배지
+              // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
+              Wrap(
+                direction: Axis.horizontal,
+                alignment: WrapAlignment.start,
+                spacing: 10,
+                runSpacing: 10,
+                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                children: developmentField.map((field) {
+                  // 괄호 안에 있는 변수는 리스트를 map한 이름
+                  return badge(
+                    field['logoUrl'],
+                    field['title'],
+                    field['titleColor'],
+                    field['badgeColor'],
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 26),
+              const Text(
+                'DEVELOPMENT TOOLS',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 20),
+              // Development Tools 배지
+              Wrap(
+                direction: Axis.horizontal,
+                alignment: WrapAlignment.start,
+                spacing: 10,
+                runSpacing: 10,
+                // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                children: developmentTool.map((tools) {
+                  return badge(
+                    tools['logoUrl'],
+                    tools['title'],
+                    tools['titleColor'],
+                    tools['badgeColor'],
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 26),
+              Row(
+                children: [
+                  const Text(
+                    '내 팀 현황',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isExpanded = !isExpanded;
+                      });
+                    },
+                    icon: Icon(
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                    ),
+                  ),
+                ],
+              ),
+              if (isExpanded)
+                teamApplyProvider.teams.isEmpty
+                    ? const Text('생성된 팀이 없습니다.')
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: teamApplyProvider.teams['teamList'].length,
+                        itemBuilder: (context, index) {
+                          final team =
+                              teamApplyProvider.teams['teamList'][index];
+                          final teamMembers =
+                              team['teamMember'] as List<dynamic>;
+
+                          // data의 memberName과 teamMember의 memberName을 비교하여 memberRole을 찾기
+                          final memberRole = teamMembers.firstWhere(
+                            (member) =>
+                                member['memberName'] == techStack['memberName'],
+                            orElse: () => {'memberRole': 'Member'},
+                          )['memberRole'];
+
+                          return Card(
+                            color: const Color(0xFFECECEC),
+                            elevation: 1.0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 5.0),
+                              child: ListTile(
+                                title: Text(
+                                  team['teamName'] ?? '팀 이름 없음',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Row(
+                                  children: [
+                                    Text(
+                                      team['teamCategory'] ?? '카테고리 없음',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF808080),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFFEA4E44),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        minimumSize: const Size(33, 20),
+                                      ),
+                                      child: Text(
+                                        memberRole == 'LEADER'
+                                            ? 'Leader'
+                                            : 'Member',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+              const SizedBox(height: 20),
+              // 계정(비밀번호 변경, 로그아웃) 위젯
+              const AccountWidget(),
             ],
           ),
         ),

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/teamApply_model.dart';
 import 'package:frontend/services/teamApply_service.dart';
+import 'package:frontend/providers/profile_provider.dart';
 
 class TeamApplyProvider with ChangeNotifier {
   final TeamApplyService service = TeamApplyService();
 
   List<TeamApply> teamApplys = [];
+  final List<Map<String, dynamic>> _teamList = [];
+  Map<String, dynamic> teams = {}; // Store team data here
+
+  List<Map<String, dynamic>> get teamList => _teamList;
 
   Future<List<TeamApply>> getTeamApply() async {
     return teamApplys;
@@ -15,13 +20,12 @@ class TeamApplyProvider with ChangeNotifier {
   Future<int> createTeamApply(TeamApply teamApply) async {
     try {
       int applicationId = await service.createTeamApply(teamApply);
-      print('Application ID: $applicationId'); // 디버깅을 위한 로그
+      print('Application ID: $applicationId');
 
-      // 작성된 신청글을 리스트에 추가하고 리스너들에게 알림
       teamApplys.add(teamApply);
       notifyListeners();
 
-      return applicationId; // 작성된 신청글의 ID 반환
+      return applicationId;
     } catch (e) {
       print(e);
       rethrow;
@@ -33,10 +37,8 @@ class TeamApplyProvider with ChangeNotifier {
       int applicationId, TeamApply updatedTeamApply) async {
     try {
       await service.updateTeamApply(applicationId, updatedTeamApply);
-      print(
-          'Application ID: $applicationId updated successfully'); // 디버깅을 위한 로그
+      print('Application ID: $applicationId updated successfully');
 
-      // 로컬 리스트에서 해당 신청글을 업데이트하고 리스너들에게 알림
       int index = teamApplys.indexWhere((app) => app.id == applicationId);
       if (index != -1) {
         teamApplys[index] = updatedTeamApply;
@@ -51,10 +53,8 @@ class TeamApplyProvider with ChangeNotifier {
   Future<void> deleteTeamApply(int applicationId) async {
     try {
       await service.deleteTeamApply(applicationId);
-      print(
-          'Application ID: $applicationId deleted successfully'); // 디버깅을 위한 로그
+      print('Application ID: $applicationId deleted successfully');
 
-      // 로컬 리스트에서 해당 신청글을 삭제하고 리스너들에게 알림
       teamApplys.removeWhere((app) => app.id == applicationId);
       notifyListeners();
     } catch (e) {
@@ -69,9 +69,7 @@ class TeamApplyProvider with ChangeNotifier {
       await service.processTeamApply(memberId, recruitmentId, accept);
       print('Team member processed: $memberId for recruitment: $recruitmentId');
 
-      // 처리된 팀원 신청글을 리스트에서 제거하고 리스너들에게 알림
-      teamApplys.removeWhere(
-          (app) => app.id == memberId); // ID 비교 로직은 실제 응답에 따라 수정 가능
+      teamApplys.removeWhere((app) => app.id == memberId);
       notifyListeners();
     } catch (e) {
       print(e);
@@ -82,13 +80,32 @@ class TeamApplyProvider with ChangeNotifier {
   Future<void> createTeam(
       int recruitmentId, String teamName, String kakaoUrl) async {
     try {
-      await service.createTeam(recruitmentId, teamName, kakaoUrl);
-      print('Team created successfully for recruitment: $recruitmentId');
-
-      // 팀 생성 후 추가적인 로직 (필요에 따라)
-      notifyListeners();
+      // 팀 생성 후 팀 ID 반환
+      int teamId = await service.createTeam(recruitmentId, teamName, kakaoUrl);
+      print('Team created successfully with ID: $teamId');
     } catch (e) {
       print('Failed to create team: $e');
+      rethrow;
+    }
+  }
+
+  // 팀 목록 조회
+  Future<void> fetchTeamsFromProfile(ProfileProvider profileProvider) async {
+    try {
+      final teamData = profileProvider.teams;
+
+      if (teamData.isNotEmpty) {
+        print('Team data fetched successfully from profile');
+        teams = {
+          'teamList': teamData,
+        };
+        print('teams : $teams');
+        notifyListeners();
+      } else {
+        print('No team data found in profile');
+      }
+    } catch (e) {
+      print('Failed to fetch teams: $e');
       rethrow;
     }
   }

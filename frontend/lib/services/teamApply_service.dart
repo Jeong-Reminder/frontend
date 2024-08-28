@@ -27,14 +27,11 @@ class TeamApplyService {
     }
     final String baseUrl =
         'http://127.0.0.1:9000/api/v1/recruitment/team-application/$id';
-
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
     }
-
     print('Request Body: ${jsonEncode(teamapply.toJson())}');
-
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: <String, String>{
@@ -43,25 +40,18 @@ class TeamApplyService {
       },
       body: jsonEncode(teamapply.toJson()),
     );
-
     final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-
     if (response.statusCode == 200) {
       final dataResponse = responseData['data'];
-
       // teamApplicationList가 null일 수 있으므로 null 체크 추가
       final List<dynamic> applyResponse =
           dataResponse['teamApplicationList'] ?? [];
-
       print('팀원 신청글 작성 성공 : $dataResponse');
-
       for (var application in applyResponse) {
         print('Application: ${jsonEncode(application)}');
       }
-
       // 서버 응답에서 id 추출 (응답 구조에 따라 수정)
       int applicationId = dataResponse['id'];
-
       return applicationId;
     } else {
       throw Exception('팀원 신청글 작성 실패: ${response.body}');
@@ -73,14 +63,11 @@ class TeamApplyService {
       int applicationId, TeamApply teamapply) async {
     final String baseUrl =
         'http://127.0.0.1:9000/api/v1/recruitment/team-application/$applicationId';
-
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
     }
-
     print('Request Body: ${jsonEncode(teamapply.toJson())}');
-
     final response = await http.put(
       Uri.parse(baseUrl),
       headers: <String, String>{
@@ -89,11 +76,9 @@ class TeamApplyService {
       },
       body: jsonEncode(teamapply.toJson()),
     );
-
     if (response.statusCode == 200) {
       final responseData = jsonDecode(utf8.decode(response.bodyBytes));
       print('팀원 신청글 수정 성공: $responseData');
-
       return responseData;
     } else {
       throw Exception('팀원 신청글 수정 실패: ${response.body}');
@@ -104,12 +89,10 @@ class TeamApplyService {
   Future<void> deleteTeamApply(int applicationId) async {
     final String baseUrl =
         'http://127.0.0.1:9000/api/v1/recruitment/team-application/$applicationId';
-
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
     }
-
     final response = await http.delete(
       Uri.parse(baseUrl),
       headers: <String, String>{
@@ -117,7 +100,6 @@ class TeamApplyService {
         'access': token,
       },
     );
-
     if (response.statusCode == 200) {
       final responseData = jsonDecode(utf8.decode(response.bodyBytes));
       print('팀원 신청글 삭제 성공: $responseData');
@@ -131,14 +113,11 @@ class TeamApplyService {
       int memberId, int recruitmentId, bool accept) async {
     String baseUrl =
         'http://127.0.0.1:9000/api/v1/accept-member?accept=$accept';
-
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
     }
-
     print('Processing with recruitmentId: $recruitmentId, memberId: $memberId');
-
     final response = await http.put(
       Uri.parse(baseUrl),
       headers: <String, String>{
@@ -150,10 +129,8 @@ class TeamApplyService {
         'recruitmentId': recruitmentId,
       }),
     );
-
     if (response.statusCode == 200) {
       final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-
       print('팀원 신청글 수락, 거절 성공: $responseData');
     } else {
       throw Exception('팀원 신청글 수락, 거절 실패: ${response.body}');
@@ -161,7 +138,7 @@ class TeamApplyService {
   }
 
   // 팀 생성 API
-  Future<void> createTeam(
+  Future<int> createTeam(
       int recruitmentId, String teamName, String kakaoUrl) async {
     String baseUrl = 'http://127.0.0.1:9000/api/v1/team';
 
@@ -169,9 +146,6 @@ class TeamApplyService {
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
     }
-
-    print(
-        'Processing with recruitmentId: $recruitmentId, teamName: $teamName, kakaoUrl: $kakaoUrl');
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -188,8 +162,8 @@ class TeamApplyService {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-
-      print('팀 생성 성공: $responseData');
+      print('팀 생성 성공 : $responseData');
+      return responseData['data']['id']; // Return the team ID
     } else {
       throw Exception('팀 생성 실패: ${response.body}');
     }
