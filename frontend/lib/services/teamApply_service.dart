@@ -168,30 +168,4 @@ class TeamApplyService {
       throw Exception('팀 생성 실패: ${response.body}');
     }
   }
-
-  // 팀 조회 API
-  Future<Map<String, dynamic>> fetchTeams(int teamId) async {
-    String baseUrl = 'http://127.0.0.1:9000/api/v1/team/$teamId';
-
-    final token = await getToken();
-    if (token == null) {
-      throw Exception('Access token을 찾을 수 없습니다.');
-    }
-
-    final response = await http.get(
-      Uri.parse(baseUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'access': token,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
-      print('팀 조회 성공 : $responseData');
-      return responseData['data'];
-    } else {
-      throw Exception('팀 조회 실패: ${response.body}');
-    }
-  }
 }
