@@ -107,6 +107,7 @@ flutter:
         - assets/images/contestImg.png
         - assets/images/filtering.png
         - assets/images/Folder_send_light.png
+        - assets/images/frust.png
         - assets/skilImages/typescript.png
         - assets/skilImages/javascript.png
         - assets/skilImages/tailwindcss.png

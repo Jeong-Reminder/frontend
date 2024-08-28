@@ -89,74 +89,82 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 프로필
-            const Profile(
-              profileUrl: 'assets/images/profile.png',
-              name: '홍길동',
-              status: 'Admin',
-              showSubTitle: false,
-              studentId: '2090',
-            ),
-            const SizedBox(height: 25),
-
-            // 작성 내역 버튼
-            Row(
-              children: [
-                const Text(
-                  '작성 내역',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 프로필
+                  const Profile(
+                    profileUrl: 'assets/images/profile.png',
+                    name: '홍길동',
+                    status: 'Admin',
+                    showSubTitle: false,
+                    studentId: '2090',
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isOpened = true;
-                    });
+                  const SizedBox(height: 25),
 
-                    if (isOpened == true) {
-                      boardHistory(context).whenComplete(() {
-                        // 바텀 모달시트를 닫을 때 whenComplete 메서드를 통해 isOpened를 false로 설정
-                        setState(() {
-                          isOpened = false;
-                        });
-                      });
-                    }
-                  },
-                  icon: Icon(
-                    isOpened ? Icons.expand_less : Icons.expand_more,
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: pickedHistory.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: const Icon(Icons.edit),
-                    title: Text(
-                      '[ ${pickedHistory[index]['category']} ]',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                  // 작성 내역 버튼
+                  Row(
+                    children: [
+                      const Text(
+                        '작성 내역',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isOpened = true;
+                          });
+
+                          if (isOpened == true) {
+                            boardHistory(context).whenComplete(() {
+                              // 바텀 모달시트를 닫을 때 whenComplete 메서드를 통해 isOpened를 false로 설정
+                              setState(() {
+                                isOpened = false;
+                              });
+                            });
+                          }
+                        },
+                        icon: Icon(
+                          isOpened ? Icons.expand_less : Icons.expand_more,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: pickedHistory.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          leading: const Icon(Icons.edit),
+                          title: Text(
+                            '[ ${pickedHistory[index]['category']} ]',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(pickedHistory[index]['title']),
+                        );
+                      },
                     ),
-                    subtitle: Text(pickedHistory[index]['title']),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
-
-            // 계정(비밀번호 변경, 로그아웃) 위젯
-            const AccountWidget(),
-          ],
-        ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            child: AccountWidget(),
+          ),
+        ],
       ),
     );
   }

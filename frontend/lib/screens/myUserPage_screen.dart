@@ -36,8 +36,7 @@ class _MyUserPageState extends State<MyUserPage> {
     getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
     getTool();
     _loadCredentials(); // 학번을 로드하는 메서드 호출
-
-    _fetchTeamData(4);
+    _fetchProfileData(); // 프로필 데이터를 불러오는 메서드 호출
   }
 
   // 학번, 이름, 재적상태를 로드하는 메서드
@@ -51,11 +50,14 @@ class _MyUserPageState extends State<MyUserPage> {
     });
   }
 
-  Future<void> _fetchTeamData(int teamId) async {
+  Future<void> _fetchProfileData() async {
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    await profileProvider.fetchProfile(profileProvider.memberId);
+
     final teamApplyProvider =
         Provider.of<TeamApplyProvider>(context, listen: false);
-
-    await teamApplyProvider.fetchTeams(teamId);
+    await teamApplyProvider.fetchTeamsFromProfile(profileProvider);
   }
 
   // 문자열을 리스트로 변환하는 메소드
@@ -272,53 +274,76 @@ class _MyUserPageState extends State<MyUserPage> {
               if (isExpanded)
                 teamApplyProvider.teams.isEmpty
                     ? const Text('생성된 팀이 없습니다.')
-                    : Card(
-                        color: const Color(0xFFECECEC),
-                        elevation: 1.0,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 5.0),
-                          child: ListTile(
-                            title: Text(
-                              teamApplyProvider.teams['teamName'] ?? '팀 이름 없음',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: teamApplyProvider.teams['teamList'].length,
+                        itemBuilder: (context, index) {
+                          final team =
+                              teamApplyProvider.teams['teamList'][index];
+                          final teamMembers =
+                              team['teamMember'] as List<dynamic>;
+
+                          // data의 memberName과 teamMember의 memberName을 비교하여 memberRole을 찾기
+                          final memberRole = teamMembers.firstWhere(
+                            (member) =>
+                                member['memberName'] == techStack['memberName'],
+                            orElse: () => {'memberRole': 'Member'},
+                          )['memberRole'];
+
+                          return Card(
+                            color: const Color(0xFFECECEC),
+                            elevation: 1.0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 5.0),
+                              child: ListTile(
+                                title: Text(
+                                  team['teamName'] ?? '팀 이름 없음',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Row(
+                                  children: [
+                                    Text(
+                                      team['teamCategory'] ?? '카테고리 없음',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF808080),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFFEA4E44),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        minimumSize: const Size(33, 20),
+                                      ),
+                                      child: Text(
+                                        memberRole == 'LEADER'
+                                            ? 'Leader'
+                                            : 'Member',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            subtitle: Row(
-                              children: [
-                                Text(
-                                  teamApplyProvider.teams['teamCategory'] ??
-                                      '카테고리 없음',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF808080),
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFEA4E44),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    minimumSize: const Size(33, 20),
-                                  ),
-                                  child: const Text(
-                                    '팀원',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
+
               const SizedBox(height: 20),
               // 계정(비밀번호 변경, 로그아웃) 위젯
               const AccountWidget(),

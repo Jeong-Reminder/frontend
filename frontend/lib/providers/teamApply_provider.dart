@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/teamApply_model.dart';
 import 'package:frontend/services/teamApply_service.dart';
+import 'package:frontend/providers/profile_provider.dart';
 
 class TeamApplyProvider with ChangeNotifier {
   final TeamApplyService service = TeamApplyService();
@@ -89,17 +90,19 @@ class TeamApplyProvider with ChangeNotifier {
   }
 
   // 팀 목록 조회
-  Future<void> fetchTeams(int teamId) async {
+  Future<void> fetchTeamsFromProfile(ProfileProvider profileProvider) async {
     try {
-      final teamData = await service.fetchTeams(teamId);
+      final teamData = profileProvider.teams;
 
       if (teamData.isNotEmpty) {
-        print('Team data fetched successfully: $teamId');
-        teams = teamData;
+        print('Team data fetched successfully from profile');
+        teams = {
+          'teamList': teamData,
+        };
         print('teams : $teams');
         notifyListeners();
       } else {
-        print('No data found for teamId: $teamId');
+        print('No team data found in profile');
       }
     } catch (e) {
       print('Failed to fetch teams: $e');

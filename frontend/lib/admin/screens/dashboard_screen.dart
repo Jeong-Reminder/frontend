@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/screens/contestTeamList_screen.dart';
 import 'package:frontend/admin/screens/teamRecruitList_screen.dart';
-import 'package:frontend/screens/home_screen.dart';
 
 class DashBoardPage extends StatefulWidget {
   const DashBoardPage({super.key});
@@ -78,9 +78,16 @@ class _DashBoardPageState extends State<DashBoardPage> {
 
                     // 경진대회 버튼
                     dashboardBtn(
-                      () {},
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ContestTeamListPage(),
+                          ),
+                        );
+                      },
                       'assets/images/contestImg.png',
-                      '경진대회',
+                      '팀',
                     ),
                   ],
                 )),

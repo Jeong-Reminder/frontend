@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/models/vote_model.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/viewVote_screen.dart';
 import 'package:frontend/services/login_services.dart';

@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 
 class MemberRecruitPage extends StatefulWidget {
@@ -41,6 +42,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   List<Map<String, dynamic>> filteredBoardList = [];
   List<Map<String, dynamic>> recruitList = []; // 조회된 팀원 모집글을 저장하는 리스트
   List<Map<String, dynamic>> cateBoardList = [];
+
+  int? announcementId; // 모집글 작성에 사용할 게시글 아이디
 
   @override
   void initState() {
@@ -261,14 +264,32 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         if (categoryList.isNotEmpty) const PopupMenuDivider(),
       ],
     ).then((selectedItem) async {
+      setState(() {
+        announcementId = categoryList.map((cate) {
+          // 빈 맵을 반환하여 타입 문제 해결
+          // cateBoardList에서 cate와 _parseCategoryName(cateBoard['announcementTitle'])이 동일한 첫 번째 항목을 확인
+          final match = cateBoardList.firstWhere(
+            (cateBoard) =>
+                cate == _parseCategoryName(cateBoard['announcementTitle']),
+            orElse: () => <String, dynamic>{}, // 빈 맵 반환
+          );
+
+          // 찾은 항목(match)에서 id 값을 추출
+          return match['id'] as int?;
+        }).firstWhere((id) => id != null,
+            orElse: () => null); // categoryList에서 가장 먼저 발견된 id가 null이 아닌 값을 반환
+      });
+
       // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우
       if (selectedItem != null && categoryList.contains(selectedItem)) {
         if (userRole == 'ROLE_USER') {
+          print('anncouncementID: $announcementId');
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => MakeTeamPage(
                 initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
+                announcementId: announcementId,
               ),
             ),
           );

@@ -358,26 +358,38 @@ class _LoginPageState extends State<LoginPage> {
                         }
                         // userRole 값에 따라 다른 페이지로 이동
                         if (result['role'] == 'ROLE_ADMIN') {
-                          Navigator.pushNamed(context, '/dashboard');
+                          if (context.mounted) {
+                            Navigator.pushNamed(context, '/dashboard');
+                          }
                         } else if (result['role'] == 'ROLE_USER') {
                           // techStack 값이 null이거나 값이 비어있는 경우
                           if (result['techStack'] == null ||
                               result['techStack'].isEmpty) {
-                            Navigator.pushNamed(context, '/setting-profile');
+                            if (context.mounted) {
+                              Navigator.pushNamed(context, '/set-profile');
+                            }
+
                             // memberExperience 값이 null이거나 값이 비어있는 경우
                           } else if (result['memberExperiences'] == null ||
                               result['memberExperiences'].isEmpty) {
-                            Navigator.pushNamed(context, '/member-experience');
+                            if (context.mounted) {
+                              Navigator.pushNamed(
+                                  context, '/member-experience');
+                            }
 
                             // 둘 다 비어있을 경우
                           } else if ((result['techStack'] == null ||
                                   result['techStack'].isEmpty) &&
                               (result['memberExperiences'] == null ||
                                   result['memberExperiences'].isEmpty)) {
-                            Navigator.pushNamed(context, '/setting-profile');
+                            if (context.mounted) {
+                              Navigator.pushNamed(context, '/set-profile');
+                            }
                           } else {
                             // techStack, memberExperiences 값이 둘 다 채워진 경우
-                            Navigator.pushNamed(context, '/homepage');
+                            if (context.mounted) {
+                              Navigator.pushNamed(context, '/homepage');
+                            }
                           }
                         }
                         // userRole 저장
