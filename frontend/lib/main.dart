@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/teamApply_provider.dart';
 import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
@@ -26,8 +26,8 @@ import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
-import 'package:frontend/screens/settingProFile1_screen.dart';
-import 'package:frontend/screens/settingProfile2_screen.dart';
+import 'package:frontend/screens/setProfile_screen.dart';
+import 'package:frontend/screens/setExperience_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
@@ -200,9 +200,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/': (context) => const LoginPage(),
         '/add_member': (context) => const AddMemberPage(),
         '/user-info': (context) => const UserInfoPage(),
-        '/setting-profile': (context) => const SettingProfile1Page(),
         '/myuser': (context) => const MyUserPage(),
-        '/member-experience': (context) => const SettingProfile2Page(),
+        '/set-profile': (context) => const SetProfilePage(),
+        '/member-experience': (context) => const SetExperiencePage(),
         '/experience': (context) => const ExperiencePage(
               experiences: [],
               name: '',
@@ -212,7 +212,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
         '/total-board': (context) => const TotalBoardPage(),
-        '/write-board': (context) => const BoardWritePage(),
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),

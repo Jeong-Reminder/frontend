@@ -3,157 +3,31 @@ import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/setExperience_screen.dart';
 import 'package:frontend/services/profile_service.dart';
+import 'package:frontend/widgets/field_list.dart';
+import 'package:frontend/widgets/tool_list.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-class SettingProfilePage extends StatefulWidget {
+class SetSkillPage extends StatefulWidget {
   final String githubLink;
   final String hopeJob;
-  const SettingProfilePage(this.githubLink, this.hopeJob, {super.key});
+  const SetSkillPage(this.githubLink, this.hopeJob, {super.key});
 
   @override
-  State<SettingProfilePage> createState() => _SettingProfilePageState();
+  State<SetSkillPage> createState() => _SetSkillPageState();
 }
 
-class _SettingProfilePageState extends State<SettingProfilePage> {
+class _SetSkillPageState extends State<SetSkillPage> {
   String developmentField = '';
   String developmentTool = '';
 
-  List<Map<String, dynamic>> fieldList = [
-    {
-      'logoUrl': 'assets/skilImages/typescript.png',
-      'title': 'TYPESCRIPT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF037BCB),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/javascript.png',
-      'title': 'JAVASCRIPT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF5DF1D),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/tailwindcss.png',
-      'title': 'TAILWINDCSS',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF3DB1AB),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/html.png',
-      'title': 'HTML5',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFE35026),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/css.png',
-      'title': 'CSS3',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF1472B6),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/react.png',
-      'title': 'REACT',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFF61DAFB),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/npm.png',
-      'title': 'NPM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFCB3837),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/docker.png',
-      'title': 'DOCKER',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0BB7ED),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/yarn.png',
-      'title': 'YARN',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2C8EBB),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/prettier.png',
-      'title': 'PRETTIER',
-      'titleColor': Colors.black,
-      'badgeColor': const Color(0xFFF8B83E),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/eslint.png',
-      'title': 'ESLINT',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4B3263),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/figma.png',
-      'title': 'FIGMA',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFFF24D1D),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/vscode.png',
-      'title': 'VISUAL STUDIO CODE',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF0078D7),
-      'isSelected': false,
-    },
-  ];
-
-  List<Map<String, dynamic>> toolsList = [
-    {
-      'logoUrl': 'assets/skilImages/github.png',
-      'title': 'GITHUB',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF111011),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/notion.png',
-      'title': 'NOTION',
-      'titleColor': Colors.white,
-      'badgeColor': Colors.black,
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/slack.png',
-      'title': 'SLACK',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF4A144C),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/zoom.png',
-      'title': 'ZOOM',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF2D8CFF),
-      'isSelected': false,
-    },
-    {
-      'logoUrl': 'assets/skilImages/discord.png',
-      'title': 'DISCORD',
-      'titleColor': Colors.white,
-      'badgeColor': const Color(0xFF5765F2),
-      'isSelected': false,
-    }
-  ];
   List<Map<String, dynamic>> selectedFields = []; // 선택된 Field 리스트
   List<Map<String, dynamic>> selectedTools = []; // 선택된 Tools 리스트
+
   bool completedField = false; // Field 선택 완료 불리안
   double percent = 0.5;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -416,7 +290,7 @@ class _SettingProfilePageState extends State<SettingProfilePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomePage(),
+                              builder: (context) => const SetExperiencePage(),
                             ),
                           );
                         }

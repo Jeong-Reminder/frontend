@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/all/providers/announcement_provider.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/services/login_services.dart';
@@ -72,9 +72,12 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            '/write-board',
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BoardWritePage(category: 'TOTAL'),
+                            ),
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),

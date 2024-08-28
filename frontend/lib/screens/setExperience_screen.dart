@@ -5,14 +5,14 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:frontend/models/projectExperience_model.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 
-class SettingProfile2Page extends StatefulWidget {
-  const SettingProfile2Page({super.key});
+class SetExperiencePage extends StatefulWidget {
+  const SetExperiencePage({super.key});
 
   @override
-  State<SettingProfile2Page> createState() => _SettingProfile2PageState();
+  State<SetExperiencePage> createState() => _SetExperiencePageState();
 }
 
-class _SettingProfile2PageState extends State<SettingProfile2Page> {
+class _SetExperiencePageState extends State<SetExperiencePage> {
   double percent = 0; // 프로그레스 바 진행률
   TextEditingController projectNameController =
       TextEditingController(); // 프로젝트명 입력 컨트롤러
@@ -211,8 +211,8 @@ class _SettingProfile2PageState extends State<SettingProfile2Page> {
                   TextFormField(
                     controller: projectExperienceController,
                     maxLines: 4,
-                    textInputAction:
-                        TextInputAction.done, // 키패드 완료 버튼으로(키보드 창에서 나가도록 설정)
+                    keyboardType: TextInputType.multiline, // 줄바꿈 가능한 키보드
+                    textInputAction: TextInputAction.done, // 키보드에 '확인' 버튼을 추가
                     decoration: const InputDecoration(
                       labelText: '프로젝트 경험을 입력해주세요',
                       labelStyle: TextStyle(

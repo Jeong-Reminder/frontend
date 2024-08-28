@@ -31,6 +31,7 @@ dependencies:
     flutter:
         sdk: flutter
 
+
     cupertino_icons: ^1.0.2
     image_picker: ^1.0.8
     table_calendar: ^3.1.1
@@ -57,6 +58,9 @@ dependencies:
     flutter_local_notifications: ^17.2.1+2
     get: ^4.6.6
     convert: ^3.1.1
+    permission_handler: ^11.3.1
+    share_plus: ^7.2.2
+
 
 dev_dependencies:
     flutter_test:
@@ -73,6 +77,7 @@ flutter:
     # included with your application, so that you can use the icons in
     # the material Icons class.
     uses-material-design: true
+
 
     # To add assets to your application, add an assets section, like this:
     assets:
@@ -105,6 +110,7 @@ flutter:
         - assets/images/contestImg.png
         - assets/images/filtering.png
         - assets/images/Folder_send_light.png
+        - assets/images/frust.png
         - assets/skilImages/typescript.png
         - assets/skilImages/javascript.png
         - assets/skilImages/tailwindcss.png
@@ -123,6 +129,7 @@ flutter:
         - assets/skilImages/notion.png
         - assets/skilImages/slack.png
         - assets/skilImages/zoom.png
+
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class ContestTeamListPage extends StatefulWidget {
   const ContestTeamListPage({super.key});
@@ -9,8 +11,9 @@ class ContestTeamListPage extends StatefulWidget {
 }
 
 // 팝업 메뉴 아이템을 생성하는 함수
-PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
-  return PopupMenuItem<PopUpItem>(
+PopupMenuItem<String> popUpItem(String text, String item) {
+  return PopupMenuItem<String>(
+    enabled: true,
     value: item,
     height: 25,
     child: Center(
@@ -34,25 +37,11 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
       TextEditingController(); // 검색창의 텍스트 컨트롤러
   DateTime? _selectedDate; // 선택된 날짜 저장하는 변수
   String _searchQuery = ''; // 검색어를 저장하는 변수
+  String selectedCategory = '경진대회'; // 팝업 메뉴 카테고리 이름
 
-  final List<Map<String, String>> _recruitList = [
-    // 팀원 모집글 목록을 저장하는 리스트
-    {
-      "teamName": "팀명1",
-      "members": "소진수, 민택기, 이승욱, 유다은",
-      "contest": "IoT",
-    },
-    {
-      "teamName": "팀명2",
-      "members": "소진수, 민택기, 이승욱, 장찬현",
-      "contest": "뉴테크",
-    },
-    {
-      "teamName": "팀명3",
-      "members": "소진수, 민택기, 이승욱, 장찬현",
-      "contest": "멘토티",
-    },
-  ];
+  List<Map<String, dynamic>> teamList = []; // 팀 정보 리스트
+  List<String> teamCategories = []; // 팀 카테고리 리스트
+  List<Map<String, dynamic>> filteredTeamList = []; // 필터링된 팀 정보
 
   final Map<int, bool> _selectedItems = {}; // 각 아이템의 선택 상태를 저장하는 변수
   bool _selectAll = false; // 전체 선택 상태를 저장하는 변수
@@ -121,7 +110,7 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
               width: 74,
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
@@ -144,9 +133,35 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
               width: 74,
               height: 20,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _deleteSelectedItems();
+                onPressed: () async {
+                  final adminProvider =
+                      Provider.of<AdminProvider>(context, listen: false);
+
+                  // 카테고리별로 삭제
+                  if (selectedCategory != '경진대회') {
+                    await adminProvider.delCategoryTeam(selectedCategory);
+
+                    if (context.mounted) {
+                      await adminProvider.fetchAllTeams();
+                    }
+                  }
+                  // 전체 삭제
+                  else if (selectedCategory == '경진대회') {
+                    await adminProvider.deleteAllTeams();
+
+                    if (context.mounted) {
+                      await adminProvider.fetchAllTeams();
+                    }
+                  }
+
+                  // 다시 전체보기로 변경
+                  setState(() {
+                    selectedCategory = '경진대회';
+                    filteredTeamList = teamList;
+                  });
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEA4E44),
@@ -171,26 +186,13 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
     );
   }
 
-  // 개별 선택된 아이템들을 삭제하는 메서드
-  void _deleteSelectedItems() {
-    setState(() {
-      _recruitList.removeWhere((item) {
-        // 리스트에서 선택된 아이템들을 제거
-        int index = _recruitList.indexOf(item);
-        return _selectedItems[index] ?? false;
-      });
-      _selectedItems.clear(); // 삭제 후 선택 상태 초기화
-      _selectAll = false; // 전체 선택 상태 초기화
-    });
-  }
-
   // 전체 선택 상태를 변경하는 메서드
   void _toggleSelectAll(bool? value) {
     setState(() {
       _selectAll = value ?? false;
       _selectedItems.clear();
       if (_selectAll) {
-        for (int i = 0; i < _recruitList.length; i++) {
+        for (int i = 0; i < teamList.length; i++) {
           _selectedItems[i] = true;
         }
       }
@@ -202,28 +204,28 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
     print('$column column tapped');
   }
 
-  // 선택된 팝업 아이템의 텍스트를 반환하는 메서드
-  String _getSelectedItemText() {
-    switch (_selectedPopUpItem) {
-      case PopUpItem.popUpItem1:
-        return '경진대회';
-      case PopUpItem.popUpItem2:
-        return 'IOT';
-      case PopUpItem.popUpItem3:
-        return '뉴테크';
-      default:
-        return '경진대회';
-    }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<AdminProvider>(context, listen: false).fetchAllTeams();
+
+      setState(() {
+        // teamList에 모든 팀 데이터를 저장
+        teamList = Provider.of<AdminProvider>(context, listen: false).teamList;
+        filteredTeamList = teamList; // 초기에는 전체 리스트로 표시
+
+        // teamCategories에 팀 카테고리만 추출하여 저장 (중복 제거)
+        teamCategories = teamList
+            .map((team) => team['teamCategory'] as String)
+            .toSet()
+            .toList();
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // 검색어에 따라 필터링된 팀 목록 생성
-    List<Map<String, String>> filteredRecruitList = _recruitList.where((item) {
-      return (item['teamName'] ?? '').contains(_searchQuery) ||
-          (item['contest'] ?? '').contains(_searchQuery);
-    }).toList();
-
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -264,266 +266,301 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Text(
-                    '경진대회 팀',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // 제목
+                const Text(
+                  '경진대회 팀',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () => _selectDate(context), // 이미지 클릭 시 날짜 선택기 표시
-                    child: Image.asset(
-                      'assets/images/calendar.png',
-                      width: 24,
-                      height: 24,
-                      color: const Color(0xFF33363F),
-                    ),
-                  ),
-                  if (_selectedDate != null) // 선택된 날짜가 있을 경우에만 표시
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        DateFormat('yyyy-MM-dd')
-                            .format(_selectedDate!), // 날짜 형식 지정
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF33363F),
-                        ),
-                      ),
-                    ),
-                  const Spacer(), // 남은 공간을 차지하여 조회 버튼을 오른쪽으로 밀어냄
-                  SizedBox(
-                    height: 20,
-                    width: 70,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2A72E7),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      child: const Text(
-                        '조회',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Container(
-                height: 44,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFEFF2),
-                  borderRadius: BorderRadius.circular(5),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _controller,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF848488),
-                        ),
-                        textAlignVertical: TextAlignVertical.top,
-                        decoration: const InputDecoration(
-                          hintText: '팀명 혹은 경진대회를 검색하세요',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value; // 검색어가 변경될 때 상태 업데이트
-                          });
-                        },
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Image.asset(
-                          'assets/images/send.png',
-                          width: 16,
-                          height: 16,
-                          color: const Color(0xFF2A72E7),
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 8),
+
+                // 달력
+                GestureDetector(
+                  onTap: () => _selectDate(context), // 이미지 클릭 시 날짜 선택기 표시
+                  child: Image.asset(
+                    'assets/images/calendar.png',
+                    width: 24,
+                    height: 24,
+                    color: const Color(0xFF33363F),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 23),
-              Row(
-                children: [
-                  SizedBox(
-                    height: 20,
-                    width: 70,
-                    child: ElevatedButton(
-                      onPressed:
-                          _showDeleteConfirmationDialog, // 삭제 버튼 클릭 시 모달 창 표시
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEA4E44),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      child: const Text(
-                        '삭제',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                if (_selectedDate != null) // 선택된 날짜가 있을 경우에만 표시
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      DateFormat('yyyy-MM-dd')
+                          .format(_selectedDate!), // 날짜 형식 지정
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF33363F),
                       ),
                     ),
                   ),
-                  const Spacer(),
-                  const SizedBox(height: 23),
-                  PopupMenuButton<PopUpItem>(
-                    color: const Color(0xFFEFF0F2),
-                    onSelected: (PopUpItem item) {
+                const Spacer(), // 남은 공간을 차지하여 조회 버튼을 오른쪽으로 밀어냄
+
+                // 전체 보기 버튼
+                SizedBox(
+                  height: 20,
+                  width: 70,
+                  child: ElevatedButton(
+                    onPressed: () {
                       setState(() {
-                        _selectedPopUpItem = item;
+                        // 전체 보기로 변경
+                        selectedCategory = '경진대회';
+                        filteredTeamList = teamList;
                       });
                     },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        popUpItem('경진대회', PopUpItem.popUpItem1),
-                        const PopupMenuDivider(),
-                        popUpItem('IOT', PopUpItem.popUpItem2),
-                        const PopupMenuDivider(),
-                        popUpItem('뉴테크', PopUpItem.popUpItem3),
-                      ];
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2A72E7),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Text(
+                      '전체 조회',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // 검색 창
+            Container(
+              height: 44,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFEFF2),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _controller,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF848488),
+                      ),
+                      textAlignVertical: TextAlignVertical.top,
+                      decoration: const InputDecoration(
+                        hintText: '팀명 혹은 경진대회를 검색하세요',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery =
+                              value.toLowerCase(); // 검색어가 변경될 때 상태 업데이트
+                        });
+                      },
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        filteredTeamList = teamList.where((team) {
+                          // 대소문자를 구분하지 않고 검색할 수 있도록 구현
+                          final teamName =
+                              team['teamName']?.toLowerCase() ?? '';
+                          final teamCategory =
+                              team['teamCategory']?.toLowerCase() ?? '';
+
+                          // 팀 이름이나 카테고리가 _searchQuery를 포함하는지 확인
+                          return teamName.contains(_searchQuery) ||
+                              teamCategory.contains(_searchQuery);
+                        }).toList();
+                      });
                     },
-                    child: Row(
-                      children: [
-                        Text(
-                          _getSelectedItemText(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const Icon(Icons.arrow_drop_down),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Image.asset(
+                        'assets/images/send.png',
+                        width: 16,
+                        height: 16,
+                        color: const Color(0xFF2A72E7),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  headingRowColor:
-                      const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
-                  columns: [
-                    DataColumn(
-                      label: Row(
-                        children: [
-                          Checkbox(
-                            value: _selectAll,
-                            onChanged: _toggleSelectAll,
-                          ),
-                          const Text(
-                            '팀명',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF848488),
+            ),
+            const SizedBox(height: 23),
+
+            // 삭제 & 경진대회 카테고리 팝업 메뉴
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  height: 20,
+                  width: 70,
+                  child: ElevatedButton(
+                    onPressed:
+                        _showDeleteConfirmationDialog, // 삭제 버튼 클릭 시 모달 창 표시
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEA4E44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Text(
+                      '삭제',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                PopupMenuButton(
+                  color: const Color(0xFFEFF0F2),
+                  onSelected: (String category) async {
+                    setState(() {
+                      // 선택한 카테고리를 저장
+                      selectedCategory = category;
+
+                      // 선택한 카테고리가 들어있는 팀정보만 추출해서 리스트화
+                      filteredTeamList = teamList
+                          .where((team) => team['teamCategory'] == category)
+                          .toList();
+                    });
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return teamCategories.map((category) {
+                      return PopupMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList();
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        // 선택한 카테고리를 표시
+                        selectedCategory,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            filteredTeamList.isEmpty
+                ? Center(
+                    child: Column(
+                      children: [
+                        Image.asset('assets/images/frust.png', scale: 4.0),
+                        const Text(
+                          '생성된 팀이 없습니다',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: DataTable(
+                        headingRowColor:
+                            const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
+                        columns: [
+                          DataColumn(
+                            label: const Text(
+                              '팀명',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF848488),
+                              ),
                             ),
+                            onSort: (int columnIndex, bool ascending) {
+                              _onColumnTap('팀명');
+                            },
+                          ),
+                          DataColumn(
+                            label: const Text(
+                              '팀원',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF848488),
+                              ),
+                            ),
+                            onSort: (int columnIndex, bool ascending) {
+                              _onColumnTap('팀원');
+                            },
+                          ),
+                          DataColumn(
+                            label: const Text(
+                              '경진대회',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF848488),
+                              ),
+                            ),
+                            onSort: (int columnIndex, bool ascending) {
+                              _onColumnTap('경진대회');
+                            },
                           ),
                         ],
-                      ),
-                      onSort: (int columnIndex, bool ascending) {
-                        _onColumnTap('팀명');
-                      },
-                    ),
-                    DataColumn(
-                      label: const Text(
-                        '팀원',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF848488),
-                        ),
-                      ),
-                      onSort: (int columnIndex, bool ascending) {
-                        _onColumnTap('팀원');
-                      },
-                    ),
-                    DataColumn(
-                      label: const Text(
-                        '경진대회',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF848488),
-                        ),
-                      ),
-                      onSort: (int columnIndex, bool ascending) {
-                        _onColumnTap('경진대회');
-                      },
-                    ),
-                  ],
-                  rows: List<DataRow>.generate(
-                    filteredRecruitList.length,
-                    (int index) => DataRow(
-                      color: MaterialStatePropertyAll(
-                          index.isEven ? Colors.white : Colors.white),
-                      cells: [
-                        DataCell(
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _selectedItems[index] ?? false,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    _selectedItems[index] = value ?? false;
-                                  });
-                                },
+                        rows: List<DataRow>.generate(
+                          filteredTeamList.length,
+                          (int index) => DataRow(
+                            color: MaterialStatePropertyAll(
+                              index.isEven ? Colors.white : Colors.white,
+                            ),
+                            cells: [
+                              DataCell(
+                                Text(
+                                  filteredTeamList[index]['teamName'] ?? '',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                               ),
-                              Text(
-                                filteredRecruitList[index]['teamName'] ?? '',
-                                style: const TextStyle(fontSize: 10),
+                              DataCell(
+                                Text(
+                                  filteredTeamList[index]['techStacks'] != null
+                                      ? (filteredTeamList[index]['techStacks']
+                                              as List)
+                                          .map((stack) => stack['memberName'])
+                                          .join(', ')
+                                      : '',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  filteredTeamList[index]['teamCategory'] ?? '',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        DataCell(
-                          Text(
-                            filteredRecruitList[index]['members'] ?? '',
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            filteredRecruitList[index]['contest'] ?? '',
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );

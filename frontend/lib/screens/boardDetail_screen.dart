@@ -4,10 +4,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/vote_model.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:frontend/all/providers/announcement_provider.dart';
-import 'package:frontend/providers/recommend_provider.dart';
-import 'package:frontend/providers/vote_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/widgets/vote_widget.dart';
@@ -52,6 +51,9 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
   List<File> pickedImages = [];
   List<File> pickedFiles = [];
+
+  bool isDownloading = false;
+  double downloadProgress = 0.0;
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -264,8 +266,37 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                   child: Row(
                     children: pickedFiles.asMap().entries.map((entry) {
                       File file = entry.value;
+
+                      // 파일 이름을 이용해 board의 파일 정보를 찾기
+                      final correspondingFile = board['files']?.firstWhere(
+                        (f) =>
+                            f['originalFilename'] == path.basename(file.path),
+                        orElse: () => null,
+                      );
+
                       return GestureDetector(
-                        onTap: () {},
+                        onTap: () async {
+                          if (correspondingFile != null) {
+                            final fileUrl = correspondingFile['fileUrl'];
+                            final fileName =
+                                correspondingFile['originalFilename'];
+
+                            print('fileUrl: $fileUrl');
+                            print('fileName: $fileName');
+                            final announcementProvider =
+                                Provider.of<AnnouncementProvider>(context,
+                                    listen: false);
+
+                            await announcementProvider.downloadFile(
+                                fileUrl, fileName);
+
+                            if (context.mounted) {
+                              alertSnackBar(context, '$fileName이 다운로드되었습니다.');
+                            }
+                          } else {
+                            print('해당 파일 정보를 찾을 수 없습니다.');
+                          }
+                        },
                         child: Row(
                           children: [
                             const Icon(
@@ -285,6 +316,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                     }).toList(),
                   ),
                 ),
+
               const SizedBox(height: 20),
 
               // Row(
@@ -361,4 +393,14 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
       ),
     );
   }
+}
+
+// 팝업 알림 위젯
+void alertSnackBar(BuildContext context, String title) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(title), //snack bar의 내용. icon, button같은것도 가능하다.
+      duration: const Duration(seconds: 3), //올라와있는 시간
+    ),
+  );
 }
