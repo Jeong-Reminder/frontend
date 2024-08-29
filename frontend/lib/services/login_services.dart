@@ -7,9 +7,13 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginAPI {
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
+
   late PersistCookieJar cookieJar;
   // static const loginAddress = 'https://reminder.sungkyul.ac.kr/login';
   // static const tokenRefreshAddress =
@@ -19,10 +23,14 @@ class LoginAPI {
   // static const loginAddress = 'http://10.0.2.2:9000/login';
   // static const tokenRefreshAddress = 'http://10.0.2.2:9000/api/v1/reissue';
   // static const logoutAddress = 'http://10.0.2.2:9000/api/v1/logout';
+  // static const changePasswordAddress =
+  //     'http://10.0.2.2:9000/api/v1/member/changePassword';
 
   static const loginAddress = 'http://127.0.0.1:9000/login';
   static const tokenRefreshAddress = 'http://127.0.0.1:9000/api/v1/reissue';
   static const logoutAddress = 'http://127.0.0.1:9000/api/v1/logout';
+  static const changePasswordAddress =
+      'http://127.0.0.1:9000/api/v1/member/changePassword';
 
   LoginAPI() {
     _initCookieJar();
@@ -56,6 +64,7 @@ class LoginAPI {
     final autoLogin = prefs.getBool('isAutoLogin') ?? false;
     final level = prefs.getInt('level');
     final userRole = prefs.getString('userRole');
+
     return {
       'studentId': studentId,
       'name': name, // 이름 추가
@@ -66,25 +75,6 @@ class LoginAPI {
       'userRole': userRole,
     };
   }
-
-  // 자동 로그인 시도 함수
-  // Future<bool> autoLogin() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final accessToken = prefs.getString('accessToken');
-  //   final studentId = prefs.getString('studentId');
-  //   final password = prefs.getString('password');
-
-  //   if (accessToken != null && studentId != null && password != null) {
-  //     final isExpired = JwtDecoder.isExpired(accessToken);
-  //     if (isExpired) {
-  //       return await againToken(); // 토큰 재발급 시도
-  //     } else {
-  //       print('유효한 토큰이 존재합니다.');
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
 
   // 이전 토큰 삭제 함수
   Future<void> clearTokens({bool removeRefreshToken = true}) async {
@@ -310,6 +300,51 @@ class LoginAPI {
       }
     } catch (e) {
       print('로그아웃 요청 중 에러 발생: ${e.toString()}');
+      return false;
+    }
+  }
+
+  // 비밀번호 변경 API
+  Future<bool> changePassword(
+      String studentId, String password, String newPassword) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        throw Exception('Access token을 찾을 수 없습니다.');
+      }
+
+      final url = Uri.parse(changePasswordAddress);
+
+      final response = await http.put(
+        url,
+        headers: {
+          'access': token,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'studentId': studentId,
+          'password': password,
+          'newPassword': newPassword,
+        }),
+      );
+
+      print('비밀번호 변경 요청 바디: ${jsonEncode({
+            'studentId': studentId,
+            'password': password,
+            'newPassword': newPassword,
+          })}');
+      print('비밀번호 변경 응답 상태 코드: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+        print('비밀번호 변경 성공 : $responseData');
+        return true;
+      } else {
+        print('비밀번호 변경 실패: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('비밀번호 변경 요청 중 에러 발생: ${e.toString()}');
       return false;
     }
   }
