@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/profile_widget.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class MyOwnerPage extends StatefulWidget {
   const MyOwnerPage({super.key});
@@ -15,37 +18,59 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
   bool isOpened = false;
 
   List<dynamic> pickedHistory = [];
-  List<Map<String, dynamic>> history = [
-    {
-      'year': '2020년도',
-      'board': [
-        {
-          'category': '전체 공지',
-          'title': '수강신청 하는 법',
-        },
-        {
-          'category': '전체 공지',
-          'title': '중간강의평가',
-        },
-        {
-          'category': '경진 대회',
-          'title': 'IOT 경진대회 참가 모집',
-        }
-      ],
-    },
-    {
-      'year': '2021년도',
-      'board': [],
-    },
-    {
-      'year': '2022년도',
-      'board': [],
-    },
-    {
-      'year': '2023년도',
-      'board': [],
-    },
-  ];
+  List<String> semesterList = [];
+  List<String> createdTimeList = []; // 게시글 생성 리스트
+  List<Map<String, dynamic>> boardList = []; // 전체 게시글
+
+  // 연도와 학기를 추출하는 함수
+  List<String> formatYearSemester(List<String> dateTimeList) {
+    Set<String> semesterSet = {}; // 중복을 제거하기 위해 Set 사용
+
+    for (var dateTime in dateTimeList) {
+      DateTime parsedDateTime =
+          DateTime.parse(dateTime); // String을 DateTime 객체로 변환
+      final DateFormat formatter = DateFormat('yyyy'); // 연도 추출
+      String yearMonthDay = formatter.format(parsedDateTime); // 예: 2024
+
+      // 학기 분류
+      int month = parsedDateTime.month; // 월 출력
+      int day = parsedDateTime.day; // 일 출력
+      String semester; // 학기
+
+      if (month < 7 || (month == 7 && day <= 15)) {
+        semester = '$yearMonthDay년 1학기';
+      } else {
+        semester = '$yearMonthDay년 2학기';
+      }
+
+      semesterSet.add(semester); // Set에 학기 추가
+    }
+
+    List<String> semesterList = semesterSet.toList();
+    semesterList.sort(); // 학기 리스트를 오름차순으로 정렬
+
+    return semesterList; // 정렬된 리스트를 반환
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<AnnouncementProvider>(context, listen: false)
+          .fetchAllBoards();
+
+      setState(() {
+        boardList =
+            Provider.of<AnnouncementProvider>(context, listen: false).boardList;
+
+        createdTimeList = boardList
+            .map((board) => board['createdTime'] as String)
+            .toList(); // 게시글 생성 저장
+
+        semesterList = formatYearSemester(createdTimeList); // 학기 리스트 생성
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +95,8 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
           ),
         ),
         leadingWidth: 120, // leading에 있는 위젯 크게 만들기 위한 코드
-        actions: const [
-          Padding(
+        actions: [
+          const Padding(
             padding: EdgeInsets.only(right: 23.0),
             child: Icon(
               Icons.add_alert,
@@ -79,12 +104,17 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
               color: Colors.black,
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
+          GestureDetector(
+            onTap: () {
+              print('semesterList: ${formatYearSemester(createdTimeList)}');
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 23.0),
+              child: Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
             ),
           ),
         ],
@@ -185,18 +215,15 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
           ),
           child: CupertinoPicker.builder(
             itemExtent: 50,
-            childCount: history.length,
+            childCount: formatYearSemester(createdTimeList).length,
             onSelectedItemChanged: (i) {
-              if (i >= 0 && i < history.length) {
-                setState(() {
-                  pickedHistory = history[i]['board'];
-                });
-              }
+              // 선택된 학기를 기반으로 로직 처리
             },
             itemBuilder: (context, index) {
-              if (index >= 0 && index < history.length) {
+              if (index >= 0 &&
+                  index < formatYearSemester(createdTimeList).length) {
                 return Center(
-                  child: Text(history[index]['year']),
+                  child: Text(formatYearSemester(createdTimeList)[index]),
                 );
               } else {
                 return null; // 혹시 잘못된 인덱스를 참조할 경우 null 반환
