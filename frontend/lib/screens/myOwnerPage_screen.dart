@@ -15,12 +15,30 @@ class MyOwnerPage extends StatefulWidget {
 }
 
 class _MyOwnerPageState extends State<MyOwnerPage> {
+  final FixedExtentScrollController controller =
+      FixedExtentScrollController(initialItem: 1); // 초기값 지정
+
   bool isOpened = false;
 
-  List<dynamic> pickedHistory = [];
-  List<String> semesterList = [];
+  List<String> semesterList = []; // 연도-학기 리스트
   List<String> createdTimeList = []; // 게시글 생성 리스트
   List<Map<String, dynamic>> boardList = []; // 전체 게시글
+  List<Map<String, dynamic>> selectedBoardList = []; // 선택된 학기에 해당하는 게시글 리스트
+
+  // 영어 카테고리를 한국어로 전환하는 문자열 함수
+  String engToKorCate(String engCategory) {
+    if (engCategory == 'SEASONAL_SYSTEM') {
+      return '계절제';
+    } else if (engCategory == 'CONTEST') {
+      return '경진대회';
+    } else if (engCategory == 'ACADEMIC_ALL') {
+      return '학년';
+    } else if (engCategory == 'CORPORATE_TOUR') {
+      return '기업';
+    } else {
+      return 'null';
+    }
+  }
 
   // 연도와 학기를 추출하는 함수
   List<String> formatYearSemester(List<String> dateTimeList) {
@@ -30,7 +48,7 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
       DateTime parsedDateTime =
           DateTime.parse(dateTime); // String을 DateTime 객체로 변환
       final DateFormat formatter = DateFormat('yyyy'); // 연도 추출
-      String yearMonthDay = formatter.format(parsedDateTime); // 예: 2024
+      String year = formatter.format(parsedDateTime); // 예: 2024
 
       // 학기 분류
       int month = parsedDateTime.month; // 월 출력
@@ -38,9 +56,9 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
       String semester; // 학기
 
       if (month < 7 || (month == 7 && day <= 15)) {
-        semester = '$yearMonthDay년 1학기';
+        semester = '$year년 1학기';
       } else {
-        semester = '$yearMonthDay년 2학기';
+        semester = '$year년 2학기';
       }
 
       semesterSet.add(semester); // Set에 학기 추가
@@ -57,15 +75,15 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<AnnouncementProvider>(context, listen: false)
-          .fetchAllBoards();
+          .fetchAllBoards(); // 전체 게시글 조회 호출
 
       setState(() {
-        boardList =
-            Provider.of<AnnouncementProvider>(context, listen: false).boardList;
+        boardList = Provider.of<AnnouncementProvider>(context, listen: false)
+            .boardList; // 전체 게시글 생성
 
         createdTimeList = boardList
             .map((board) => board['createdTime'] as String)
-            .toList(); // 게시글 생성 저장
+            .toList(); // 게시글 생성시간 생성
 
         semesterList = formatYearSemester(createdTimeList); // 학기 리스트 생성
       });
@@ -169,19 +187,28 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
+
+                  // 선택된 게시글
                   Expanded(
                     child: ListView.builder(
-                      itemCount: pickedHistory.length,
+                      itemCount: selectedBoardList.length,
                       itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: const Icon(Icons.edit),
-                          title: Text(
-                            '[ ${pickedHistory[index]['category']} ]',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                        final selectedBoard = selectedBoardList[index];
+                        return Column(
+                          children: [
+                            ListTile(
+                              title: Text(
+                                '[ ${engToKorCate(selectedBoard['announcementCategory'])} ]',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle:
+                                  Text(selectedBoard['announcementTitle']),
                             ),
-                          ),
-                          subtitle: Text(pickedHistory[index]['title']),
+                            const SizedBox(height: 10),
+                          ],
                         );
                       },
                     ),
@@ -214,16 +241,38 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
             ),
           ),
           child: CupertinoPicker.builder(
+            scrollController: controller,
             itemExtent: 50,
-            childCount: formatYearSemester(createdTimeList).length,
+            childCount: semesterList.length,
             onSelectedItemChanged: (i) {
-              // 선택된 학기를 기반으로 로직 처리
+              String selectedSemester = semesterList[i];
+
+              setState(() {
+                // 게시글 생성시간을 연도-학기로 추출해 semesterList와 동일한 요소가 있는지 확인
+                // 동일한게 확인되면 selectedBoardList에 저장
+                selectedBoardList = boardList.where((board) {
+                  DateTime parsedDateTime =
+                      DateTime.parse(board['createdTime']);
+                  String year = DateFormat('yyyy').format(parsedDateTime);
+                  String semester;
+
+                  int month = parsedDateTime.month;
+                  int day = parsedDateTime.day;
+
+                  if (month < 7 || (month == 7 && day <= 15)) {
+                    semester = '$year년 1학기';
+                  } else {
+                    semester = '$year년 2학기';
+                  }
+
+                  return selectedSemester == semester;
+                }).toList();
+              });
             },
             itemBuilder: (context, index) {
-              if (index >= 0 &&
-                  index < formatYearSemester(createdTimeList).length) {
+              if (index >= 0 && index < semesterList.length) {
                 return Center(
-                  child: Text(formatYearSemester(createdTimeList)[index]),
+                  child: Text(semesterList[index]),
                 );
               } else {
                 return null; // 혹시 잘못된 인덱스를 참조할 경우 null 반환
