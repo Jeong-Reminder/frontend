@@ -17,36 +17,48 @@ class GradeBoardPage extends StatefulWidget {
 enum PopUpItem { popUpItem1, popUpItem2, popUpItem3 }
 
 class _GradeBoardPageState extends State<GradeBoardPage> {
-  String selectedGrade = '1학년';
   bool isSelected = false;
   bool isHidDel = false; // 숨김 / 삭제 버튼 숨김 활성화 불리안
-  Map<String, dynamic>? selectedBoard; // 선택된 게시글을 저장할 변수
+
+  int gradeCategory = 1; // 학년 버튼을 눌렀을 때 해당하는 학년을 저장하는 변수
 
   String userRole = '';
   String boardCategory = 'ACADEMIC_ALL';
-  int gradeCategory = 1; // 학년 버튼을 눌렀을 때 해당하는 학년을 저장하는 변수
-  List<int> gradeList = [1, 2, 3, 4];
+  String selectedGrade = '1학년';
 
-  // 숨김 해제 시 호출되는 함수
-  // void unhideItems(List<Map<String, dynamic>> items) {
-  //   setState(() {
-  //     for (var item in items) {
-  //       item['isChecked'] = false;
-  //       // 각 학년별 게시판 리스트 (oneBoard, twoBoard, threeBoard, fourBoard)를 정의
-  //       // 각 항목에 originalIndex를 추가하여 원래 인덱스를 저장
-  //       // 각 항목의 originalIndex를 사용하여 원래 인덱스 위치에 항목을 다시 추가
-  //       if (selectedGrade == '1학년') {
-  //         oneBoard.insert(item['originalIndex'], item);
-  //       } else if (selectedGrade == '2학년') {
-  //         twoBoard.insert(item['originalIndex'], item);
-  //       } else if (selectedGrade == '3학년') {
-  //         threeBoard.insert(item['originalIndex'], item);
-  //       } else if (selectedGrade == '4학년') {
-  //         fourBoard.insert(item['originalIndex'], item);
-  //       }
-  //     }
-  //   });
-  // }
+  Map<String, dynamic>? selectedBoard; // 선택된 게시글을 저장할 변수
+
+  List<int> gradeList = [1, 2, 3, 4];
+  List<Map<String, dynamic>> gradeBoardList = [];
+
+  // 2년 된 게시글 1월 1일에 삭제되는 함수
+  void delete2YearsBoard(List<Map<String, dynamic>> boardList) async {
+    DateTime now = DateTime.now(); // 현재 시간 생성
+    final announcementProvider =
+        Provider.of<AnnouncementProvider>(context, listen: false);
+
+    // 현재 시간이 1월 1일인지 확인
+    if (now.month == 1 && now.day == 1) {
+      for (var board in boardList) {
+        final DateTime createdTime =
+            DateTime.parse(board['createdTime']); // 게시글 생성시간 생성
+        final Duration difference =
+            now.difference(createdTime); // 현재시간과 게시글 생성시간 차이
+
+        // 게시글이 2년 지나면 게시글 삭제
+        if (difference.inDays >= 730) {
+          await announcementProvider.deletedBoard(board['id']);
+        }
+      }
+
+      // 2년 이상된 게시글을 찾아 삭제를 완료할 경우 전체 게시글 조회
+      if (context.mounted) {
+        await announcementProvider.fetchCateBoard(boardCategory);
+      }
+    } else {
+      print('오늘은 1월 1일이 아닙니다. 게시글 삭제가 실행되지 않았습니다.');
+    }
+  }
 
   @override
   void initState() {
@@ -54,8 +66,18 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchCateBoard(boardCategory);
+
+      if (context.mounted) {
+        setState(() {
+          // 해당 공지 카테고리의 공지 리스트 출력
+          gradeBoardList =
+              Provider.of<AnnouncementProvider>(context, listen: false)
+                  .cateBoardList;
+        });
+      }
     });
 
+    delete2YearsBoard(gradeBoardList);
     _loadCredentials();
   }
 
@@ -70,10 +92,6 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 해당 공지 카테고리의 공지 리스트 출력
-    final gradeBoardList =
-        Provider.of<AnnouncementProvider>(context).cateBoardList;
-
     // gradeCategory와 일치하는 공지만 필터링
     final filteredBoardList = gradeBoardList.where((board) {
       final gradeLevel = board['announcementLevel'];

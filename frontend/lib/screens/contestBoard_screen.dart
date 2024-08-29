@@ -23,6 +23,37 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
   bool isHidDel = false;
   Map<String, dynamic>? selectedBoard;
 
+  List<Map<String, dynamic>> cateBoardList = [];
+
+  // 2년 된 게시글 1월 1일에 삭제되는 함수
+  void delete2YearsBoard(List<Map<String, dynamic>> boardList) async {
+    DateTime now = DateTime.now(); // 현재 시간 생성
+    final announcementProvider =
+        Provider.of<AnnouncementProvider>(context, listen: false);
+
+    // 현재 시간이 1월 1일인지 확인
+    if (now.month == 1 && now.day == 1) {
+      for (var board in boardList) {
+        final DateTime createdTime =
+            DateTime.parse(board['createdTime']); // 게시글 생성시간 생성
+        final Duration difference =
+            now.difference(createdTime); // 현재시간과 게시글 생성시간 차이
+
+        // 게시글이 2년 지나면 게시글 삭제
+        if (difference.inDays >= 730) {
+          await announcementProvider.deletedBoard(board['id']);
+        }
+      }
+
+      // 2년 이상된 게시글을 찾아 삭제를 완료할 경우 전체 게시글 조회
+      if (context.mounted) {
+        await announcementProvider.fetchCateBoard(boardCategory);
+      }
+    } else {
+      print('오늘은 1월 1일이 아닙니다. 게시글 삭제가 실행되지 않았습니다.');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,11 +62,14 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
           .fetchCateBoard(boardCategory);
 
       if (context.mounted) {
-        Provider.of<AnnouncementProvider>(context, listen: false)
-            .fetchContestCate();
+        setState(() {
+          cateBoardList =
+              Provider.of<AnnouncementProvider>(context, listen: false)
+                  .cateBoardList;
+        });
       }
     });
-
+    delete2YearsBoard(cateBoardList);
     _loadCredentials();
   }
 
@@ -68,9 +102,6 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final cateBoardList =
-        Provider.of<AnnouncementProvider>(context).cateBoardList;
-
     return Scaffold(
       appBar: const BoardAppbar(),
       body: Padding(

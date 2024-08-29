@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/profile_widget.dart';
 import 'package:intl/intl.dart';
@@ -21,10 +22,21 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
 
   bool isOpened = false;
 
+  String name = ''; // 관리자 이름
+
   List<String> semesterList = []; // 연도-학기 리스트
   List<String> createdTimeList = []; // 게시글 생성 리스트
   List<Map<String, dynamic>> boardList = []; // 전체 게시글
   List<Map<String, dynamic>> selectedBoardList = []; // 선택된 학기에 해당하는 게시글 리스트
+
+  // 회원정보를 로드하는 메서드
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
+    final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
+    setState(() {
+      name = credentials['name']; // 로그인 정보에 있는 level를 가져와 저장
+    });
+  }
 
   // 영어 카테고리를 한국어로 전환하는 문자열 함수
   String engToKorCate(String engCategory) {
@@ -71,6 +83,35 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
     return semesterList; // 정렬된 리스트를 반환
   }
 
+  // 2년 된 게시글 1월 1일에 삭제되는 함수
+  void delete2YearsBoard(List<Map<String, dynamic>> boardList) async {
+    DateTime now = DateTime.now(); // 현재 시간 생성
+    final announcementProvider =
+        Provider.of<AnnouncementProvider>(context, listen: false);
+
+    // 현재 시간이 1월 1일인지 확인
+    if (now.month == 1 && now.day == 1) {
+      for (var board in boardList) {
+        final DateTime createdTime =
+            DateTime.parse(board['createdTime']); // 게시글 생성시간 생성
+        final Duration difference =
+            now.difference(createdTime); // 현재시간과 게시글 생성시간 차이
+
+        // 게시글이 2년 지나면 게시글 삭제
+        if (difference.inDays >= 730) {
+          await announcementProvider.deletedBoard(board['id']);
+        }
+      }
+
+      // 2년 이상된 게시글을 찾아 삭제를 완료할 경우 전체 게시글 조회
+      if (context.mounted) {
+        await announcementProvider.fetchAllBoards();
+      }
+    } else {
+      print('오늘은 1월 1일이 아닙니다. 게시글 삭제가 실행되지 않았습니다.');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -89,6 +130,9 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
         semesterList = formatYearSemester(createdTimeList); // 학기 리스트 생성
       });
     });
+    delete2YearsBoard(boardList); // 2년 이상된 게시글 삭제 함수 호출
+
+    _loadCredentials(); // 관리자의 이름 가져오는 함수 호출
   }
 
   @override
@@ -148,9 +192,9 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 프로필
-                  const Profile(
+                  Profile(
                     profileUrl: 'assets/images/profile.png',
-                    name: '홍길동',
+                    name: name,
                     status: 'Admin',
                     showSubTitle: false,
                     studentId: '2090',
