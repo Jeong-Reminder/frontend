@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/profile_widget.dart';
@@ -198,6 +199,16 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                         return Column(
                           children: [
                             ListTile(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BoardDetailPage(
+                                      announcementId: selectedBoard['id'],
+                                    ),
+                                  ),
+                                );
+                              },
                               title: Text(
                                 '[ ${engToKorCate(selectedBoard['announcementCategory'])} ]',
                                 style: const TextStyle(
