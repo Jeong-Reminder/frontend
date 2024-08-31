@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/screens/contestTeamList_screen.dart';
+import 'package:frontend/admin/screens/teamRecruitList_screen.dart';
 
 class DashBoardPage extends StatefulWidget {
   const DashBoardPage({super.key});
@@ -11,76 +13,87 @@ class _DashBoardPageState extends State<DashBoardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          // 제목 상단바
-          Container(
-            height: 167,
-            decoration: const BoxDecoration(
-              color: Color(0xFF8FB6F6),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30.0),
-                bottomRight: Radius.circular(30.0),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 제목 상단바
+            Container(
+              height: 167,
+              decoration: const BoxDecoration(
+                color: Color(0xFF8FB6F6),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 80),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Reminder\n      DashBoard',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 80),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Reminder\n      DashBoard',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      Image.asset(
-                        'assets/images/logo.png',
-                        scale: 2.0, // 크기 감소
-                      ),
-                    ],
-                  ),
-                ],
+                        Image.asset(
+                          'assets/images/logo.png',
+                          scale: 2.0, // 크기 감소
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 72),
+            const SizedBox(height: 72),
 
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  // 회원 정보 목록 버튼
-                  dashboardBtn(
-                    () {
-                      Navigator.pushNamed(context, '/user-info');
-                    },
-                    'assets/images/userInfoImg.png',
-                    '회원 정보 목록',
-                  ),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    // 홈가기 버튼
+                    dashboardBtn(
+                      () {
+                        Navigator.pushNamed(context, '/homepage');
+                      },
+                      'assets/images/homeImg.png',
+                      '홈으로 가기',
+                    ),
 
-                  // 팀원 모집글 버튼
-                  dashboardBtn(
-                    () {},
-                    'assets/images/teamRecruitImg.png',
-                    '팀원 모집글',
-                  ),
+                    // 회원 정보 목록 버튼
+                    dashboardBtn(
+                      () {
+                        Navigator.pushNamed(context, '/user-info');
+                      },
+                      'assets/images/userInfoImg.png',
+                      '회원 정보 목록',
+                    ),
 
-                  // 경진대회 버튼
-                  dashboardBtn(
-                    () {},
-                    'assets/images/contestImg.png',
-                    '경진대회',
-                  ),
-                ],
-              )),
-          const SizedBox(height: 10),
-        ],
+                    // 경진대회 버튼
+                    dashboardBtn(
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ContestTeamListPage(),
+                          ),
+                        );
+                      },
+                      'assets/images/contestImg.png',
+                      '팀',
+                    ),
+                  ],
+                )),
+            const SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }
@@ -112,7 +125,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 25),
       ],
     );
   }

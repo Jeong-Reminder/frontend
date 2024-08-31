@@ -7,7 +7,11 @@ import 'package:frontend/models/makeTeam_modal.dart';
 
 class MakeTeamPage extends StatefulWidget {
   final MakeTeam? makeTeam; // 수정할 팀원 모집글을 받아옴 (nullable)
-  const MakeTeamPage({super.key, this.makeTeam});
+  final String? initialCategory; // 초기 카테고리 전달
+  final int? announcementId;
+
+  const MakeTeamPage(
+      {super.key, this.makeTeam, this.initialCategory, this.announcementId});
 
   @override
   State<MakeTeamPage> createState() => _MakeTeamPageState();
@@ -51,6 +55,14 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     _contentController.addListener(_validateInputs);
     _chatUrlController.addListener(_validateInputs);
     _titleFocusNode.addListener(_handleTitleFocus);
+
+    if (widget.initialCategory != null && _titleController.text.isEmpty) {
+      _titleController.text =
+          '[${widget.initialCategory}] '; // [] 안에 전달받은 initialCategory 저장
+      _titleController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _titleController.text.length), // 커서 위치 [] 다음으로 고정
+      );
+    }
 
     if (widget.makeTeam != null) {
       _titleController.text = widget.makeTeam!.recruitmentTitle;
@@ -581,7 +593,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                                   ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                       .format(selectedEndDate!)
                                   : '',
-                              announcementId: 1,
+                              announcementId: widget.announcementId!,
                             );
 
                             _showUpdateConfirmationDialog(makeTeam);
@@ -634,7 +646,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 ),
                 const SizedBox(height: 14),
                 const Text(
-                  '인원 수',
+                  '경진대회 총 인원 수',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -642,16 +654,21 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    _buildPeopleCountButton(1),
-                    const SizedBox(width: 6),
-                    _buildPeopleCountButton(2),
-                    const SizedBox(width: 6),
-                    _buildPeopleCountButton(3),
-                    const SizedBox(width: 6),
-                    _buildPeopleCountButton(4),
-                  ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildPeopleCountButton(1),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(2),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(3),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(4),
+                      const SizedBox(width: 6),
+                      _buildPeopleCountButton(5),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -881,6 +898,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 TextField(
                   controller: _contentController,
                   maxLines: null,
+                  keyboardType: TextInputType.multiline, // 줄바꿈 가능한 키보드
+                  textInputAction: TextInputAction.done, // 키보드에 '확인' 버튼을 추가
                   decoration: const InputDecoration(
                     hintText: '내용을 작성해주세요',
                     hintStyle: TextStyle(
@@ -925,7 +944,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                             ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
                                 .format(selectedEndDate!)
                             : '',
-                        announcementId: 1,
+                        announcementId: widget.announcementId!,
                       );
 
                       if (widget.makeTeam != null) {
@@ -938,7 +957,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                             .createMakeTeam(makeTeam);
                       }
 
-                      // Navigator.pop(context);
+                      Navigator.pop(context);
                     }
                   : null,
               child: Container(

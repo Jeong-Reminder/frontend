@@ -20,6 +20,37 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
   bool isHidDel = false;
   Map<String, dynamic>? selectedBoard; // 선택된 게시글을 저장할 변수
 
+  List<Map<String, dynamic>> boardList = [];
+
+  // 2년 된 게시글 1월 1일에 삭제되는 함수
+  void delete2YearsBoard(List<Map<String, dynamic>> boardList) async {
+    DateTime now = DateTime.now(); // 현재 시간 생성
+    final announcementProvider =
+        Provider.of<AnnouncementProvider>(context, listen: false);
+
+    // 현재 시간이 1월 1일인지 확인
+    if (now.month == 1 && now.day == 1) {
+      for (var board in boardList) {
+        final DateTime createdTime =
+            DateTime.parse(board['createdTime']); // 게시글 생성시간 생성
+        final Duration difference =
+            now.difference(createdTime); // 현재시간과 게시글 생성시간 차이
+
+        // 게시글이 2년 지나면 게시글 삭제
+        if (difference.inDays >= 730) {
+          await announcementProvider.deletedBoard(board['id']);
+        }
+      }
+
+      // 2년 이상된 게시글을 찾아 삭제를 완료할 경우 전체 게시글 조회
+      if (context.mounted) {
+        await announcementProvider.fetchAllBoards();
+      }
+    } else {
+      print('오늘은 1월 1일이 아닙니다. 게시글 삭제가 실행되지 않았습니다.');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +59,15 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchAllBoards();
+
+      if (context.mounted) {
+        setState(() {
+          boardList = Provider.of<AnnouncementProvider>(context, listen: false)
+              .boardList;
+        });
+      }
     });
+    delete2YearsBoard(boardList);
     _loadCredentials();
   }
 
@@ -43,8 +82,6 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final boardList = Provider.of<AnnouncementProvider>(context).boardList;
-
     return Scaffold(
       appBar: const BoardAppbar(),
       body: Padding(
@@ -71,9 +108,12 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                     return [
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('글쓰기', PopUpItem.popUpItem1, () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            '/write-board',
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BoardWritePage(category: 'TOTAL'),
+                            ),
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
@@ -116,75 +156,82 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
           ? Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .hiddenBoard(selectedBoard!, selectedBoard!['id']);
-
-                      // 전체 boardList를 다시 불러옴
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchAllBoards();
+                            .hiddenBoard(selectedBoard!, selectedBoard!['id']);
+
+                        // 전체 boardList를 다시 불러옴
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchAllBoards();
+                        }
+                        setState(() {
+                          isHidDel = false; // 숨김/삭제 버튼 숨기기
+                          selectedBoard = null; // 선택된 게시글 초기화
+                        });
                       }
-                      setState(() {
-                        isHidDel = false; // 숨김/삭제 버튼 숨기기
-                        selectedBoard = null; // 선택된 게시글 초기화
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      minimumSize: const Size(205, 75),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '숨김',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '숨김',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedBoard != null) {
-                      print('id: ${selectedBoard!['id']}');
-                      await Provider.of<AnnouncementProvider>(context,
-                              listen: false)
-                          .deletedBoard(selectedBoard!['id']);
-
-                      // 전체 boardList를 다시 불러옴
-                      if (context.mounted) {
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  height: MediaQuery.of(context).size.height / 12,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedBoard != null) {
+                        print('id: ${selectedBoard!['id']}');
                         await Provider.of<AnnouncementProvider>(context,
                                 listen: false)
-                            .fetchAllBoards();
+                            .deletedBoard(selectedBoard!['id']);
+
+                        // 전체 boardList를 다시 불러옴
+                        if (context.mounted) {
+                          await Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchAllBoards();
+                        }
+                        setState(() {
+                          isHidDel = false; // 숨김/삭제 버튼 숨기기
+                          selectedBoard = null; // 선택된 게시글 초기화
+                        });
                       }
-                      setState(() {
-                        isHidDel = false; // 숨김/삭제 버튼 숨기기
-                        selectedBoard = null; // 선택된 게시글 초기화
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFAFAFE),
-                    minimumSize: const Size(205, 75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFAFAFE),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '삭제',
-                    style: TextStyle(
-                      color: Color(0xFF7D7D7F),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    child: const Text(
+                      '삭제',
+                      style: TextStyle(
+                        color: Color(0xFF7D7D7F),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

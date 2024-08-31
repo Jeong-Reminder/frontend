@@ -31,15 +31,12 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
-  # Firebase 관련 라이브러리
-  pod 'Firebase/Core'
-  pod 'Firebase/Auth'
-  pod 'Firebase/Analytics'
-  pod 'Firebase/Firestore'
-  pod 'Firebase/Storage'
-  pod 'Firebase/Messaging'
-
-  # SwiftyGif에서만 모듈 헤더 사용
+  # Add your pods here
+  pod 'Firebase', '~> 10.18.0'
+  pod 'FirebaseFirestore', '~> 10.18.0'
+  pod 'FirebaseCore', '~> 10.18.0'
+  pod 'FirebaseMessaging', '~> 10.18.0'
+  pod 'FirebaseAnalytics', '~> 10.18.0'
   pod 'SwiftyGif', :modular_headers => true
 
   target 'RunnerTests' do

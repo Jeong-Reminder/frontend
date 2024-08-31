@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/changePW_screen.dart';
 import 'package:frontend/services/login_services.dart';
 
 class AccountWidget extends StatelessWidget {
@@ -26,7 +27,12 @@ class AccountWidget extends StatelessWidget {
         // 비밀번호 변경 버튼
         TextButton(
           onPressed: () {
-            // 비밀번호 변경 페이지로 이동
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      const ChangePWPage()), // ChangePWPage로 이동
+            );
           },
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,

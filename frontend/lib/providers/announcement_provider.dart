@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
@@ -372,7 +375,7 @@ class AnnouncementProvider with ChangeNotifier {
         throw Exception('엑세스 토큰을 찾을 수 없음');
       }
 
-      final url = Uri.parse('$baseUrl/contest-categort-name');
+      final url = Uri.parse('$baseUrl/contest-category-name');
       final response = await http.get(
         url,
         headers: {
@@ -383,19 +386,18 @@ class AnnouncementProvider with ChangeNotifier {
       // 호출됐을 때 새로운 데이터를 추가할 때 중복방지를 위해 clear 메소드로 구현
       _categoryList.clear();
 
-      final utf8Response = utf8.decode(response.bodyBytes);
-      final jsonResponse = json.decode(utf8Response) as Map<String, dynamic>;
-
-      final dataResponse = jsonResponse['data'];
-
       if (response.statusCode == 200) {
+        final utf8Response = utf8.decode(response.bodyBytes);
+        final jsonResponse = json.decode(utf8Response) as Map<String, dynamic>;
+
+        final dataResponse = jsonResponse['data'];
         for (var data in dataResponse) {
           _categoryList.add(data);
         }
 
         print('조회 성공: $_categoryList');
       } else {
-        print('조회 실패');
+        print('조회 실패 : ${response.body}');
       }
       notifyListeners();
     } catch (e) {
@@ -438,6 +440,59 @@ class AnnouncementProvider with ChangeNotifier {
       }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  // 파일 다운로드
+  Future<void> downloadFile(String url, String fileName) async {
+    try {
+      // 안드로이드 에뮬레이터에서 localhost를 10.0.2.2로 대체
+      if (Platform.isAndroid) {
+        url = url.replaceFirst('localhost', '10.0.2.2');
+      } else if (Platform.isIOS) {
+        url = url.replaceFirst('localhost', '127.0.0.1');
+      }
+
+      // 파일 다운로드
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        Directory? downloadsDir;
+
+        if (Platform.isAndroid) {
+          // Android에서의 파일 저장 경로
+          if (await Permission.manageExternalStorage.request().isGranted) {
+            downloadsDir = Directory('/storage/emulated/0/Download');
+          } else {
+            print('스토리지 접근 권한이 필요합니다.');
+            bool shouldOpenSettings = await Permission.storage.isDenied;
+            if (shouldOpenSettings) {
+              openAppSettings();
+            }
+            return;
+          }
+        } else if (Platform.isIOS) {
+          // iOS에서의 파일 저장 경로
+          downloadsDir = await getApplicationDocumentsDirectory();
+        }
+
+        if (downloadsDir != null) {
+          String downloadsPath = path.join(downloadsDir.path, fileName);
+          final file = File(downloadsPath);
+          await file.writeAsBytes(response.bodyBytes);
+          print('파일이 다운로드되었습니다: $downloadsPath');
+
+          // 파일을 다른 앱으로 공유 (Files 앱 포함)
+          final xFile = XFile(downloadsPath);
+          Share.shareXFiles([xFile], text: 'Downloaded file: $fileName');
+        } else {
+          print('파일 경로를 찾을 수 없습니다.');
+        }
+      } else {
+        print('파일 다운로드 실패: 상태 코드 ${response.statusCode}');
+      }
+    } catch (e) {
+      print('파일 다운로드 중 오류 발생: $e');
     }
   }
 }

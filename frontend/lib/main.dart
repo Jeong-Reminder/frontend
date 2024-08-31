@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/providers/teamApply_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -24,8 +26,8 @@ import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
-import 'package:frontend/screens/settingProFile1_screen.dart';
-import 'package:frontend/screens/settingProfile2_screen.dart';
+import 'package:frontend/screens/setProfile_screen.dart';
+import 'package:frontend/screens/setExperience_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
@@ -76,15 +78,28 @@ void main() async {
     print("Firebase initialization error: $e");
   }
 
+  // iOS 알림 권한 요청
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
   // 백그라운드 메시지 핸들러 등록
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // 알림 초기화 설정
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-  const DarwinInitializationSettings initializationSettingsDarwin =
-      DarwinInitializationSettings();
-  const InitializationSettings initializationSettings = InitializationSettings(
+  DarwinInitializationSettings initializationSettingsDarwin =
+      DarwinInitializationSettings(
+    onDidReceiveLocalNotification: (id, title, body, payload) async {
+      // iOS에서 로컬 알림을 받을 때 처리할 작업
+      print('Notification received: $title $body');
+      // 여기에 필요한 동작을 추가하세요.
+    },
+  );
+  InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsDarwin,
   );
@@ -105,6 +120,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => MakeTeamProvider()),
         ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
+        ChangeNotifierProvider(create: (_) => VoteProvider()),
+        ChangeNotifierProvider(create: (_) => TeamApplyProvider()),
       ],
       child: const MyApp(),
     ),
@@ -183,9 +200,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/': (context) => const LoginPage(),
         '/add_member': (context) => const AddMemberPage(),
         '/user-info': (context) => const UserInfoPage(),
-        '/setting-profile': (context) => const SettingProfile1Page(),
         '/myuser': (context) => const MyUserPage(),
-        '/member-experience': (context) => const SettingProfile2Page(),
+        '/set-profile': (context) => const SetProfilePage(),
+        '/member-experience': (context) => const SetExperiencePage(),
         '/experience': (context) => const ExperiencePage(
               experiences: [],
               name: '',
@@ -195,11 +212,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/edit-field': (context) => const EditFieldPage(),
         '/edit-tool': (context) => const EditToolPage(),
         '/total-board': (context) => const TotalBoardPage(),
-        '/write-board': (context) => const BoardWritePage(),
         '/contest-board': (context) => const ContestBoardPage(),
         '/grade-board': (context) => const GradeBoardPage(),
         '/corSea-board': (context) => const CorSeaBoardPage(),
-        '/detail-board': (context) => BoardDetailPage(),
+        '/detail-board': (context) => const BoardDetailPage(),
         '/hidden-board': (context) => HiddenPage(),
       },
     );
@@ -223,6 +239,6 @@ Future<void> setupInteractedMessage() async {
 void _handleMessage(RemoteMessage message) {
   print('message = ${message.notification!.title}');
   if (message.data['type'] == 'chat') {
-    Get.toNamed('/homepage', arguments: message.data);
+    Get.toNamed('/detail-board', arguments: message.data);
   }
 }

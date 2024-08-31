@@ -1,14 +1,18 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class AdminProvider with ChangeNotifier {
   final UserService userService = UserService();
 
   List<Admin> admins = []; // Datatable에 표시할 회원 정보 리스트
+  final List<Map<String, dynamic>> _teamList = [];
+
+  List<Map<String, dynamic>> get teamList => _teamList;
 
   // 학생들 정보를 담는 메소드를 호출(그래야만 학생들 정보를 admins에 담고 반환할 수 있음)
   // admins 반환
@@ -18,6 +22,15 @@ class AdminProvider with ChangeNotifier {
     await fetchMembers();
     return admins;
   }
+
+  // 엑세스 토큰 할당
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
+  }
+
+  final String baseUrl = 'http://10.0.2.2:9000/api/v1/admin/';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/admin//';
 
   // 회원 추가
   Future<void> createUser(Admin admin) async {
@@ -93,5 +106,114 @@ class AdminProvider with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', token); // access token 키 저장
     notifyListeners();
+  }
+
+  // recruitment 전체 삭제
+  Future<void> deleteAllRecruitments() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}recruitment-delete-all');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      print('모집글 전체 삭제 성공: ${response.body}');
+    } else {
+      print('모집글 전체 삭제 실패: ${response.body}');
+    }
+  }
+
+  // recruitment 카테고리 별 삭제
+  Future<void> deleteCateRecruitment(String contestCate) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}recruitment-delete?category=$contestCate');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      print('카테고리 별 삭제 성공: ${response.body}');
+    } else {
+      print('카테고리 별 삭제 실패: ${response.body}');
+    }
+  }
+
+  // 팀 전제 초회
+  Future<void> fetchAllTeams() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}team-get');
+    final response = await http.get(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    _teamList.clear();
+
+    if (response.statusCode == 200) {
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response);
+      final dataResponse = jsonResponse['data'];
+
+      for (var data in dataResponse) {
+        _teamList.add(data);
+      }
+      notifyListeners();
+      print('팀 전체 조회 성공: $_teamList');
+    } else {
+      print('팀 전체 조회 실패: ${response.body}');
+    }
+  }
+
+  // Team 카테고리 별 삭제
+  Future<void> delCategoryTeam(String category) async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}team-delete?category=$category');
+    final response = await http.delete(url, headers: {
+      'access': accessToken,
+    });
+
+    if (response.statusCode == 200) {
+      print('Team 카테고리별 삭제 성공: ${response.body}');
+    } else {
+      print('Team 카테고리별 삭제 실패: ${response.body}');
+    }
+  }
+
+  // Team 전체 삭제
+  Future<void> deleteAllTeams() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse('${baseUrl}team-delete-all');
+    final response = await http.delete(
+      url,
+      headers: {'access': accessToken},
+    );
+
+    if (response.statusCode == 200) {
+      print('Team 카테고리별 삭제 성공: ${response.body}');
+    } else {
+      print('Team 카테고리별 삭제 실패: ${response.body}');
+    }
   }
 }

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:frontend/screens/settingProfile_screen.dart';
+import 'package:frontend/screens/setSkill_screen.dart';
+import 'package:frontend/widgets/position_list.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
-class SettingProfile1Page extends StatefulWidget {
-  const SettingProfile1Page({super.key});
+class SetProfilePage extends StatefulWidget {
+  const SetProfilePage({super.key});
 
   @override
-  State<SettingProfile1Page> createState() => _SettingProfile1PageState();
+  State<SetProfilePage> createState() => _SetProfilePageState();
 }
 
-class _SettingProfile1PageState extends State<SettingProfile1Page> {
+class _SetProfilePageState extends State<SetProfilePage> {
   double percent = 0; // 프로그레스 바 진행률
   TextEditingController linkController = TextEditingController(); // 깃허브 링크 입력
-  bool writtenLink = false;
+  bool writtenLink = false; // 깃허브 링크 작성 여부(작성 후 true로 변환 후 희망 분야 선택으로 전환)
   String githubUrl = '';
 
   @override
@@ -32,33 +33,6 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
   void _updateTextState() {
     setState(() {});
   }
-
-  List<Map<String, dynamic>> positionList = [
-    {
-      'title': '프론트엔드',
-      'isSelected': false,
-    },
-    {
-      'title': '백엔드',
-      'isSelected': false,
-    },
-    {
-      'title': '클라우드',
-      'isSelected': false,
-    },
-    {
-      'title': '데이터 엔지니어',
-      'isSelected': false,
-    },
-    {
-      'title': 'DevOps',
-      'isSelected': false,
-    },
-    {
-      'title': '없음',
-      'isSelected': false,
-    },
-  ];
 
   List<Map<String, dynamic>> chosenpositionList = [];
 
@@ -97,7 +71,7 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
               ),
               const SizedBox(height: 75),
 
-              // 링크 작성 부분을 지나면(true) 보직 선택으로 이동
+              // 링크 작성 부분을 지나면(true) 희망 분야 선택으로 이동
               if (writtenLink)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +80,7 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
                     Row(
                       children: [
                         const Text(
-                          '2. 보직 선택',
+                          '2. 희망분야 선택',
                           style: TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
@@ -217,15 +191,14 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
               GestureDetector(
                 onTap: () {
                   // writtenLink이 false일 때 깃허브 링크 화면에서 진행
-                  if (!writtenLink) {
+                  if (writtenLink == false) {
                     if (linkController.text.isNotEmpty) {
                       setState(() {
                         githubUrl =
                             'https://github.com/${linkController.text}'; // 깃허브 링크 최종 주소
                       });
                     } else {
-                      githubUrl = '깃허브 링크 없음';
-                      print(githubUrl);
+                      githubUrl = '없음';
                     }
                     setState(() {
                       writtenLink = true; // 깃허브 링크 작성 true로 설정
@@ -238,12 +211,14 @@ class _SettingProfile1PageState extends State<SettingProfile1Page> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SettingProfilePage(
+                        builder: (context) => SetSkillPage(
                           githubUrl,
                           chosenpositionList[0]['title'],
                         ),
                       ),
                     );
+                    print(
+                        'githubUrl: $githubUrl\n chosenpositionList: ${chosenpositionList[0]['title']}');
                   }
                 },
                 child: Row(
