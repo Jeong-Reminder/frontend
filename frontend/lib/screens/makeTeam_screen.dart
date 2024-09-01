@@ -35,18 +35,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
   ValueNotifier<bool> isChatUrlValid =
       ValueNotifier(false); // 오픈채팅 URL 유효성 상태를 관리하는 변수
 
-  // 글 제목에서 대괄호([]) 안의 경진대회 이름을 추출하는 함수
-  String _parseCompetitionName(String title) {
-    final RegExp regExp = RegExp(
-      r'\[(.*?)\]',
-      caseSensitive: false,
-    );
-    final match = regExp.firstMatch(title);
-    if (match != null) {
-      return match.group(1)?.trim() ?? '';
-    }
-    return '';
-  }
+  bool get isEditMode => widget.makeTeam != null; // 수정 모드 여부를 판단
 
   @override
   void initState() {
@@ -56,22 +45,21 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     _chatUrlController.addListener(_validateInputs);
     _titleFocusNode.addListener(_handleTitleFocus);
 
-    if (widget.initialCategory != null && _titleController.text.isEmpty) {
-      _titleController.text =
-          '[${widget.initialCategory}] '; // [] 안에 전달받은 initialCategory 저장
+    if (isEditMode && widget.makeTeam != null) {
+      // 수정 모드인 경우 제목의 카테고리만 남기고 나머지 필드는 초기화
+      String category =
+          _parseCompetitionName(widget.makeTeam!.recruitmentTitle);
+      _titleController.text = '[$category] ';
       _titleController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _titleController.text.length), // 커서 위치 [] 다음으로 고정
+        TextPosition(offset: _titleController.text.length),
       );
-    }
-
-    if (widget.makeTeam != null) {
-      _titleController.text = widget.makeTeam!.recruitmentTitle;
-      _contentController.text = widget.makeTeam!.recruitmentContent;
-      _chatUrlController.text = widget.makeTeam!.kakaoUrl;
-      selectedPeopleCount = widget.makeTeam!.studentCount;
-      selectedFields = widget.makeTeam!.hopeField.split(', ');
-      selectedEndDate =
-          DateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(widget.makeTeam!.endTime);
+    } else if (widget.initialCategory != null &&
+        _titleController.text.isEmpty) {
+      // 신규 작성 모드인 경우
+      _titleController.text = '[${widget.initialCategory}] ';
+      _titleController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _titleController.text.length),
+      );
     }
   }
 
@@ -204,301 +192,6 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     );
   }
 
-  void _showUpdateConfirmationDialog(MakeTeam makeTeam) {
-    // 모달 창에서 상태 관리를 위한 변수를 초기화
-    TextEditingController titleController =
-        TextEditingController(text: makeTeam.recruitmentTitle);
-    TextEditingController contentController =
-        TextEditingController(text: makeTeam.recruitmentContent);
-    TextEditingController chatUrlController =
-        TextEditingController(text: makeTeam.kakaoUrl);
-    int updatedSelectedPeopleCount = makeTeam.studentCount;
-    List<String> updatedSelectedFields = makeTeam.hopeField.split(', ');
-    DateTime updatedSelectedEndDate =
-        DateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(makeTeam.endTime);
-
-    // 모달 창을 띄워 사용자 입력을 받음
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('팀원 모집글 수정'),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    // 인원 수
-                    Row(
-                      children: [
-                        const Text(
-                          '인원 수',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                _buildPeopleCountButtonInDialog(
-                                    1, updatedSelectedPeopleCount, (value) {
-                                  setState(() {
-                                    updatedSelectedPeopleCount = value;
-                                  });
-                                }),
-                                const SizedBox(width: 6),
-                                _buildPeopleCountButtonInDialog(
-                                    2, updatedSelectedPeopleCount, (value) {
-                                  setState(() {
-                                    updatedSelectedPeopleCount = value;
-                                  });
-                                }),
-                                const SizedBox(width: 6),
-                                _buildPeopleCountButtonInDialog(
-                                    3, updatedSelectedPeopleCount, (value) {
-                                  setState(() {
-                                    updatedSelectedPeopleCount = value;
-                                  });
-                                }),
-                                const SizedBox(width: 6),
-                                _buildPeopleCountButtonInDialog(
-                                    4, updatedSelectedPeopleCount, (value) {
-                                  setState(() {
-                                    updatedSelectedPeopleCount = value;
-                                  });
-                                }),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    // 희망 분야
-                    Row(
-                      children: [
-                        const Text(
-                          '희망 분야',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: <String>[
-                                '백엔드',
-                                '프론트',
-                                'DevOps',
-                                '데이터 엔지니어',
-                                'AI',
-                                'SRE',
-                                'QA',
-                                'Security',
-                                'IoT'
-                              ].map((String field) {
-                                return _buildFieldButtonInDialog(
-                                    field, updatedSelectedFields, (selected) {
-                                  setState(() {
-                                    if (selected) {
-                                      updatedSelectedFields.add(field);
-                                    } else {
-                                      updatedSelectedFields.remove(field);
-                                    }
-                                  });
-                                });
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    // 종료 기간
-                    Row(
-                      children: [
-                        const Text(
-                          '종료 기간',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        GestureDetector(
-                          onTap: () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: updatedSelectedEndDate,
-                              firstDate: DateTime(2010),
-                              lastDate: DateTime(2101),
-                            );
-
-                            if (picked != null) {
-                              setState(() {
-                                updatedSelectedEndDate = picked;
-                              });
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              '${updatedSelectedEndDate.year}-${updatedSelectedEndDate.month}-${updatedSelectedEndDate.day}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    _buildTextField(chatUrlController, '오픈채팅방 링크'),
-                    _buildTextField(titleController, '제목'),
-                    _buildTextField(contentController, '내용'),
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('취소'),
-                  onPressed: () {
-                    Navigator.of(context).pop(); // 모달 닫기
-                  },
-                ),
-                TextButton(
-                  child: const Text('수정'),
-                  onPressed: () async {
-                    // MakeTeam 객체 업데이트
-                    MakeTeam updatedMakeTeam = MakeTeam(
-                      id: makeTeam.id,
-                      recruitmentCategory: makeTeam.recruitmentCategory,
-                      recruitmentTitle: titleController.text,
-                      recruitmentContent: contentController.text,
-                      studentCount: updatedSelectedPeopleCount,
-                      hopeField: updatedSelectedFields.join(', '),
-                      kakaoUrl: chatUrlController.text,
-                      recruitmentStatus: makeTeam.recruitmentStatus,
-                      endTime: DateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                          .format(updatedSelectedEndDate),
-                      announcementId: 1,
-                    );
-
-                    // 업데이트된 객체를 Provider를 통해 저장
-                    await Provider.of<MakeTeamProvider>(context, listen: false)
-                        .updateMakeTeam(updatedMakeTeam);
-
-                    // 메인 화면 업데이트
-                    setState(() {
-                      widget.makeTeam?.id = updatedMakeTeam.id;
-                      _titleController.text = updatedMakeTeam.recruitmentTitle;
-                      _contentController.text =
-                          updatedMakeTeam.recruitmentContent;
-                      _chatUrlController.text = updatedMakeTeam.kakaoUrl;
-                      selectedPeopleCount = updatedMakeTeam.studentCount;
-                      selectedFields = updatedMakeTeam.hopeField.split(', ');
-                      selectedEndDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                          .parse(updatedMakeTeam.endTime);
-                    });
-
-                    // 모달 닫기
-                    Navigator.of(context).pop(true); // 변경 사항이 있다는 플래그 전달
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).then((value) {
-      if (value == true) {
-        // 변경 사항이 있을 경우 setState로 메인 화면 업데이트
-        setState(() {});
-      }
-    });
-  }
-
-  Widget _buildPeopleCountButtonInDialog(
-      int count, int selectedCount, Function(int) onTap) {
-    bool isSelected = selectedCount == count;
-    return GestureDetector(
-      onTap: () {
-        onTap(count);
-      },
-      child: Container(
-        height: 20,
-        width: 70,
-        decoration: BoxDecoration(
-          color: const Color(0xFFDBE7FB),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Center(
-          child: Text(
-            '$count명',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.black : Colors.black54,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFieldButtonInDialog(
-      String field, List<String> selectedFields, Function(bool) onTap) {
-    bool isSelected = selectedFields.contains(field);
-    return GestureDetector(
-      onTap: () {
-        onTap(!isSelected);
-      },
-      child: Container(
-        height: 20,
-        width: 90,
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        decoration: BoxDecoration(
-          color: const Color(0xFFDBE7FB),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Center(
-          child: Text(
-            field,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.black : Colors.black54,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -546,101 +239,23 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '경진대회 팀원 모집',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '필요한 조건을 선택해 주세요',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '경진대회 팀원 모집',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () async {
-                            String competitionName =
-                                _parseCompetitionName(_titleController.text);
-                            if (competitionName.isNotEmpty) {
-                              print('경진대회 이름: $competitionName');
-                            }
-
-                            MakeTeam makeTeam = MakeTeam(
-                              id: widget.makeTeam?.id,
-                              recruitmentCategory: competitionName,
-                              recruitmentTitle: _titleController.text,
-                              recruitmentContent: _contentController.text,
-                              studentCount: selectedPeopleCount,
-                              hopeField: selectedFields.join(', '),
-                              kakaoUrl: _chatUrlController.text,
-                              recruitmentStatus: true,
-                              endTime: selectedEndDate != null
-                                  ? DateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                                      .format(selectedEndDate!)
-                                  : '',
-                              announcementId: widget.announcementId!,
-                            );
-
-                            _showUpdateConfirmationDialog(makeTeam);
-                          },
-                          child: Container(
-                            height: 20,
-                            width: 60,
-                            margin: const EdgeInsets.only(left: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2A72E7),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '수정',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            height: 20,
-                            width: 60,
-                            margin: const EdgeInsets.only(left: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEA4E44),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '삭제',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '필요한 조건을 선택해 주세요',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -947,26 +562,26 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                         announcementId: widget.announcementId!,
                       );
 
-                      if (widget.makeTeam != null) {
+                      if (isEditMode) {
                         await context
                             .read<MakeTeamProvider>()
                             .updateMakeTeam(makeTeam);
                       } else {
                         await context
                             .read<MakeTeamProvider>()
-                            .createMakeTeam(makeTeam);
+                            .createMakeTeam(makeTeam); // API 호출하여 모집글 작성
                       }
 
-                      Navigator.pop(context);
+                      Navigator.pop(context, makeTeam); // 작성된 데이터를 반환
                     }
                   : null,
               child: Container(
                 color: isEnabled ? const Color(0xFFACC7F1) : Colors.grey,
                 height: 76,
                 alignment: Alignment.center,
-                child: const Text(
-                  '작성 완료',
-                  style: TextStyle(
+                child: Text(
+                  isEditMode ? '수정 완료' : '작성 완료',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -978,5 +593,17 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
         ),
       ),
     );
+  }
+
+  String _parseCompetitionName(String title) {
+    final RegExp regExp = RegExp(
+      r'\[(.*?)\]',
+      caseSensitive: false,
+    );
+    final match = regExp.firstMatch(title);
+    if (match != null) {
+      return match.group(1)?.trim() ?? '';
+    }
+    return '';
   }
 }

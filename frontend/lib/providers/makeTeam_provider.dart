@@ -88,4 +88,19 @@ class MakeTeamProvider with ChangeNotifier {
       print(e);
     }
   }
+
+  // 팀원 모집글 삭제
+  Future<void> deleteMakeTeam() async {
+    try {
+      await service.deleteMakeTeam(); // 서비스에서 팀원 모집글 삭제
+      // 삭제된 팀원 모집글을 리스트에서 제거
+      int? id = await service.getId(); // 저장된 팀원 모집글 ID를 가져옴
+      if (id != null) {
+        makeTeams.removeWhere((team) => team.id == id);
+      }
+      notifyListeners();
+    } catch (e) {
+      print(e);
+    }
+  }
 }
