@@ -6,8 +6,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
-import 'package:frontend/screens/boardDetail_screen.dart';
-import 'package:frontend/services/notification_services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
@@ -523,17 +521,17 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                     isMustRead = !isMustRead;
                   });
                 }),
-            const SizedBox(height: 5.0),
+            // const SizedBox(height: 5.0),
 
-            // 투표 버튼
-            readVoteBtn(
-              title: '투표',
-              imgPath: 'assets/images/vote.png',
-              state: isConfirmedVote,
-              onPressed: () {
-                _showVoteSheet(context);
-              },
-            ),
+            // // 투표 버튼
+            // readVoteBtn(
+            //   title: '투표',
+            //   imgPath: 'assets/images/vote.png',
+            //   state: isConfirmedVote,
+            //   onPressed: () {
+            //     _showVoteSheet(context);
+            //   },
+            // ),
             const SizedBox(height: 30),
 
             // 경계선
@@ -560,19 +558,24 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
               announcementLevel: getSelectedGradeInt(),
             );
 
+            Map<String, dynamic> boardMap = {
+              'announcementCategory': getSelectedCategoryText(),
+              'announcementTitle': titleController.text,
+              'announcementContent': contentController.text,
+              'announcementImportant': isMustRead,
+              'visible': true,
+              'announcementLevel': getSelectedGradeInt(),
+              'votes': widget.board['votes'],
+            };
+
             await Provider.of<AnnouncementProvider>(context, listen: false)
                 .updateBoard(
                     board, pickedImages, pickedFiles, widget.board['id']);
 
             if (context.mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BoardDetailPage(
-                    announcementId: widget.board['id'],
-                  ),
-                ),
-              );
+              // 이전 페이지로 result 값 전달
+              // 이전 페이지의 push 함수에 리턴
+              Navigator.pop(context, boardMap);
             }
           } catch (e) {
             print(e.toString());

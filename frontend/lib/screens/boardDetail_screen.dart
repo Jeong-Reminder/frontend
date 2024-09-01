@@ -212,14 +212,18 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                         popUpItem('URL 공유', PopUpItem.popUpItem1, () {}),
                         if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                         if (userRole == 'ROLE_ADMIN')
-                          popUpItem('수정', PopUpItem.popUpItem2, () {
-                            Navigator.push(
+                          popUpItem('수정', PopUpItem.popUpItem2, () async {
+                            // 수정 페이지에서 리턴값을 받아서 board에 저장
+                            final data = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
                                     BoardUpdatePage(board: board),
                               ),
                             );
+                            setState(() {
+                              board = data;
+                            });
                           }),
                       ];
                     },
