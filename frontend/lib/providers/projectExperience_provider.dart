@@ -7,6 +7,7 @@ class ProjectExperienceProvider with ChangeNotifier {
 
   List<ProjectExperience> projectExperiences =
       []; // DataTable에 표시할 프로젝트 경험 정보 리스트
+  List<ProjectExperience> memberExperiences = [];
 
   // 프로젝트 경험 정보를 담는 메소드를 호출(그래야만 프로젝트 경험 정보를 projectExperiences에 담고 반환할 수 있음)
   // projectExperiences 반환
@@ -55,6 +56,22 @@ class ProjectExperienceProvider with ChangeNotifier {
       projectExperiences = fetchExperiences;
 
       notifyListeners(); // 상태 변경을 알림
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 다른 사람 프로젝트 경험 조회
+  Future<void> fetchMemberExperiences(int memberId) async {
+    try {
+      // 특정 사용자의 프로젝트 경험을 가져옴
+      List<ProjectExperience> fetchedMemberExperiences =
+          await service.fetchMemberExperiences(memberId);
+
+      // 가져온 프로젝트 경험을 memberExperiences 리스트에 할당
+      memberExperiences = fetchedMemberExperiences;
+
+      notifyListeners(); // 상태 변경 알림
     } catch (e) {
       print(e);
     }

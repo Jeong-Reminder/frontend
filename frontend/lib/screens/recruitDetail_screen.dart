@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:badges/badges.dart' as badges;
 import 'package:frontend/models/makeTeam_modal.dart';
 import 'package:frontend/models/teamApply_model.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/services/teamApply_service.dart';
 import 'package:provider/provider.dart';
+import 'package:badges/badges.dart' as badges;
 
 class RecruitDetailPage extends StatefulWidget {
   final Map<String, dynamic> makeTeam;
@@ -883,7 +885,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               GestureDetector(
                                 onTap: () {
                                   _showNameDialog(apply['developmentField'],
-                                      apply['githubLink']);
+                                      apply['githubLink'], apply['memberId']);
                                 },
                                 child: Text(
                                   apply['memberName'] ?? 'Unknown',
@@ -1221,15 +1223,66 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   }
 
   // 신청자의 기술 스택 및 Github 정보를 보여주는 다이얼로그
-  void _showNameDialog(String? field, String? githubUrl) {
+  // 댓글 단 사람 이름 클릭 시 다이얼로그 표시
+  void _showNameDialog(String name, String githubUrl, int memberId) {
+    // recruitList에서 memberId가 일치하는 멤버를 찾기
+    final member = recruitList['teamApplicationList'].firstWhere(
+      (application) => application['memberId'] == memberId,
+      orElse: () => null,
+    );
+
+    if (member == null) {
+      // 멤버가 없을 경우 예외 처리
+      print('해당 멤버를 찾을 수 없습니다.');
+      return;
+    }
+
+    final String name = member['memberName']; // 멤버 이름 추출
+    final String githubUrl = member['githubLink']; // GitHub URL 추출
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          // 다이얼로그의 제목 부분
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(field ?? 'No Field'),
+              // 멤버의 이름을 표시
+              Text(name), // 멤버의 이름을 제목으로 표시
+              Directionality(
+                textDirection: TextDirection.rtl, // 텍스트와 아이콘의 방향을 RTL로 설정
+                child: TextButton.icon(
+                  onPressed: () async {
+                    // 해당 멤버의 프로젝트 경험을 서버에서 가져옴
+                    await Provider.of<ProjectExperienceProvider>(context,
+                            listen: false)
+                        .fetchMemberExperiences(memberId);
+
+                    // 다이얼로그를 닫고, 새로운 페이지로 이동하여 경험을 보여줌
+                    Navigator.of(context).pop(); // 현재 다이얼로그 닫기
+                    final provider = Provider.of<ProjectExperienceProvider>(
+                        context,
+                        listen: false);
+
+                    // ExperiencePage로 이동하여 해당 멤버의 경험들을 보여줌
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ExperiencePage(
+                          experiences: provider.memberExperiences, // 가져온 경험 데이터
+                          name: name, // 멤버의 이름을 전달
+                        ),
+                      ),
+                    );
+                  },
+                  // "경험 보러가기" 버튼과 아이콘을 설정
+                  label: const Text(
+                    '경험 보러가기',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  icon: const Icon(Icons.chevron_left),
+                ),
+              ),
             ],
           ),
           titleTextStyle: const TextStyle(
@@ -1237,26 +1290,15 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
+          // 다이얼로그의 본문 부분
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: fieldList.map<Widget>((field) {
-                    return badge(
-                      field['logoUrl'] ?? '',
-                      field['title'] ?? '',
-                      field['titleColor'] ?? Colors.black,
-                      field['badgeColor'] ?? Colors.grey,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
+                // GitHub URL을 하이퍼링크 스타일로 표시
                 RichText(
                   text: TextSpan(
-                    text: 'Github: ',
+                    text: 'Github: ', // "Github: " 라벨
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -1264,11 +1306,11 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     ),
                     children: [
                       TextSpan(
-                        text: githubUrl ?? 'No Github URL',
+                        text: githubUrl, // 실제 GitHub URL
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.blue,
-                          decoration: TextDecoration.underline,
+                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
                         ),
                       ),
                     ],
@@ -1277,11 +1319,12 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               ],
             ),
           ),
+          // 다이얼로그 하단의 "닫기" 버튼
           actions: <Widget>[
             TextButton(
               child: const Text('닫기'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // 다이얼로그 닫기
               },
             ),
           ],
