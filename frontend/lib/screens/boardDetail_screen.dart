@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/widgets/vote_widget.dart';
@@ -22,10 +21,11 @@ class BoardDetailPage extends StatefulWidget {
   State<BoardDetailPage> createState() => _BoardDetailPageState();
 }
 
-PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
+PopupMenuItem<PopUpItem> popUpItem(
+    String text, PopUpItem item, Function() onTap) {
   return PopupMenuItem<PopUpItem>(
     enabled: true, // 팝업메뉴 호출
-    onTap: () {},
+    onTap: onTap,
     value: item,
     height: 25,
     child: Center(
@@ -41,7 +41,7 @@ PopupMenuItem<PopUpItem> popUpItem(String text, PopUpItem item) {
   );
 }
 
-enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
+enum PopUpItem { popUpItem1, popUpItem2, popUpItem3, popUpItem4 } // 팝업 아이템
 
 class _BoardDetailPageState extends State<BoardDetailPage> {
   Map<String, dynamic> board = {};
@@ -208,10 +208,54 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                     color: const Color(0xFFEFF0F2),
                     itemBuilder: (BuildContext context) {
                       return [
-                        popUpItem('URL 공유', PopUpItem.popUpItem1),
-                        if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
-                        if (userRole == 'ROLE_ADMIN')
-                          popUpItem('수정', PopUpItem.popUpItem2),
+                        popUpItem('URL 공유', PopUpItem.popUpItem1, () {}),
+                        if (userRole == 'ROLE_ADMIN') ...[
+                          const PopupMenuDivider(),
+                          popUpItem('수정', PopUpItem.popUpItem2, () async {
+                            // 수정 페이지에서 리턴값을 받아서 board에 저장
+                            // final data = await Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //         BoardUpdatePage(board: board),
+                            //   ),
+                            // );
+                            // setState(() {
+                            //   board = data;
+                            // });
+                          }),
+                          const PopupMenuDivider(),
+                          popUpItem(
+                            '숨김',
+                            PopUpItem.popUpItem3,
+                            () async {
+                              await Provider.of<AnnouncementProvider>(context,
+                                      listen: false)
+                                  .hiddenBoard(board, board['id']);
+
+                              if (context.mounted) {
+                                alertSnackBar(context, '숨김이 완료되었습니다');
+                              }
+                            },
+                          ),
+                          const PopupMenuDivider(),
+                          popUpItem(
+                            '삭제',
+                            PopUpItem.popUpItem4,
+                            () async {
+                              print('id: ${board['id']}');
+                              await Provider.of<AnnouncementProvider>(context,
+                                      listen: false)
+                                  .deletedBoard(board['id']);
+
+                              if (context.mounted) {
+                                Navigator.popAndPushNamed(
+                                    context, '/total-board');
+                                alertSnackBar(context, '삭제가 완료되었습니다');
+                              }
+                            },
+                          ),
+                        ]
                       ];
                     },
                     child: const Icon(Icons.more_vert),

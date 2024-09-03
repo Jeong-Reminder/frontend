@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/write_screen.dart';
 import 'package:frontend/services/login_services.dart';
@@ -126,7 +127,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  HiddenPage(category: 'TOTAL'),
+                                  const HiddenPage(category: 'TOTAL'),
                             ),
                           );
                         }),
@@ -141,104 +142,12 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               child: Board(
                 boardList: boardList,
                 total: true,
-                onBoardSelected: (board) {
-                  setState(() {
-                    selectedBoard = board;
-                    isHidDel = !isHidDel; // 숨김/삭제 버튼 표시
-                  });
-                },
+                isClicked: true,
               ),
             ),
           ],
         ),
       ),
-      // 숨김/삭제 버튼(isEdited 값을 저장한 isHidDel)
-      bottomNavigationBar: isHidDel
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  height: MediaQuery.of(context).size.height / 12,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (selectedBoard != null) {
-                        print('id: ${selectedBoard!['id']}');
-                        await Provider.of<AnnouncementProvider>(context,
-                                listen: false)
-                            .hiddenBoard(selectedBoard!, selectedBoard!['id']);
-
-                        // 전체 boardList를 다시 불러옴
-                        if (context.mounted) {
-                          await Provider.of<AnnouncementProvider>(context,
-                                  listen: false)
-                              .fetchAllBoards();
-                        }
-                        setState(() {
-                          isHidDel = false; // 숨김/삭제 버튼 숨기기
-                          selectedBoard = null; // 선택된 게시글 초기화
-                        });
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFAFAFE),
-                      minimumSize: const Size(205, 75),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                    ),
-                    child: const Text(
-                      '숨김',
-                      style: TextStyle(
-                        color: Color(0xFF7D7D7F),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  height: MediaQuery.of(context).size.height / 12,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (selectedBoard != null) {
-                        print('id: ${selectedBoard!['id']}');
-                        await Provider.of<AnnouncementProvider>(context,
-                                listen: false)
-                            .deletedBoard(selectedBoard!['id']);
-
-                        // 전체 boardList를 다시 불러옴
-                        if (context.mounted) {
-                          await Provider.of<AnnouncementProvider>(context,
-                                  listen: false)
-                              .fetchAllBoards();
-                        }
-                        setState(() {
-                          isHidDel = false; // 숨김/삭제 버튼 숨기기
-                          selectedBoard = null; // 선택된 게시글 초기화
-                        });
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFAFAFE),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0),
-                      ),
-                    ),
-                    child: const Text(
-                      '삭제',
-                      style: TextStyle(
-                        color: Color(0xFF7D7D7F),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : null,
     );
   }
 }
