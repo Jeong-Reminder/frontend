@@ -10,6 +10,7 @@ import 'package:frontend/services/login_services.dart';
 import 'package:frontend/services/teamApply_service.dart';
 import 'package:provider/provider.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:frontend/widgets/field_list.dart';
 
 class RecruitDetailPage extends StatefulWidget {
   final Map<String, dynamic> makeTeam;
@@ -160,8 +161,6 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
       }
     }
   }
-
-  List<Map<String, dynamic>> fieldList = [];
 
   // 팝업 메뉴 항목을 생성하는 함수
   PopupMenuItem<String> popUpItem(String text, String item) {
@@ -609,17 +608,14 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                             ),
                           ),
                           const SizedBox(width: 6),
+                          // 팀 생성하기 버튼 - 모집 인원이 꽉 차면 활성화
                           if (acceptMemberList.length ==
-                              makeTeam['studentCount'])
+                                  makeTeam['studentCount'] &&
+                              recruitList['recruitmentStatus'] == true)
                             GestureDetector(
                               onTap: () async {
                                 // 팀 생성 다이얼로그 호출
                                 _showCreateTeamDialog(recruitList['id']);
-
-                                setState(() {
-                                  recruitList['recruitmentStatus'] =
-                                      true; // 팀 생성 성공 시 상태 업데이트
-                                });
                               },
                               child: Container(
                                 height: 20,
@@ -636,6 +632,26 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          // 팀 생성 후 모집 완료 상태
+                          if (recruitList['recruitmentStatus'] == false)
+                            Container(
+                              height: 20,
+                              width: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  '모집 완료',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -1007,6 +1023,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: Text('${widget.makeTeam['memberName']}님의 기술 스택'),
           titleTextStyle: const TextStyle(
             fontSize: 13,
@@ -1074,7 +1091,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   void _showCreateTeamDialog(int recruitmentId) {
     final TextEditingController teamNameController = TextEditingController();
     final TextEditingController kakaoUrlController = TextEditingController(
-      text: recruitList['kakaoUrl'] ?? '', // recruitList['kakaoUrl'] 값을 미리 채워줌
+      text: recruitList['kakaoUrl'] ?? '', // 기존 URL을 미리 채워줌
     );
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -1140,15 +1157,14 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       kakaoUrlController.text,
                     );
 
+                    // 팀 생성 완료 후 모집 완료 상태로 변경
+                    setState(() {
+                      recruitList['recruitmentStatus'] = false; // 모집 완료 상태
+                    });
+
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('팀 생성 성공!')),
-                    );
                   } catch (e) {
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('팀 생성 실패: $e')),
-                    );
                   }
                 }
               },
@@ -1239,16 +1255,25 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
     final String name = member['memberName']; // 멤버 이름 추출
     final String githubUrl = member['githubLink']; // GitHub URL 추출
+    final List<String> developmentFields =
+        (member['developmentField'] as String)
+            .split(',')
+            .map((field) => field.trim())
+            .toList(); // developmentFields 데이터 추출
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           // 다이얼로그의 제목 부분
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // 멤버의 이름을 표시
-              Text(name), // 멤버의 이름을 제목으로 표시
+              Text(name,
+                  style:
+                      const TextStyle(color: Colors.black)), // 멤버의 이름을 제목으로 표시
               Directionality(
                 textDirection: TextDirection.rtl, // 텍스트와 아이콘의 방향을 RTL로 설정
                 child: TextButton.icon(
@@ -1278,9 +1303,10 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   // "경험 보러가기" 버튼과 아이콘을 설정
                   label: const Text(
                     '경험 보러가기',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.black), // 텍스트 색상 변경
                   ),
-                  icon: const Icon(Icons.chevron_left),
+                  icon: const Icon(Icons.chevron_left,
+                      color: Colors.black), // 아이콘 색상 변경
                 ),
               ),
             ],
@@ -1288,13 +1314,31 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           titleTextStyle: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Colors.black, // 제목 텍스트 색상 변경
           ),
           // 다이얼로그의 본문 부분
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 기술 스택을 배지 형태로 표시
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: developmentFields.map<Widget>((field) {
+                    final fieldData = fieldList.firstWhere(
+                      (element) => element['title'] == field,
+                      orElse: () => <String, dynamic>{}, // 기본값 추가
+                    );
+                    return badge(
+                      fieldData['logoUrl'] ?? '',
+                      fieldData['title'] ?? '',
+                      fieldData['titleColor'] ?? Colors.black,
+                      fieldData['badgeColor'] ?? Colors.grey,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
                 // GitHub URL을 하이퍼링크 스타일로 표시
                 RichText(
                   text: TextSpan(
@@ -1302,7 +1346,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.black, // 기본 텍스트 색상 변경
                     ),
                     children: [
                       TextSpan(
@@ -1322,7 +1366,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           // 다이얼로그 하단의 "닫기" 버튼
           actions: <Widget>[
             TextButton(
-              child: const Text('닫기'),
+              child: const Text('닫기',
+                  style: TextStyle(color: Colors.black)), // 버튼 텍스트 색상 변경
               onPressed: () {
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
