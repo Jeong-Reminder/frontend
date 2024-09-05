@@ -39,7 +39,6 @@ class ProfileProvider with ChangeNotifier {
   Future<int> createProfile(Profile profile) async {
     try {
       int profileId = await profileService.createProfile(profile);
-
       return profileId;
     } catch (e) {
       throw Exception('에러: ${e.toString()}');
@@ -48,18 +47,25 @@ class ProfileProvider with ChangeNotifier {
 
   // 프로필 조회
   Future<void> fetchProfile(int memberId) async {
-    Map<String, dynamic> profile = await profileService.fetchProfile(memberId);
-    techStack = profile;
+    try {
+      Map<String, dynamic> profile =
+          await profileService.fetchProfile(memberId);
+      techStack = profile;
 
-    // 프로필에서 team 정보 추출
-    if (profile.containsKey('team')) {
-      teams = List<Map<String, dynamic>>.from(profile['team']);
-    } else {
-      teams = [];
+      // 프로필에서 team 정보 추출
+      if (profile.containsKey('team') && profile['team'] is List) {
+        teams = List<Map<String, dynamic>>.from(profile['team']);
+      } else {
+        teams = []; // 팀 정보가 없을 때 빈 리스트로 설정
+      }
+
+      notifyListeners();
+      print('techStack: $techStack');
+      print('teams: $teams');
+    } catch (e) {
+      print('프로필 조회 중 에러 발생: ${e.toString()}');
+      teams = []; // 에러 발생 시에도 빈 리스트로 초기화
+      notifyListeners();
     }
-
-    notifyListeners();
-    print('techStack: $techStack');
-    print('teams: $teams');
   }
 }
