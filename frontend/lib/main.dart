@@ -127,7 +127,7 @@ void main() async {
     ),
   );
 
-  // 백그라운드 메시지 클릭 액션 설정
+  // 백그라운드 메시지 클릭 액션 설정`
   await setupInteractedMessage();
 }
 

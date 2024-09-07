@@ -25,7 +25,7 @@
     <application
         android:label="frontend"
         android:name="${applicationName}"
-        android:icon="@drawable/ic_stat_notifications"
+        android:icon="@mipmap/launcher_icon"
         android:roundIcon="@drawable/ic_stat_notifications"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
