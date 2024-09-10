@@ -19,8 +19,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
-                                <rect key="frame" x="143" y="394" width="144" height="144"/>
+                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" misplaced="YES" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
+                                <rect key="frame" x="114" y="363" width="200" height="200"/>
                                 <edgeInsets key="layoutMargins" top="8" left="8" bottom="8" right="8"/>
                             </imageView>
                         </subviews>
@@ -33,10 +33,10 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="80.152671755725194" y="264.08450704225356"/>
+            <point key="canvasLocation" x="79.906542056074755" y="263.71490280777539"/>
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchImage" width="144" height="144"/>
+        <image name="LaunchImage" width="341.33334350585938" height="341.33334350585938"/>
     </resources>
 </document>
