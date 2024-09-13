@@ -312,19 +312,24 @@ class _BoardWritePageState extends State<BoardWritePage> {
                   children: pickedImages.asMap().entries.map((entry) {
                     int index = entry.key;
                     File pickedImage = entry.value;
-                    return Stack(
-                      alignment: Alignment.topRight,
+                    return Row(
                       children: [
-                        Image.file(
-                          File(pickedImage.path),
-                          height: 80,
-                          alignment: Alignment.centerLeft,
+                        Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            Image.file(
+                              File(pickedImage.path),
+                              height: 80,
+                              alignment: Alignment.centerLeft,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close_outlined,
+                                  color: Colors.black),
+                              onPressed: () => _deleteImage(index),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.close_outlined,
-                              color: Colors.black),
-                          onPressed: () => _deleteImage(index),
-                        ),
+                        const SizedBox(width: 10),
                       ],
                     );
                   }).toList(),
@@ -344,26 +349,31 @@ class _BoardWritePageState extends State<BoardWritePage> {
                     children: pickedFiles.asMap().entries.map((entry) {
                       int index = entry.key;
                       File pickedFile = entry.value;
-                      return Stack(
-                        alignment: Alignment.topRight,
+                      return Row(
                         children: [
-                          Row(
+                          Stack(
+                            alignment: Alignment.topRight,
                             children: [
-                              const Icon(Icons.file_present),
-                              const SizedBox(width: 5),
-                              Text(path.basename(pickedFile.path)),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.close_outlined,
-                                  color: Colors.black,
-                                  size: 15,
-                                ),
-                                onPressed: () {
-                                  _deleteFile(index);
-                                },
+                              Row(
+                                children: [
+                                  const Icon(Icons.file_present),
+                                  const SizedBox(width: 5),
+                                  Text(path.basename(pickedFile.path)),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.close_outlined,
+                                      color: Colors.black,
+                                      size: 15,
+                                    ),
+                                    onPressed: () {
+                                      _deleteFile(index);
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                          const SizedBox(width: 10),
                         ],
                       );
                     }).toList(),

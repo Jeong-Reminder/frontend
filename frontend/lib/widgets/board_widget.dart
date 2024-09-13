@@ -12,12 +12,14 @@ class Board extends StatefulWidget {
   final Function(Map<String, dynamic> board)? onBoardSelected; // 선택된 게시글 콜백 함수
   // bool? isHidden =
   //     false; // 숨긴 게시글인지 아닌지 여부(숨긴 게시글일 경우 detailBoard 페이지로 이동 못하게 설정)
+  final String category;
 
   const Board({
     super.key,
     required this.boardList,
     required this.total,
     this.onBoardSelected,
+    required this.category,
   });
 
   @override
@@ -29,12 +31,14 @@ class _BoardState extends State<Board> {
   bool isPressed = false; // 길게 눌렀는지 여부
   int count = 4; // 좋아요 개수
   int? level;
+  List<Map<String, dynamic>> boardList = []; // widget.boardList 저장할 변수
   List<Map<String, dynamic>> filteredBoardList = [];
   int? selectedBoardIndex; // 선택된 게시글의 인덱스를 저장할 변수
 
   @override
   void initState() {
     super.initState();
+    // boardList = widget.boardList;
     _loadCredentials(); // 학번을 로드하는 메서드 호출
   }
 
@@ -104,14 +108,19 @@ class _BoardState extends State<Board> {
                     .fetchOneBoard(board['id']);
 
                 if (context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BoardDetailPage(
-                        announcementId: board['id'],
+                  if (widget.category == 'HIDDEN') {
+                    alertSnackBar(context, '숨긴 게시글은 조회할 수 없습니다.');
+                  } else {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BoardDetailPage(
+                          announcementId: board['id'],
+                          category: widget.category,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 }
               },
 
@@ -203,4 +212,14 @@ class _BoardState extends State<Board> {
         return category; // 변환되지 않은 경우 원래 값을 반환
     }
   }
+}
+
+// 팝업 알림 위젯
+void alertSnackBar(BuildContext context, String title) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(title), //snack bar의 내용. icon, button같은것도 가능하다.
+      duration: const Duration(seconds: 3), //올라와있는 시간
+    ),
+  );
 }

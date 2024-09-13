@@ -103,6 +103,7 @@ class _HiddenPageState extends State<HiddenPage> {
                     isHidDel = !isHidDel;
                   });
                 },
+                category: 'HIDDEN',
               ),
             ),
           ],

@@ -16,7 +16,8 @@ import 'package:provider/provider.dart';
 
 class BoardDetailPage extends StatefulWidget {
   final int? announcementId;
-  const BoardDetailPage({this.announcementId, super.key});
+  final String? category;
+  const BoardDetailPage({this.announcementId, this.category, super.key});
 
   @override
   State<BoardDetailPage> createState() => _BoardDetailPageState();
@@ -45,16 +46,19 @@ PopupMenuItem<PopUpItem> popUpItem(
 enum PopUpItem { popUpItem1, popUpItem2 } // 팝업 아이템
 
 class _BoardDetailPageState extends State<BoardDetailPage> {
-  Map<String, dynamic> board = {};
   String userRole = '';
+
   bool isLiked = false;
+  bool isDownloading = false;
+  bool isLoading = true; // 로딩 상태
+
   int likeCount = 0;
+  double downloadProgress = 0.0;
+
+  Map<String, dynamic> board = {};
 
   List<File> pickedImages = [];
   List<File> pickedFiles = [];
-
-  bool isDownloading = false;
-  double downloadProgress = 0.0;
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -130,6 +134,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         setState(() {
           board =
               Provider.of<AnnouncementProvider>(context, listen: false).board;
+          isLoading = false; // 데이터를 받아오면 false로 변환
         });
 
         await _initializeFilesAndImages(board); // 파일 및 이미지 초기화
@@ -149,8 +154,20 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         leading: Padding(
           padding: const EdgeInsets.only(right: 40.0),
           child: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
+            onPressed: () async {
+              if (widget.category == 'CORSEA') {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/corSea-board', (route) => false);
+              } else if (widget.category == 'ACADEMIC_ALL') {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/grade-board', (route) => false);
+              } else if (widget.category == 'CONTEST') {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/contest-board', (route) => false);
+              } else {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/total-board', (route) => false);
+              }
             },
             icon: const Icon(
               Icons.arrow_back,
@@ -191,233 +208,242 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 학년 공지 상단바
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // 게시글 제목
-                  Text(
-                    board['announcementTitle'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 학년 공지 상단바
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // 게시글 제목
+                        Text(
+                          board['announcementTitle'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
 
-                  // 팝업 메뉴 창
-                  PopupMenuButton<PopUpItem>(
-                    color: const Color(0xFFEFF0F2),
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        popUpItem('URL 공유', PopUpItem.popUpItem1, () {}),
-                        if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
-                        if (userRole == 'ROLE_ADMIN')
-                          popUpItem('수정', PopUpItem.popUpItem2, () async {
-                            // BoardUpdatePage에서 수정된 게시글 정보를 받아옴
-                            final updateBoard = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    BoardUpdatePage(board: board),
+                        // 팝업 메뉴 창
+                        PopupMenuButton<PopUpItem>(
+                          color: const Color(0xFFEFF0F2),
+                          itemBuilder: (BuildContext context) {
+                            return [
+                              popUpItem('URL 공유', PopUpItem.popUpItem1, () {}),
+                              if (userRole == 'ROLE_ADMIN')
+                                const PopupMenuDivider(),
+                              if (userRole == 'ROLE_ADMIN')
+                                popUpItem('수정', PopUpItem.popUpItem2, () async {
+                                  // BoardUpdatePage에서 수정된 게시글 정보를 받아옴
+                                  final updateBoard = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          BoardUpdatePage(board: board),
+                                    ),
+                                  );
+                                  // 만약 수정된 게시글 정보가 존재하면, 상태를 업데이트하여 즉시 반영
+                                  if (updateBoard != null) {
+                                    setState(() {
+                                      board = updateBoard;
+                                      print('수정된 게시글: $board');
+
+                                      // 텍스트는 바로바로 띄울 수 있지만 이미지와 파일은 board['images']와 board['files']가 아닌 pickedImages와 pickedFiles로 화면에 보여주기 때문에
+                                      // _initializeFilesAndImages 메서드를 불러서 pickedImages와 pickedFiles를 수정
+                                      _initializeFilesAndImages(board);
+                                    });
+                                  }
+                                }),
+                            ];
+                          },
+                          child: const Icon(Icons.more_vert),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 게시글 내용
+                    Text(
+                      board['announcementContent'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+
+                    // 게시글 이미지
+                    if (pickedImages.isNotEmpty)
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: pickedImages.asMap().entries.map((entry) {
+                            File imageFile = entry.value;
+                            return Row(
+                              children: [
+                                Center(
+                                  child: Image.file(
+                                    imageFile,
+                                    width: MediaQuery.of(context).size.width,
+                                    fit: BoxFit.cover, // 이미지를 컨테이너에 맞게 채움
+                                    errorBuilder: (BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace) {
+                                      return const Text('이미지를 불러올 수 없습니다.');
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+
+                    // 게시글 파일
+                    if (pickedFiles.isNotEmpty)
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: pickedFiles.asMap().entries.map((entry) {
+                            File file = entry.value;
+
+                            // 파일 이름을 이용해 board의 파일 정보를 찾기
+                            final correspondingFile =
+                                board['files']?.firstWhere(
+                              (f) =>
+                                  f['originalFilename'] ==
+                                  path.basename(file.path),
+                              orElse: () => null,
+                            );
+
+                            return GestureDetector(
+                              onTap: () async {
+                                if (correspondingFile != null) {
+                                  final fileUrl = correspondingFile['fileUrl'];
+                                  final fileName =
+                                      correspondingFile['originalFilename'];
+
+                                  print('fileUrl: $fileUrl');
+                                  print('fileName: $fileName');
+                                  final announcementProvider =
+                                      Provider.of<AnnouncementProvider>(context,
+                                          listen: false);
+
+                                  await announcementProvider.downloadFile(
+                                      fileUrl, fileName);
+
+                                  if (context.mounted) {
+                                    alertSnackBar(
+                                        context, '$fileName이 다운로드되었습니다.');
+                                  }
+                                } else {
+                                  print('해당 파일 정보를 찾을 수 없습니다.');
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.insert_drive_file,
+                                    size: 25,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    path.basename(file.path),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 10),
+                                ],
                               ),
                             );
-                            // 만약 수정된 게시글 정보가 존재하면, 상태를 업데이트하여 즉시 반영
-                            if (updateBoard != null) {
-                              setState(() {
-                                board = updateBoard;
-                                print('수정된 게시글: $board');
+                          }).toList(),
+                        ),
+                      ),
 
-                                // 텍스트는 바로바로 띄울 수 있지만 이미지와 파일은 board['images']와 board['files']가 아닌 pickedImages와 pickedFiles로 화면에 보여주기 때문에
-                                // _initializeFilesAndImages 메서드를 불러서 pickedImages와 pickedFiles를 수정
-                                _initializeFilesAndImages(board);
-                              });
-                            }
-                          }),
-                      ];
-                    },
-                    child: const Icon(Icons.more_vert),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-              // 게시글 내용
-              Text(
-                board['announcementContent'] ?? '',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 15),
+                    // Row(
+                    //   crossAxisAlignment: CrossAxisAlignment.center,
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   children: [
+                    //     GestureDetector(
+                    //       onTap: () async {
+                    //         try {
+                    //           bool suucess =
+                    //               await RecommendProvider().recommend(board['id']);
+                    //           if (suucess) {
+                    //             setState(() {
+                    //               isLiked = !isLiked;
+                    //               likeCount += 1;
+                    //             });
+                    //           }
+                    //         } catch (e) {
+                    //           print(e.toString());
+                    //         }
+                    //       },
+                    //       child: Icon(
+                    //         isLiked ? Icons.favorite : Icons.favorite_border,
+                    //         color: isLiked ? Colors.red : Colors.grey,
+                    //         size: 20,
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 2),
+                    //     Text(
+                    //       '$likeCount',
+                    //       style: const TextStyle(
+                    //         fontSize: 14,
+                    //         fontWeight: FontWeight.bold,
+                    //         color: Colors.black,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    const SizedBox(height: 20),
 
-              // 게시글 이미지
-              if (pickedImages.isNotEmpty)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: pickedImages.asMap().entries.map((entry) {
-                      File imageFile = entry.value;
-                      return Row(
-                        children: [
-                          Center(
-                            child: Image.file(
-                              imageFile,
-                              width: MediaQuery.of(context).size.width,
-                              fit: BoxFit.cover, // 이미지를 컨테이너에 맞게 채움
-                              errorBuilder: (BuildContext context,
-                                  Object exception, StackTrace? stackTrace) {
-                                return const Text('이미지를 불러올 수 없습니다.');
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              const SizedBox(height: 20),
-
-              // 게시글 파일
-              if (pickedFiles.isNotEmpty)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: pickedFiles.asMap().entries.map((entry) {
-                      File file = entry.value;
-
-                      // 파일 이름을 이용해 board의 파일 정보를 찾기
-                      final correspondingFile = board['files']?.firstWhere(
-                        (f) =>
-                            f['originalFilename'] == path.basename(file.path),
-                        orElse: () => null,
-                      );
-
-                      return GestureDetector(
-                        onTap: () async {
-                          if (correspondingFile != null) {
-                            final fileUrl = correspondingFile['fileUrl'];
-                            final fileName =
-                                correspondingFile['originalFilename'];
-
-                            print('fileUrl: $fileUrl');
-                            print('fileName: $fileName');
-                            final announcementProvider =
-                                Provider.of<AnnouncementProvider>(context,
-                                    listen: false);
-
-                            await announcementProvider.downloadFile(
-                                fileUrl, fileName);
-
-                            if (context.mounted) {
-                              alertSnackBar(context, '$fileName이 다운로드되었습니다.');
-                            }
-                          } else {
-                            print('해당 파일 정보를 찾을 수 없습니다.');
-                          }
-                        },
-                        child: Row(
+                    // 투표 보기
+                    if (board['votes'] != null &&
+                        (board['votes'] as List).isNotEmpty)
+                      Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          title: const Text('투표 보기'),
                           children: [
-                            const Icon(
-                              Icons.insert_drive_file,
-                              size: 25,
-                              color: Colors.grey,
+                            VoteWidget(
+                              votes: (board['votes'] as List<dynamic>)
+                                  .map((vote) => Vote.fromJson(
+                                      vote as Map<String, dynamic>))
+                                  .toList(),
                             ),
-                            const SizedBox(width: 5),
-                            Text(
-                              path.basename(file.path),
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            const SizedBox(height: 10),
                           ],
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-              const SizedBox(height: 20),
-
-              // Row(
-              //   crossAxisAlignment: CrossAxisAlignment.center,
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     GestureDetector(
-              //       onTap: () async {
-              //         try {
-              //           bool suucess =
-              //               await RecommendProvider().recommend(board['id']);
-              //           if (suucess) {
-              //             setState(() {
-              //               isLiked = !isLiked;
-              //               likeCount += 1;
-              //             });
-              //           }
-              //         } catch (e) {
-              //           print(e.toString());
-              //         }
-              //       },
-              //       child: Icon(
-              //         isLiked ? Icons.favorite : Icons.favorite_border,
-              //         color: isLiked ? Colors.red : Colors.grey,
-              //         size: 20,
-              //       ),
-              //     ),
-              //     const SizedBox(width: 2),
-              //     Text(
-              //       '$likeCount',
-              //       style: const TextStyle(
-              //         fontSize: 14,
-              //         fontWeight: FontWeight.bold,
-              //         color: Colors.black,
-              //       ),
-              //     ),
-              //   ],
-              // ),
-              const SizedBox(height: 20),
-
-              // 투표 보기
-              if (board['votes'] != null && (board['votes'] as List).isNotEmpty)
-                Theme(
-                  data: Theme.of(context)
-                      .copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    title: const Text('투표 보기'),
-                    children: [
-                      VoteWidget(
-                        votes: (board['votes'] as List<dynamic>)
-                            .map((vote) =>
-                                Vote.fromJson(vote as Map<String, dynamic>))
-                            .toList(),
                       ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-              // 댓글 작성 제한 메세지
-              const Center(
-                child: Text(
-                  '댓글을 작성할 수 없는 게시물입니다.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Color(0xFFA89F9F),
-                  ),
+                    // 댓글 작성 제한 메세지
+                    const Center(
+                      child: Text(
+                        '댓글을 작성할 수 없는 게시물입니다.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          color: Color(0xFFA89F9F),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
