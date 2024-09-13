@@ -272,7 +272,8 @@ class _MyUserPageState extends State<MyUserPage> {
                 ],
               ),
               if (isExpanded)
-                teamApplyProvider.teams.isEmpty
+                (teamApplyProvider.teams['teamList'] == null ||
+                        teamApplyProvider.teams['teamList'].isEmpty)
                     ? const Text('생성된 팀이 없습니다.')
                     : ListView.builder(
                         shrinkWrap: true,

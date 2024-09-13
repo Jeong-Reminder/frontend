@@ -216,4 +216,34 @@ class MakeTeamService {
       throw Exception('팀원 모집글 수정 실패: ${response.body}');
     }
   }
+
+  // 팀원 모집글 삭제 API
+  Future<void> deleteMakeTeam() async {
+    final int? id = await getId(); // 저장된 팀원 모집글 ID를 가져옵니다.
+    if (id == null) {
+      throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
+    }
+
+    final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment/$id';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    final response = await http.delete(
+      Uri.parse(baseUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'access': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('팀원 모집글 삭제 성공');
+    } else {
+      throw Exception('팀원 모집글 삭제 실패: ${response.body}');
+    }
+  }
 }
