@@ -33,8 +33,8 @@ class AnnouncementProvider with ChangeNotifier {
   // final String baseUrl = 'http://172.30.1.8:9000/api/v1/announcement';
 
 // 게시글 수정
-  Future<int> updateBoard(Board board, List<File> pickedImages,
-      List<File> pickedFiles, int announcementId) async {
+  Future<void> updateBoard(Board board, List<File> pickedImages,
+      List<File> pickedFiles, int announcementId, BuildContext context) async {
     final accessToken = await getToken();
     if (accessToken == null) {
       throw Exception('엑세스 토큰을 찾을 수 없음');
@@ -85,9 +85,16 @@ class AnnouncementProvider with ChangeNotifier {
       final response = await boardInfo.send();
       final responseString = await response.stream.bytesToString();
 
+      // responseString을 JSON으로 파싱 후 data 필드만 추출
+      Map<String, dynamic> jsonResponse = jsonDecode(responseString);
+      Map<String, dynamic> updateBoard = jsonResponse['data'];
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         print('수정 성공: ${response.statusCode}');
-        return response.statusCode;
+
+        if (context.mounted) {
+          Navigator.pop(context, updateBoard);
+        }
       } else {
         print('수정 실패: ${response.statusCode} - $responseString');
         throw Exception('Failed to update board');

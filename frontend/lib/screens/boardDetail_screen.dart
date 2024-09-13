@@ -86,6 +86,12 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
   // 이미지와 파일 초기화 메서드
   Future<void> _initializeFilesAndImages(Map<String, dynamic> board) async {
+    // 게시글에 표시된 이미지와 파일을 모두 제거 후 다시 초기화 진행
+    setState(() {
+      pickedImages.clear();
+      pickedFiles.clear();
+    });
+
     // 이미지 URL 초기화
     if (board['images'] != null) {
       for (var image in board['images']) {
@@ -213,17 +219,25 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                         if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                         if (userRole == 'ROLE_ADMIN')
                           popUpItem('수정', PopUpItem.popUpItem2, () async {
-                            // 수정 페이지에서 리턴값을 받아서 board에 저장
-                            final data = await Navigator.push(
+                            // BoardUpdatePage에서 수정된 게시글 정보를 받아옴
+                            final updateBoard = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
                                     BoardUpdatePage(board: board),
                               ),
                             );
-                            setState(() {
-                              board = data;
-                            });
+                            // 만약 수정된 게시글 정보가 존재하면, 상태를 업데이트하여 즉시 반영
+                            if (updateBoard != null) {
+                              setState(() {
+                                board = updateBoard;
+                                print('수정된 게시글: $board');
+
+                                // 텍스트는 바로바로 띄울 수 있지만 이미지와 파일은 board['images']와 board['files']가 아닌 pickedImages와 pickedFiles로 화면에 보여주기 때문에
+                                // _initializeFilesAndImages 메서드를 불러서 pickedImages와 pickedFiles를 수정
+                                _initializeFilesAndImages(board);
+                              });
+                            }
                           }),
                       ];
                     },

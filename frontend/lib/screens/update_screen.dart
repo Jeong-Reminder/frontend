@@ -414,26 +414,32 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                     children: pickedImages.asMap().entries.map((entry) {
                       int index = entry.key;
                       File imageFile = entry.value;
-                      return Stack(
-                        alignment: Alignment.topRight,
+                      return Row(
                         children: [
-                          Image.file(
-                            imageFile,
-                            height: 150,
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return const Text('이미지를 불러올 수 없습니다.');
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close_outlined,
-                                color: Colors.black),
-                            onPressed: () {
-                              _deleteImage(index);
+                          Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              Image.file(
+                                imageFile,
+                                height: 150,
+                                errorBuilder: (BuildContext context,
+                                    Object exception, StackTrace? stackTrace) {
+                                  return const Text('이미지를 불러올 수 없습니다.');
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close_outlined,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  _deleteImage(index);
 
-                              print('Remaining Images: ${pickedImages.length}');
-                            },
+                                  print(
+                                      'Remaining Images: ${pickedImages.length}');
+                                },
+                              ),
+                            ],
                           ),
+                          const SizedBox(width: 10),
                         ],
                       );
                     }).toList(),
@@ -453,34 +459,40 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                     children: pickedFiles.asMap().entries.map((entry) {
                       int index = entry.key;
                       File file = entry.value;
-                      return Stack(
-                        alignment: Alignment.topRight,
+                      return Row(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Column(
-                              children: [
-                                const Icon(
-                                  Icons.insert_drive_file,
-                                  size: 50,
-                                  color: Colors.grey,
+                          Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Column(
+                                  children: [
+                                    const Icon(
+                                      Icons.insert_drive_file,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                    Text(
+                                      path.basename(file.path),
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  path.basename(file.path),
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close_outlined,
-                                color: Colors.black),
-                            onPressed: () {
-                              _deleteFile(index);
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close_outlined,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  _deleteFile(index);
 
-                              print('Remaining Files: ${pickedFiles.length}');
-                            },
+                                  print(
+                                      'Remaining Files: ${pickedFiles.length}');
+                                },
+                              ),
+                            ],
                           ),
+                          const SizedBox(width: 10),
                         ],
                       );
                     }).toList(),
@@ -558,25 +570,9 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
               announcementLevel: getSelectedGradeInt(),
             );
 
-            Map<String, dynamic> boardMap = {
-              'announcementCategory': getSelectedCategoryText(),
-              'announcementTitle': titleController.text,
-              'announcementContent': contentController.text,
-              'announcementImportant': isMustRead,
-              'visible': true,
-              'announcementLevel': getSelectedGradeInt(),
-              'votes': widget.board['votes'],
-            };
-
             await Provider.of<AnnouncementProvider>(context, listen: false)
-                .updateBoard(
-                    board, pickedImages, pickedFiles, widget.board['id']);
-
-            if (context.mounted) {
-              // 이전 페이지로 result 값 전달
-              // 이전 페이지의 push 함수에 리턴
-              Navigator.pop(context, boardMap);
-            }
+                .updateBoard(board, pickedImages, pickedFiles,
+                    widget.board['id'], context);
           } catch (e) {
             print(e.toString());
           }
@@ -601,211 +597,6 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
           ),
         ),
       ),
-    );
-  }
-
-  // 투표 바텀시트
-  void _showVoteSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.7,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 22.0, vertical: 40.0),
-
-                // 모달 내부 영역
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 제목 입력 필드
-                    TextFormField(
-                      decoration: InputDecoration(
-                        hintText: '제목을 입력해주세요',
-                        hintStyle: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFFC5C5C7),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                    ),
-                    const SizedBox(height: 19),
-
-                    // 투표 항목 입력 필드
-                    // 목록의 순서를 재배열시켜주는 위젯
-                    ReorderableListView(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-
-                      // 아이템을 재정렬할 때 호출
-                      // 아이템을 이동할 때 함수를 사용해서 아이템의 순서를 업데이트
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          _reorderVoteItems(oldIndex, newIndex);
-                        });
-                      },
-                      children: [
-                        for (int index = 0;
-                            index < voteControllers.length;
-                            index++)
-
-                          // 드래그가 되지 않아 ListTile로 구현
-                          // 투표 항목
-                          ListTile(
-                            key: ValueKey(index),
-                            title: TextFormField(
-                              controller: voteControllers[index],
-                              decoration: InputDecoration(
-                                hintText: '${index + 1}. 항목을 입력하세요',
-                                hintStyle: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFFC5C5C7),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0, vertical: 5.0),
-                              ),
-                            ),
-                            trailing: const Icon(Icons.menu),
-                          ),
-                      ],
-                    ),
-
-                    // 항목 추가 버튼
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _addVoteItem(); // 투표 항목 추가 함수 호출
-                        });
-                      },
-                      icon: const Icon(
-                        Icons.add,
-                        color: Colors.black,
-                        size: 20,
-                      ),
-                      label: const Text(
-                        '항목 추가',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    const Divider(),
-                    const SizedBox(height: 15),
-
-                    // 복수 선택 허용 체크박스
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isMultiplied,
-                          onChanged: (value) {
-                            setState(() {
-                              isMultiplied = value!;
-                            });
-                          },
-                        ),
-                        const Text(
-                          '복수 선택 허용',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
-                    const Text(
-                      '종료일 설정',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 종료일 설정
-                    Row(
-                      children: [
-                        // 달력 아이콘
-                        IconButton(
-                          onPressed: () {
-                            DatePicker.showDateTimePicker(
-                              context,
-                              currentTime: DateTime.now(),
-                              locale: LocaleType.ko, // 한국어 버전
-                              onConfirm: (date) {
-                                setState(() {
-                                  selectedEndDate = date;
-                                });
-                              },
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.calendar_month,
-                          ),
-                        ),
-
-                        // 지정한 종료 날짜
-                        Text(
-                          selectedEndDate != null
-                              ? (formatDateTime(selectedEndDate!))
-                              : '',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-
-                    // 확인 버튼
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            isConfirmedVote = true;
-                          });
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDBE7FB),
-                          surfaceTintColor:
-                              const Color(0xFF2B72E7).withOpacity(0.25),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                          minimumSize: const Size(94, 38),
-                        ),
-                        child: const Text(
-                          '확인',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF6E747E),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
@@ -1091,9 +882,9 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
   String getSelectedCategoryText() {
     List<String> categories = [
       'SEASONAL_SYSTEM',
-      'CORPORATE_TOUR',
-      'CONTEST',
       'ACADEMIC_ALL',
+      'CONTEST',
+      'CORPORATE_TOUR',
     ];
 
     for (int i = 0; i < isCategory.length; i++) {
