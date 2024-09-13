@@ -1019,72 +1019,72 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         .map((field) => field.trim())
         .toList();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text('${widget.makeTeam['memberName']}님의 기술 스택'),
-          titleTextStyle: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: developmentFields.map<Widget>((field) {
-                    final fieldData = fieldList.firstWhere(
-                      (element) => element['title'] == field,
-                      orElse: () => <String, dynamic>{}, // 기본값 추가
-                    );
-                    return badge(
-                      fieldData['logoUrl'] ?? '',
-                      fieldData['title'] ?? '',
-                      fieldData['titleColor'] ?? Colors.black,
-                      fieldData['badgeColor'] ?? Colors.grey,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                RichText(
-                  text: TextSpan(
-                    text: 'Github: ',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: githubLink,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ],
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('${widget.makeTeam['memberName']}님의 기술 스택'),
+            titleTextStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: developmentFields.map<Widget>((field) {
+                      final fieldData = fieldList.firstWhere(
+                        (element) => element['title'] == field,
+                      );
+                      return badge(
+                        fieldData['logoUrl'] ?? '',
+                        fieldData['title'] ?? '',
+                        fieldData['titleColor'] ?? Colors.black,
+                        fieldData['badgeColor'] ?? Colors.grey,
+                      );
+                    }).toList(),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Github: ',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: githubLink,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('닫기'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+            actions: <Widget>[
+              TextButton(
+                child: const Text('닫기'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   // 팀 생성하기 버튼 클릭 시 보이는 다이얼로그

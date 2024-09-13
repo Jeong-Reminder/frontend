@@ -147,6 +147,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                     isHidDel = !isHidDel; // 숨김/삭제 버튼 표시
                   });
                 },
+                category: 'TOTAL',
               ),
             ),
           ],

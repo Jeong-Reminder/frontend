@@ -202,14 +202,16 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
 
             Expanded(
               child: Board(
-                  boardList: filteredBoardList,
-                  total: false,
-                  onBoardSelected: (board) {
-                    setState(() {
-                      selectedBoard = board;
-                      isHidDel = !isHidDel;
-                    });
-                  }),
+                boardList: filteredBoardList,
+                total: false,
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel;
+                  });
+                },
+                category: 'ACADEMIC_ALL',
+              ),
             ),
           ],
         ),
