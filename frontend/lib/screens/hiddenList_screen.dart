@@ -122,6 +122,11 @@ class _HiddenPageState extends State<HiddenPage> {
                     await Provider.of<AnnouncementProvider>(context,
                             listen: false)
                         .fetchHiddenBoard();
+
+                    // 숨김 해제 후 새로고침할 때 숨김 해제 버튼 없애기 위해 isHidDel를 false로 설정
+                    setState(() {
+                      isHidDel = false;
+                    });
                   }
                 }
               },

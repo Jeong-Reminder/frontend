@@ -155,19 +155,8 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
           padding: const EdgeInsets.only(right: 40.0),
           child: IconButton(
             onPressed: () async {
-              if (widget.category == 'CORSEA') {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/corSea-board', (route) => false);
-              } else if (widget.category == 'ACADEMIC_ALL') {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/grade-board', (route) => false);
-              } else if (widget.category == 'CONTEST') {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/contest-board', (route) => false);
-              } else {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/total-board', (route) => false);
-              }
+              // 공지 카테고리에 맞는 Navigator 메서드
+              pushNamedAndRemoveUntil();
             },
             icon: const Icon(
               Icons.arrow_back,
@@ -238,7 +227,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                               popUpItem('URL 공유', PopUpItem.popUpItem1, () {}),
                               if (userRole == 'ROLE_ADMIN')
                                 const PopupMenuDivider(),
-                              if (userRole == 'ROLE_ADMIN')
+                              if (userRole == 'ROLE_ADMIN') ...[
                                 popUpItem('수정', PopUpItem.popUpItem2, () async {
                                   // BoardUpdatePage에서 수정된 게시글 정보를 받아옴
                                   final updateBoard = await Navigator.push(
@@ -260,6 +249,40 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                                     });
                                   }
                                 }),
+                                const PopupMenuDivider(),
+                                popUpItem(
+                                  '숨김',
+                                  PopUpItem.popUpItem3,
+                                  () async {
+                                    await Provider.of<AnnouncementProvider>(
+                                            context,
+                                            listen: false)
+                                        .hiddenBoard(board, board['id']);
+
+                                    if (context.mounted) {
+                                      pushNamedAndRemoveUntil();
+                                      alertSnackBar(context, '숨김이 완료되었습니다');
+                                    }
+                                  },
+                                ),
+                                const PopupMenuDivider(),
+                                popUpItem(
+                                  '삭제',
+                                  PopUpItem.popUpItem4,
+                                  () async {
+                                    print('id: ${board['id']}');
+                                    await Provider.of<AnnouncementProvider>(
+                                            context,
+                                            listen: false)
+                                        .deletedBoard(board['id']);
+
+                                    if (context.mounted) {
+                                      pushNamedAndRemoveUntil();
+                                      alertSnackBar(context, '삭제가 완료되었습니다');
+                                    }
+                                  },
+                                ),
+                              ]
                             ];
                           },
                           child: const Icon(Icons.more_vert),
@@ -445,6 +468,23 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
               ),
             ),
     );
+  }
+
+  // 공지 카테고리에 맞는 Navigator 메서드
+  void pushNamedAndRemoveUntil() {
+    if (widget.category == 'CORSEA') {
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/corSea-board', (route) => false);
+    } else if (widget.category == 'ACADEMIC_ALL') {
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/grade-board', (route) => false);
+    } else if (widget.category == 'CONTEST') {
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/contest-board', (route) => false);
+    } else {
+      Navigator.pushNamedAndRemoveUntil(
+          context, '/total-board', (route) => false);
+    }
   }
 }
 
