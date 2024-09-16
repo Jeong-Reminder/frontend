@@ -175,6 +175,7 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
                     isHidDel = !isHidDel;
                   });
                 },
+                category: 'CORSEA',
               ),
             ),
           ],

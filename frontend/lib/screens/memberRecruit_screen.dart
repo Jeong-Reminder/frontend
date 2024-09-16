@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/providers/announcement_provider.dart';
@@ -120,17 +119,22 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         return GestureDetector(
           onTap: () async {
             // RecruitDetailPage로 이동할 때, await로 결과를 기다림
-            final updatedAcceptMemberList = await Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => RecruitDetailPage(makeTeam: post),
               ),
             );
 
-            // 만약 전달받은 acceptMemberList가 null이 아니라면, UI를 업데이트
-            if (updatedAcceptMemberList != null) {
+            // 만약 전달받은 값이 true라면 해당 post를 리스트에서 제거
+            if (result == true) {
               setState(() {
-                post['acceptMemberList'] = updatedAcceptMemberList;
+                recruitList.remove(post);
+              });
+            } else if (result is List<Map<String, dynamic>>) {
+              // 만약 반환된 값이 업데이트된 acceptMemberList라면, UI를 업데이트
+              setState(() {
+                post['acceptMemberList'] = result;
               });
             }
           },
@@ -176,7 +180,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                 Row(
                   children: [
                     Text(
-                      '모집 인원 ${post['acceptMemberList']?.length ?? 0}/${post['studentCount'].toString()}', // 모집 인원
+                      '모집 인원 ${post['acceptMemberList'] is List ? post['acceptMemberList'].length : 0}/${post['studentCount'].toString()}', // 모집 인원
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -265,19 +269,16 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       ],
     ).then((selectedItem) async {
       setState(() {
-        announcementId = categoryList.map((cate) {
-          // 빈 맵을 반환하여 타입 문제 해결
-          // cateBoardList에서 cate와 _parseCategoryName(cateBoard['announcementTitle'])이 동일한 첫 번째 항목을 확인
-          final match = cateBoardList.firstWhere(
-            (cateBoard) =>
-                cate == _parseCategoryName(cateBoard['announcementTitle']),
-            orElse: () => <String, dynamic>{}, // 빈 맵 반환
-          );
+        // cateBoardList에서 선택된 카테고리와 일치하는 항목을 찾음
+        final matchedBoard = cateBoardList.firstWhere(
+          (cateBoard) =>
+              selectedItem ==
+              _parseCategoryName(cateBoard['announcementTitle']),
+          orElse: () => <String, dynamic>{}, // 일치하는 항목이 없을 경우 null 반환
+        );
 
-          // 찾은 항목(match)에서 id 값을 추출
-          return match['id'] as int?;
-        }).firstWhere((id) => id != null,
-            orElse: () => null); // categoryList에서 가장 먼저 발견된 id가 null이 아닌 값을 반환
+        // 매칭된 항목이 있는 경우 해당 id를 가져옴
+        announcementId = matchedBoard['id'] as int;
       });
 
       // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우

@@ -26,6 +26,10 @@ class LoginAPI {
   // static const changePasswordAddress =
   //     'http://10.0.2.2:9000/api/v1/member/changePassword';
 
+  // static const loginAddress = 'http://172.30.1.8:9000/login';
+  // static const tokenRefreshAddress = 'http://172.30.1.8:9000/api/v1/reissue';
+  // static const logoutAddress = 'http://172.30.1.8:9000/api/v1/logout';
+
   static const loginAddress = 'http://127.0.0.1:9000/login';
   static const tokenRefreshAddress = 'http://127.0.0.1:9000/api/v1/reissue';
   static const logoutAddress = 'http://127.0.0.1:9000/api/v1/logout';

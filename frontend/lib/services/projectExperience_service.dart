@@ -20,7 +20,6 @@ class ProjectExperienceService {
     const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
     // const String baseUrl = 'http://10.0.2.2:9000/api/v1/member-experience';
 
-
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
@@ -109,6 +108,40 @@ class ProjectExperienceService {
       return fetchExperiences;
     } else {
       print("내 프로젝트 경험 조회 실패");
+      return [];
+    }
+  }
+
+  // 다른 사람의 프로젝트 경험 조회 API
+  Future<List<ProjectExperience>> fetchMemberExperiences(int memberId) async {
+    final String baseUrl =
+        'http://127.0.0.1:9000/api/v1/member-experience/$memberId';
+
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Access token을 찾을 수 없습니다.');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'access': token,
+      },
+    );
+
+    final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+    if (response.statusCode == 200) {
+      List<ProjectExperience> memberExperiences = (responseData['data'] as List)
+          .map((projectExperienceData) =>
+              ProjectExperience.fromJson(projectExperienceData))
+          .toList();
+
+      print("다른 사람의 프로젝트 경험 조회 성공: $memberExperiences");
+      return memberExperiences;
+    } else {
+      print("다른 사람의 프로젝트 경험 조회 실패");
       return [];
     }
   }

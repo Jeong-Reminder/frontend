@@ -127,7 +127,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  const HiddenPage(category: 'TOTAL'),
+                                  HiddenPage(category: 'TOTAL'),
                             ),
                           );
                         }),
@@ -142,7 +142,13 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
               child: Board(
                 boardList: boardList,
                 total: true,
-                isClicked: true,
+                onBoardSelected: (board) {
+                  setState(() {
+                    selectedBoard = board;
+                    isHidDel = !isHidDel; // 숨김/삭제 버튼 표시
+                  });
+                },
+                category: 'TOTAL',
               ),
             ),
           ],
