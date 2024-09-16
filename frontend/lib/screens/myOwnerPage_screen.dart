@@ -249,6 +249,7 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                                   MaterialPageRoute(
                                     builder: (context) => BoardDetailPage(
                                       announcementId: selectedBoard['id'],
+                                      category: 'PROFILE',
                                     ),
                                   ),
                                 );
@@ -273,7 +274,7 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
             ),
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            padding: EdgeInsets.all(20.0),
             child: AccountWidget(),
           ),
         ],

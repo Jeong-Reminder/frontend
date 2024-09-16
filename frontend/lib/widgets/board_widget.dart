@@ -99,16 +99,6 @@ class _BoardState extends State<Board> {
         final category = _getCategoryName(board['announcementCategory']);
         // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
-        // 제목이 20자 이상일 때 "..." 처리
-        String truncatedTitle = board['announcementTitle'].length > 20
-            ? '${board['announcementTitle'].substring(0, 20)}...'
-            : board['announcementTitle'];
-
-        // 내용이 30자 이상일 때 "..." 처리
-        String truncatedContent = board['announcementContent'].length > 30
-            ? '${board['announcementContent'].substring(0, 30)}...'
-            : board['announcementContent'];
-
         return Column(
           children: [
             GestureDetector(
@@ -164,35 +154,42 @@ class _BoardState extends State<Board> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                truncatedTitle,
+                          // Flexible 위젯을 사용하는 이유는 제목 옆에 카테고리가 붙어있어야 하기 때문
+                          Flexible(
+                            child: RichText(
+                              overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                text: board['announcementTitle'],
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 5),
-                              Text(
-                                category,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFF7D7D7F),
-                                ),
-                              ),
-                            ],
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            category,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF7D7D7F),
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 7),
-                      Text(
-                        truncatedContent,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      RichText(
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                        text: TextSpan(
+                          text: board['announcementContent'],
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 7),

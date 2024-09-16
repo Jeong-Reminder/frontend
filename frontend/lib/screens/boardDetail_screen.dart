@@ -211,11 +211,18 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // 게시글 제목
-                        Text(
-                          board['announcementTitle'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: RichText(
+                            overflow: TextOverflow.clip,
+                            maxLines: 5,
+                            text: TextSpan(
+                              text: board['announcementTitle'] ?? '',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
                         ),
 
@@ -484,6 +491,8 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     } else if (widget.category == 'TOTAL') {
       Navigator.pushNamedAndRemoveUntil(
           context, '/total-board', (route) => false);
+    } else if (widget.category == 'PROFILE') {
+      Navigator.pushNamedAndRemoveUntil(context, '/myowner', (route) => false);
     } else {
       Navigator.pushNamedAndRemoveUntil(context, '/homepage', (route) => false);
     }

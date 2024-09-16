@@ -362,27 +362,6 @@ class _HomePageState extends State<HomePage> {
                                   ? userBoardList[index]
                                   : mustBoardList[index];
 
-                              // 제목이 20자 이상일 때 "..." 처리
-                              String truncatedTitle = board['announcementTitle']
-                                          .length >
-                                      13
-                                  ? '${board['announcementTitle'].substring(0, 13)}...'
-                                  : board['announcementTitle'];
-
-                              // 줄바꿈 제거 후, 내용이 30자 이상일 때 "..." 처리
-                              String announcementContent =
-                                  board['announcementContent']
-                                      .replaceAll('\n', '')
-                                      .replaceAll('\r', '');
-
-                              // 내용이 30자 이상일 때 "..." 처리
-                              String truncatedContent = board[
-                                              'announcementContent']
-                                          .length >
-                                      25
-                                  ? '${announcementContent.substring(0, 25)}...'
-                                  : announcementContent;
-
                               return Row(
                                 children: [
                                   GestureDetector(
@@ -415,19 +394,31 @@ class _HomePageState extends State<HomePage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            truncatedTitle, // 정해진 길이만큼 출력한 공지글 제목
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
+                                          // 컨테이너 크기에 맞게 줄임표를 사용하여 텍스트가 오버플로되었음을 나타냄
+                                          // 공지글 제목
+                                          RichText(
+                                            overflow: TextOverflow.ellipsis,
+                                            text: TextSpan(
+                                              text: board['announcementTitle'],
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
-                                          Text(
-                                            truncatedContent, // 줄바꿈 제거 후 길이만큼 출력한 공지글 내용
-                                            style: const TextStyle(
-                                              color: Colors.black54,
-                                              fontSize: 12,
+
+                                          // 공지글 내용
+                                          RichText(
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                            text: TextSpan(
+                                              text:
+                                                  board['announcementContent'],
+                                              style: const TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 12,
+                                              ),
                                             ),
                                           ),
                                           const SizedBox(height: 29),
