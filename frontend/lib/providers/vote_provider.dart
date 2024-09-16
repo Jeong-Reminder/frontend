@@ -17,7 +17,8 @@ class VoteProvider with ChangeNotifier {
     return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
   }
 
-  final String baseUrl = 'http://10.0.2.2:9000/api/v1/votes';
+  final String baseUrl = 'https://reminder.sungkyul.ac.kr/api/v1/votes';
+  // final String baseUrl = 'http://10.0.2.2:9000/api/v1/votes';
   // final String baseUrl = 'http://127.0.0.1:9000/api/v1/votes';
 
   // 투표 생성

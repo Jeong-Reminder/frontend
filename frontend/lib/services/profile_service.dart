@@ -10,10 +10,10 @@ class ProfileService {
     return prefs.getString('accessToken'); // accessToken 키로 저장된 문자열 값을 가져옴
   }
 
-  // final String baseUrl =
-  //     'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
+  final String baseUrl =
+      'https://reminder.sungkyul.ac.kr/api/v1/member-profile';
   // final String baseUrl = 'http://10.0.2.2:9000/api/v1/member-profile';
-  final String baseUrl = 'http://127.0.0.1:9000/api/v1/member-profile';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/member-profile';
   // final String baseUrl = 'http://172.30.1.8:9000/api/v1/member-profile'; -> 실제 기기
 
   // 프로필 생성 API
