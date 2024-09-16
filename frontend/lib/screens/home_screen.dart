@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
@@ -384,60 +385,74 @@ class _HomePageState extends State<HomePage> {
 
                               return Row(
                                 children: [
-                                  Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 2,
-                                    padding: const EdgeInsets.all(10.0),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFDBE7FB),
-                                      borderRadius: BorderRadius.circular(15.0),
-                                      border: Border.all(
-                                        color: const Color(0xFF2B72E7)
-                                            .withOpacity(0.25),
-                                        width: 1,
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => BoardDetailPage(
+                                            announcementId: board['id'],
+                                            category: 'HOME',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width:
+                                          MediaQuery.of(context).size.width / 2,
+                                      padding: const EdgeInsets.all(10.0),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDBE7FB),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                        border: Border.all(
+                                          color: const Color(0xFF2B72E7)
+                                              .withOpacity(0.25),
+                                          width: 1,
+                                        ),
                                       ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          truncatedTitle, // 정해진 길이만큼 출력한 공지글 제목
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            truncatedTitle, // 정해진 길이만큼 출력한 공지글 제목
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          truncatedContent, // 줄바꿈 제거 후 길이만큼 출력한 공지글 내용
-                                          style: const TextStyle(
-                                            color: Colors.black54,
-                                            fontSize: 12,
+                                          Text(
+                                            truncatedContent, // 줄바꿈 제거 후 길이만큼 출력한 공지글 내용
+                                            style: const TextStyle(
+                                              color: Colors.black54,
+                                              fontSize: 12,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 29),
-                                        const Row(
-                                          children: [
-                                            Text(
-                                              '더보기',
-                                              style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
+                                          const SizedBox(height: 29),
+                                          const Row(
+                                            children: [
+                                              Text(
+                                                '더보기',
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 30.0),
-                                              child: Icon(
-                                                  Icons.arrow_forward_ios,
-                                                  size: 14,
-                                                  color: Colors.black54),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    right: 30.0),
+                                                child: Icon(
+                                                    Icons.arrow_forward_ios,
+                                                    size: 14,
+                                                    color: Colors.black54),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 9),

@@ -481,9 +481,11 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     } else if (widget.category == 'CONTEST') {
       Navigator.pushNamedAndRemoveUntil(
           context, '/contest-board', (route) => false);
-    } else {
+    } else if (widget.category == 'TOTAL') {
       Navigator.pushNamedAndRemoveUntil(
           context, '/total-board', (route) => false);
+    } else {
+      Navigator.pushNamedAndRemoveUntil(context, '/homepage', (route) => false);
     }
   }
 }
