@@ -99,6 +99,16 @@ class _BoardState extends State<Board> {
         final category = _getCategoryName(board['announcementCategory']);
         // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
+        // 제목이 20자 이상일 때 "..." 처리
+        String truncatedTitle = board['announcementTitle'].length > 20
+            ? '${board['announcementTitle'].substring(0, 20)}...'
+            : board['announcementTitle'];
+
+        // 내용이 30자 이상일 때 "..." 처리
+        String truncatedContent = board['announcementContent'].length > 30
+            ? '${board['announcementContent'].substring(0, 30)}...'
+            : board['announcementContent'];
+
         return Column(
           children: [
             GestureDetector(
@@ -159,7 +169,7 @@ class _BoardState extends State<Board> {
                           Row(
                             children: [
                               Text(
-                                board['announcementTitle'],
+                                truncatedTitle,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -179,7 +189,7 @@ class _BoardState extends State<Board> {
                       ),
                       const SizedBox(height: 7),
                       Text(
-                        board['announcementContent'],
+                        truncatedContent,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
