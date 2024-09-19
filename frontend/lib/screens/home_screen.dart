@@ -1,6 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
@@ -48,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   DateTime? _rangeEnd;
 
   String userRole = '';
+  int? level;
 
   List<Map<String, dynamic>> voteList = [
     {
@@ -67,13 +70,27 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+  List<Map<String, dynamic>> userBoardList =
+      []; // 학생에게 보여질 공지글(해당 학년의 공지글만 보여주기 위해)
+
   // 위젯의 상태 초기화
   @override
   void initState() {
     super.initState();
     _selectedDay = _focuseDay;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _initializeData();
+    });
+
     _loadCredentials();
+  }
+
+  // 비동기 초기화 메서드
+  Future<void> _initializeData() async {
+    await Provider.of<AnnouncementProvider>(context, listen: false)
+        .fetchAllBoards();
+    getData(); // 전체 공지 api가 먼저 호출되어야 홈화면에 공지를 띄울 수 있음.
   }
 
   // 역할을 로드하는 메서드
@@ -82,7 +99,9 @@ class _HomePageState extends State<HomePage> {
     final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
     setState(() {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
+      level = credentials['level'];
     });
+    print('학년: $level');
   }
 
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
@@ -196,17 +215,6 @@ class _HomePageState extends State<HomePage> {
     return token!;
   }
 
-  // 알림 테스트
-  // 푸시 알림 데이터
-  Map<String, dynamic> notificationData = {
-    "id": "1",
-    "title": "Test Notification",
-    "content": "This is a test notification message.",
-    "category": "general",
-    "targetId": 1,
-    "createdAt": "2024-07-28T10:00:00"
-  };
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -307,118 +315,150 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                SingleChildScrollView(
-                  // 사용자가 스크롤하여 모든 위젯을 볼 수 있음
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Container(
-                        // 첫 번째 위젯 박스
-                        width: 216,
-                        padding: const EdgeInsets.all(20.0),
-                        margin: const EdgeInsets.only(right: 9.0),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDBE7FB),
-                          borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
-                          border: Border.all(
-                            // 박스 테두리
-                            color: const Color(0xFF2B72E7).withOpacity(0.25),
-                            width: 1, // 두께
-                          ),
-                        ),
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '우리 학교의 모든 것',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '중요한 학교 정보 놓치지 마세요',
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 12,
-                              ),
-                            ),
-                            SizedBox(height: 29),
-                            Row(
-                              children: [
-                                Text(
-                                  '더보기',
-                                  style: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+
+                // 필독 공지들
+                FutureBuilder(
+                  future: getData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('데이터를 불러오는 도중 오류가 발생했습니다.'),
+                      );
+                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      List<Map<String, dynamic>> boardList =
+                          snapshot.data as List<Map<String, dynamic>>;
+
+                      // 전체 공지에서 필독 상태인 공지만 필터링한 공지
+                      List<Map<String, dynamic>> mustBoardList =
+                          boardList.where((board) {
+                        return board['announcementImportant'] == true;
+                      }).toList();
+
+                      // 학생일 경우에는 학년까지 필터링해야 함
+                      if (userRole == 'ROLE_USER') {
+                        userBoardList = boardList.where((board) {
+                          return board['announcementLevel'] == level &&
+                              board['announcementImportant'] == true;
+                        }).toList();
+                      }
+
+                      // 공지글이 비어있으면 공지 아이콘들이 최상단에 위치
+                      if (userBoardList.isNotEmpty ||
+                          mustBoardList.isNotEmpty) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height / 6,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: (userRole == 'ROLE_USER')
+                                ? userBoardList.length
+                                : mustBoardList.length,
+                            shrinkWrap: true, // 높이를 제한하는 데 도움을 줌
+                            itemBuilder: (context, index) {
+                              final board = (userRole == 'ROLE_USER')
+                                  ? userBoardList[index]
+                                  : mustBoardList[index];
+
+                              return Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => BoardDetailPage(
+                                            announcementId: board['id'],
+                                            category: 'HOME',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width:
+                                          MediaQuery.of(context).size.width / 2,
+                                      padding: const EdgeInsets.all(10.0),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDBE7FB),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                        border: Border.all(
+                                          color: const Color(0xFF2B72E7)
+                                              .withOpacity(0.25),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // 컨테이너 크기에 맞게 줄임표를 사용하여 텍스트가 오버플로되었음을 나타냄
+                                          // 공지글 제목
+                                          RichText(
+                                            overflow: TextOverflow.ellipsis,
+                                            text: TextSpan(
+                                              text: board['announcementTitle'],
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+
+                                          // 공지글 내용
+                                          RichText(
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                            text: TextSpan(
+                                              text:
+                                                  board['announcementContent'],
+                                              style: const TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 29),
+                                          const Row(
+                                            children: [
+                                              Text(
+                                                '더보기',
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    right: 30.0),
+                                                child: Icon(
+                                                    Icons.arrow_forward_ios,
+                                                    size: 14,
+                                                    color: Colors.black54),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(right: 30.0),
-                                  child: Icon(Icons.arrow_forward_ios,
-                                      size: 14, color: Colors.black54),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        // 두 번째 위젯 박스
-                        width: 216,
-                        padding: const EdgeInsets.all(20.0),
-                        margin: const EdgeInsets.only(right: 9.0),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDBE7FB),
-                          borderRadius: BorderRadius.circular(15.0),
-                          border: Border.all(
-                            color: const Color(0xFF2B72E7).withOpacity(0.25),
-                            width: 1,
+                                  const SizedBox(width: 9),
+                                ],
+                              );
+                            },
                           ),
-                        ),
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '졸업 이수학점 확인 공지',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '학생분들은 이수학점 및 현수강',
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 12,
-                              ),
-                            ),
-                            SizedBox(height: 29),
-                            Row(
-                              children: [
-                                Text(
-                                  '더보기',
-                                  style: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(right: 30.0),
-                                  child: Icon(Icons.arrow_forward_ios,
-                                      size: 14, color: Colors.black54),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    } else {
+                      return Container();
+                    }
+                  },
                 ),
 
                 const SizedBox(height: 10),
@@ -723,5 +763,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<List<Map<String, dynamic>>> getData() async {
+    return Provider.of<AnnouncementProvider>(context, listen: false).boardList;
   }
 }

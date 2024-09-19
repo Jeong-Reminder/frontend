@@ -169,6 +169,7 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
                     isHidDel = !isHidDel;
                   });
                 },
+                category: 'CONTEST',
               ),
             ),
           ],

@@ -21,9 +21,10 @@ class MakeTeamService {
 
   // 팀원 모집글 작성 API
   Future<int> createMakeTeam(MakeTeam makeTeam) async {
+
+    const String baseUrl = 'https://reminder.sungkyul.ac.kr/api/v1/recruitment';
     // const String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment';
     // const String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment';
-    const String baseUrl = 'https://reminder.sungkyul.ac.kr/api/v1/recruitment';
 
     final token = await getToken();
     if (token == null) {
@@ -61,9 +62,11 @@ class MakeTeamService {
     if (id == null) {
       throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
     }
-    // final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
+
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://10.0.2.2:9000/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
 
     final token = await getToken();
     if (token == null) {
@@ -108,13 +111,14 @@ class MakeTeamService {
 
   // 팀원 모집글 공지글 아이디로 조회(카테고리 조회) API
   Future<List<Map<String, dynamic>>> fetchCateMakeTeam(int id) async {
+
+    final String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/recruitment/category/$id';
     // final String baseUrl =
     //     'http://127.0.0.1:9000/api/v1/recruitment/category/$id';
     // final String baseUrl =
     //     'http://10.0.0.2:9000/api/v1/recruitment/category/$id';
-    final String baseUrl =
-        'https://reminder.sungkyul.ac.kr/api/v1/recruitment/category/$id';
-
+   
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
@@ -189,10 +193,11 @@ class MakeTeamService {
     if (id == null) {
       throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
     }
-    // final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
-    // final String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment/$id';
+
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment/$id';
 
     final token = await getToken();
     if (token == null) {
@@ -231,10 +236,11 @@ class MakeTeamService {
       throw Exception('저장된 MakeTeam ID를 찾을 수 없습니다.');
     }
 
-    // final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
-    // final String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment/$id';
+
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://127.0.0.1:9000/api/v1/recruitment/$id';
+    // final String baseUrl = 'http://10.0.0.2:9000/api/v1/recruitment/$id';
 
     final token = await getToken();
     if (token == null) {

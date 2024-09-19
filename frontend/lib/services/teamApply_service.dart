@@ -29,6 +29,7 @@ class TeamApplyService {
     //     'http://127.0.0.1:9000/api/v1/recruitment/team-application/$id';
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/recruitment/team-application/$id';
+
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
@@ -67,6 +68,7 @@ class TeamApplyService {
     //     'http://127.0.0.1:9000/api/v1/recruitment/team-application/$applicationId';
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/recruitment/team-application/$applicationId';
+
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
@@ -95,6 +97,7 @@ class TeamApplyService {
     //     'http://127.0.0.1:9000/api/v1/recruitment/team-application/$applicationId';
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/recruitment/team-application/$applicationId';
+
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
@@ -121,6 +124,7 @@ class TeamApplyService {
     //     'http://127.0.0.1:9000/api/v1/accept-member?accept=$accept';
     String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/accept-member?accept=$accept';
+
     final token = await getToken();
     if (token == null) {
       throw Exception('Access token을 찾을 수 없습니다.');
@@ -148,8 +152,10 @@ class TeamApplyService {
   // 팀 생성 API
   Future<int> createTeam(
       int recruitmentId, String teamName, String kakaoUrl) async {
+
     // String baseUrl = 'http://127.0.0.1:9000/api/v1/team';
     String baseUrl = 'https://reminder.sungkyul.ac.kr/api/v1/team';
+
 
     final token = await getToken();
     if (token == null) {

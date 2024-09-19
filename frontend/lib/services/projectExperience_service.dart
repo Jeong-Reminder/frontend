@@ -120,6 +120,8 @@ class ProjectExperienceService {
     //     'http://127.0.0.1:9000/api/v1/member-experience/$memberId';
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/member-experience/$memberId';
+    //  final String baseUrl =
+    // 'http://10.0.2.2:9000/api/v1/member-experience/$memberId';
 
     final token = await getToken();
     if (token == null) {
