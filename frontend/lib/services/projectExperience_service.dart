@@ -17,8 +17,10 @@ class ProjectExperienceService {
   // 프로젝트 경험 추가 API
   Future<void> createProjectExperience(
       ProjectExperience projectExperience) async {
-    const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience';
     // const String baseUrl = 'http://10.0.2.2:9000/api/v1/member-experience';
+    // const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
 
     final token = await getToken();
     if (token == null) {
@@ -47,10 +49,10 @@ class ProjectExperienceService {
   // 프로젝트 경험 여러개 추가 API
   Future<void> createProjectExperiences(
       List<ProjectExperience> projectExperiences) async {
-    // const String baseUrl =
-    //     'https://reminder.sungkyul.ac.kr/api/v1/member-experience/list';
     const String baseUrl =
-        'http://127.0.0.1:9000 /api/v1/member-experience/list';
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience/list';
+    // const String baseUrl =
+    //     'http://127.0.0.1:9000 /api/v1/member-experience/list';
     // const String baseUrl =
     //     'http://10.0.2.2:9000 /api/v1/member-experience/list';
 
@@ -78,9 +80,9 @@ class ProjectExperienceService {
 
   // 내 프로젝트 경험 조회 API
   Future<List<ProjectExperience>> fetchExperiences() async {
-    // const String baseUrl =
-    //     'https://reminder.sungkyul.ac.kr/api/v1/member-experience';
-    const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience';
+    // const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
     // const String baseUrl = 'http://10.0.2.2:9000/api/v1/member-experience';
 
     final accessToken = await getToken();
@@ -114,8 +116,10 @@ class ProjectExperienceService {
 
   // 다른 사람의 프로젝트 경험 조회 API
   Future<List<ProjectExperience>> fetchMemberExperiences(int memberId) async {
+    // final String baseUrl =
+    //     'http://127.0.0.1:9000/api/v1/member-experience/$memberId';
     final String baseUrl =
-        'http://127.0.0.1:9000/api/v1/member-experience/$memberId';
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience/$memberId';
 
     final token = await getToken();
     if (token == null) {
@@ -154,9 +158,9 @@ class ProjectExperienceService {
       throw Exception('프로젝트 경험 ID가 존재하지 않습니다.');
     }
 
-    // final baseUrl =
-    //     'https://reminder.sungkyul.ac.kr/api/v1/member-experience/$id';
-    final baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience/$id';
+    final baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/member-experience/$id';
+    // final baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience/$id';
     // final baseUrl = 'http://10.0.2.2:9000/api/v1/member-experience/$id';
 
     final token = await getToken();

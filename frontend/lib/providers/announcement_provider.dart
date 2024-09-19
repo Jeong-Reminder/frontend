@@ -29,7 +29,8 @@ class AnnouncementProvider with ChangeNotifier {
   }
 
   // final String baseUrl = 'http://10.0.2.2:9000/api/v1/announcement';
-  final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
+  // final String baseUrl = 'http://127.0.0.1:9000/api/v1/announcement';
+  final String baseUrl = 'https://reminder.sungkyul.ac.kr/api/v1/announcement';
 
   // 게시글 작성
   Future<int> createBoard(
