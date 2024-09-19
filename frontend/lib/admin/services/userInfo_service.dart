@@ -13,9 +13,9 @@ class UserService {
 
   // 회원 추가 API
   Future<void> createUser(Admin admin) async {
-    // const String baseUrl =
-    //     'https://reminder.sungkyul.ac.kr/api/v1/admin/admin-insert';
-    const String baseUrl = 'http://localhost:9000/api/v1/admin/admin-insert';
+    const String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/admin/admin-insert';
+    // const String baseUrl = 'http://localhost:9000/api/v1/admin/admin-insert';
 
     final token = await getToken();
     if (token == null) {
