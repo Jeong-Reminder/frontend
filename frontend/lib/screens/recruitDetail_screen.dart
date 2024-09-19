@@ -828,7 +828,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
               ),
               const SizedBox(height: 10),
               // userRole이 'USER'일 경우에만 댓글 창을 보여줌
-              if (userRole == 'ROLE_USER') ...[
+              if (userRole == 'ROLE_USER' &&
+                  makeTeam['memberName'] != name) ...[
                 Container(
                   height: 40,
                   width: double.infinity,

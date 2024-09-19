@@ -19,8 +19,8 @@ class ProjectExperienceService {
       ProjectExperience projectExperience) async {
     const String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/member-experience';
-    // const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
     // const String baseUrl = 'http://10.0.2.2:9000/api/v1/member-experience';
+    // const String baseUrl = 'http://127.0.0.1:9000/api/v1/member-experience';
 
     final token = await getToken();
     if (token == null) {
@@ -116,12 +116,12 @@ class ProjectExperienceService {
 
   // 다른 사람의 프로젝트 경험 조회 API
   Future<List<ProjectExperience>> fetchMemberExperiences(int memberId) async {
+    // final String baseUrl =
+    //     'http://127.0.0.1:9000/api/v1/member-experience/$memberId';
     final String baseUrl =
         'https://reminder.sungkyul.ac.kr/api/v1/member-experience/$memberId';
     //  final String baseUrl =
     // 'http://10.0.2.2:9000/api/v1/member-experience/$memberId';
-    // final String baseUrl =
-    //     'http://127.0.0.1:9000/api/v1/member-experience/$memberId';
 
     final token = await getToken();
     if (token == null) {

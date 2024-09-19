@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.sungkyul.reminder
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
