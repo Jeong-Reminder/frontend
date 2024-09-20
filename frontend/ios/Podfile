@@ -32,11 +32,11 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   # Add your pods here
-  pod 'Firebase', '~> 10.18.0'
-  pod 'FirebaseFirestore', '~> 10.18.0'
-  pod 'FirebaseCore', '~> 10.18.0'
-  pod 'FirebaseMessaging', '~> 10.18.0'
-  pod 'FirebaseAnalytics', '~> 10.18.0'
+  pod 'Firebase', '~> 10.22.0'
+  pod 'FirebaseFirestore', '~> 10.22.0'
+  pod 'FirebaseCore', '~> 10.22.0'
+  pod 'FirebaseMessaging', '~> 10.22.0'
+  pod 'FirebaseAnalytics', '~> 10.22.0'
   pod 'SwiftyGif', :modular_headers => true
 
   target 'RunnerTests' do

@@ -272,7 +272,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
         backgroundColor: Colors.white,
-        leading: const BackButton(),
+        leading: BackButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/dashboard');
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 23.0, vertical: 50.0),

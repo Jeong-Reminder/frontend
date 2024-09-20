@@ -50,7 +50,10 @@ class _HomePageState extends State<HomePage> {
   DateTime? _rangeEnd;
 
   String userRole = '';
+
   int? level;
+  // 알림 카운트를 위한 변수
+  int notificationCount = 0;
 
   List<Map<String, dynamic>> voteList = [
     {
@@ -79,18 +82,45 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _selectedDay = _focuseDay;
 
+    // Firebase 메시지 초기화
+    _initializeFirebaseMessaging();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _initializeData();
+      await Provider.of<AnnouncementProvider>(context, listen: false)
+          .fetchAllBoards();
+      getData(); // 전체 공지 api가 먼저 호출되어야 홈화면에 공지를 띄울 수 있음.
     });
 
     _loadCredentials();
   }
 
-  // 비동기 초기화 메서드
-  Future<void> _initializeData() async {
-    await Provider.of<AnnouncementProvider>(context, listen: false)
-        .fetchAllBoards();
-    getData(); // 전체 공지 api가 먼저 호출되어야 홈화면에 공지를 띄울 수 있음.
+  // // 비동기 초기화 메서드
+  // Future<void> _initializeData() async {
+  //   await Provider.of<AnnouncementProvider>(context, listen: false)
+  //       .fetchAllBoards();
+  //   getData(); // 전체 공지 api가 먼저 호출되어야 홈화면에 공지를 띄울 수 있음.
+  // }
+
+  // Firebase 메시지 수신을 위한 초기화 함수
+  void _initializeFirebaseMessaging() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      setState(() {
+        notificationCount += 1; // 알림이 수신되면 카운트를 증가시킴
+      });
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      setState(() {
+        notificationCount = 0; // 사용자가 앱을 열면 카운트를 초기화
+      });
+    });
+  }
+
+  // 알림 카운트 리셋 함수 (사용자가 알림 아이콘을 눌렀을 때 호출)
+  void _resetNotificationCount() {
+    setState(() {
+      notificationCount = 0; // 알림 카운트 초기화
+    });
   }
 
   // 역할을 로드하는 메서드
@@ -251,14 +281,44 @@ class _HomePageState extends State<HomePage> {
             ),
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
-              child: IconButton(
-                onPressed: () {},
-                // badge 패키지 사용해서 다시 작성 예정
-                icon: const Icon(
-                  Icons.add_alert,
-                  size: 30,
-                  color: Colors.black,
-                ),
+              child: Stack(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      _resetNotificationCount(); // 알림 아이콘을 클릭하면 카운트를 초기화
+                    },
+                    icon: const Icon(
+                      Icons.add_alert,
+                      size: 30,
+                      color: Colors.black,
+                    ),
+                  ),
+                  if (notificationCount > 0) // 알림이 있으면 숫자를 표시
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$notificationCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             Padding(
