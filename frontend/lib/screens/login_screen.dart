@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isAutoLogin = false;
   bool pwInvisible = true; // 비밀번호 숨김 기본값 true
+  bool loginSuccess = true; // 로그인 성공 여부(실패 시 메세지 처리하기 위해 선언)
   late PersistCookieJar cookieJar; // 쿠키를 관리할 객체
 
   final formKey = GlobalKey<FormState>(); // 폼 유효성을 검사하는데 사용
@@ -334,6 +335,14 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 27),
 
+              // 로그인 실패 메세지
+              if (loginSuccess == false)
+                const Text(
+                  '아이디(학번) 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.',
+                  style: TextStyle(color: Colors.red),
+                ),
+              const SizedBox(height: 20),
+              // 로그인 버튼
               ElevatedButton(
                 onPressed: () async {
                   await _getFCMToken();
@@ -350,6 +359,9 @@ class _LoginPageState extends State<LoginPage> {
                         .handleLogin(context, studentId, password, fcmToken)
                         .then((result) async {
                       if (result['success']) {
+                        setState(() {
+                          loginSuccess = true;
+                        });
                         final prefs = await SharedPreferences.getInstance();
                         if (isAutoLogin) {
                           // 자동 로그인 체크 시에만 학번과 비밀번호 저장
@@ -396,6 +408,9 @@ class _LoginPageState extends State<LoginPage> {
                         await prefs.setString('userRole', result['role']);
                       } else {
                         // 로그인 실패 처리
+                        setState(() {
+                          loginSuccess = false; // false가 되면 로그인 버튼 위에 실패 메세지 구현
+                        });
                       }
                     });
                   }

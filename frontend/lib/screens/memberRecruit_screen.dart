@@ -201,19 +201,22 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       spacing: 6.0,
                       children: post['hopeField']
                           .split(',')
-                          .map<Widget>((field) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFDBE7FB),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  field.trim(), // 각 hopeField 항목
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                          .map<Widget>((field) => SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDBE7FB),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    field.trim(), // 각 hopeField 항목
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ))

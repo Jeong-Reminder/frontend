@@ -170,37 +170,40 @@ class _MyUserPageState extends State<MyUserPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 26.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 프로필
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserInfoPage(
+                      profile: techStack,
+                    ),
+                  ),
+                );
+              },
+              child: Profile(
+                profileUrl: 'assets/images/profile.png',
+                name: '${techStack['memberName']}', // 이름 전달
+                status: status ?? '', // 상태 전달
+                showSubTitle: true,
+                showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                studentId: studentId ?? '', // 학번 전달
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            // 사용자가 설정한 기술 스택 및 팀
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 프로필
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UserInfoPage(
-                            profile: techStack,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Profile(
-                      profileUrl: 'assets/images/profile.png',
-                      name: '${techStack['memberName']}', // 이름 전달
-                      status: status ?? '', // 상태 전달
-                      showSubTitle: true,
-                      showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
-                      studentId: studentId ?? '', // 학번 전달
-                    ),
-                  ),
-                  const SizedBox(height: 25),
                   const Text(
                     'DEVELOPMENT FIELD',
                     style: TextStyle(
@@ -236,6 +239,7 @@ class _MyUserPageState extends State<MyUserPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+
                   // Development Tools 배지
                   Wrap(
                     direction: Axis.horizontal,
@@ -253,6 +257,8 @@ class _MyUserPageState extends State<MyUserPage> {
                     }).toList(),
                   ),
                   const SizedBox(height: 26),
+
+                  // 생성된 팀
                   Row(
                     children: [
                       const Text(
@@ -349,19 +355,13 @@ class _MyUserPageState extends State<MyUserPage> {
                               );
                             },
                           ),
+                  // 계정(비밀번호 변경, 로그아웃) 위젯
+                  const AccountWidget(),
                 ],
               ),
             ),
-          ),
-          // 하단에 고정하고자 하는 위젯을 호출하기 전에 spacer() 위젯 호출
-          const Spacer(),
-
-          // 계정(비밀번호 변경, 로그아웃) 위젯
-          const Padding(
-            padding: EdgeInsets.all(20),
-            child: AccountWidget(),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
