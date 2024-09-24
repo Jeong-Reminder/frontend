@@ -96,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
   // 역할에 따라 페이지로 이동하는 함수
   void _navigateBasedOnRole(String role) {
     if (role == 'ROLE_ADMIN') {
-      Navigator.pushReplacementNamed(context, '/user-info');
+      Navigator.pushReplacementNamed(context, '/dashboard');
     } else if (role == 'ROLE_USER') {
       Navigator.pushReplacementNamed(context, '/homepage');
     }
