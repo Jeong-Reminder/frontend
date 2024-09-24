@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
@@ -167,12 +168,25 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // 로그인 시 FCM 토큰 발급 함수
-  Future<String> _getFCMToken() async {
+  Future<String?> _getFCMToken() async {
+    String? token;
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    String? token = await messaging.getToken();
+    // iOS와 Android 플랫폼에 따라 FCM 토큰 또는 APNS 토큰을 가져옴
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      token = await messaging.getAPNSToken();
+      if (token == null) {
+        print('APNS 토큰을 가져오지 못했습니다.');
+        return null; // null 값을 반환하여 처리 가능하게 함
+      }
+    } else {
+      token = await messaging.getToken();
+      if (token == null) {
+        print('FCM 토큰을 가져오지 못했습니다.');
+        return null; // null 값을 반환하여 처리 가능하게 함
+      }
+    }
     print('FCM 토큰: $token');
-
-    return token!;
+    return token;
   }
 
   @override
@@ -351,7 +365,12 @@ class _LoginPageState extends State<LoginPage> {
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
                     String password = pwController.text;
-                    String fcmToken = await _getFCMToken(); // 토큰 발급
+                    String? fcmToken = await _getFCMToken();
+                    if (fcmToken == null) {
+                      // FCM 토큰을 가져오지 못했을 때의 예외 처리
+                      print('FCM 토큰을 가져올 수 없습니다.');
+                      return; // 더 이상 진행하지 않음
+                    }
 
                     print('fcmToken: $fcmToken');
 
