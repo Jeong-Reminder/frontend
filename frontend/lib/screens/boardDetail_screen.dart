@@ -149,6 +149,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류 방지
         toolbarHeight: 70,
         leading: Padding(

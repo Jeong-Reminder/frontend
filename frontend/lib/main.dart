@@ -236,7 +236,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     double screenWidth = mediaQueryData.size.width;
     double screenHeight = mediaQueryData.size.height;
     if (screenWidth > 600) {
-      print('pad 에서 접속했습니다. 가로모드만 적용');
+      print('pad 에서 접속했습니다. 가로세로모두 적용');
     } else {
       print('phone 에서 접속했습니다. 세로모드만 적용');
     }

@@ -269,8 +269,11 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false, // 버튼과 키보드가 겹쳐도 오류가 안나게 하기
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
         toolbarHeight: 70,
         leading: IconButton(
           icon: const Icon(Icons.close_outlined),
