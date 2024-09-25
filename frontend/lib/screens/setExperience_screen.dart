@@ -122,6 +122,11 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
               builder: (context) => const HomePage(),
             ),
           );
+
+          // 학번, 비번, 토큰 키 값 제거
+          prefs.remove('studentId');
+          prefs.remove('password');
+          prefs.remove('fcmToken');
         }
       }
     } else {
