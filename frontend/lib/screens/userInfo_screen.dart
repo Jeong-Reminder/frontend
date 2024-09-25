@@ -18,6 +18,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool isEdited = false;
   List<Map<String, dynamic>> selectedFields = []; // 선택된 Field 리스트
 
+  int? memberId;
+
   String developmentField = ''; // 수정할 때 값이 변경될 때 저장할려고 선언
   String developmentTool = '';
   String hopeJob = '';
@@ -35,6 +37,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     developmentTool = widget.profile['developmentTool'] ?? '없음';
     hopeJob = widget.profile['hopeJob'] ?? '';
     githubLink = widget.profile['githubLink'] ?? '';
+    memberId = widget.profile['memberId'];
 
     // 컨트롤러 초기화
     hopeJobController = TextEditingController(text: hopeJob);
@@ -56,13 +59,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
         toolbarHeight: 70,
         leading: BackButton(
           onPressed: () async {
-            final memberId =
-                Provider.of<ProfileProvider>(context, listen: false).memberId;
-
-            if (memberId > 0) {
-              await Provider.of<ProfileProvider>(context, listen: false)
-                  .fetchProfile(memberId);
-            }
+            await Provider.of<ProfileProvider>(context, listen: false)
+                .fetchProfile(memberId!);
 
             if (context.mounted) {
               Navigator.pushNamedAndRemoveUntil(

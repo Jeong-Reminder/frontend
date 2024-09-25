@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
-import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
@@ -128,7 +127,6 @@ class _HomePageState extends State<HomePage> {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
       level = credentials['level'];
     });
-    print('학년: $level');
   }
 
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
@@ -319,15 +317,6 @@ class _HomePageState extends State<HomePage> {
               child: GestureDetector(
                 onTap: () async {
                   if (userRole == 'ROLE_USER') {
-                    final memberId =
-                        Provider.of<ProfileProvider>(context, listen: false)
-                            .memberId;
-
-                    if (memberId > 0) {
-                      await Provider.of<ProfileProvider>(context, listen: false)
-                          .fetchProfile(memberId);
-                    }
-
                     if (context.mounted) {
                       Navigator.pushNamed(
                         context,

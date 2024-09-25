@@ -20,23 +20,23 @@ class MyUserPage extends StatefulWidget {
 
 class _MyUserPageState extends State<MyUserPage> {
   bool isExpanded = false; // 내 팀 현황 확장성 여부를 나타내는 변수
+
+  int? memberId; // 사용자 아이디
+
   String? studentId = ''; // 학번을 저장할 변수, 기본 값을 빈 문자열로 설정
   String? name = ''; // 이름을 저장할 변수, 기본 값을 빈 문자열로 설정
   String? status = ''; // 상태를 저장할 변수, 기본 값을 빈 문자열로 설정
 
-  List<String> stringToListFieldList = [];
   List<Map<String, dynamic>> developmentField = [];
-
-  List<String> stringToListToolList = [];
   List<Map<String, dynamic>> developmentTool = [];
 
+  Map<String, dynamic> techStack = {}; // 기술 스택
+
   @override
-  void initState() {
+  void initState() async {
     super.initState();
-    getField(); // 초기화 작업을 통해 들어오면 바로 배지가 보이기 위해 작성
-    getTool();
-    _loadCredentials(); // 학번을 로드하는 메서드 호출
-    _fetchProfileData(); // 프로필 데이터를 불러오는 메서드 호출
+    await _loadCredentials(); // 학번을 로드하는 메서드 호출
+    await _initializePage();
   }
 
   // 학번, 이름, 재적상태를 로드하는 메서드
@@ -47,34 +47,42 @@ class _MyUserPageState extends State<MyUserPage> {
       studentId = credentials['studentId'] ?? ''; // 학번 설정, 없으면 빈 문자열로 설정
       name = credentials['name'] ?? ''; // 이름 설정, 없으면 빈 문자열로 설정
       status = credentials['status'] ?? ''; // 상태 설정, 없으면 빈 문자열로 설정
+      memberId = credentials['memberId'] ?? '';
     });
+    print('사용자 아이디: $memberId');
   }
 
-  Future<void> _fetchProfileData() async {
-    final profileProvider =
-        Provider.of<ProfileProvider>(context, listen: false);
-    await profileProvider.fetchProfile(profileProvider.memberId);
+  // 페이지 초기화를 비동기로 처리하는 메서드
+  Future<void> _initializePage() async {
+    await _loadCredentials(); // 학번을 로드하는 메서드 호출
 
-    final teamApplyProvider =
-        Provider.of<TeamApplyProvider>(context, listen: false);
-    await teamApplyProvider.fetchTeamsFromProfile(profileProvider);
-  }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
+      await profileProvider.fetchProfile(memberId!);
 
-  // 문자열을 리스트로 변환하는 메소드
-  void stringToListField() {
-    final techStack =
-        Provider.of<ProfileProvider>(context, listen: false).techStack;
-    String strField = techStack['developmentField'];
+      if (context.mounted) {
+        setState(() {
+          techStack = profileProvider.techStack; // techStack 초기화
+        });
 
-    setState(() {
-      // 콤마(,)를 기준으로 끊어서 리스트 생성
-      stringToListFieldList = strField.split(',');
+        // techStack이 성공적으로 초기화된 후 getField와 getTool 호출
+        getField(); // 기술 필드 정보 설정
+        getTool(); // 툴 정보 설정
+
+        final teamApplyProvider =
+            Provider.of<TeamApplyProvider>(context, listen: false);
+        await teamApplyProvider.fetchTeamsFromProfile(profileProvider);
+      }
     });
   }
 
   // 선택한 field의 배지를 가져오는 메서드
   void getField() {
-    stringToListField();
+    String strField = techStack['developmentField'];
+
+    // 콤마(,)를 기준으로 끊어서 리스트 생성
+    List<String> stringToListFieldList = strField.split(',');
 
     setState(() {
       // fieldList의 title에 생성한 stringToListFieldList이 있다면 출력해서 리스트로 생성
@@ -86,21 +94,12 @@ class _MyUserPageState extends State<MyUserPage> {
     });
   }
 
-  // 문자열을 리스트로 변환하는 메소드
-  void stringToListTool() {
-    final techStack =
-        Provider.of<ProfileProvider>(context, listen: false).techStack;
-    String strTool = techStack['developmentTool'];
-
-    setState(() {
-      // 콤마(,)를 기준으로 끊어서 리스트 생성
-      stringToListToolList = strTool.split(',');
-    });
-  }
-
   // 선택한 field의 배지를 가져오는 메서드
   void getTool() {
-    stringToListTool();
+    String strTool = techStack['developmentTool'] as String;
+
+    // 콤마(,)를 기준으로 끊어서 리스트 생성
+    List<String> stringToListToolList = strTool.split(',');
 
     setState(() {
       // fieldList의 title에 생성한 stringToListFieldList이 있다면 출력해서 리스트로 생성
@@ -114,8 +113,6 @@ class _MyUserPageState extends State<MyUserPage> {
 
   @override
   Widget build(BuildContext context) {
-    final techStack =
-        Provider.of<ProfileProvider>(context, listen: false).techStack;
     final teamApplyProvider = Provider.of<TeamApplyProvider>(context);
 
     return Scaffold(
@@ -136,12 +133,18 @@ class _MyUserPageState extends State<MyUserPage> {
         ),
         leadingWidth: 120,
         actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 12.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
+          GestureDetector(
+            onTap: () {
+              print(
+                  '필드와 툴: ${techStack['developmentField']}\n ${techStack['developmentTool']}');
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 12.0),
+              child: Icon(
+                Icons.add_alert,
+                size: 30,
+                color: Colors.black,
+              ),
             ),
           ),
           IconButton(
@@ -212,6 +215,7 @@ class _MyUserPageState extends State<MyUserPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+
                   // Development Field 배지
                   // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
                   Wrap(
