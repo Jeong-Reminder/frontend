@@ -53,6 +53,7 @@ class BoardAppbar extends StatelessWidget implements PreferredSizeWidget {
               size: 30,
               color: Colors.black,
             ),
+            visualDensity: VisualDensity.compact,
           ),
         ),
       ],

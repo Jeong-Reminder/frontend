@@ -134,24 +134,33 @@ class _BoardState extends State<Board> {
 
               // 숨김/삭제 버튼 띄울 때
               onLongPress: () async {
-                setState(() {
-                  selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
-                });
+                if (selectedBoardIndex != null) {
+                  setState(() {
+                    selectedBoardIndex = null;
+                  });
+                } else {
+                  setState(() {
+                    selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
+                  });
+                }
+                print('selectedBoardIndex: $selectedBoardIndex');
+
                 if (widget.onBoardSelected != null) {
                   widget.onBoardSelected!(board); // 선택된 게시글 콜백 호출
                 }
+
                 print('selectedBoard: ${board['announcementTitle']}');
               },
               child: Card(
                 color: const Color(0xFFFAFAFE),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
-                  // side: BorderSide(
-                  //   color: isSelected
-                  //       ? Colors.blue
-                  //       : Colors.transparent, // 선택된 경우 테두리 색상 적용
-                  //   width: 1.0,
-                  // ),
+                  side: BorderSide(
+                    color: (selectedBoardIndex == index)
+                        ? Colors.blue
+                        : Colors.transparent, // 선택된 경우 테두리 색상 적용
+                    width: 1.0,
+                  ),
                 ),
                 elevation: 0.5,
                 child: Container(

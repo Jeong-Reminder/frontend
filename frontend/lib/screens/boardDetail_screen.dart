@@ -167,36 +167,6 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => (userRole == 'ROLE_ADMIN')
-                        ? const MyOwnerPage()
-                        : const MyUserPage(),
-                  ),
-                );
-              },
-              icon: const Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

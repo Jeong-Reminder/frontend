@@ -56,6 +56,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
         toolbarHeight: 70,
         leading: BackButton(
           onPressed: () async {
@@ -69,12 +71,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
           },
         ),
         actions: [
-          const Icon(
-            Icons.add_alert,
-            size: 30,
-            color: Colors.black,
-          ),
-          const SizedBox(width: 20),
           // 팝업 메뉴 창
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
@@ -84,7 +80,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 return [
                   popUpItem('수정하기', PopUpItem.popUpItem1, () {
                     setState(() {
-                      isEdited = true;
+                      isEdited = !isEdited;
                     });
                   }),
                 ];
