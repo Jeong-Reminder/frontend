@@ -328,7 +328,9 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         Provider.of<AnnouncementProvider>(context).cateBoardList;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
         leading: Padding(

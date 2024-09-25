@@ -85,7 +85,10 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BoardAppbar(),
+      backgroundColor: Colors.white,
+      appBar: BoardAppbar(
+        userRole: userRole,
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,

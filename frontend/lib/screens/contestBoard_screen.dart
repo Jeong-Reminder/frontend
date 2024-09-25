@@ -103,7 +103,10 @@ class _ContestBoardPageState extends State<ContestBoardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BoardAppbar(),
+      backgroundColor: Colors.white,
+      appBar: BoardAppbar(
+        userRole: userRole,
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
