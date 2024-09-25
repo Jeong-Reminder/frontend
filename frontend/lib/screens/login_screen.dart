@@ -396,6 +396,11 @@ class _LoginPageState extends State<LoginPage> {
                           // techStack 값이 null이거나 값이 비어있는 경우
                           if (result['techStack'] == null ||
                               result['techStack'].isEmpty) {
+                            // 학번, 비밀번호, fcmToken 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                            await prefs.setString('fcmToken', fcmToken);
+
                             if (context.mounted) {
                               Navigator.pushNamed(context, '/set-profile');
                             }
@@ -403,6 +408,10 @@ class _LoginPageState extends State<LoginPage> {
                             // memberExperience 값이 null이거나 값이 비어있는 경우
                           } else if (result['memberExperiences'] == null ||
                               result['memberExperiences'].isEmpty) {
+                            // 학번, 비밀번호, fcmToken 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                            await prefs.setString('fcmToken', fcmToken);
                             if (context.mounted) {
                               Navigator.pushNamed(
                                   context, '/member-experience');
@@ -413,6 +422,10 @@ class _LoginPageState extends State<LoginPage> {
                                   result['techStack'].isEmpty) &&
                               (result['memberExperiences'] == null ||
                                   result['memberExperiences'].isEmpty)) {
+                            // 학번, 비밀번호, fcmToken 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                            await prefs.setString('fcmToken', fcmToken);
                             if (context.mounted) {
                               Navigator.pushNamed(context, '/set-profile');
                             }

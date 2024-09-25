@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:frontend/models/projectExperience_model.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SetExperiencePage extends StatefulWidget {
   const SetExperiencePage({super.key});
@@ -105,12 +107,22 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
 
       // 홈 페이지로 이동
       if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
+        // 아이디, 비밀번호, fcmToken 꺼내옴
+        // 이유 : 로그인 api를 호출해 본인 프로필 정보가 뜰 수 있게 구현(로그인을 호출하지 않으면 전에 로그인한 회원의 정보가 뜸)
+        final prefs = await SharedPreferences.getInstance();
+        final studentId = prefs.getString('studentId');
+        final password = prefs.getString('password');
+        final fcmToken = prefs.getString('fcmToken');
+
+        if (context.mounted) {
+          LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ),
+          );
+        }
       }
     } else {
       print('입력 사항을 모두 작성해주세요.');
