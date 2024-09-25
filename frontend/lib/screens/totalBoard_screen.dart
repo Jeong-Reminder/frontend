@@ -144,7 +144,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
             Expanded(
               child: Board(
                 boardList: boardList,
-                total: true,
+                total: true, // 학년에 맞는 공지만 출력
                 onBoardSelected: (board) {
                   setState(() {
                     selectedBoard = board;
