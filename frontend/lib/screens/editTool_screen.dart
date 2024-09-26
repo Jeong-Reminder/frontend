@@ -81,7 +81,7 @@ class _EditToolPageState extends State<EditToolPage> {
         child: BottomSheet(
           onClosing: () {},
           constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width,
+            maxWidth: MediaQuery.of(context).size.width,
             maxHeight: MediaQuery.of(context).size.height / 3.6,
           ),
           backgroundColor: Colors.white,
@@ -93,8 +93,8 @@ class _EditToolPageState extends State<EditToolPage> {
               children: [
                 SingleChildScrollView(
                   child: Container(
-                    width: 400,
-                    height: 160,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 5.5,
                     decoration: const BoxDecoration(
                       color: Color(0xFFF6F6F6),
                     ),
@@ -130,6 +130,13 @@ class _EditToolPageState extends State<EditToolPage> {
 
                     if (context.mounted) {
                       Navigator.pop(context, developmentTool);
+
+                      for (var tool in toolsList) {
+                        if (tool['isSelected'] == true) {
+                          tool['isSelected'] = false;
+                        }
+                      }
+                      selectedTools.clear();
                     }
                   },
                   style: ElevatedButton.styleFrom(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:flutter/rendering.dart';
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
@@ -46,13 +47,17 @@ class _SetSkillPageState extends State<SetSkillPage> {
               ),
             ),
             Center(
-              child: LinearPercentIndicator(
-                padding: EdgeInsets.zero,
-                percent: percent,
-                lineHeight: 20,
-                backgroundColor: const Color(0xFFD9D9D9),
-                progressColor: const Color(0xFF2A72E7),
-                width: 370,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return LinearPercentIndicator(
+                    padding: EdgeInsets.zero,
+                    percent: percent,
+                    lineHeight: 20,
+                    backgroundColor: const Color(0xFFD9D9D9),
+                    progressColor: const Color(0xFF2A72E7),
+                    width: constraints.maxWidth, // 화면 너비를 constraints에서 가져오기
+                  );
+                },
               ),
             ),
             const SizedBox(height: 60),
@@ -110,87 +115,92 @@ class _SetSkillPageState extends State<SetSkillPage> {
                     ),
                   ),
             const SizedBox(height: 28),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return SlideTransition(
-                  position: animation.drive(
-                    Tween<Offset>(
-                      begin: const Offset(1, 0),
-                      end: const Offset(0, 0),
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return SlideTransition(
+                    position: animation.drive(
+                      Tween<Offset>(
+                        begin: const Offset(1, 0),
+                        end: const Offset(0, 0),
+                      ),
                     ),
-                  ),
-                  child: child,
-                );
-              },
-              layoutBuilder:
-                  (Widget? currentChild, List<Widget> previousChildren) {
-                return Stack(
-                  children: <Widget>[
-                    ...previousChildren,
-                    if (currentChild != null) currentChild,
-                  ],
-                );
-              },
-              child: completedField
-                  ? Wrap(
-                      key: ValueKey<bool>(completedField),
-                      direction: Axis.horizontal,
-                      alignment: WrapAlignment.start,
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: toolsList.map((tools) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              tools['isSelected'] = !tools['isSelected'];
-                              if (tools['isSelected']) {
-                                selectedTools.add(tools);
-                              } else {
-                                selectedTools.remove(tools);
-                              }
-                            });
-                            print('${tools['title']} : ${tools['isSelected']}');
-                          },
-                          child: badge(
-                            tools['logoUrl'],
-                            tools['title'],
-                            tools['titleColor'],
-                            tools['badgeColor'],
-                            tools['isSelected'],
-                          ),
-                        );
-                      }).toList(),
-                    )
-                  : Wrap(
-                      key: ValueKey<bool>(completedField),
-                      direction: Axis.horizontal,
-                      alignment: WrapAlignment.start,
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: fieldList.map((field) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              field['isSelected'] = !field['isSelected'];
-                              if (field['isSelected']) {
-                                selectedFields.add(field);
-                              } else {
-                                selectedFields.remove(field);
-                              }
-                            });
-                            print('${field['title']} : ${field['isSelected']}');
-                          },
-                          child: badge(
-                            field['logoUrl'],
-                            field['title'],
-                            field['titleColor'],
-                            field['badgeColor'],
-                            field['isSelected'],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                    child: child,
+                  );
+                },
+                layoutBuilder:
+                    (Widget? currentChild, List<Widget> previousChildren) {
+                  return Stack(
+                    children: <Widget>[
+                      ...previousChildren,
+                      if (currentChild != null) currentChild,
+                    ],
+                  );
+                },
+                child: completedField
+                    ? Wrap(
+                        key: ValueKey<bool>(completedField),
+                        direction: Axis.horizontal,
+                        alignment: WrapAlignment.start,
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: toolsList.map((tools) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                tools['isSelected'] = !tools['isSelected'];
+                                if (tools['isSelected']) {
+                                  selectedTools.add(tools);
+                                } else {
+                                  selectedTools.remove(tools);
+                                }
+                              });
+                              print(
+                                  '${tools['title']} : ${tools['isSelected']}');
+                            },
+                            child: badge(
+                              tools['logoUrl'],
+                              tools['title'],
+                              tools['titleColor'],
+                              tools['badgeColor'],
+                              tools['isSelected'],
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    : Wrap(
+                        key: ValueKey<bool>(completedField),
+                        direction: Axis.horizontal,
+                        alignment: WrapAlignment.start,
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: fieldList.map((field) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                field['isSelected'] = !field['isSelected'];
+                                if (field['isSelected']) {
+                                  selectedFields.add(field);
+                                } else {
+                                  selectedFields.remove(field);
+                                }
+                              });
+                              print(
+                                  '${field['title']} : ${field['isSelected']}');
+                            },
+                            child: badge(
+                              field['logoUrl'],
+                              field['title'],
+                              field['titleColor'],
+                              field['badgeColor'],
+                              field['isSelected'],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+              ),
             ),
           ],
         ),
@@ -202,7 +212,7 @@ class _SetSkillPageState extends State<SetSkillPage> {
         child: BottomSheet(
           onClosing: () {},
           constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width,
+            maxWidth: MediaQuery.of(context).size.width,
             maxHeight: MediaQuery.of(context).size.height / 3.6,
           ),
           backgroundColor: Colors.white,
@@ -214,8 +224,8 @@ class _SetSkillPageState extends State<SetSkillPage> {
               children: [
                 SingleChildScrollView(
                   child: Container(
-                    width: 400,
-                    height: 160,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 5.5,
                     decoration: const BoxDecoration(
                       color: Color(0xFFF6F6F6),
                     ),
@@ -250,7 +260,7 @@ class _SetSkillPageState extends State<SetSkillPage> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () async {
                     if (!completedField) {
@@ -297,6 +307,23 @@ class _SetSkillPageState extends State<SetSkillPage> {
                       } catch (e) {
                         print(e.toString());
                       }
+
+                      setState(() {
+                        // 흔적이 남기지 않게 페이지 이동 후 false 설정과 선택된 필드와 툴 제거
+                        for (var field in fieldList) {
+                          if (field['isSelected'] == true) {
+                            field['isSelected'] = false;
+                          }
+                        }
+                        selectedFields.clear();
+
+                        for (var tool in toolsList) {
+                          if (tool['isSelected'] == true) {
+                            tool['isSelected'] = false;
+                          }
+                        }
+                        selectedTools.clear();
+                      });
                     }
                   },
                   style: ElevatedButton.styleFrom(
