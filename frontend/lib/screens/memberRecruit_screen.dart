@@ -256,63 +256,6 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     return _buildPostContent(recruitList);
   }
 
-  // 선택한 카테고리 팝업 메뉴
-  void selectCateMenu(BuildContext context) {
-    // AnnouncementProvider에서 카테고리 리스트를 가져옴
-    final categoryList =
-        Provider.of<AnnouncementProvider>(context, listen: false).categoryList;
-
-    // showMenu 함수를 사용하여 팝업 메뉴를 화면에 띄움
-    showMenu(
-      context: context,
-      // 메뉴가 화면에 나타나는 위치 RelativeRect
-      position: const RelativeRect.fromLTRB(287, 200, 900, 500),
-      color: const Color(0xFFDFDEE5),
-      // 팝업 메뉴에 들어갈 항목
-      items: <PopupMenuEntry<String>>[
-        for (int i = 0; i < categoryList.length; i++) ...[
-          // 각 카테고리에 대해 메뉴 아이템 추가
-          popUpItem(categoryList[i], categoryList[i]),
-          // 마지막 아이템이 아니면 Divider를 추가
-          if (i < categoryList.length - 1) const PopupMenuDivider(),
-        ],
-        // categoryList가 비어있지 않은 경우, 마지막에 Divider를 추가
-        if (categoryList.isNotEmpty) const PopupMenuDivider(),
-      ],
-    ).then((selectedItem) async {
-      setState(() {
-        // cateBoardList에서 선택된 카테고리와 일치하는 항목을 찾음
-        final matchedBoard = cateBoardList.firstWhere(
-          (cateBoard) =>
-              selectedItem ==
-              _parseCategoryName(cateBoard['announcementTitle']),
-          orElse: () => <String, dynamic>{}, // 일치하는 항목이 없을 경우 null 반환
-        );
-
-        // 매칭된 항목이 있는 경우 해당 id를 가져옴
-        announcementId = matchedBoard['id'] as int;
-      });
-
-      // 사용자가 항목을 선택했고, 그 항목이 categoryList에 존재하는 경우
-      if (selectedItem != null && categoryList.contains(selectedItem)) {
-        if (userRole == 'ROLE_USER') {
-          print('anncouncementID: $announcementId');
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MakeTeamPage(
-                initialCategory: selectedItem, // 선택된 항목을 초기 카테고리로 전달
-                announcementId: announcementId,
-              ),
-            ),
-          );
-        } else if (userRole == 'ROLE_ADMIN') {
-          deleteDialog(context, 'individual', selectedItem);
-        }
-      }
-    });
-  }
-
   // 팀원 모집글 데이터를 불러오는 함수
   Future<void> fetchRecruitData(int boardId) async {
     setState(() {
@@ -389,25 +332,13 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  const Row(
                     children: [
-                      const Text(
+                      Text(
                         '팀원 모집',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () {},
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 4.0),
-                          child: Image(
-                            image: AssetImage('assets/images/filtering.png'),
-                            width: 18,
-                            height: 18,
-                          ),
                         ),
                       ),
                     ],
@@ -417,11 +348,29 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                   PopupMenuButton<String>(
                     color: const Color(0xFFEFF0F2),
                     onSelected: (String item) async {
-                      if (item == '모집글 작성' || item == '개별 삭제') {
-                        selectCateMenu(context); // 새로운 팝업 메뉴 생성 `
-                      }
-                      if (item == '모집글 전체 삭제') {
-                        deleteDialog(context, 'total');
+                      if (item == '모집글 작성') {
+                        // 이전에 선택한 카테고리가 있을 경우 실행
+                        if (selectedButton.isNotEmpty) {
+                          final matchedBoard = cateBoardList.firstWhere(
+                            // 선택한 카테고리와 일치하는 게시글을 찾음
+                            (cateBoard) =>
+                                selectedButton ==
+                                _parseCategoryName(
+                                    cateBoard['announcementTitle']),
+                            orElse: () =>
+                                <String, dynamic>{}, // 일치하는 항목이 없으면 빈 객체 반환
+                          );
+                          final announcementId = matchedBoard['id'] as int;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MakeTeamPage(
+                                initialCategory: selectedButton,
+                                announcementId: announcementId,
+                              ),
+                            ),
+                          );
+                        }
                       }
                     },
                     itemBuilder: (BuildContext context) {
@@ -429,12 +378,19 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                       if (userRole == 'ROLE_ADMIN') {
                         return <PopupMenuEntry<String>>[
                           popUpItem('URL 공유', 'URL 공유'),
-                          const PopupMenuDivider(),
-                          popUpItem('모집글 전체 삭제', '모집글 전체 삭제'),
-                          const PopupMenuDivider(),
-                          popUpItem('개별 삭제', '개별 삭제'),
+                          const PopupMenuDivider(), // 구분선 추가
+                          if (selectedButton.isEmpty)
+                            // 선택된 카테고리가 없을 경우, 모집글 전체 삭제 버튼만 표시 (구분선 없음)
+                            popUpItem('모집글 전체 삭제', '모집글 전체 삭제'),
+                          if (selectedButton.isNotEmpty) ...[
+                            // 선택한 카테고리가 있을 경우, 해당 카테고리 삭제 버튼 표시 및 구분선 추가
+                            popUpItem('모집글 전체 삭제', '모집글 전체 삭제'),
+                            const PopupMenuDivider(), // 구분선 추가
+                            popUpItem('$selectedButton 삭제', '카테고리 삭제'),
+                          ]
                         ];
                       } else {
+                        // 일반 사용자일 경우 표시되는 메뉴 항목
                         return <PopupMenuEntry<String>>[
                           popUpItem('URL 공유', 'URL 공유'),
                           const PopupMenuDivider(),
@@ -508,7 +464,6 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   }
 
   // recruitment 전체 삭제 다이얼로그
-  // 파라미터에 [ ]를 덮어서 작성하는 것은 선택적으로, 즉 필요할 때 값을 줄 수 있도록 설정하는 것
   Future<dynamic> deleteDialog(BuildContext context, String range,
       [String? category]) {
     return showDialog(
