@@ -269,6 +269,13 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       setState(() {
         recruitList =
             Provider.of<MakeTeamProvider>(context, listen: false).cateList;
+
+        // 모집글을 작성일 기준으로 내림차순 정렬 (가장 최근 글이 위로 오도록)
+        recruitList.sort((a, b) {
+          DateTime createdTimeA = DateTime.parse(a['createdTime']);
+          DateTime createdTimeB = DateTime.parse(b['createdTime']);
+          return createdTimeB.compareTo(createdTimeA); // 내림차순
+        });
       });
     } catch (e) {
       print("Error fetching recruit data: $e");
