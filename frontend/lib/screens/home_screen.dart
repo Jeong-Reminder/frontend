@@ -1,13 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
-import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/services/notification_services.dart';
-import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/memberRecruit_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -52,8 +49,7 @@ class _HomePageState extends State<HomePage> {
   String userRole = '';
 
   int? level;
-  // 알림 카운트를 위한 변수
-  int notificationCount = 0;
+  int notificationCount = 0; // 알림 카운트를 위한 변수
 
   List<Map<String, dynamic>> voteList = [
     {
@@ -131,7 +127,6 @@ class _HomePageState extends State<HomePage> {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
       level = credentials['level'];
     });
-    print('학년: $level');
   }
 
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
@@ -254,6 +249,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          backgroundColor: Colors.white,
           scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
           toolbarHeight: 70,
           leading: Padding(
@@ -271,14 +267,7 @@ class _HomePageState extends State<HomePage> {
           ),
           leadingWidth: 120,
           actions: [
-            const Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
-                Icons.search,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
+            // 알림 아이콘
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: Stack(
@@ -321,20 +310,13 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
+
+            // 프로필 아이콘
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () async {
                   if (userRole == 'ROLE_USER') {
-                    final memberId =
-                        Provider.of<ProfileProvider>(context, listen: false)
-                            .memberId;
-
-                    if (memberId > 0) {
-                      await Provider.of<ProfileProvider>(context, listen: false)
-                          .fetchProfile(memberId);
-                    }
-
                     if (context.mounted) {
                       Navigator.pushNamed(
                         context,
@@ -521,79 +503,70 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
 
-                const SizedBox(height: 10),
-                // overflow 방지
-                SizedBox(
-                  height: 100,
-                  width: double.infinity,
-                  child: GridView.count(
-                    physics:
-                        const NeverScrollableScrollPhysics(), // Gridview의 스크롤 방지
-                    crossAxisCount: 5, // 1개의 행에 보여줄 item의 개수
-                    crossAxisSpacing: 9.0, // 같은 행의 iteme들 사이의 간
+                const SizedBox(height: 20),
 
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const TotalBoardPage(),
-                            ),
-                          );
-                        },
-                        child: homeItem(
-                            imgPath: 'assets/images/general.png',
-                            title: '전체공지'),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/grade-board');
-                        },
-                        child: homeItem(
-                            imgPath: 'assets/images/grade.png', title: '학년공지'),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/contest-board',
-                          );
-                        },
-                        child: homeItem(
+                // 공지 아이콘
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TotalBoardPage(),
+                          ),
+                        );
+                      },
+                      child: homeItem(
+                          imgPath: 'assets/images/general.png', title: '전체공지'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/grade-board');
+                      },
+                      child: homeItem(
+                          imgPath: 'assets/images/grade.png', title: '학년공지'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/contest-board',
+                        );
+                      },
+                      child: homeItem(
                           imgPath: 'assets/images/competition.png',
-                          title: '경진대회',
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/corSea-board');
-                        },
-                        child: homeItem(
-                            imgPath: 'assets/images/company.png',
-                            title: '기업탐방'),
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MemberRecruitPage(),
-                              ),
-                            );
-                          },
-                          child: homeItem(
-                              imgPath: 'assets/images/etc.png', title: '팀원모집')),
-                    ],
-                  ),
+                          title: '경진대회'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/corSea-board');
+                      },
+                      child: homeItem(
+                          imgPath: 'assets/images/company.png', title: '기업탐방'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MemberRecruitPage(),
+                          ),
+                        );
+                      },
+                      child: homeItem(
+                          imgPath: 'assets/images/etc.png', title: '팀원모집'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Container(
-                  // 세 번째 위젯 박스
-                  width: 432,
+                const SizedBox(height: 20),
 
+                // 광고
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 10,
                   padding: const EdgeInsets.all(20.0),
-                  margin: const EdgeInsets.only(right: 9.0),
                   decoration: BoxDecoration(
                     color: const Color(0xFFDBE7FB),
                     borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
@@ -642,121 +615,122 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Text(
-                        '커뮤니티',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Row(
-                        children: [
-                          Text(
-                            '더보기',
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(right: 30.0),
-                            child: Icon(Icons.arrow_forward_ios,
-                                size: 14, color: Colors.black54),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  // 네 번째 위젯 박스
-                  width: 432,
 
-                  padding: const EdgeInsets.all(20.0),
-                  margin: const EdgeInsets.only(right: 9.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFAFAFE),
-                    borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
-                  ),
-                  child: const Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            '대외 활동',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                          SizedBox(width: 17),
-                          Text(
-                            '코테노이아 절찬 모집중!!!',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Text(
-                            '취업 진로',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                          SizedBox(width: 17),
-                          Text(
-                            '이거 꼭 해봐!!',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Text(
-                            '정통 광장',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                          SizedBox(width: 17),
-                          Text(
-                            '시험 범위 알려줄 사람~~',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                // 커뮤니티
+                // const Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Padding(
+                //       padding: EdgeInsets.only(top: 20),
+                //       child: Text(
+                //         '커뮤니티',
+                //         style: TextStyle(
+                //           fontSize: 20,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //     ),
+                //     Padding(
+                //       padding: EdgeInsets.only(top: 20),
+                //       child: Row(
+                //         children: [
+                //           Text(
+                //             '더보기',
+                //             style: TextStyle(
+                //               color: Colors.black54,
+                //               fontSize: 12,
+                //               fontWeight: FontWeight.bold,
+                //             ),
+                //           ),
+                //           Padding(
+                //             padding: EdgeInsets.only(right: 30.0),
+                //             child: Icon(Icons.arrow_forward_ios,
+                //                 size: 14, color: Colors.black54),
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // Container(
+                //   // 네 번째 위젯 박스
+                //   width: MediaQuery.of(context).size.width,
+                //   padding: const EdgeInsets.all(20.0),
+                //   margin: const EdgeInsets.only(right: 9.0),
+                //   decoration: BoxDecoration(
+                //     color: const Color(0xFFFAFAFE),
+                //     borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
+                //   ),
+                //   child: const Column(
+                //     children: [
+                //       Row(
+                //         children: [
+                //           Text(
+                //             '대외 활동',
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 14,
+                //               fontWeight: FontWeight.normal,
+                //             ),
+                //           ),
+                //           SizedBox(width: 17),
+                //           Text(
+                //             '코테노이아 절찬 모집중!!!',
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 12,
+                //               fontWeight: FontWeight.normal,
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //       SizedBox(height: 16),
+                //       Row(
+                //         children: [
+                //           Text(
+                //             '취업 진로',
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 14,
+                //               fontWeight: FontWeight.normal,
+                //             ),
+                //           ),
+                //           SizedBox(width: 17),
+                //           Text(
+                //             '이거 꼭 해봐!!',
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 12,
+                //               fontWeight: FontWeight.normal,
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //       SizedBox(height: 16),
+                //       Row(
+                //         children: [
+                //           Text(
+                //             '정통 광장',
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 14,
+                //               fontWeight: FontWeight.normal,
+                //             ),
+                //           ),
+                //           SizedBox(width: 17),
+                //           Text(
+                //             '시험 범위 알려줄 사람~~',
+                //             style: TextStyle(
+                //               color: Colors.black,
+                //               fontSize: 12,
+                //               fontWeight: FontWeight.normal,
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 const Padding(
                   padding: EdgeInsets.only(top: 20),
                   child: Text(

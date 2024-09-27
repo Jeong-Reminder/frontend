@@ -81,7 +81,7 @@ class _EditFieldPageState extends State<EditFieldPage> {
         child: BottomSheet(
           onClosing: () {},
           constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width,
+            maxWidth: MediaQuery.of(context).size.width,
             maxHeight: MediaQuery.of(context).size.height / 3.6,
           ),
           backgroundColor: Colors.white,
@@ -93,8 +93,8 @@ class _EditFieldPageState extends State<EditFieldPage> {
               children: [
                 SingleChildScrollView(
                   child: Container(
-                    width: 400,
-                    height: 160,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 5.5,
                     decoration: const BoxDecoration(
                       color: Color(0xFFF6F6F6),
                     ),
@@ -132,6 +132,13 @@ class _EditFieldPageState extends State<EditFieldPage> {
                     if (context.mounted) {
                       // 변경된 developmentField를 이전 페이지로 전달하면서 이동
                       Navigator.pop(context, developmentField);
+
+                      for (var field in fieldList) {
+                        if (field['isSelected'] == true) {
+                          field['isSelected'] = false;
+                        }
+                      }
+                      selectedFields.clear();
                     }
                   },
                   style: ElevatedButton.styleFrom(

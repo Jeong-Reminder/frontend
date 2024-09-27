@@ -149,6 +149,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류 방지
         toolbarHeight: 70,
         leading: Padding(
@@ -166,36 +167,6 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => (userRole == 'ROLE_ADMIN')
-                        ? const MyOwnerPage()
-                        : const MyUserPage(),
-                  ),
-                );
-              },
-              icon: const Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

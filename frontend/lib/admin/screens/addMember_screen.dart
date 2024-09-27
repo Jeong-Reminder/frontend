@@ -19,6 +19,10 @@ class _AddMemberPageState extends State<AddMemberPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: const BackButton(),
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 27.0, vertical: 109.0),
         child: Column(

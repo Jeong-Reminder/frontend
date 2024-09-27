@@ -29,11 +29,15 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   final prefs = SharedPreferences.getInstance();
   bool isPressed = false; // 길게 눌렀는지 여부
+
   int count = 4; // 좋아요 개수
   int? level;
+  int? selectedBoardIndex; // 선택된 게시글의 인덱스를 저장할 변수
+
+  String userRole = '';
+
   List<Map<String, dynamic>> boardList = []; // widget.boardList 저장할 변수
   List<Map<String, dynamic>> filteredBoardList = [];
-  int? selectedBoardIndex; // 선택된 게시글의 인덱스를 저장할 변수
 
   @override
   void initState() {
@@ -47,18 +51,20 @@ class _BoardState extends State<Board> {
     final loginAPI = LoginAPI(); // LoginAPI 인스턴스 생성
     final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
     setState(() {
-      level = credentials['level']; // 로그인 정보에 있는 level를 가져와 저장
+      level = credentials['level']; // 로그인 정보에 있는 level(학년)을 가져와 저장
+      userRole = credentials['userRole'];
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // level과 memberLevel이 맞는 공지사항만 필터링
-    if (widget.total) {
+    // 필터링 여부가 true와 사용자일 경우에만 공지사항 필터링 진행(관리자는 모든 공지를 다 보여줘야하기 때문에 필터링 진행할 이유 없음)
+    if (widget.total && userRole == 'ROLE_USER') {
       setState(() {
+        // 공지글이 사용자의 학년과 같거나 공지 설정 학년이 0일때 filteredBoardList에 저장
         filteredBoardList = widget.boardList.where((board) {
-          final memberLevel = board['announcementLevel'];
-          return level == memberLevel || level == 0;
+          final announcementLevel = board['announcementLevel'];
+          return announcementLevel == level || announcementLevel == 0;
         }).toList();
       });
 
@@ -90,12 +96,14 @@ class _BoardState extends State<Board> {
 
     // 필터링된 공지사항 리스트를 화면에 표시
     return ListView.builder(
-      itemCount:
-          widget.total ? filteredBoardList.length : widget.boardList.length,
+      itemCount: (widget.total && userRole == 'ROLE_USER')
+          ? filteredBoardList.length
+          : widget.boardList.length,
       shrinkWrap: true, // 높이를 자동으로 조절
       itemBuilder: (context, index) {
-        final board =
-            widget.total ? filteredBoardList[index] : widget.boardList[index];
+        final board = (widget.total && userRole == 'ROLE_USER')
+            ? filteredBoardList[index]
+            : widget.boardList[index];
         final category = _getCategoryName(board['announcementCategory']);
         // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
@@ -126,24 +134,33 @@ class _BoardState extends State<Board> {
 
               // 숨김/삭제 버튼 띄울 때
               onLongPress: () async {
-                setState(() {
-                  selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
-                });
+                if (selectedBoardIndex != null) {
+                  setState(() {
+                    selectedBoardIndex = null;
+                  });
+                } else {
+                  setState(() {
+                    selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
+                  });
+                }
+                print('selectedBoardIndex: $selectedBoardIndex');
+
                 if (widget.onBoardSelected != null) {
                   widget.onBoardSelected!(board); // 선택된 게시글 콜백 호출
                 }
+
                 print('selectedBoard: ${board['announcementTitle']}');
               },
               child: Card(
                 color: const Color(0xFFFAFAFE),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
-                  // side: BorderSide(
-                  //   color: isSelected
-                  //       ? Colors.blue
-                  //       : Colors.transparent, // 선택된 경우 테두리 색상 적용
-                  //   width: 1.0,
-                  // ),
+                  side: BorderSide(
+                    color: (selectedBoardIndex == index)
+                        ? Colors.blue
+                        : Colors.transparent, // 선택된 경우 테두리 색상 적용
+                    width: 1.0,
+                  ),
                 ),
                 elevation: 0.5,
                 child: Container(

@@ -4,30 +4,15 @@ import 'package:frontend/services/profile_service.dart';
 
 class ProfileProvider with ChangeNotifier {
   ProfileService profileService = ProfileService();
-  Map<String, dynamic>? _techStack;
-  int? _memberId;
+
+  Map<String, dynamic> _techStack = {}; // 기술 스택
   List<Map<String, dynamic>> _teams = []; // 팀 정보를 저장할 리스트
 
-  // memberId 꺼내기
-  int get memberId => _memberId!;
-
   // 프로필 techStack 꺼내기
-  Map<String, dynamic> get techStack => _techStack!;
+  Map<String, dynamic> get techStack => _techStack; // 기술 스택 저장
 
   // 프로필 team 정보 꺼내기
   List<Map<String, dynamic>> get teams => _teams;
-
-  // memberId 저장
-  set memberId(int id) {
-    _memberId = id;
-    notifyListeners();
-  }
-
-  // 프로필 techStack 저장
-  set techStack(Map<String, dynamic> tech) {
-    _techStack = tech;
-    notifyListeners();
-  }
 
   // 팀 저장
   set teams(List<Map<String, dynamic>> teamData) {
@@ -50,7 +35,8 @@ class ProfileProvider with ChangeNotifier {
     try {
       Map<String, dynamic> profile =
           await profileService.fetchProfile(memberId);
-      techStack = profile;
+
+      _techStack = profile;
 
       // 프로필에서 team 정보 추출
       if (profile.containsKey('team') && profile['team'] is List) {

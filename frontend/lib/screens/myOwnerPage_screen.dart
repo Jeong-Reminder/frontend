@@ -140,6 +140,7 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         toolbarHeight: 70,
         scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
         leading: Padding(
@@ -158,29 +159,13 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
           ),
         ),
         leadingWidth: 120, // leading에 있는 위젯 크게 만들기 위한 코드
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
+        title: const Text(
+          '내 정보',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
-          GestureDetector(
-            onTap: () {
-              print('semesterList: ${formatYearSemester(createdTimeList)}');
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(right: 23.0),
-              child: Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
       body: Column(
         children: [

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 
 // BoardAppbar 위젯 정의
 class BoardAppbar extends StatelessWidget implements PreferredSizeWidget {
-  const BoardAppbar({super.key});
+  final String? userRole;
+  const BoardAppbar({this.userRole, super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: Colors.white,
+      scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
       toolbarHeight: 70,
       leadingWidth: 140,
       leading: Padding(
@@ -20,29 +24,36 @@ class BoardAppbar extends StatelessWidget implements PreferredSizeWidget {
           color: Colors.black,
         ),
       ),
-      actions: const [
+      actions: [
+        // 프로필 아이콘
         Padding(
-          padding: EdgeInsets.only(right: 23.0),
-          child: Icon(
-            Icons.search,
-            size: 30,
-            color: Colors.black,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: 23.0),
-          child: Icon(
-            Icons.add_alert,
-            size: 30,
-            color: Colors.black,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(right: 23.0),
-          child: Icon(
-            Icons.account_circle,
-            size: 30,
-            color: Colors.black,
+          padding: const EdgeInsets.only(right: 23.0),
+          child: IconButton(
+            onPressed: () async {
+              if (userRole == 'ROLE_USER') {
+                if (context.mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    '/myuser',
+                  );
+                }
+              } else if (userRole == 'ROLE_ADMIN') {
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
+                  );
+                }
+              }
+            },
+            icon: const Icon(
+              Icons.account_circle,
+              size: 30,
+              color: Colors.black,
+            ),
+            visualDensity: VisualDensity.compact,
           ),
         ),
       ],

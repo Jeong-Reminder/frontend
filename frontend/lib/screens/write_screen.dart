@@ -6,8 +6,10 @@ import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
+import 'package:frontend/widgets/boardAppbar_widget.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
+    as picker;
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
@@ -169,34 +171,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false, // 버튼과 키보드가 겹쳐도 오류가 안나게 하기
-      appBar: AppBar(
-        toolbarHeight: 70,
-        leading: IconButton(
-          icon: const Icon(Icons.close_outlined),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
+      appBar: const BoardAppbar(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,15 +611,20 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         // 달력 아이콘
                         IconButton(
                           onPressed: () {
-                            DatePicker.showDateTimePicker(
+                            picker.DatePicker.showDateTimePicker(
                               context,
                               currentTime: DateTime.now(),
-                              locale: LocaleType.ko, // 한국어 버전
+                              locale: picker.LocaleType.ko, // 한국어 버전
                               onConfirm: (date) {
                                 setState(() {
                                   selectedEndDate = date;
                                 });
                               },
+                              theme: const picker.DatePickerTheme(
+                                itemStyle: TextStyle(
+                                  color: Colors.black, // 텍스트 색상을 검은색으로 설정
+                                ),
+                              ),
                             );
                           },
                           icon: const Icon(

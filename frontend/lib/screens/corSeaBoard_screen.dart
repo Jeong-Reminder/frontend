@@ -112,7 +112,10 @@ class _CorSeaBoardPageState extends State<CorSeaBoardPage> {
       ..addAll(seasonalBoardList);
 
     return Scaffold(
-      appBar: const BoardAppbar(),
+      backgroundColor: Colors.white,
+      appBar: BoardAppbar(
+        userRole: userRole,
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,

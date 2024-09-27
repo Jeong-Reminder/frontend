@@ -70,6 +70,7 @@ class LoginAPI {
     final autoLogin = prefs.getBool('isAutoLogin') ?? false;
     final level = prefs.getInt('level');
     final userRole = prefs.getString('userRole');
+    final memberId = prefs.getInt('memberId');
 
     return {
       'studentId': studentId,
@@ -79,6 +80,7 @@ class LoginAPI {
       'isAutoLogin': autoLogin,
       'level': level,
       'userRole': userRole,
+      'memberId': memberId,
     };
   }
 
@@ -207,6 +209,12 @@ class LoginAPI {
           await prefs.setString('status', status); // 재적상태 저장
           await prefs.setInt('level', level);
 
+          // techStack이 비어있지 않을 때(사용자일 경우) 사용자 아이디를 추출해서 저장
+          if (techStack != null) {
+            final memberId = responseData['techStack']['memberId'];
+            await prefs.setInt('memberId', memberId); // 사용자 아이디 저장
+          }
+
           final uri = Uri.parse(loginAddress);
           cookieJar.saveFromResponse(
               uri, [Cookie('refresh', refreshToken)]); // refreshToken 쿠키 저장
@@ -218,12 +226,15 @@ class LoginAPI {
           final savedName = prefs.getString('name');
           final savedStatus = prefs.getString('status');
           final savedLevel = prefs.getInt('level');
+          final savedMemberId = prefs.getInt('memberId');
+
           print('저장된 액세스 토큰: $savedAccessToken');
           print('저장된 리프레시 토큰: $savedRefreshToken');
           print('저장된 학번: $savedStudentId');
           print('저장된 이름: $savedName');
           print('저장된 상태: $savedStatus');
           print('저장된 학년: $savedLevel');
+          print('저장된 사용자 아이디: $savedMemberId');
 
           // memberExperience 배열에서 id 값 추출하여 저장
           final memberExperienceIds = (memberExperience as List)
@@ -231,19 +242,6 @@ class LoginAPI {
               .toList();
           await prefs.setStringList('memberExperienceIds', memberExperienceIds);
           print('저장된 memberExperience id: $memberExperienceIds');
-
-          // techStack이 null이 아닐 경우에 memberID값 추출
-          if (techStack != null) {
-            final memberId = techStack['memberId'];
-
-            // ProfileProvider를 통해 memberId 저장
-            // techStack이 있을 경우에는 로그인 응답 데이터에서 가져와서 memberId 저장
-            final profileProvider =
-                Provider.of<ProfileProvider>(context, listen: false);
-
-            profileProvider.memberId = memberId;
-            print("memberID: ${profileProvider.memberId}");
-          }
         }
         print('로그인 성공');
 
