@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/screens/contestTeamList_screen.dart';
-import 'package:frontend/admin/screens/teamRecruitList_screen.dart';
 
 class DashBoardPage extends StatefulWidget {
   const DashBoardPage({super.key});
@@ -12,13 +11,16 @@ class DashBoardPage extends StatefulWidget {
 class _DashBoardPageState extends State<DashBoardPage> {
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
             // 제목 상단바
             Container(
-              height: 167,
+              height: screenHeight / 6,
               decoration: const BoxDecoration(
                 color: Color(0xFF8FB6F6),
                 borderRadius: BorderRadius.only(
@@ -30,7 +32,7 @@ class _DashBoardPageState extends State<DashBoardPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 80),
+                    SizedBox(height: screenHeight / 14),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -99,28 +101,38 @@ class _DashBoardPageState extends State<DashBoardPage> {
   }
 
   Widget dashboardBtn(VoidCallback onTap, String imageAsset, String title) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       children: [
         GestureDetector(
           onTap: onTap,
           child: Container(
-            height: 154,
+            height: MediaQuery.of(context).size.height / 7,
             width: double.infinity,
             padding: const EdgeInsets.only(top: 20),
             alignment: Alignment.topCenter,
             decoration: BoxDecoration(
               color: const Color(0xFFFAFAFE),
-              image: DecorationImage(
-                image: AssetImage(imageAsset),
-                opacity: 0.3,
-                alignment: const Alignment(-0.65, -0.5), // 이미지의 위치 조정
-              ),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: screenWidth > 600 ? 25 : 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Opacity(
+                    opacity: 0.3,
+                    child: Image.asset(imageAsset),
+                  ),
+                ],
               ),
             ),
           ),

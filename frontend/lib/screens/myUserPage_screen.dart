@@ -33,10 +33,10 @@ class _MyUserPageState extends State<MyUserPage> {
   Map<String, dynamic> techStack = {}; // 기술 스택
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
-    await _loadCredentials(); // 학번을 로드하는 메서드 호출
-    await _initializePage();
+    _loadCredentials(); // 학번을 로드하는 메서드 호출
+    _initializePage();
   }
 
   // 학번, 이름, 재적상태를 로드하는 메서드

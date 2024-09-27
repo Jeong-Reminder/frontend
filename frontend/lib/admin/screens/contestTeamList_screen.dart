@@ -39,14 +39,15 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
   String _searchQuery = ''; // 검색어를 저장하는 변수
   String selectedCategory = '경진대회'; // 팝업 메뉴 카테고리 이름
 
+  Future<List<Map<String, dynamic>>>? futureTeamList; // 팀 정보 리스트
   List<Map<String, dynamic>> teamList = []; // 팀 정보 리스트
   List<String> teamCategories = []; // 팀 카테고리 리스트
   List<Map<String, dynamic>> filteredTeamList = []; // 필터링된 팀 정보
 
   final Map<int, bool> _selectedItems = {}; // 각 아이템의 선택 상태를 저장하는 변수
-  bool _selectAll = false; // 전체 선택 상태를 저장하는 변수
 
-  PopUpItem? _selectedPopUpItem; // 선택된 팝업 아이템을 저장하는 변수
+  bool _selectAll = false; // 전체 선택 상태를 저장하는 변수
+  bool isLoading = true; // 데이터를 불러오는 동안 true로 설정
 
   // 날짜 선택기를 표시하는 메서드
   Future<void> _selectDate(BuildContext context) async {
@@ -210,23 +211,40 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<AdminProvider>(context, listen: false).fetchAllTeams();
 
-      setState(() {
-        // teamList에 모든 팀 데이터를 저장
-        teamList = Provider.of<AdminProvider>(context, listen: false).teamList;
-        filteredTeamList = teamList; // 초기에는 전체 리스트로 표시
+      if (mounted) {
+        setState(() {
+          teamList =
+              Provider.of<AdminProvider>(context, listen: false).teamList;
 
-        // teamCategories에 팀 카테고리만 추출하여 저장 (중복 제거)
-        teamCategories = teamList
-            .map((team) => team['teamCategory'] as String)
-            .toSet()
-            .toList();
-      });
+          filteredTeamList = teamList;
+
+          teamCategories = teamList
+              .map((team) => team['teamCategory'] as String)
+              .toSet()
+              .toList();
+        });
+      }
     });
+    futureTeamList = _fetchTeamData();
+  }
+
+  // 비동기적으로 팀 데이터를 가져오는 메서드
+  Future<List<Map<String, dynamic>>> _fetchTeamData() async {
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    await adminProvider.fetchAllTeams(); // 비동기 데이터 로드
+    return adminProvider.teamList; // 로드된 팀 리스트 반환
+  }
+
+  @override
+  void dispose() {
+    // 만약 타이머나 비동기 작업이 있다면 여기서 취소해줘야 합니다.
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
@@ -245,24 +263,6 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
@@ -464,8 +464,19 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
             ),
             const SizedBox(height: 10),
 
-            filteredTeamList.isEmpty
-                ? Center(
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: futureTeamList,
+              builder: (context, snapshot) {
+                // 로딩 중일 때
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(), // 로딩 스피너
+                  );
+                }
+
+                // 데이터가 비어 있을 때 또는 데이터가 없을 때
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
                     child: Column(
                       children: [
                         Image.asset('assets/images/frust.png', scale: 4.0),
@@ -475,11 +486,17 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                         ),
                       ],
                     ),
-                  )
-                : SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
+                  );
+                }
+
+                // 데이터가 있을 때
+                final filteredTeamList = snapshot.data!;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
                       child: DataTable(
                         headingRowColor:
                             const MaterialStatePropertyAll(Color(0xFFEFEFF2)),
@@ -531,23 +548,26 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                               index.isEven ? Colors.white : Colors.white,
                             ),
                             cells: [
+                              // 팀명
                               DataCell(
                                 Text(
                                   filteredTeamList[index]['teamName'] ?? '',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                               ),
+                              // 팀원
                               DataCell(
                                 Text(
-                                  filteredTeamList[index]['techStacks'] != null
-                                      ? (filteredTeamList[index]['techStacks']
+                                  filteredTeamList[index]['teamMember'] != null
+                                      ? (filteredTeamList[index]['teamMember']
                                               as List)
-                                          .map((stack) => stack['memberName'])
+                                          .map((member) => member['memberName'])
                                           .join(', ')
                                       : '',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                               ),
+                              // 경진대회
                               DataCell(
                                 Text(
                                   filteredTeamList[index]['teamCategory'] ?? '',
@@ -560,6 +580,9 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                       ),
                     ),
                   ),
+                );
+              },
+            ),
           ],
         ),
       ),

@@ -268,6 +268,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
@@ -457,6 +458,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.vertical,
                           child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
                             child: DataTable(
                               columnSpacing: 12,
                               horizontalMargin: 12,
@@ -536,56 +538,45 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       ), // 중앙 정렬
                                     ),
                                     DataCell(
-                                      Center(
-                                          child: Text(userListData[index]
-                                              .name)), // 중앙 정렬
+                                      Text(userListData[index].name), // 중앙 정렬
                                     ),
                                     DataCell(
-                                      Center(
-                                          child: Text(
-                                              userListData[index].studentId)),
+                                      Text(userListData[index].studentId),
                                     ),
                                     DataCell(
-                                      Center(
-                                          child: Text(
-                                              '${userListData[index].level}')),
+                                      Text('${userListData[index].level}'),
                                     ),
                                     DataCell(
-                                      Center(
-                                          child:
-                                              Text(userListData[index].status)),
+                                      Text(userListData[index].status),
                                     ),
                                     DataCell(
-                                      Center(
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              selectedUser =
-                                                  userListData[index];
-                                            });
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            selectedUser = userListData[index];
+                                          });
 
-                                            _showEditDialog(
-                                              context,
-                                              userListData[index],
-                                            );
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                const Color(0xFF2A72E7),
-                                            foregroundColor: Colors.white,
-                                            minimumSize: const Size(60, 16),
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 2.0),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(6.0),
-                                            ),
+                                          _showEditDialog(
+                                            context,
+                                            userListData[index],
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF2A72E7),
+                                          foregroundColor: Colors.white,
+                                          minimumSize: const Size(60, 16),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 2.0),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6.0),
                                           ),
-                                          child: const Text(
-                                            '수정',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        ),
+                                        child: const Text(
+                                          '수정',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
