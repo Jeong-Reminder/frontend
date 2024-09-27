@@ -196,31 +196,33 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                           color: Colors.black54),
                     ),
                     const SizedBox(width: 6),
-                    // hopeField를 개별적으로 처리하여 위젯 생성
-                    Wrap(
-                      spacing: 6.0,
-                      children: post['hopeField']
-                          .split(',')
-                          .map<Widget>((field) => SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFDBE7FB),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    field.trim(), // 각 hopeField 항목
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                    // hopeField를 개별적으로 처리하여 가로 스크롤 가능한 위젯 생성
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Wrap(
+                          spacing: 6.0,
+                          children: post['hopeField']
+                              .split(',')
+                              .map<Widget>((field) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFDBE7FB),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                  ),
-                                ),
-                              ))
-                          .toList(), // Make sure this is List<Widget>
+                                    child: Text(
+                                      field.trim(), // 각 hopeField 항목
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ))
+                              .toList(), // List<Widget> 생성
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -328,7 +330,9 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         Provider.of<AnnouncementProvider>(context).cateBoardList;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
         leading: Padding(
@@ -346,14 +350,6 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         ),
         leadingWidth: 120,
         actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(

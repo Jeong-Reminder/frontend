@@ -419,6 +419,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
         leading: Padding(
@@ -435,30 +436,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                print('acceptMemberList : $acceptMemberList');
-                print('recruitList: $recruitList');
-              },
-              child: const Icon(
-                Icons.add_alert,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: Center(
         child: Padding(
@@ -785,41 +763,48 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: (makeTeam['hopeField'] as String? ?? '')
-                        .split(',')
-                        .map<Widget>((field) {
-                      return Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDBE7FB),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  field.trim(),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                  const Spacer(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal, // 가로 스크롤 활성화
+                      child: Wrap(
+                        spacing: 6.0, // 항목 간의 간격 설정
+                        children: (makeTeam['hopeField'] as String? ?? '')
+                            .split(',')
+                            .map<Widget>((field) {
+                          return Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6), // 내부 여백 설정
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDBE7FB),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      field.trim(),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      );
-                    }).toList(),
+                              const SizedBox(width: 4),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 5),
               const Divider(
                 color: Color(0xFFC5C5C7),
