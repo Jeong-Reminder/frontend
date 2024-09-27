@@ -37,6 +37,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   String selectedButton = ''; // 초기에는 아무 페이지 선택이 안 되어있는 상태
   String boardCategory = 'CONTEST';
   String? userRole; // 사용자의 역할을 저장할 변수
+  bool isLoading = false; // 로딩 상태를 관리하는 변수
 
   List<Map<String, dynamic>> filteredBoardList = [];
   List<Map<String, dynamic>> recruitList = []; // 조회된 팀원 모집글을 저장하는 리스트
@@ -236,6 +237,11 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   // 선택된 버튼에 따라 다른 콘텐츠를 반환하는 함수
   Widget buildContent() {
+    // 로딩 중일 때 로딩 인디케이터 표시
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     // 사용자가 아무 버튼도 선택하지 않은 경우
     if (selectedButton.isEmpty) {
       return const Center(child: Text('원하는 카테고리를 선택하세요'));
@@ -246,6 +252,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       return const Center(child: Text('선택한 카테고리에 작성된 모집글이 없습니다'));
     }
 
+    // 사용자가 버튼을 선택했고 모집글이 있는 경우
     return _buildPostContent(recruitList);
   }
 
@@ -308,6 +315,10 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
 
   // 팀원 모집글 데이터를 불러오는 함수
   Future<void> fetchRecruitData(int boardId) async {
+    setState(() {
+      isLoading = true; // 데이터를 가져오는 동안 로딩 상태로 설정
+    });
+
     try {
       await Provider.of<MakeTeamProvider>(context, listen: false)
           .fetchcateMakeTeam(boardId);
@@ -318,6 +329,10 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
       });
     } catch (e) {
       print("Error fetching recruit data: $e");
+    } finally {
+      setState(() {
+        isLoading = false; // 데이터를 다 가져온 후 로딩 상태 해제
+      });
     }
   }
 
