@@ -359,7 +359,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 20),
 
                 // 필독 공지들
-                FutureBuilder(
+                FutureBuilder<List<Map<String, dynamic>>>(
                   future: getData(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -371,8 +371,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text('데이터를 불러오는 도중 오류가 발생했습니다.'),
                       );
                     } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                      List<Map<String, dynamic>> boardList =
-                          snapshot.data as List<Map<String, dynamic>>;
+                      List<Map<String, dynamic>> boardList = snapshot.data!;
 
                       // 전체 공지에서 필독 상태인 공지만 필터링한 공지
                       List<Map<String, dynamic>> mustBoardList =
