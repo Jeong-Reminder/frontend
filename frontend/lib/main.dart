@@ -239,7 +239,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     } else {
       // print('phone 에서 접속했습니다. 세로모드만 적용');
     }
-    print('>>screenWidth');
+    // print('>>screenWidth');
     print(screenWidth);
     print(screenHeight);
   }

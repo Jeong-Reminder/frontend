@@ -341,11 +341,6 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
                                   await announcementProvider.downloadFile(
                                       fileUrl, fileName);
-
-                                  if (context.mounted) {
-                                    alertSnackBar(
-                                        context, '$fileName이 다운로드되었습니다.');
-                                  }
                                 } else {
                                   print('해당 파일 정보를 찾을 수 없습니다.');
                                 }
