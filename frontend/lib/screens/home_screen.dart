@@ -565,8 +565,11 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 10,
-                  padding: const EdgeInsets.all(20.0),
                   decoration: BoxDecoration(
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/ad.png'),
+                      fit: BoxFit.fill,
+                    ),
                     color: const Color(0xFFDBE7FB),
                     borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
                     border: Border.all(
@@ -574,44 +577,6 @@ class _HomePageState extends State<HomePage> {
                       color: const Color(0xFF2B72E7).withOpacity(0.25),
                       width: 1, // 두께
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '이런 경진대회라면 놓칠 수 없지!',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              const Text(
-                                '정보통신공학과 학생만 가능한 경험',
-                                style: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 10.0),
-                                child: Image.asset(
-                                  'assets/images/light.png',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Image.asset(
-                        'assets/images/smile.png',
-                      ),
-                    ],
                   ),
                 ),
 
