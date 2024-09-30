@@ -470,9 +470,15 @@ class AnnouncementProvider with ChangeNotifier {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        // 로컬 저장 경로 가져오기 (iOS: 앱 문서 디렉토리)
-        Directory? tempDir = await getApplicationDocumentsDirectory();
-        String savePath = path.join(tempDir.path, fileName);
+        // 로컬 저장 경로 가져오기
+        Directory? tempDir;
+
+        if (Platform.isAndroid) {
+          tempDir = await getExternalStorageDirectory(); // Android의 외부 저장소
+        } else if (Platform.isIOS) {
+          tempDir = await getApplicationDocumentsDirectory();
+        }
+        String savePath = path.join(tempDir!.path, fileName);
 
         // 파일 저장
         File file = File(savePath);
