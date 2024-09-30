@@ -60,6 +60,7 @@ dependencies:
   permission_handler: ^11.3.1
   share_plus: ^7.2.2
   url_launcher_ios: ^6.2.4
+  share: ^2.0.4
 
 dev_dependencies:
   flutter_test:
@@ -128,6 +129,7 @@ flutter:
     - assets/images/filtering.png
     - assets/images/Folder_send_light.png
     - assets/images/frust.png
+    - assets/images/ad.png
     - assets/skilImages/typescript.png
     - assets/skilImages/javascript.png
     - assets/skilImages/tailwindcss.png

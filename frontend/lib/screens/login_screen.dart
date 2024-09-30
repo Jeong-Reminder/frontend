@@ -172,19 +172,13 @@ class _LoginPageState extends State<LoginPage> {
     String? token;
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     // iOS와 Android 플랫폼에 따라 FCM 토큰 또는 APNS 토큰을 가져옴
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      token = await messaging.getAPNSToken();
-      if (token == null) {
-        print('APNS 토큰을 가져오지 못했습니다.');
-        return null; // null 값을 반환하여 처리 가능하게 함
-      }
-    } else {
-      token = await messaging.getToken();
-      if (token == null) {
-        print('FCM 토큰을 가져오지 못했습니다.');
-        return null; // null 값을 반환하여 처리 가능하게 함
-      }
+
+    token = await messaging.getToken();
+    if (token == null) {
+      print('FCM 토큰을 가져오지 못했습니다.');
+      return null; // null 값을 반환하여 처리 가능하게 함
     }
+
     print('FCM 토큰: $token');
     return token;
   }
