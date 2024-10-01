@@ -367,7 +367,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                             orElse: () =>
                                 <String, dynamic>{}, // 일치하는 항목이 없으면 빈 객체 반환
                           );
-                          final announcementId = matchedBoard['id'] as int;
+                          final announcementId =
+                              matchedBoard['id'] as int? ?? 0; // null이면 0으로 처리
                           Navigator.push(
                             context,
                             MaterialPageRoute(

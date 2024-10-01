@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:frontend/models/makeTeam_modal.dart';
 
 class MakeTeamPage extends StatefulWidget {
-  final MakeTeam? makeTeam; // 수정할 팀원 모집글을 받아옴 (nullable)
-  final String? initialCategory; // 초기 카테고리 전달
+  final MakeTeam? makeTeam;
+  final String? initialCategory;
   final int? announcementId;
 
   const MakeTeamPage(
@@ -18,48 +18,38 @@ class MakeTeamPage extends StatefulWidget {
 }
 
 class _MakeTeamPageState extends State<MakeTeamPage> {
-  int selectedPeopleCount = -1; // 선택된 인원 수를 저장하는 변수
-  List<String> selectedFields = []; // 선택된 희망 분야를 저장하는 리스트
-  DateTime? selectedEndDate; // 선택된 모집 종료 기간을 저장하는 변수
+  int selectedPeopleCount = -1;
+  List<String> selectedFields = [];
+  DateTime? selectedEndDate;
 
-  final TextEditingController _titleController =
-      TextEditingController(); // 제목 텍스트 제어하는 컨트롤러
-  final TextEditingController _contentController =
-      TextEditingController(); // 내용 텍스트 제어하는 컨트롤러
-  final TextEditingController _chatUrlController =
-      TextEditingController(); // 오픈채팅 URL 텍스트 제어하는 컨트롤러
-  final FocusNode _titleFocusNode = FocusNode(); // 포커스 노드
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  final TextEditingController _chatUrlController = TextEditingController();
+  final TextEditingController _fieldController =
+      TextEditingController(); // 입력 필드 컨트롤러
 
-  ValueNotifier<bool> isButtonEnabled =
-      ValueNotifier(false); // 버튼 활성화 상태를 관리하는 변수
-  ValueNotifier<bool> isChatUrlValid =
-      ValueNotifier(false); // 오픈채팅 URL 유효성 상태를 관리하는 변수
+  final FocusNode _titleFocusNode = FocusNode();
+  ValueNotifier<bool> isButtonEnabled = ValueNotifier(false);
+  ValueNotifier<bool> isChatUrlValid = ValueNotifier(false);
+  ValueNotifier<String?> fieldErrorNotifier =
+      ValueNotifier<String?>(null); // 중복 경고 메시지를 위한 ValueNotifier
 
-  bool get isEditMode => widget.makeTeam != null; // 수정 모드 여부를 판단
+  bool get isEditMode => widget.makeTeam != null;
 
   @override
   void initState() {
     super.initState();
+
+    // 입력 필드 유효성 검사를 위한 리스너 설정
     _titleController.addListener(_validateInputs);
     _contentController.addListener(_validateInputs);
     _chatUrlController.addListener(_validateInputs);
+    _fieldController.addListener(_validateField); // 입력 필드 유효성 검사 추가
     _titleFocusNode.addListener(_handleTitleFocus);
 
-    if (isEditMode && widget.makeTeam != null) {
-      // 수정 모드인 경우 제목의 카테고리만 남기고 나머지 필드는 초기화
-      String category =
-          _parseCompetitionName(widget.makeTeam!.recruitmentTitle);
-      _titleController.text = '[$category] ';
-      _titleController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _titleController.text.length),
-      );
-    } else if (widget.initialCategory != null &&
-        _titleController.text.isEmpty) {
-      // 신규 작성 모드인 경우
+    // initialCategory가 있을 경우 제목에 [] 안에 카테고리 이름을 설정
+    if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
       _titleController.text = '[${widget.initialCategory}] ';
-      _titleController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _titleController.text.length),
-      );
     }
   }
 
@@ -68,10 +58,12 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     _titleController.removeListener(_validateInputs);
     _contentController.removeListener(_validateInputs);
     _chatUrlController.removeListener(_validateInputs);
+    _fieldController.removeListener(_validateField);
     _titleFocusNode.removeListener(_handleTitleFocus);
     _titleController.dispose();
     _contentController.dispose();
     _chatUrlController.dispose();
+    _fieldController.dispose();
     _titleFocusNode.dispose();
     super.dispose();
   }
@@ -81,6 +73,15 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
         _contentController.text.isNotEmpty &&
         _chatUrlController.text.isNotEmpty;
     isChatUrlValid.value = _chatUrlController.text.isNotEmpty;
+  }
+
+  void _validateField() {
+    String newField = _fieldController.text.trim();
+    if (newField.isNotEmpty && selectedFields.contains(newField)) {
+      fieldErrorNotifier.value = "이미 추가된 분야입니다.";
+    } else {
+      fieldErrorNotifier.value = null;
+    }
   }
 
   void _handleTitleFocus() {
@@ -101,7 +102,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
       firstDate: DateTime(2010),
       lastDate: DateTime(2101),
     );
-    if (picked != null || picked != selectedEndDate) {
+    if (picked != null && picked != selectedEndDate) {
       setState(() {
         selectedEndDate = picked;
       });
@@ -130,6 +131,63 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     }
   }
 
+  Future<void> _addFieldDialog() async {
+    _fieldController.clear(); // 새로 열 때마다 필드 초기화
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("희망 분야"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _fieldController,
+                decoration: const InputDecoration(hintText: "원하는 희망 분야를 입력하세요"),
+              ),
+              const SizedBox(height: 10),
+              ValueListenableBuilder<String?>(
+                valueListenable: fieldErrorNotifier,
+                builder: (context, errorText, child) {
+                  return errorText != null
+                      ? Text(
+                          errorText,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        )
+                      : const SizedBox();
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("취소"),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  String newField = _fieldController.text.trim();
+                  if (newField.isNotEmpty &&
+                      !selectedFields.contains(newField)) {
+                    selectedFields.add(newField);
+                    Navigator.of(context).pop();
+                  }
+                });
+              },
+              child: const Text("추가"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildPeopleCountButton(int count) {
     bool isSelected = selectedPeopleCount == count;
     return GestureDetector(
@@ -139,7 +197,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
         });
       },
       child: Container(
-        height: 20,
+        height: 30,
         width: 70,
         decoration: BoxDecoration(
           color: const Color(0xFFDBE7FB),
@@ -161,32 +219,40 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
 
   Widget _buildFieldButton(String field) {
     bool isSelected = selectedFields.contains(field);
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (isSelected) {
-            selectedFields.remove(field);
-          } else {
-            selectedFields.add(field);
-          }
-        });
-      },
+    return IntrinsicWidth(
       child: Container(
-        height: 20,
-        width: 90,
+        height: 30,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: const Color(0xFFDBE7FB),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Center(
-          child: Text(
-            field,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.black : Colors.black54,
+        child: Row(
+          children: [
+            Center(
+              child: Text(
+                field,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.black : Colors.black54,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 5),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedFields.remove(field); // X 버튼을 클릭하면 희망 분야 삭제
+                });
+              },
+              child: const Icon(
+                Icons.close,
+                size: 14,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -297,24 +363,13 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        // 검색 아이콘을 클릭했을 때 실행할 코드
-                      },
+                      onTap: _addFieldDialog,
                       child: const Row(
                         children: [
                           Icon(
                             Icons.search,
                             size: 15,
                             color: Colors.black54,
-                          ),
-                          SizedBox(width: 2),
-                          Text(
-                            '검색 ',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
-                            ),
                           ),
                         ],
                       ),
@@ -325,25 +380,12 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: [
-                      _buildFieldButton('백엔드'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('프론트'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('DevOps'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('데이터 엔지니어'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('AI'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('SRE'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('QA'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('Security'),
-                      const SizedBox(width: 6),
-                      _buildFieldButton('IoT'),
-                    ],
+                    children: selectedFields
+                        .map((field) => Padding(
+                              padding: const EdgeInsets.only(right: 6.0),
+                              child: _buildFieldButton(field),
+                            ))
+                        .toList(),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -369,7 +411,7 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                     GestureDetector(
                       onTap: () => _selectEndDate(context),
                       child: Container(
-                        height: 20,
+                        height: 30,
                         width: 90,
                         decoration: BoxDecoration(
                           color: const Color(0xFFDBE7FB),
@@ -513,8 +555,8 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                 TextField(
                   controller: _contentController,
                   maxLines: null,
-                  keyboardType: TextInputType.multiline, // 줄바꿈 가능한 키보드
-                  textInputAction: TextInputAction.done, // 키보드에 '확인' 버튼을 추가
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.done,
                   decoration: const InputDecoration(
                     hintText: '내용을 작성해주세요',
                     hintStyle: TextStyle(
@@ -569,10 +611,10 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
                       } else {
                         await context
                             .read<MakeTeamProvider>()
-                            .createMakeTeam(makeTeam); // API 호출하여 모집글 작성
+                            .createMakeTeam(makeTeam);
                       }
 
-                      Navigator.pop(context, makeTeam); // 작성된 데이터를 반환
+                      Navigator.pop(context, makeTeam);
                     }
                   : null,
               child: Container(
