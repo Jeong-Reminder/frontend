@@ -62,7 +62,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
       await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchAllBoards();
 
-      if (context.mounted) {
+      if (mounted) {
         setState(() {
           boardList = Provider.of<AnnouncementProvider>(context, listen: false)
               .boardList;
