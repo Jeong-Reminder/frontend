@@ -128,8 +128,25 @@ void main() async {
     ),
   );
 
-  // 백그라운드 메시지 클릭 액션 설정
-  await setupInteractedMessage();
+  // 앱이 종료된 상태에서 알림을 클릭했을 때
+  RemoteMessage? initialMessage =
+      await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    print('App launched from notification while app was terminated.');
+    _handleMessage(initialMessage); // 종료 상태에서 알림 클릭 시 처리
+  }
+
+  // 앱이 백그라운드에 있을 때 알림을 클릭했을 때
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('App opened from background due to a notification tap.');
+    _handleMessage(message); // 백그라운드 상태에서 알림 클릭 시 처리
+  });
+
+  // 앱이 포그라운드에 있을 때 알림 수신
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Received a message in the foreground.');
+    _handleMessage(message); // 포그라운드 상태에서 알림 수신 시 처리
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -201,7 +218,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     ]); // 가로모드 방지(세로모드 지원)
     _screenSize();
 
-    return MaterialApp(
+    return GetMaterialApp(
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginPage(),
@@ -245,23 +262,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 }
 
-// 백그라운드 메시지 클릭 액션 설정
-Future<void> setupInteractedMessage() async {
-  RemoteMessage? initialMessage =
-      await FirebaseMessaging.instance.getInitialMessage();
-
-  // 종료상태에서 클릭한 푸시 알림 메시지 핸들링
-  if (initialMessage != null) {
-    _handleMessage(initialMessage);
-  }
-
-  // 앱이 백그라운드 상태에서 푸시 알림 클릭 하여 열릴 경우 메시지 스트림을 통해 처리
-  FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-}
-
+// 알림 수신 시 처리 로직
 void _handleMessage(RemoteMessage message) {
-  print('message = ${message.notification!.title}');
-  if (message.data['type'] == 'chat') {
-    Get.toNamed('/detail-board', arguments: message.data);
+  if (message.data.containsKey('targetId')) {
+    int announcementId = int.parse(message.data['targetId'].toString());
+
+    Get.to(BoardDetailPage(announcementId: announcementId, category: 'ALARM'));
   }
 }
