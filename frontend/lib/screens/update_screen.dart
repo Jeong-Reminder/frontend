@@ -281,21 +281,26 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             Navigator.pop(context);
           },
         ),
-        actions: const [
+        actions: [
+          // 프로필 아이콘
           Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
+            padding: const EdgeInsets.only(right: 23.0),
+            child: IconButton(
+              onPressed: () async {
+                if (context.mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    '/myowner',
+                  );
+                }
+              },
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
+              visualDensity: VisualDensity.compact,
             ),
           ),
         ],
@@ -309,7 +314,7 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  width: 315,
+                  width: MediaQuery.of(context).size.width,
                   child: TextFormField(
                     controller: titleController,
                     focusNode: titleFocusNode,
@@ -329,31 +334,6 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                         titleController.text = val!;
                       });
                     },
-                  ),
-                ),
-
-                // 미리보기
-                Padding(
-                  padding: const EdgeInsets.only(right: 17.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showPreview(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFDBE7FB),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(50, 30),
-                    ),
-                    child: const Text(
-                      '미리보기',
-                      style: TextStyle(
-                        color: Color(0xFF6E747E),
-                        fontSize: 12,
-                      ),
-                    ),
                   ),
                 ),
               ],
@@ -506,15 +486,44 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             const SizedBox(height: 25),
 
             // 설정
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 17.0),
-              child: Text(
-                '설정',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 17.0),
+                  child: Text(
+                    '설정',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                // 미리보기
+                Padding(
+                  padding: const EdgeInsets.only(right: 17.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showPreview(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDBE7FB),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                    ),
+                    child: const Text(
+                      '미리보기',
+                      style: TextStyle(
+                        color: Color(0xFF6E747E),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
 

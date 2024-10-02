@@ -6,7 +6,6 @@ import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
-import 'package:frontend/widgets/boardAppbar_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
     as picker;
@@ -190,31 +189,6 @@ class _BoardWritePageState extends State<BoardWritePage> {
           ),
         ),
         actions: [
-          // 미리보기
-          Padding(
-            padding: const EdgeInsets.only(right: 17.0),
-            child: ElevatedButton(
-              onPressed: () {
-                _showPreview(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFDBE7FB),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(50, 30),
-              ),
-              child: const Text(
-                '미리보기',
-                style: TextStyle(
-                  color: Color(0xFF6E747E),
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-
           // 프로필 아이콘
           Padding(
             padding: const EdgeInsets.only(right: 23.0),
@@ -394,15 +368,44 @@ class _BoardWritePageState extends State<BoardWritePage> {
             const SizedBox(height: 25),
 
             // 설정
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 17.0),
-              child: Text(
-                '설정',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 17.0),
+                  child: Text(
+                    '설정',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                // 미리보기
+                Padding(
+                  padding: const EdgeInsets.only(right: 17.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showPreview(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDBE7FB),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                    ),
+                    child: const Text(
+                      '미리보기',
+                      style: TextStyle(
+                        color: Color(0xFF6E747E),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
 
