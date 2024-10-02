@@ -339,8 +339,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                               horizontal: 20.0, vertical: 6.0),
                                           width: MediaQuery.of(context)
                                                   .size
-                                                  .width *
-                                              0.2,
+                                                  .width /
+                                              2,
                                           height: 28,
                                           child: Row(
                                             mainAxisAlignment:
