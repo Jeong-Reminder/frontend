@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart'; // iOS 경로 제공
 import 'package:permission_handler/permission_handler.dart'; // Android 권한 요청
 import 'package:share_plus/share_plus.dart' as share; // 파일 공유 라이브러리
@@ -452,9 +454,9 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
-  Future<void> downloadFile(String url, String fileName) async {
+  Future<void> downloadFile(String url, String fileName, String content) async {
     try {
-      // 퍼미션 요청 (Android에서 필요)
+      // Android 퍼미션 요청
       if (Platform.isAndroid) {
         var status = await Permission.storage.request();
         if (status.isDenied) {
@@ -463,30 +465,46 @@ class AnnouncementProvider with ChangeNotifier {
         }
       }
 
-      // url 수정 (localhost -> 원격 서버)
+      // URL 수정 (필요한 경우)
       url = url.replaceRange(0, 21, 'https://reminder.sungkyul.ac.kr');
 
       // 파일 다운로드
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        // 로컬 저장 경로 가져오기
-        Directory? tempDir;
+        // content에 따라 처리 분리
+        if (content == 'image') {
+          // 이미지 처리 - 갤러리에 저장
+          Uint8List imageBytes = response.bodyBytes;
 
-        if (Platform.isAndroid) {
-          tempDir = await getExternalStorageDirectory(); // Android의 외부 저장소
-        } else if (Platform.isIOS) {
-          tempDir = await getApplicationDocumentsDirectory();
+          // 갤러리에 이미지 저장
+          final result =
+              await ImageGallerySaver.saveImage(imageBytes, name: fileName);
+
+          if (result['isSuccess']) {
+            print("이미지 갤러리에 저장 성공: $fileName");
+          } else {
+            print("이미지 갤러리에 저장 실패");
+          }
+        } else if (content == 'file') {
+          // 파일 처리 - 로컬 저장 및 공유
+          Directory? tempDir;
+
+          if (Platform.isAndroid) {
+            tempDir = await getExternalStorageDirectory(); // Android의 외부 저장소
+          } else if (Platform.isIOS) {
+            tempDir = await getApplicationDocumentsDirectory(); // iOS의 문서 디렉토리
+          }
+          String savePath = path.join(tempDir!.path, fileName);
+
+          // 파일 저장
+          File file = File(savePath);
+          await file.writeAsBytes(response.bodyBytes);
+          print('파일 다운로드 및 저장 성공: $savePath');
+
+          // iCloud Drive 또는 기타 앱으로 파일 공유
+          await shareFile(file);
         }
-        String savePath = path.join(tempDir!.path, fileName);
-
-        // 파일 저장
-        File file = File(savePath);
-        await file.writeAsBytes(response.bodyBytes);
-        print('파일 다운로드 및 저장 성공: $savePath');
-
-        // iCloud Drive로 파일을 공유
-        await shareFile(file);
       } else {
         print('파일 다운로드 실패: 상태 코드 ${response.statusCode}');
       }

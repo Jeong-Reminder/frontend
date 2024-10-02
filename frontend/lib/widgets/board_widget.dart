@@ -94,16 +94,25 @@ class _BoardState extends State<Board> {
       );
     }
 
+    // 공지사항을 createdTime으로 정렬 (내림차순으로 최신부터)
+    final sortedBoardList = (widget.total && userRole == 'ROLE_USER')
+        ? filteredBoardList
+        : widget.boardList;
+    sortedBoardList.sort((a, b) {
+      DateTime createdTimeA =
+          DateTime.parse(a['createdTime']); // 작성 시간은 DateTime으로 변환
+      DateTime createdTimeB = DateTime.parse(b['createdTime']);
+      return createdTimeB
+          .compareTo(createdTimeA); // b가 a보다 더 최근일 경우 양수를 반환(즉, 최신순 정렬)
+      // 반환값이 양수이면, 순서가 바뀌고 음수이면, 순서가 바뀌지 않음
+    });
+
     // 필터링된 공지사항 리스트를 화면에 표시
     return ListView.builder(
-      itemCount: (widget.total && userRole == 'ROLE_USER')
-          ? filteredBoardList.length
-          : widget.boardList.length,
+      itemCount: sortedBoardList.length,
       shrinkWrap: true, // 높이를 자동으로 조절
       itemBuilder: (context, index) {
-        final board = (widget.total && userRole == 'ROLE_USER')
-            ? filteredBoardList[index]
-            : widget.boardList[index];
+        final board = sortedBoardList[index];
         final category = _getCategoryName(board['announcementCategory']);
         // final isSelected = selectedBoardIndex == index; // 현재 게시글이 선택된 게시글인지 확인
 
@@ -134,22 +143,24 @@ class _BoardState extends State<Board> {
 
               // 숨김/삭제 버튼 띄울 때
               onLongPress: () async {
-                if (selectedBoardIndex != null) {
-                  setState(() {
-                    selectedBoardIndex = null;
-                  });
-                } else {
-                  setState(() {
-                    selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
-                  });
-                }
-                print('selectedBoardIndex: $selectedBoardIndex');
+                if (widget.category == 'HIDDEN') {
+                  if (selectedBoardIndex != null) {
+                    setState(() {
+                      selectedBoardIndex = null;
+                    });
+                  } else {
+                    setState(() {
+                      selectedBoardIndex = index; // 선택된 게시글의 인덱스를 저장
+                    });
+                  }
+                  print('selectedBoardIndex: $selectedBoardIndex');
 
-                if (widget.onBoardSelected != null) {
-                  widget.onBoardSelected!(board); // 선택된 게시글 콜백 호출
-                }
+                  if (widget.onBoardSelected != null) {
+                    widget.onBoardSelected!(board); // 선택된 게시글 콜백 호출
+                  }
 
-                print('selectedBoard: ${board['announcementTitle']}');
+                  print('selectedBoard: ${board['announcementTitle']}');
+                }
               },
               child: Card(
                 color: const Color(0xFFFAFAFE),

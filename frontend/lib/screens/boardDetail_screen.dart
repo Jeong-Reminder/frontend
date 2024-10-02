@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/downloadImage_screen.dart';
 import 'package:frontend/screens/update_screen.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
@@ -286,19 +288,49 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: pickedImages.asMap().entries.map((entry) {
+                            int index = entry.key + 1;
                             File imageFile = entry.value;
+
                             return Row(
                               children: [
-                                Center(
-                                  child: Image.file(
-                                    imageFile,
-                                    width: MediaQuery.of(context).size.width,
-                                    fit: BoxFit.cover, // 이미지를 컨테이너에 맞게 채움
-                                    errorBuilder: (BuildContext context,
-                                        Object exception,
-                                        StackTrace? stackTrace) {
-                                      return const Text('이미지를 불러올 수 없습니다.');
-                                    },
+                                GestureDetector(
+                                  onTap: () {
+                                    final imageUrl =
+                                        board['images'][entry.key]['imageUrl'];
+                                    final imageName =
+                                        board['images'][entry.key]['imageName'];
+
+                                    print('imageUrl: $imageUrl');
+                                    print('imageName: $imageName');
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DownloadImagePage(
+                                          imageFile: imageFile,
+                                          imageLength: pickedImages.length,
+                                          index: index,
+                                          imageUrl: imageUrl,
+                                          imageName: imageName,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Center(
+                                    child: Hero(
+                                      tag: 'image_$index',
+                                      child: Image.file(
+                                        imageFile,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        fit: BoxFit.contain, // 이미지를 컨테이너에 맞게 채움
+                                        errorBuilder: (BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace) {
+                                          return const Text('이미지를 불러올 수 없습니다.');
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -340,7 +372,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                                           listen: false);
 
                                   await announcementProvider.downloadFile(
-                                      fileUrl, fileName);
+                                      fileUrl, fileName, 'file');
                                 } else {
                                   print('해당 파일 정보를 찾을 수 없습니다.');
                                 }
@@ -365,44 +397,6 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                         ),
                       ),
 
-                    const SizedBox(height: 20),
-
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.center,
-                    //   mainAxisAlignment: MainAxisAlignment.start,
-                    //   children: [
-                    //     GestureDetector(
-                    //       onTap: () async {
-                    //         try {
-                    //           bool suucess =
-                    //               await RecommendProvider().recommend(board['id']);
-                    //           if (suucess) {
-                    //             setState(() {
-                    //               isLiked = !isLiked;
-                    //               likeCount += 1;
-                    //             });
-                    //           }
-                    //         } catch (e) {
-                    //           print(e.toString());
-                    //         }
-                    //       },
-                    //       child: Icon(
-                    //         isLiked ? Icons.favorite : Icons.favorite_border,
-                    //         color: isLiked ? Colors.red : Colors.grey,
-                    //         size: 20,
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 2),
-                    //     Text(
-                    //       '$likeCount',
-                    //       style: const TextStyle(
-                    //         fontSize: 14,
-                    //         fontWeight: FontWeight.bold,
-                    //         color: Colors.black,
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                     const SizedBox(height: 20),
 
                     // 투표 보기

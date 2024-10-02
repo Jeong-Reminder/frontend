@@ -159,6 +159,7 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
           ),
         ),
         leadingWidth: 120, // leading에 있는 위젯 크게 만들기 위한 코드
+        centerTitle: true,
         title: const Text(
           '내 정보',
           style: TextStyle(

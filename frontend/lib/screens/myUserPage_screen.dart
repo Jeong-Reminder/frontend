@@ -133,6 +133,7 @@ class _MyUserPageState extends State<MyUserPage> {
           ),
         ),
         leadingWidth: 120,
+        centerTitle: true,
         title: const Text(
           '내 정보',
           style: TextStyle(

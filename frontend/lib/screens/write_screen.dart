@@ -6,7 +6,6 @@ import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
-import 'package:frontend/widgets/boardAppbar_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
     as picker;
@@ -173,64 +172,73 @@ class _BoardWritePageState extends State<BoardWritePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false, // 버튼과 키보드가 겹쳐도 오류가 안나게 하기
-      appBar: const BoardAppbar(),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
+        toolbarHeight: 70,
+        leadingWidth: 140,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/homepage', (route) => false);
+            },
+            icon: Image.asset('assets/images/logo.png'),
+            color: Colors.black,
+          ),
+        ),
+        actions: [
+          // 프로필 아이콘
+          Padding(
+            padding: const EdgeInsets.only(right: 23.0),
+            child: IconButton(
+              onPressed: () async {
+                if (context.mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    '/myowner',
+                  );
+                }
+              },
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 제목 입력 필드
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: 315,
-                  child: TextFormField(
-                    controller: titleController,
-                    focusNode: titleFocusNode,
-                    decoration: InputDecoration(
-                      hintText: '제목을 작성해주세요(경진대회 공지일 경우 []안에 대회명을 작성해주세요)',
-                      hintStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.25),
-                      ),
-                      contentPadding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 10.0),
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onSaved: (val) {
-                      setState(() {
-                        titleController.text = val!;
-                      });
-                    },
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: TextFormField(
+                controller: titleController,
+                focusNode: titleFocusNode,
+                decoration: InputDecoration(
+                  hintText: '제목을 작성해주세요(경진대회 공지일 경우 []안에 대회명을 작성해주세요)',
+                  hintStyle: TextStyle(
+                    color: Colors.black.withOpacity(0.25),
+                  ),
+                  contentPadding:
+                      const EdgeInsetsDirectional.symmetric(horizontal: 10.0),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
                   ),
                 ),
-
-                // 미리보기
-                Padding(
-                  padding: const EdgeInsets.only(right: 17.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showPreview(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFDBE7FB),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(50, 30),
-                    ),
-                    child: const Text(
-                      '미리보기',
-                      style: TextStyle(
-                        color: Color(0xFF6E747E),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                onSaved: (val) {
+                  setState(() {
+                    titleController.text = val!;
+                  });
+                },
+              ),
             ),
 
             Container(
@@ -360,15 +368,44 @@ class _BoardWritePageState extends State<BoardWritePage> {
             const SizedBox(height: 25),
 
             // 설정
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 17.0),
-              child: Text(
-                '설정',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 17.0),
+                  child: Text(
+                    '설정',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                // 미리보기
+                Padding(
+                  padding: const EdgeInsets.only(right: 17.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showPreview(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDBE7FB),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                    ),
+                    child: const Text(
+                      '미리보기',
+                      style: TextStyle(
+                        color: Color(0xFF6E747E),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
 
