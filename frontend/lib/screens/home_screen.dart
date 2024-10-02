@@ -368,6 +368,17 @@ class _HomePageState extends State<HomePage> {
                     } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       List<Map<String, dynamic>> boardList = snapshot.data!;
 
+                      // 게시글을 작성 시간 순서대로 정렬
+                      boardList.sort((a, b) {
+                        DateTime createdTimeA = DateTime.parse(
+                            a['createdTime']); // 작성 시간은 DateTime으로 변환
+                        DateTime createdTimeB =
+                            DateTime.parse(b['createdTime']);
+                        return createdTimeB.compareTo(
+                            createdTimeA); // b가 a보다 더 최근일 경우 양수를 반환(즉, 최신순 정렬)
+                        // 반환값이 양수이면, 순서가 바뀌고 음수이면, 순서가 바뀌지 않음
+                      });
+
                       List<Map<String, dynamic>> userBoardList =
                           []; // 학생에게 보여질 공지글(해당 학년의 공지글만 보여주기 위해)
                       List<Map<String, dynamic>> mustBoardList = [];
