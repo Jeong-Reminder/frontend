@@ -247,6 +247,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           memberId, recruitmentId, true); // true는 승인 처리
 
       setState(() {
+        apply['memberRole'] = 'MEMBER'; // 승인된 멤버의 역할을 설정
         acceptMemberList.add(apply); // 승인된 팀원 리스트에 추가
         applyList.removeAt(index);
         print('승인 처리 성공: $memberId');
@@ -684,7 +685,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           if (member['memberRole'] == 'MEMBER')
                             SizedBox(
                               height: 20,
-                              width: 94,
+                              width: 92,
                               child: ElevatedButton(
                                 onPressed: () {},
                                 style: ElevatedButton.styleFrom(
