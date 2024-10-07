@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:frontend/models/projectExperience_model.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SetExperiencePage extends StatefulWidget {
   const SetExperiencePage({super.key});
@@ -13,7 +15,7 @@ class SetExperiencePage extends StatefulWidget {
 }
 
 class _SetExperiencePageState extends State<SetExperiencePage> {
-  double percent = 0; // 프로그레스 바 진행률
+  double percent = 0.75; // 프로그레스 바 진행률
   TextEditingController projectNameController =
       TextEditingController(); // 프로젝트명 입력 컨트롤러
   TextEditingController projectExperienceController =
@@ -61,59 +63,95 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
   }
 
   Future<void> _onTapHandler() async {
-    final projectName = projectNameController.text;
-    final projectExperience = projectExperienceController.text;
-    final githubLink =
-        'https://github.com/${githubLinkController.text}'; // 깃허브 링크 저장 시 고정된 값 추가
-    final roll = rollController.text;
-    final part = partController.text;
+    // '없음' 버튼이 클릭된 경우 모든 입력을 빈 배열로 처리
+    if (projectNameController.text.isEmpty &&
+        projectExperienceController.text.isEmpty &&
+        githubLinkController.text.isEmpty &&
+        rollController.text.isEmpty &&
+        partController.text.isEmpty &&
+        (selectedDuration == null && customDurationValue.isEmpty)) {
+      // 빈 배열로 설정
+      ProjectExperience emptyExperience = ProjectExperience(
+        experienceName: '[]', // 빈 배열 값
+        experienceRole: '[]', // 빈 배열 값
+        experienceContent: '[]', // 빈 배열 값
+        experienceGithub: '[]', // 빈 배열 값
+        experienceJob: '[]', // 빈 배열 값
+        experienceDate: '[]', // 빈 배열 값
+      );
 
-    if (projectName.isNotEmpty &&
-        projectExperience.isNotEmpty &&
-        githubLink.isNotEmpty &&
-        roll.isNotEmpty &&
-        part.isNotEmpty &&
-        (selectedDuration != null || customDurationValue.isNotEmpty)) {
-      // 입력 사항이 모두 채워져 있을 때 처리할 로직
-      print('프로젝트 명 : $projectName');
-      print('프로젝트 경험 : $projectExperience');
-      print('깃허브 링크 : $githubLink');
-      print('역할 : $roll');
-      print('맡은 파트 : $part');
-      if (selectedDuration == '직접 입력') {
-        print('직접 입력한 프로젝트 기간 : $customDurationValue');
-      } else {
-        print('프로젝트 기간 : $selectedDuration');
-        customDurationValue = ''; // 선택된 값 초기화
+      // 빈 배열 값으로 처리
+      final provider = context.read<ProjectExperienceProvider>();
+      await provider.createProjectExperience(emptyExperience);
+
+      // 홈 페이지로 이동
+      if (context.mounted) {
+        final prefs = await SharedPreferences.getInstance();
+        final studentId = prefs.getString('studentId');
+        final password = prefs.getString('password');
+        final fcmToken = prefs.getString('fcmToken');
+
+        if (context.mounted) {
+          LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ),
+          );
+
+          // 학번, 비번, 토큰 제거
+          prefs.remove('studentId');
+          prefs.remove('password');
+          prefs.remove('fcmToken');
+        }
       }
-      writtenText = true; // 입력 완료 상태로 변경
-      percent = 1; // 100%로 진행률 증가
+    } else {
+      // 기존 입력 처리 로직 유지
+      final projectName = projectNameController.text;
+      final projectExperience = projectExperienceController.text;
+      final githubLink = 'https://github.com/${githubLinkController.text}';
+      final roll = rollController.text;
+      final part = partController.text;
+      final duration = selectedDuration ?? customDurationValue;
 
-      // ProjectExperience 인스턴스 생성
+      writtenText = true;
+      percent = 1;
+
       ProjectExperience newExperience = ProjectExperience(
         experienceName: projectName,
         experienceRole: roll,
         experienceContent: projectExperience,
-        experienceGithub: githubLink, // 깃허브 링크 설정
+        experienceGithub: githubLink,
         experienceJob: part,
-        experienceDate: selectedDuration ?? customDurationValue,
+        experienceDate: duration,
       );
 
-      // Provider를 사용하여 API 호출
       final provider = context.read<ProjectExperienceProvider>();
       await provider.createProjectExperience(newExperience);
 
       // 홈 페이지로 이동
       if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
+        final prefs = await SharedPreferences.getInstance();
+        final studentId = prefs.getString('studentId');
+        final password = prefs.getString('password');
+        final fcmToken = prefs.getString('fcmToken');
+
+        if (context.mounted) {
+          LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ),
+          );
+
+          // 학번, 비번, 토큰 제거
+          prefs.remove('studentId');
+          prefs.remove('password');
+          prefs.remove('fcmToken');
+        }
       }
-    } else {
-      print('입력 사항을 모두 작성해주세요.');
     }
   }
 
