@@ -372,7 +372,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                                           listen: false);
 
                                   await announcementProvider.downloadFile(
-                                      fileUrl, fileName, 'file');
+                                      fileUrl, fileName);
                                 } else {
                                   print('해당 파일 정보를 찾을 수 없습니다.');
                                 }

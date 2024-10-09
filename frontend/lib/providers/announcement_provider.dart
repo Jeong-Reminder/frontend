@@ -453,7 +453,7 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
-  Future<void> downloadFile(String url, String fileName, String content) async {
+  Future<void> downloadFile(String url, String fileName) async {
     try {
       // Android 퍼미션 요청
       if (Platform.isAndroid) {
@@ -471,39 +471,23 @@ class AnnouncementProvider with ChangeNotifier {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        // content에 따라 처리 분리
-        if (content == 'image') {
-          // 이미지 처리 - 갤러리에 저장
-          Uint8List imageBytes = response.bodyBytes;
+        // 파일 처리 - 로컬 저장 및 공유
+        Directory? tempDir;
 
-          // 갤러리에 이미지 저장
-          final result =
-              await ImageGallerySaver.saveImage(imageBytes, name: fileName);
-
-          if (result['isSuccess']) {
-            print("이미지 갤러리에 저장 성공: $fileName");
-          } else {
-            print("이미지 갤러리에 저장 실패");
-          }
-        } else if (content == 'file') {
-          // 파일 처리 - 로컬 저장 및 공유
-          Directory? tempDir;
-
-          if (Platform.isAndroid) {
-            tempDir = await getExternalStorageDirectory(); // Android의 외부 저장소
-          } else if (Platform.isIOS) {
-            tempDir = await getApplicationDocumentsDirectory(); // iOS의 문서 디렉토리
-          }
-          String savePath = path.join(tempDir!.path, fileName);
-
-          // 파일 저장
-          File file = File(savePath);
-          await file.writeAsBytes(response.bodyBytes);
-          print('파일 다운로드 및 저장 성공: $savePath');
-
-          // iCloud Drive 또는 기타 앱으로 파일 공유
-          await shareFile(file);
+        if (Platform.isAndroid) {
+          tempDir = await getExternalStorageDirectory(); // Android의 외부 저장소
+        } else if (Platform.isIOS) {
+          tempDir = await getApplicationDocumentsDirectory(); // iOS의 문서 디렉토리
         }
+        String savePath = path.join(tempDir!.path, fileName);
+
+        // 파일 저장
+        File file = File(savePath);
+        await file.writeAsBytes(response.bodyBytes);
+        print('파일 다운로드 및 저장 성공: $savePath');
+
+        // iCloud Drive 또는 기타 앱으로 파일 공유
+        await shareFile(file);
       } else {
         print('파일 다운로드 실패: 상태 코드 ${response.statusCode}');
       }
