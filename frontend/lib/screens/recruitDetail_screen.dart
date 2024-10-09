@@ -769,7 +769,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal, // 가로 스크롤 활성화
                       child: Wrap(
-                        spacing: 6.0, // 항목 간의 간격 설정
+                        spacing: MediaQuery.of(context).size.width * 0.02,
+                        runSpacing: MediaQuery.of(context).size.width * 0.02,
                         children: (makeTeam['hopeField'] as String? ?? '')
                             .split(',')
                             .map<Widget>((field) {
@@ -778,8 +779,13 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               GestureDetector(
                                 onTap: () {},
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6), // 내부 여백 설정
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.04,
+                                      vertical:
+                                          MediaQuery.of(context).size.width *
+                                              0.02),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFDBE7FB),
                                     borderRadius: BorderRadius.circular(6),
@@ -796,7 +802,9 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.02),
                             ],
                           );
                         }).toList(),
