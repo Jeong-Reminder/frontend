@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart'; // iOS 경로 제공
 import 'package:permission_handler/permission_handler.dart'; // Android 권한 요청
 import 'package:share_plus/share_plus.dart' as share; // 파일 공유 라이브러리
