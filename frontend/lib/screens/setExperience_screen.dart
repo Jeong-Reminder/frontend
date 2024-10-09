@@ -132,6 +132,8 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
 
       // 홈 페이지로 이동
       if (context.mounted) {
+        // 아이디, 비밀번호, fcmToken 꺼내옴
+        // 이유 : 로그인 api를 호출해 본인 프로필 정보가 뜰 수 있게 구현(로그인을 호출하지 않으면 전에 로그인한 회원의 정보가 뜸)
         final prefs = await SharedPreferences.getInstance();
         final studentId = prefs.getString('studentId');
         final password = prefs.getString('password');
@@ -145,8 +147,6 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
               builder: (context) => const HomePage(),
             ),
           );
-
-          // 학번, 비번, 토큰 제거
           prefs.remove('studentId');
           prefs.remove('password');
           prefs.remove('fcmToken');

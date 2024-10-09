@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart'; // iOS 경로 제공
+import 'package:permission_handler/permission_handler.dart'; // Android 권한 요청
+import 'package:share_plus/share_plus.dart' as share; // 파일 공유 라이브러리
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
+// import 'package:share/share.dart'; // 네이티브 공유 UI 사용
 
 class AnnouncementProvider with ChangeNotifier {
   final List<Map<String, dynamic>> _boardList = []; // 전체 공지 리스트
@@ -451,56 +454,73 @@ class AnnouncementProvider with ChangeNotifier {
     }
   }
 
-  // 파일 다운로드
-  Future<void> downloadFile(String url, String fileName) async {
+  Future<void> downloadFile(String url, String fileName, String content) async {
     try {
-      // 안드로이드 에뮬레이터에서 localhost를 10.0.2.2로 대체
+      // Android 퍼미션 요청
       if (Platform.isAndroid) {
-        url = url.replaceFirst('localhost', '10.0.2.2');
-      } else if (Platform.isIOS) {
-        url = url.replaceFirst('localhost', '127.0.0.1');
+        var status = await Permission.storage.request();
+        if (status.isDenied) {
+          print("파일 저장 권한이 거부되었습니다.");
+          return;
+        }
       }
+
+      // URL 수정 (필요한 경우)
+      url = url.replaceRange(0, 21, 'https://reminder.sungkyul.ac.kr');
 
       // 파일 다운로드
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        Directory? downloadsDir;
+        // content에 따라 처리 분리
+        if (content == 'image') {
+          // 이미지 처리 - 갤러리에 저장
+          Uint8List imageBytes = response.bodyBytes;
 
-        if (Platform.isAndroid) {
-          // Android에서의 파일 저장 경로
-          if (await Permission.manageExternalStorage.request().isGranted) {
-            downloadsDir = Directory('/storage/emulated/0/Download');
+          // 갤러리에 이미지 저장
+          final result =
+              await ImageGallerySaver.saveImage(imageBytes, name: fileName);
+
+          if (result['isSuccess']) {
+            print("이미지 갤러리에 저장 성공: $fileName");
           } else {
-            print('스토리지 접근 권한이 필요합니다.');
-            bool shouldOpenSettings = await Permission.storage.isDenied;
-            if (shouldOpenSettings) {
-              openAppSettings();
-            }
-            return;
+            print("이미지 갤러리에 저장 실패");
           }
-        } else if (Platform.isIOS) {
-          // iOS에서의 파일 저장 경로
-          downloadsDir = await getApplicationDocumentsDirectory();
-        }
+        } else if (content == 'file') {
+          // 파일 처리 - 로컬 저장 및 공유
+          Directory? tempDir;
 
-        if (downloadsDir != null) {
-          String downloadsPath = path.join(downloadsDir.path, fileName);
-          final file = File(downloadsPath);
+          if (Platform.isAndroid) {
+            tempDir = await getExternalStorageDirectory(); // Android의 외부 저장소
+          } else if (Platform.isIOS) {
+            tempDir = await getApplicationDocumentsDirectory(); // iOS의 문서 디렉토리
+          }
+          String savePath = path.join(tempDir!.path, fileName);
+
+          // 파일 저장
+          File file = File(savePath);
           await file.writeAsBytes(response.bodyBytes);
-          print('파일이 다운로드되었습니다: $downloadsPath');
+          print('파일 다운로드 및 저장 성공: $savePath');
 
-          // 파일을 다른 앱으로 공유 (Files 앱 포함)
-          final xFile = XFile(downloadsPath);
-          Share.shareXFiles([xFile], text: 'Downloaded file: $fileName');
-        } else {
-          print('파일 경로를 찾을 수 없습니다.');
+          // iCloud Drive 또는 기타 앱으로 파일 공유
+          await shareFile(file);
         }
       } else {
         print('파일 다운로드 실패: 상태 코드 ${response.statusCode}');
       }
     } catch (e) {
       print('파일 다운로드 중 오류 발생: $e');
+    }
+  }
+
+// 파일을 iCloud Drive로 공유할 수 있는 네이티브 공유 UI 띄우기
+  Future<void> shareFile(File file) async {
+    try {
+      // 파일을 XFile로 변환하여 shareXFiles 메서드에 전달
+      final xFile = share.XFile(file.path);
+      await share.Share.shareXFiles([xFile], text: '파일 다운로드 완료');
+    } catch (e) {
+      print('파일 공유 중 오류 발생: $e');
     }
   }
 }

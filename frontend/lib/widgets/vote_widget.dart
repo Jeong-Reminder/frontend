@@ -197,6 +197,7 @@ class _VoteWidgetState extends State<VoteWidget> {
     // print('투표 조회 성공: $voteList');
 
     return Material(
+      color: Colors.white,
       child: SingleChildScrollView(
         child: ListView.builder(
           shrinkWrap: true,
@@ -271,7 +272,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                     // 투표 항목
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAFAFE), // 박스 배경색
+                        color: Colors.white, // 박스 배경색
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       padding: const EdgeInsets.all(10.0),
@@ -336,7 +337,10 @@ class _VoteWidgetState extends State<VoteWidget> {
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20.0, vertical: 6.0),
-                                          width: 171,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              2,
                                           height: 28,
                                           child: Row(
                                             mainAxisAlignment:
@@ -408,7 +412,7 @@ class _VoteWidgetState extends State<VoteWidget> {
                                                   color: Colors.black,
                                                 ),
                                               ),
-                                              const SizedBox(width: 20),
+                                              const SizedBox(width: 40),
 
                                               // 투표 완료한 경우 투표 인원 표시
                                               (vote.voteItems![i]['hasVoted'] ||

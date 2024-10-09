@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -14,7 +15,6 @@ import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/hiddenList_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
-import 'package:frontend/screens/write_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
@@ -195,6 +195,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]); // 가로모드 방지(세로모드 지원)
+    _screenSize();
+
     return MaterialApp(
       initialRoute: '/',
       routes: {
@@ -221,6 +227,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/hidden-board': (context) => HiddenPage(),
       },
     );
+  }
+
+  _screenSize() {
+    MediaQueryData mediaQueryData = MediaQueryData.fromView(View.of(context));
+    // 화면의 가로 및 세로 크기를 가져옵니다.
+    double screenWidth = mediaQueryData.size.width;
+    double screenHeight = mediaQueryData.size.height;
+    if (screenWidth > 600) {
+      // print('pad 에서 접속했습니다. 가로세로모두 적용');
+    } else {
+      // print('phone 에서 접속했습니다. 세로모드만 적용');
+    }
+    // print('>>screenWidth');
+    print(screenWidth);
+    print(screenHeight);
   }
 }
 

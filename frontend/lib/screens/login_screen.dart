@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
@@ -167,12 +168,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // 로그인 시 FCM 토큰 발급 함수
-  Future<String> _getFCMToken() async {
+  Future<String?> _getFCMToken() async {
+    String? token;
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    String? token = await messaging.getToken();
-    print('FCM 토큰: $token');
+    // iOS와 Android 플랫폼에 따라 FCM 토큰 또는 APNS 토큰을 가져옴
 
-    return token!;
+    token = await messaging.getToken();
+    if (token == null) {
+      print('FCM 토큰을 가져오지 못했습니다.');
+      return null; // null 값을 반환하여 처리 가능하게 함
+    }
+
+    print('FCM 토큰: $token');
+    return token;
   }
 
   @override
@@ -351,7 +359,12 @@ class _LoginPageState extends State<LoginPage> {
                   if (formKey.currentState!.validate()) {
                     String studentId = idController.text;
                     String password = pwController.text;
-                    String fcmToken = await _getFCMToken(); // 토큰 발급
+                    String? fcmToken = await _getFCMToken();
+                    if (fcmToken == null) {
+                      // FCM 토큰을 가져오지 못했을 때의 예외 처리
+                      print('FCM 토큰을 가져올 수 없습니다.');
+                      return; // 더 이상 진행하지 않음
+                    }
 
                     print('fcmToken: $fcmToken');
 
@@ -377,6 +390,11 @@ class _LoginPageState extends State<LoginPage> {
                           // techStack 값이 null이거나 값이 비어있는 경우
                           if (result['techStack'] == null ||
                               result['techStack'].isEmpty) {
+                            // 학번, 비밀번호, fcmToken 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                            await prefs.setString('fcmToken', fcmToken);
+
                             if (context.mounted) {
                               Navigator.pushNamed(context, '/set-profile');
                             }
@@ -384,6 +402,10 @@ class _LoginPageState extends State<LoginPage> {
                             // memberExperience 값이 null이거나 값이 비어있는 경우
                           } else if (result['memberExperiences'] == null ||
                               result['memberExperiences'].isEmpty) {
+                            // 학번, 비밀번호, fcmToken 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                            await prefs.setString('fcmToken', fcmToken);
                             if (context.mounted) {
                               Navigator.pushNamed(
                                   context, '/member-experience');
@@ -394,6 +416,10 @@ class _LoginPageState extends State<LoginPage> {
                                   result['techStack'].isEmpty) &&
                               (result['memberExperiences'] == null ||
                                   result['memberExperiences'].isEmpty)) {
+                            // 학번, 비밀번호, fcmToken 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                            await prefs.setString('fcmToken', fcmToken);
                             if (context.mounted) {
                               Navigator.pushNamed(context, '/set-profile');
                             }

@@ -64,21 +64,23 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 카테고리 게시글 데이터를 불러오고 1학년 공지로 필터링
       Provider.of<AnnouncementProvider>(context, listen: false)
-          .fetchCateBoard(boardCategory);
-
-      if (context.mounted) {
-        setState(() {
-          // 해당 공지 카테고리의 공지 리스트 출력
-          gradeBoardList =
-              Provider.of<AnnouncementProvider>(context, listen: false)
-                  .cateBoardList;
-        });
-      }
+          .fetchCateBoard(boardCategory)
+          .then((_) {
+        // 공지가 불러온 후에 상태 업데이트
+        if (context.mounted) {
+          setState(() {
+            gradeBoardList =
+                Provider.of<AnnouncementProvider>(context, listen: false)
+                    .cateBoardList;
+          });
+        }
+      });
     });
 
-    delete2YearsBoard(gradeBoardList);
-    _loadCredentials();
+    delete2YearsBoard(gradeBoardList); // 2년된 게시글 삭제
+    _loadCredentials(); // 사용자 역할 로드
   }
 
   // 역할을 로드하는 메서드
@@ -95,11 +97,15 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
     // gradeCategory와 일치하는 공지만 필터링
     final filteredBoardList = gradeBoardList.where((board) {
       final gradeLevel = board['announcementLevel'];
-      return gradeLevel == gradeCategory;
+      return gradeLevel ==
+          gradeCategory; // 처음에 1학년으로 되어있기 때문에 페이지 들어갈 때 1학년 공지가 먼저 보이게 설정하는 코드
     }).toList();
 
     return Scaffold(
-      appBar: const BoardAppbar(),
+      backgroundColor: Colors.white,
+      appBar: BoardAppbar(
+        userRole: userRole,
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -136,7 +142,14 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
                           );
                         }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
-                      popUpItem('새로고침', PopUpItem.popUpItem2, () {}),
+                      popUpItem('새로고침', PopUpItem.popUpItem2, () {
+                        setState(() {
+                          gradeCategory = 1; // 1학년 공지로 리셋
+                          Provider.of<AnnouncementProvider>(context,
+                                  listen: false)
+                              .fetchCateBoard(boardCategory);
+                        });
+                      }),
                       if (userRole == 'ROLE_ADMIN') const PopupMenuDivider(),
                       if (userRole == 'ROLE_ADMIN')
                         popUpItem('숨김 관리', PopUpItem.popUpItem3, () {

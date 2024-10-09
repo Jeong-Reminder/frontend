@@ -18,6 +18,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool isEdited = false;
   List<Map<String, dynamic>> selectedFields = []; // 선택된 Field 리스트
 
+  int? memberId;
+
   String developmentField = ''; // 수정할 때 값이 변경될 때 저장할려고 선언
   String developmentTool = '';
   String hopeJob = '';
@@ -35,6 +37,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     developmentTool = widget.profile['developmentTool'] ?? '없음';
     hopeJob = widget.profile['hopeJob'] ?? '';
     githubLink = widget.profile['githubLink'] ?? '';
+    memberId = widget.profile['memberId'];
 
     // 컨트롤러 초기화
     hopeJobController = TextEditingController(text: hopeJob);
@@ -53,16 +56,13 @@ class _UserInfoPageState extends State<UserInfoPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
         toolbarHeight: 70,
         leading: BackButton(
           onPressed: () async {
-            final memberId =
-                Provider.of<ProfileProvider>(context, listen: false).memberId;
-
-            if (memberId > 0) {
-              await Provider.of<ProfileProvider>(context, listen: false)
-                  .fetchProfile(memberId);
-            }
+            await Provider.of<ProfileProvider>(context, listen: false)
+                .fetchProfile(memberId!);
 
             if (context.mounted) {
               Navigator.pushNamedAndRemoveUntil(
@@ -71,12 +71,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
           },
         ),
         actions: [
-          const Icon(
-            Icons.add_alert,
-            size: 30,
-            color: Colors.black,
-          ),
-          const SizedBox(width: 20),
           // 팝업 메뉴 창
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
@@ -86,7 +80,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 return [
                   popUpItem('수정하기', PopUpItem.popUpItem1, () {
                     setState(() {
-                      isEdited = true;
+                      isEdited = !isEdited;
                     });
                   }),
                 ];

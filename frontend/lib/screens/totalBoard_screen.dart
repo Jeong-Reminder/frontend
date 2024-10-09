@@ -62,7 +62,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
       await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchAllBoards();
 
-      if (context.mounted) {
+      if (mounted) {
         setState(() {
           boardList = Provider.of<AnnouncementProvider>(context, listen: false)
               .boardList;
@@ -85,7 +85,10 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BoardAppbar(),
+      backgroundColor: Colors.white,
+      appBar: BoardAppbar(
+        userRole: userRole,
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -141,7 +144,7 @@ class _TotalBoardPageState extends State<TotalBoardPage> {
             Expanded(
               child: Board(
                 boardList: boardList,
-                total: true,
+                total: true, // 학년에 맞는 공지만 출력
                 onBoardSelected: (board) {
                   setState(() {
                     selectedBoard = board;

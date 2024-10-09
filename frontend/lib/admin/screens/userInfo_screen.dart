@@ -24,6 +24,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   bool selectAll = false; // 전체 삭제 선택 상태 불리안
   List<bool> selectedMembers = []; // 각 아이템의 삭제할 선택 불리안을 저장 리스트
   List<String> selectedStudentIds = [];
+  List<bool> isAscending = [true, true, true, true]; // 순서 상태 리스트
 
   bool isAscendingName = true; // 이름 정렬 순서 상태
   bool isAscendingStudentId = true; // 학번 정렬 순서 상태
@@ -250,6 +251,87 @@ class _UserInfoPageState extends State<UserInfoPage> {
     );
   }
 
+  // 이름, 학번, 학년, 학적상태 필터링 메서드
+  void _sortData(int i) {
+    // 이름 필터링
+    if (i == 0) {
+      if (searchController.text.isEmpty) {
+        // 검색하지 않았을 때는 userList(전체 사용자)로 필터링
+        (isAscending[i] == true)
+            ? userList!.then((userListData) {
+                userListData.sort((a, b) => b.name.compareTo(a.name));
+              })
+            : userList!.then((userListData) {
+                userListData.sort((a, b) => a.name.compareTo(b.name));
+              });
+        // 검색했을 때는 filteredUserList(검색 결과)로 필터링
+      } else {
+        (isAscending[i] == true)
+            ? filteredUserList.sort((a, b) => b.name.compareTo(a.name))
+            : filteredUserList.sort((a, b) => a.name.compareTo(b.name));
+      }
+    }
+
+    // 학번 필터링
+    else if (i == 1) {
+      if (searchController.text.isEmpty) {
+        // 검색하지 않았을 때는 userList(전체 사용자)로 필터링
+        (isAscending[i] == true)
+            ? userList!.then((userListData) {
+                userListData.sort((a, b) => b.studentId.compareTo(a.studentId));
+              })
+            : userList!.then((userListData) {
+                userListData.sort((a, b) => a.studentId.compareTo(b.studentId));
+              });
+        // 검색했을 때는 filteredUserList(검색 결과)로 필터링
+      } else {
+        (isAscending[i] == true)
+            ? filteredUserList
+                .sort((a, b) => b.studentId.compareTo(a.studentId))
+            : filteredUserList
+                .sort((a, b) => a.studentId.compareTo(b.studentId));
+      }
+    }
+
+    // 학년 필터링
+    else if (i == 2) {
+      if (searchController.text.isEmpty) {
+        // 검색하지 않았을 때는 userList(전체 사용자)로 필터링
+        (isAscending[i] == true)
+            ? userList!.then((userListData) {
+                userListData.sort((a, b) => b.level.compareTo(a.level));
+              })
+            : userList!.then((userListData) {
+                userListData.sort((a, b) => a.level.compareTo(b.level));
+              });
+        // 검색했을 때는 filteredUserList(검색 결과)로 필터링
+      } else {
+        (isAscending[i] == true)
+            ? filteredUserList.sort((a, b) => b.level.compareTo(a.level))
+            : filteredUserList.sort((a, b) => a.level.compareTo(b.level));
+      }
+    }
+
+    // 학적상태 필터링
+    else if (i == 3) {
+      if (searchController.text.isEmpty) {
+        // 검색하지 않았을 때는 userList(전체 사용자)로 필터링
+        (isAscending[i] == true)
+            ? userList!.then((userListData) {
+                userListData.sort((a, b) => b.status.compareTo(a.status));
+              })
+            : userList!.then((userListData) {
+                userListData.sort((a, b) => a.status.compareTo(b.status));
+              });
+        // 검색했을 때는 filteredUserList(검색 결과)로 필터링
+      } else {
+        (isAscending[i] == true)
+            ? filteredUserList.sort((a, b) => b.status.compareTo(a.status))
+            : filteredUserList.sort((a, b) => a.status.compareTo(b.status));
+      }
+    }
+  }
+
   // 학년 체크박스 상태
   List<bool> chosenGrades = [false, false, false, false];
 
@@ -268,6 +350,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
@@ -453,10 +536,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     }
                     return Expanded(
                       child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
+                        scrollDirection: Axis.horizontal, // 수평 스크롤
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: MediaQuery.of(context)
+                                .size
+                                .width, // DataTable이 최소한 화면 크기만큼 확장되도록 설정
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical, // 수직 스크롤
                             child: DataTable(
                               columnSpacing: 12,
                               horizontalMargin: 12,
@@ -497,10 +585,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                     ),
                                   ), // 중앙 정렬
                                 ),
-                                dataColumn('이름', isAscendingName),
-                                dataColumn('학번', isAscendingStudentId),
-                                dataColumn('학년', isAscendingGrade),
-                                dataColumn('학적상태', isAscendingStatus),
+                                dataColumn('이름', 0),
+                                dataColumn('학번', 1),
+                                dataColumn('학년', 2),
+                                dataColumn('학적상태', 3),
                                 const DataColumn(
                                   label: Text('정보 수정'),
                                 ),
@@ -536,56 +624,45 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                       ), // 중앙 정렬
                                     ),
                                     DataCell(
-                                      Center(
-                                          child: Text(userListData[index]
-                                              .name)), // 중앙 정렬
+                                      Text(userListData[index].name), // 중앙 정렬
                                     ),
                                     DataCell(
-                                      Center(
-                                          child: Text(
-                                              userListData[index].studentId)),
+                                      Text(userListData[index].studentId),
                                     ),
                                     DataCell(
-                                      Center(
-                                          child: Text(
-                                              '${userListData[index].level}')),
+                                      Text('${userListData[index].level}'),
                                     ),
                                     DataCell(
-                                      Center(
-                                          child:
-                                              Text(userListData[index].status)),
+                                      Text(userListData[index].status),
                                     ),
                                     DataCell(
-                                      Center(
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              selectedUser =
-                                                  userListData[index];
-                                            });
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            selectedUser = userListData[index];
+                                          });
 
-                                            _showEditDialog(
-                                              context,
-                                              userListData[index],
-                                            );
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                const Color(0xFF2A72E7),
-                                            foregroundColor: Colors.white,
-                                            minimumSize: const Size(60, 16),
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 2.0),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(6.0),
-                                            ),
+                                          _showEditDialog(
+                                            context,
+                                            userListData[index],
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF2A72E7),
+                                          foregroundColor: Colors.white,
+                                          minimumSize: const Size(60, 16),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 2.0),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6.0),
                                           ),
-                                          child: const Text(
-                                            '수정',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        ),
+                                        child: const Text(
+                                          '수정',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
@@ -849,19 +926,26 @@ class _UserInfoPageState extends State<UserInfoPage> {
   // 데이터 열
   DataColumn dataColumn(
     String label,
-    bool isAscending,
+    int i,
   ) {
     return DataColumn(
       label: Row(
         children: [
           Text(label),
           IconButton(
+            onPressed: () {
+              setState(() {
+                isAscending[i] = !isAscending[i];
+
+                // 열 데이터 필터링 메서드
+                _sortData(i);
+              });
+            },
             visualDensity: VisualDensity.compact,
             icon: Icon(
-              isAscending ? Icons.arrow_downward : Icons.arrow_upward,
+              isAscending[i] ? Icons.arrow_downward : Icons.arrow_upward,
               size: 16,
             ),
-            onPressed: () {},
           ),
         ],
       ),

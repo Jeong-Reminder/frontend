@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/widgets/board_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -34,6 +35,7 @@ class _HiddenPageState extends State<HiddenPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0, // 스크롤 시 상단바 색상 바뀌는 오류
         toolbarHeight: 70,
         leading: BackButton(
@@ -50,29 +52,27 @@ class _HiddenPageState extends State<HiddenPage> {
           },
           color: Colors.black,
         ),
-        actions: const [
+        actions: [
+          // 프로필 아이콘
           Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.search,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
+            padding: const EdgeInsets.only(right: 20.0),
+            child: IconButton(
+              onPressed: () async {
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(
+                Icons.account_circle,
+                size: 30,
+                color: Colors.black,
+              ),
+              visualDensity: VisualDensity.compact,
             ),
           ),
         ],

@@ -189,7 +189,7 @@ class _SetProfilePageState extends State<SetProfilePage> {
 
               // 다음으로 또는 없음 버튼
               GestureDetector(
-                onTap: () {
+                onTap: () async {
                   // writtenLink이 false일 때 깃허브 링크 화면에서 진행
                   if (writtenLink == false) {
                     if (linkController.text.isNotEmpty) {
@@ -208,7 +208,7 @@ class _SetProfilePageState extends State<SetProfilePage> {
                   // writtenLink이 true가 된 후에 보직화면으로 이동하기 때문에
                   // 그 화면에서 버튼을 누르게 되면 기술 스택 화면으로 이동
                   else {
-                    Navigator.push(
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => SetSkillPage(
@@ -219,6 +219,16 @@ class _SetProfilePageState extends State<SetProfilePage> {
                     );
                     print(
                         'githubUrl: $githubUrl\n chosenpositionList: ${chosenpositionList[0]['title']}');
+
+                    setState(() {
+                      // 선택된 항목들을 순회하면서 isSelected 값을 false로 전환
+                      for (var position in positionList) {
+                        if (position['isSelected'] == true) {
+                          position['isSelected'] = false;
+                        }
+                      }
+                      chosenpositionList.clear();
+                    });
                   }
                 },
                 child: Row(
