@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/projectExperience_model.dart';
+import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:frontend/screens/setExperience_screen.dart';
+import 'package:provider/provider.dart';
 
 class ExperiencePage extends StatefulWidget {
   final List<ProjectExperience> experiences;
@@ -36,24 +39,6 @@ class ExperiencePageState extends State<ExperiencePage> {
             Navigator.pop(context);
           },
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.add_alert,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 23.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -70,69 +55,207 @@ class ExperiencePageState extends State<ExperiencePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(width: 10),
+                const Spacer(),
+                Visibility(
+                  visible: _isExpanded.contains(true),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: _editSelectedExperience,
+                        child: Container(
+                          height: 20,
+                          width: 78,
+                          margin: const EdgeInsets.only(left: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2A72E7),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              '경험 수정하기',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: widget.experiences.length,
-                itemBuilder: (context, index) {
-                  final experience = widget.experiences[index];
-                  return Column(
-                    children: [
-                      ExpansionTile(
-                        title: userInfo(
-                          title: '프로젝트명',
-                          titleSize: 20,
-                          info: experience.experienceName,
+              child: Column(
+                children: [
+                  if (widget.experiences.isEmpty)
+                    Column(
+                      children: [
+                        const Center(
+                          child: Text(
+                            '프로젝트 경험이 없습니다', // 경험이 없을 때 표시할 문구
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
                         ),
-                        onExpansionChanged: (bool expanded) {
-                          setState(() {
-                            _isExpanded[index] = expanded;
-                          });
-                        },
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            child: Column(
-                              children: [
-                                userInfo(
-                                  title: '나의 역할',
-                                  titleSize: 18,
-                                  info: experience.experienceRole,
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: () async {
+                            final newExperiences = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SetExperiencePage(),
+                              ),
+                            );
+                            // 새로운 경험 리스트가 추가된 경우 리스트에 반영
+                            if (newExperiences != null &&
+                                newExperiences is List<ProjectExperience>) {
+                              setState(() {
+                                widget.experiences.addAll(newExperiences);
+                              });
+                              // 여러 개의 경험 추가 API 호출
+                              final provider =
+                                  context.read<ProjectExperienceProvider>();
+                              await provider
+                                  .createProjectExperiences(newExperiences);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blueAccent),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '경험 추가하기',
+                                style: TextStyle(
+                                  color: Colors.blueAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
-                                userInfo(
-                                  title: '프로젝트 경험',
-                                  titleSize: 18,
-                                  info: experience.experienceContent,
-                                ),
-                                userInfo(
-                                  title: '깃허브 프로젝트 링크',
-                                  titleSize: 18,
-                                  info: experience.experienceGithub,
-                                ),
-                                userInfo(
-                                  title: '직무',
-                                  titleSize: 18,
-                                  info: experience.experienceJob,
-                                ),
-                                userInfo(
-                                  title: '프로젝트 기간',
-                                  titleSize: 18,
-                                  info: experience.experienceDate,
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                        ],
+                        ),
+                      ],
+                    )
+                  else
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: widget.experiences.length + 1,
+                        itemBuilder: (context, index) {
+                          // 마지막 항목에는 "경험 추가하기" 버튼을 배치
+                          if (index == widget.experiences.length) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final newExperiences = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SetExperiencePage(),
+                                    ),
+                                  );
+                                  // 새로운 경험 리스트가 추가된 경우 리스트에 반영
+                                  if (newExperiences != null &&
+                                      newExperiences
+                                          is List<ProjectExperience>) {
+                                    setState(() {
+                                      widget.experiences.addAll(newExperiences);
+                                    });
+                                    // 여러 개의 경험 추가 API 호출
+                                    final provider = context
+                                        .read<ProjectExperienceProvider>();
+                                    await provider.createProjectExperiences(
+                                        newExperiences);
+                                  }
+                                },
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: Colors.blueAccent),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      '경험 추가하기',
+                                      style: TextStyle(
+                                        color: Colors.blueAccent,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          final experience = widget.experiences[index];
+                          return Column(
+                            children: [
+                              ExpansionTile(
+                                title: userInfo(
+                                  title: '프로젝트명',
+                                  titleSize: 20,
+                                  info: experience.experienceName,
+                                ),
+                                onExpansionChanged: (bool expanded) {
+                                  setState(() {
+                                    _isExpanded[index] = expanded;
+                                  });
+                                },
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    child: Column(
+                                      children: [
+                                        userInfo(
+                                          title: '나의 역할',
+                                          titleSize: 18,
+                                          info: experience.experienceRole,
+                                        ),
+                                        userInfo(
+                                          title: '프로젝트 경험',
+                                          titleSize: 18,
+                                          info: experience.experienceContent,
+                                        ),
+                                        userInfo(
+                                          title: '깃허브 프로젝트 링크',
+                                          titleSize: 18,
+                                          info: experience.experienceGithub,
+                                        ),
+                                        userInfo(
+                                          title: '직무',
+                                          titleSize: 18,
+                                          info: experience.experienceJob,
+                                        ),
+                                        userInfo(
+                                          title: '프로젝트 기간',
+                                          titleSize: 18,
+                                          info: experience.experienceDate,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                          );
+                        },
                       ),
-                      const SizedBox(height: 10),
-                    ],
-                  );
-                },
+                    ),
+                ],
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -169,6 +292,101 @@ class ExperiencePageState extends State<ExperiencePage> {
           ),
         ),
       ],
+    );
+  }
+
+  // 선택한 경험 수정하는 메서드
+  void _editSelectedExperience() {
+    final selectedIndex = _isExpanded.indexWhere((expanded) => expanded);
+    if (selectedIndex != -1) {
+      final experience = context
+          .read<ProjectExperienceProvider>()
+          .projectExperiences[selectedIndex];
+      _showEditExperienceDialog(context, experience, selectedIndex);
+    }
+  }
+
+  // 경험 수정 다이얼로그
+  void _showEditExperienceDialog(
+      BuildContext context, ProjectExperience experience, int index) {
+    final TextEditingController nameController =
+        TextEditingController(text: experience.experienceName);
+    final TextEditingController roleController =
+        TextEditingController(text: experience.experienceRole);
+    final TextEditingController contentController =
+        TextEditingController(text: experience.experienceContent);
+    final TextEditingController githubController =
+        TextEditingController(text: experience.experienceGithub);
+    final TextEditingController jobController =
+        TextEditingController(text: experience.experienceJob);
+    final TextEditingController dateController =
+        TextEditingController(text: experience.experienceDate);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('경험 수정하기'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTextField(nameController, '프로젝트명'),
+                _buildTextField(roleController, '나의 역할'),
+                _buildTextField(contentController, '프로젝트 경험'),
+                _buildTextField(githubController, '깃허브 프로젝트 링크'),
+                _buildTextField(jobController, '직무'),
+                _buildTextField(dateController, '프로젝트 기간'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                final updatedExperience = ProjectExperience(
+                  id: experience.id,
+                  experienceName: nameController.text,
+                  experienceRole: roleController.text,
+                  experienceContent: contentController.text,
+                  experienceGithub: githubController.text,
+                  experienceJob: jobController.text,
+                  experienceDate: dateController.text,
+                );
+
+                Provider.of<ProjectExperienceProvider>(context, listen: false)
+                    .updateProjectExperience(updatedExperience)
+                    .then((_) {
+                  setState(() {
+                    widget.experiences[index] = updatedExperience;
+                  });
+                  Navigator.of(context).pop();
+                });
+              },
+              child: const Text('저장'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 텍스트 필드 생성 헬퍼 함수
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
     );
   }
 }

@@ -247,6 +247,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           memberId, recruitmentId, true); // true는 승인 처리
 
       setState(() {
+        apply['memberRole'] = 'MEMBER'; // 승인된 멤버의 역할을 설정
         acceptMemberList.add(apply); // 승인된 팀원 리스트에 추가
         applyList.removeAt(index);
         print('승인 처리 성공: $memberId');
@@ -419,6 +420,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
         leading: Padding(
@@ -435,30 +437,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                print('acceptMemberList : $acceptMemberList');
-                print('recruitList: $recruitList');
-              },
-              child: const Icon(
-                Icons.add_alert,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: Center(
         child: Padding(
@@ -706,7 +685,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           if (member['memberRole'] == 'MEMBER')
                             SizedBox(
                               height: 20,
-                              width: 94,
+                              width: 92,
                               child: ElevatedButton(
                                 onPressed: () {},
                                 style: ElevatedButton.styleFrom(
@@ -785,41 +764,56 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: (makeTeam['hopeField'] as String? ?? '')
-                        .split(',')
-                        .map<Widget>((field) {
-                      return Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDBE7FB),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  field.trim(),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                  const Spacer(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal, // 가로 스크롤 활성화
+                      child: Wrap(
+                        spacing: MediaQuery.of(context).size.width * 0.02,
+                        runSpacing: MediaQuery.of(context).size.width * 0.02,
+                        children: (makeTeam['hopeField'] as String? ?? '')
+                            .split(',')
+                            .map<Widget>((field) {
+                          return Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.04,
+                                      vertical:
+                                          MediaQuery.of(context).size.width *
+                                              0.02),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDBE7FB),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      field.trim(),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      );
-                    }).toList(),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.02),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 5),
               const Divider(
                 color: Color(0xFFC5C5C7),
