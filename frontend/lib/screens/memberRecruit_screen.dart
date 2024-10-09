@@ -419,6 +419,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                     onTap: () {
                       setState(() {
                         selectedButton = label;
+                        recruitList.clear(); // 이전 모집글을 지워줌
                       });
 
                       filteredBoardList.clear();
