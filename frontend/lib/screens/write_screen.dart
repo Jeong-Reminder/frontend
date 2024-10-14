@@ -6,6 +6,12 @@ import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/vote_provider.dart';
+import 'package:frontend/screens/contestBoard_screen.dart';
+import 'package:frontend/screens/corSeaBoard_screen.dart';
+import 'package:frontend/screens/gradeBoard_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
     as picker;
@@ -181,8 +187,12 @@ class _BoardWritePageState extends State<BoardWritePage> {
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
             onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/homepage', (route) => false);
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomePage(),
+                  ),
+                  (route) => false);
             },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,
@@ -195,9 +205,11 @@ class _BoardWritePageState extends State<BoardWritePage> {
             child: IconButton(
               onPressed: () async {
                 if (context.mounted) {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    '/myowner',
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
                   );
                 }
               },
@@ -483,33 +495,40 @@ class _BoardWritePageState extends State<BoardWritePage> {
               await VoteProvider().createVote(vote, boardId);
             }
 
-            // 알림 API
-            // String fcmToken = await _getFCMToken(); // fcm토큰 할당
-            // DateTime dt = DateTime.now(); // 현재시간 할당
-
-            // // 날짜 시간을 문자열로 변환 후 '.'기준으로 분할해 0번째(첫 번째)부분 선택
-            // // 공백(' ')을 T로 대체
-            // String createdAt = dt.toString().split('.')[0].replaceAll(' ', 'T');
-
-            // Map<String, dynamic> notificationData = {
-            //   "title": titleController.text,
-            //   "content": contentController.text,
-            //   "category": getSelectedCategoryText(),
-            //   "targetId": boardId, // 게시글 아이디
-            //   "createdAt": createdAt, // 생성일
-            // };
-            // await NotificationService()
-            //     .notification(notificationData, fcmToken);
-
             if (context.mounted) {
               if (widget.category == 'TOTAL') {
-                Navigator.popAndPushNamed(context, '/total-board');
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
               } else if (widget.category == 'ACADEMIC_ALL') {
-                Navigator.popAndPushNamed(context, '/grade-board');
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
               } else if (widget.category == 'CONTEST') {
-                Navigator.popAndPushNamed(context, '/contest-board');
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const ContestBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
               } else if (widget.category == 'CORSEA') {
-                Navigator.popAndPushNamed(context, '/corSea-board');
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
               }
             }
           } catch (e) {

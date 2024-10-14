@@ -34,10 +34,10 @@ class MakeTeamProvider with ChangeNotifier {
   }
 
   // 팀원 모집글 아이디로 조회
-  Future<void> fetchMakeTeam() async {
+  Future<void> fetchMakeTeam(int makeTeamId) async {
     try {
       // fetchMakeTeam 메서드에서 applyResponse와 acceptMemberList를 모두 가져옴
-      final result = await service.fetchMakeTeam();
+      final result = await service.fetchMakeTeam(makeTeamId);
 
       // applyResponse와 acceptMemberList를 분리해서 처리
       final applies = result['applyResponse'] as List<Map<String, dynamic>>;

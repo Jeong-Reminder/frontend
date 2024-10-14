@@ -8,22 +8,29 @@ import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/services/teamApply_service.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/widgets/field_list.dart';
 
 class RecruitDetailPage extends StatefulWidget {
-  final Map<String, dynamic> makeTeam;
+  final int? makeTeamId;
   final String? initialCategory; // 초기 카테고리 전달
 
-  const RecruitDetailPage(
-      {super.key, required this.makeTeam, this.initialCategory});
+  const RecruitDetailPage({
+    super.key,
+    this.makeTeamId,
+    this.initialCategory,
+  });
 
   @override
   State<RecruitDetailPage> createState() => _RecruitDetailPageState();
 }
 
 class _RecruitDetailPageState extends State<RecruitDetailPage> {
+  final Map<String, dynamic> arguments = Get.arguments;
+  int? makeTeamId;
+
   bool isExpandedSection1 = false; // 팀원 명단 섹션이 확장되었는지 여부
 
   final TextEditingController _controller = TextEditingController();
@@ -116,8 +123,12 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   // 팀원 신청 리스트와 승인된 팀원 리스트를 불러오는 함수
   Future<void> _fetchApplyList() async {
     try {
+      setState(() {
+        makeTeamId = arguments['makeTeamId'];
+      });
       final provider = Provider.of<MakeTeamProvider>(context, listen: false);
-      await provider.fetchMakeTeam();
+      await provider.fetchMakeTeam(makeTeamId!);
+
       setState(() {
         applyList = provider.applyList; // 불러온 신청 리스트를 상태에 저장
         // 각 요소를 명시적으로 Map<String, dynamic>으로 변환하여 저장
@@ -136,8 +147,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
   // 승인된 팀원 리스트 초기화
   Future<void> _initializeAcceptMemberList() async {
     setState(() {
-      acceptMemberList = widget.makeTeam['acceptMemberList'] != null
-          ? List<Map<String, dynamic>>.from(widget.makeTeam['acceptMemberList'])
+      acceptMemberList = recruitList['acceptMemberList'] != null
+          ? List<Map<String, dynamic>>.from(recruitList['acceptMemberList'])
           : [];
     });
   }
@@ -247,6 +258,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           memberId, recruitmentId, true); // true는 승인 처리
 
       setState(() {
+        apply['memberRole'] = 'MEMBER'; // 승인된 멤버의 역할을 설정
         acceptMemberList.add(apply); // 승인된 팀원 리스트에 추가
         applyList.removeAt(index);
         print('승인 처리 성공: $memberId');
@@ -284,13 +296,12 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
     if (updatedMakeTeam != null) {
       setState(() {
-        widget.makeTeam['recruitmentTitle'] = updatedMakeTeam.recruitmentTitle;
-        widget.makeTeam['recruitmentContent'] =
-            updatedMakeTeam.recruitmentContent;
-        widget.makeTeam['studentCount'] = updatedMakeTeam.studentCount;
-        widget.makeTeam['hopeField'] = updatedMakeTeam.hopeField;
-        widget.makeTeam['kakaoUrl'] = updatedMakeTeam.kakaoUrl;
-        widget.makeTeam['endTime'] = updatedMakeTeam.endTime;
+        recruitList['recruitmentTitle'] = updatedMakeTeam.recruitmentTitle;
+        recruitList['recruitmentContent'] = updatedMakeTeam.recruitmentContent;
+        recruitList['studentCount'] = updatedMakeTeam.studentCount;
+        recruitList['hopeField'] = updatedMakeTeam.hopeField;
+        recruitList['kakaoUrl'] = updatedMakeTeam.kakaoUrl;
+        recruitList['endTime'] = updatedMakeTeam.endTime;
       });
     }
   }
@@ -403,7 +414,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final makeTeam = widget.makeTeam;
+    final makeTeam = recruitList;
 
     // memberName 및 createdTime 처리
     String memberName = makeTeam['memberName']?.isNotEmpty == true
@@ -419,6 +430,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
         toolbarHeight: 70,
         leading: Padding(
@@ -435,30 +447,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           ),
         ),
         leadingWidth: 120,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                print('acceptMemberList : $acceptMemberList');
-                print('recruitList: $recruitList');
-              },
-              child: const Icon(
-                Icons.add_alert,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: Icon(
-              Icons.account_circle,
-              size: 30,
-              color: Colors.black,
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: Center(
         child: Padding(
@@ -706,7 +695,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           if (member['memberRole'] == 'MEMBER')
                             SizedBox(
                               height: 20,
-                              width: 94,
+                              width: 92,
                               child: ElevatedButton(
                                 onPressed: () {},
                                 style: ElevatedButton.styleFrom(
@@ -785,41 +774,56 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: (makeTeam['hopeField'] as String? ?? '')
-                        .split(',')
-                        .map<Widget>((field) {
-                      return Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              height: 20,
-                              width: 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDBE7FB),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  field.trim(),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                  const Spacer(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal, // 가로 스크롤 활성화
+                      child: Wrap(
+                        spacing: MediaQuery.of(context).size.width * 0.02,
+                        runSpacing: MediaQuery.of(context).size.width * 0.02,
+                        children: (makeTeam['hopeField'] as String? ?? '')
+                            .split(',')
+                            .map<Widget>((field) {
+                          return Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              0.04,
+                                      vertical:
+                                          MediaQuery.of(context).size.width *
+                                              0.02),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDBE7FB),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      field.trim(),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      );
-                    }).toList(),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.02),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 5),
               const Divider(
                 color: Color(0xFFC5C5C7),
@@ -1011,7 +1015,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
 
-    await profileProvider.fetchProfile(widget.makeTeam['memberId']!);
+    await profileProvider.fetchProfile(recruitList['memberId']!);
 
     final techStack = profileProvider.techStack;
     final githubLink = techStack['githubLink'];
@@ -1025,7 +1029,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('${widget.makeTeam['memberName']}님의 기술 스택'),
+            title: Text('${recruitList['memberName']}님의 기술 스택'),
             titleTextStyle: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,

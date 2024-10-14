@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:frontend/admin/models/admin_model.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/admin/screens/addMember_screen.dart';
+import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:provider/provider.dart';
 
@@ -222,7 +223,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   try {
                     await UserService().deleteMembers(studentIds);
                     if (context.mounted) {
-                      Navigator.pushNamed(context, '/user-info');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const UserInfoPage(),
+                        ),
+                      );
                     }
                   } catch (e) {
                     print(e);
@@ -358,7 +364,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
         backgroundColor: Colors.white,
         leading: BackButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/dashboard');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DashBoardPage(),
+              ),
+            );
           },
         ),
       ),

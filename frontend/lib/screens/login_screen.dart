@@ -1,6 +1,11 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:frontend/admin/screens/dashboard_screen.dart';
+import 'package:frontend/admin/screens/userInfo_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/setExperience_screen.dart';
+import 'package:frontend/screens/setProfile_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
@@ -97,9 +102,11 @@ class _LoginPageState extends State<LoginPage> {
   // 역할에 따라 페이지로 이동하는 함수
   void _navigateBasedOnRole(String role) {
     if (role == 'ROLE_ADMIN') {
-      Navigator.pushReplacementNamed(context, '/user-info');
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const DashBoardPage()));
     } else if (role == 'ROLE_USER') {
-      Navigator.pushReplacementNamed(context, '/homepage');
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
     }
   }
 
@@ -384,7 +391,12 @@ class _LoginPageState extends State<LoginPage> {
                         // userRole 값에 따라 다른 페이지로 이동
                         if (result['role'] == 'ROLE_ADMIN') {
                           if (context.mounted) {
-                            Navigator.pushNamed(context, '/dashboard');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DashBoardPage(),
+                              ),
+                            );
                           }
                         } else if (result['role'] == 'ROLE_USER') {
                           // techStack 값이 null이거나 값이 비어있는 경우
@@ -396,7 +408,12 @@ class _LoginPageState extends State<LoginPage> {
                             await prefs.setString('fcmToken', fcmToken);
 
                             if (context.mounted) {
-                              Navigator.pushNamed(context, '/set-profile');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SetProfilePage(),
+                                ),
+                              );
                             }
 
                             // memberExperience 값이 null이거나 값이 비어있는 경우
@@ -407,8 +424,13 @@ class _LoginPageState extends State<LoginPage> {
                             await prefs.setString('password', password);
                             await prefs.setString('fcmToken', fcmToken);
                             if (context.mounted) {
-                              Navigator.pushNamed(
-                                  context, '/member-experience');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SetExperiencePage(),
+                                ),
+                              );
                             }
 
                             // 둘 다 비어있을 경우
@@ -421,12 +443,22 @@ class _LoginPageState extends State<LoginPage> {
                             await prefs.setString('password', password);
                             await prefs.setString('fcmToken', fcmToken);
                             if (context.mounted) {
-                              Navigator.pushNamed(context, '/set-profile');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SetProfilePage(),
+                                ),
+                              );
                             }
                           } else {
                             // techStack, memberExperiences 값이 둘 다 채워진 경우
                             if (context.mounted) {
-                              Navigator.pushNamed(context, '/homepage');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomePage(),
+                                ),
+                              );
                             }
                           }
                         }

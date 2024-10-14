@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
@@ -288,9 +289,11 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             child: IconButton(
               onPressed: () async {
                 if (context.mounted) {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    '/myowner',
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
                   );
                 }
               },

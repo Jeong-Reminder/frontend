@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/changePW_screen.dart';
+import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/services/login_services.dart';
 
 class AccountWidget extends StatelessWidget {
@@ -128,7 +129,12 @@ class AccountWidget extends StatelessWidget {
                     bool success = await loginAPI.logout();
                     if (success) {
                       // 로그인 화면으로 이동
-                      Navigator.pushNamed(context, '/');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
                     } else {
                       Navigator.pop(context);
                     }

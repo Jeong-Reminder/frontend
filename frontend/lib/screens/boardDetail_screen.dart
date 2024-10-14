@@ -3,10 +3,17 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/contestBoard_screen.dart';
+import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/downloadImage_screen.dart';
+import 'package:frontend/screens/gradeBoard_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/update_screen.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
@@ -59,6 +66,10 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
   List<File> pickedImages = [];
   List<File> pickedFiles = [];
+
+  final Map<String, dynamic> arguments = Get.arguments;
+  int? announcementId;
+  String category = '';
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -124,12 +135,16 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.announcementId != null) {
-      print('id: ${widget.announcementId}');
+
+    announcementId = arguments['announcementId'];
+    category = arguments['category'];
+
+    if (announcementId != null) {
+      print('id: $announcementId');
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Provider.of<AnnouncementProvider>(context, listen: false)
-            .fetchOneBoard(widget.announcementId!);
+            .fetchOneBoard(announcementId!);
 
         setState(() {
           board =
@@ -474,22 +489,54 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
   // 공지 카테고리에 맞는 Navigator 메서드
   void pushNamedAndRemoveUntil() {
-    if (widget.category == 'CORSEA') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/corSea-board', (route) => false);
-    } else if (widget.category == 'ACADEMIC_ALL') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/grade-board', (route) => false);
-    } else if (widget.category == 'CONTEST') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/contest-board', (route) => false);
-    } else if (widget.category == 'TOTAL') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/total-board', (route) => false);
-    } else if (widget.category == 'PROFILE') {
-      Navigator.pushNamedAndRemoveUntil(context, '/myowner', (route) => false);
+    if (category == 'CORSEA') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'ACADEMIC_ALL') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'CONTEST') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ContestBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'TOTAL') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'PROFILE') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MyOwnerPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
     } else {
-      Navigator.pushNamedAndRemoveUntil(context, '/homepage', (route) => false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
     }
   }
 }

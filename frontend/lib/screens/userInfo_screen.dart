@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/services/profile_service.dart';
 import 'package:provider/provider.dart';
 
@@ -65,8 +66,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 .fetchProfile(memberId!);
 
             if (context.mounted) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/myuser', (route) => false);
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyUserPage(),
+                  ),
+                  (route) => false);
             }
           },
         ),
