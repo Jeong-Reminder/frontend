@@ -457,12 +457,10 @@ class AnnouncementProvider with ChangeNotifier {
       String url, String fileName, BuildContext context) async {
     try {
       url = url.replaceRange(0, 21, 'https://reminder.sungkyul.ac.kr');
-
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         Directory? tempDir;
-
         if (Platform.isAndroid) {
           tempDir = await getExternalStorageDirectory();
 
@@ -475,23 +473,19 @@ class AnnouncementProvider with ChangeNotifier {
           }
         } else if (Platform.isIOS) {
           tempDir = await getApplicationDocumentsDirectory();
-
           if (!await Permission.storage.isGranted) {
             await Permission.storage.request();
           }
-
           if (!await tempDir.exists()) {
             await tempDir.create(recursive: true);
           }
         }
-
         if (tempDir != null) {
           String savePath = path.join(tempDir.path, fileName);
           File file = await File(savePath).create();
 
           await file.writeAsBytes(response.bodyBytes);
           print('파일 다운로드 및 저장 성공: $savePath');
-
           if (context.mounted) {
             await shareFile(file, fileName, context);
           }
@@ -511,13 +505,10 @@ class AnnouncementProvider with ChangeNotifier {
       File file, String fileName, BuildContext context) async {
     final mediaQuery = MediaQuery.of(context);
     bool isTablet = mediaQuery.size.shortestSide >= 600;
-
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset position = box.localToGlobal(Offset.zero);
-
     try {
       final xFile = share.XFile(file.path);
-
       if (Platform.isIOS) {
         if (isTablet) {
           await share.Share.shareXFiles(

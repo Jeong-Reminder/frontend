@@ -1,11 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:frontend/admin/screens/dashboard_screen.dart';
-import 'package:frontend/admin/screens/userInfo_screen.dart';
-import 'package:frontend/screens/home_screen.dart';
-import 'package:frontend/screens/setExperience_screen.dart';
-import 'package:frontend/screens/setProfile_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
@@ -102,11 +97,9 @@ class _LoginPageState extends State<LoginPage> {
   // 역할에 따라 페이지로 이동하는 함수
   void _navigateBasedOnRole(String role) {
     if (role == 'ROLE_ADMIN') {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const DashBoardPage()));
+      Navigator.pushReplacementNamed(context, '/dashboard');
     } else if (role == 'ROLE_USER') {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const HomePage()));
+      Navigator.pushReplacementNamed(context, '/homepage');
     }
   }
 
@@ -178,7 +171,6 @@ class _LoginPageState extends State<LoginPage> {
   Future<String?> _getFCMToken() async {
     String? token;
     FirebaseMessaging messaging = FirebaseMessaging.instance;
-    // iOS와 Android 플랫폼에 따라 FCM 토큰 또는 APNS 토큰을 가져옴
 
     token = await messaging.getToken();
     if (token == null) {
@@ -193,310 +185,288 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 23.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Image.asset('assets/images/sungkyul.png'),
-                  Row(
-                    children: [
-                      Text(
-                        '지금',
-                        style: TextStyle(
-                          color: Colors.black.withOpacity(0.5),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      const Text(
-                        '알리미',
-                        style: TextStyle(
-                          color: Color(0xFF2A72E7),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        '시작해보세요!',
-                        style: TextStyle(
-                          color: Colors.black.withOpacity(0.5),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // 학번 텍스트폼필드
-              Form(
-                key: formKey,
-                child: Column(
+      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true, // 키보드가 올라올 때 화면 자동 조절
+      body: SingleChildScrollView(
+        // 화면이 길어질 때 스크롤 가능
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 23.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                    height: MediaQuery.of(context).size.height *
+                        0.2), // 로고나 설명을 위해 추가
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    TextFormField(
-                      controller: idController,
-                      decoration: const InputDecoration(
-                        labelText: '학번',
-                        labelStyle: TextStyle(fontSize: 14.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
+                    Image.asset('assets/images/sungkyul.png'),
+                    Row(
+                      children: [
+                        Text(
+                          '지금',
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(0.5),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '학번을 입력하세요';
-                        }
-                        if (value.length < 4 || value.length > 10) {
-                          return '4자 이상 10자 이하로 작성해주세요';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 비밀번호 텍스트폼필드
-                    TextFormField(
-                      controller: pwController,
-                      decoration: InputDecoration(
-                        labelText: '비밀번호',
-                        labelStyle: const TextStyle(fontSize: 14.0),
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5.0),
+                        const SizedBox(width: 5),
+                        const Text(
+                          '알리미',
+                          style: TextStyle(
+                            color: Color(0xFF2A72E7),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              pwInvisible = !pwInvisible;
-                            });
-                          },
-                          icon: Icon(pwInvisible
-                              ? Icons.visibility
-                              : Icons.visibility_off),
+                        const SizedBox(width: 5),
+                        Text(
+                          '시작해보세요!',
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(0.5),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
-                      ),
-                      obscureText: pwInvisible,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '비밀번호를 입력하세요';
-                        }
-                        if (value.length < 4 && value.length > 15) {
-                          return '4자 이상 15자 이하로 작성해주세요';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ],
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // 자동 로그인
-                  Row(
+                const SizedBox(height: 20),
+
+                // 학번 텍스트폼필드
+                Form(
+                  key: formKey,
+                  child: Column(
                     children: [
-                      Checkbox(
-                        value: isAutoLogin,
-                        onChanged: (value) async {
-                          setState(() {
-                            isAutoLogin = value!;
-                          });
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setBool('isAutoLogin', isAutoLogin);
-                          if (!isAutoLogin) {
-                            await prefs.remove('studentId');
-                            await prefs.remove('password');
+                      TextFormField(
+                        controller: idController,
+                        decoration: const InputDecoration(
+                          labelText: '학번',
+                          labelStyle: TextStyle(fontSize: 14.0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(5.0),
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 5.0),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '학번을 입력하세요';
                           }
+                          if (value.length < 4 || value.length > 10) {
+                            return '4자 이상 10자 이하로 작성해주세요';
+                          }
+                          return null;
                         },
-                        activeColor: const Color(0xFF2A72E7),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: const VisualDensity(
-                          horizontal: VisualDensity.minimumDensity,
-                          vertical: VisualDensity.minimumDensity,
-                        ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
-                      const SizedBox(width: 5),
-                      const Text(
-                        '자동 로그인',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF808080),
+                      const SizedBox(height: 12),
+
+                      // 비밀번호 텍스트폼필드
+                      TextFormField(
+                        controller: pwController,
+                        decoration: InputDecoration(
+                          labelText: '비밀번호',
+                          labelStyle: const TextStyle(fontSize: 14.0),
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(5.0),
+                            ),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                pwInvisible = !pwInvisible;
+                              });
+                            },
+                            icon: Icon(pwInvisible
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 5.0),
                         ),
+                        obscureText: pwInvisible,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '비밀번호를 입력하세요';
+                          }
+                          if (value.length < 4 && value.length > 15) {
+                            return '4자 이상 15자 이하로 작성해주세요';
+                          }
+                          return null;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
                     ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 27),
-
-              // 로그인 실패 메세지
-              if (loginSuccess == false)
-                const Text(
-                  '아이디(학번) 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.',
-                  style: TextStyle(color: Colors.red),
                 ),
-              const SizedBox(height: 20),
-              // 로그인 버튼
-              ElevatedButton(
-                onPressed: () async {
-                  await _getFCMToken();
-
-                  // 유효성 통과 시 홈 화면으로 이동
-                  if (formKey.currentState!.validate()) {
-                    String studentId = idController.text;
-                    String password = pwController.text;
-                    String? fcmToken = await _getFCMToken();
-                    if (fcmToken == null) {
-                      // FCM 토큰을 가져오지 못했을 때의 예외 처리
-                      print('FCM 토큰을 가져올 수 없습니다.');
-                      return; // 더 이상 진행하지 않음
-                    }
-
-                    print('fcmToken: $fcmToken');
-
-                    LoginAPI()
-                        .handleLogin(context, studentId, password, fcmToken)
-                        .then((result) async {
-                      if (result['success']) {
-                        setState(() {
-                          loginSuccess = true;
-                        });
-                        final prefs = await SharedPreferences.getInstance();
-                        if (isAutoLogin) {
-                          // 자동 로그인 체크 시에만 학번과 비밀번호 저장
-                          await prefs.setString('studentId', studentId);
-                          await prefs.setString('password', password);
-                        }
-                        // userRole 값에 따라 다른 페이지로 이동
-                        if (result['role'] == 'ROLE_ADMIN') {
-                          if (context.mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const DashBoardPage(),
-                              ),
-                            );
-                          }
-                        } else if (result['role'] == 'ROLE_USER') {
-                          // techStack 값이 null이거나 값이 비어있는 경우
-                          if (result['techStack'] == null ||
-                              result['techStack'].isEmpty) {
-                            // 학번, 비밀번호, fcmToken 저장
-                            await prefs.setString('studentId', studentId);
-                            await prefs.setString('password', password);
-                            await prefs.setString('fcmToken', fcmToken);
-
-                            if (context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SetProfilePage(),
-                                ),
-                              );
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 자동 로그인
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isAutoLogin,
+                          onChanged: (value) async {
+                            setState(() {
+                              isAutoLogin = value!;
+                            });
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool('isAutoLogin', isAutoLogin);
+                            if (!isAutoLogin) {
+                              await prefs.remove('studentId');
+                              await prefs.remove('password');
                             }
+                          },
+                          activeColor: const Color(0xFF2A72E7),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: const VisualDensity(
+                            horizontal: VisualDensity.minimumDensity,
+                            vertical: VisualDensity.minimumDensity,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        const Text(
+                          '자동 로그인',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF808080),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 27),
 
-                            // memberExperience 값이 null이거나 값이 비어있는 경우
-                          } else if (result['memberExperiences'] == null ||
-                              result['memberExperiences'].isEmpty) {
-                            // 학번, 비밀번호, fcmToken 저장
-                            await prefs.setString('studentId', studentId);
-                            await prefs.setString('password', password);
-                            await prefs.setString('fcmToken', fcmToken);
-                            if (context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SetExperiencePage(),
-                                ),
-                              );
-                            }
+                // 로그인 실패 메세지
+                if (loginSuccess == false)
+                  const Text(
+                    '아이디(학번) 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                const SizedBox(height: 20),
+                // 로그인 버튼
+                ElevatedButton(
+                  onPressed: () async {
+                    await _getFCMToken();
 
-                            // 둘 다 비어있을 경우
-                          } else if ((result['techStack'] == null ||
-                                  result['techStack'].isEmpty) &&
-                              (result['memberExperiences'] == null ||
-                                  result['memberExperiences'].isEmpty)) {
-                            // 학번, 비밀번호, fcmToken 저장
-                            await prefs.setString('studentId', studentId);
-                            await prefs.setString('password', password);
-                            await prefs.setString('fcmToken', fcmToken);
-                            if (context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SetProfilePage(),
-                                ),
-                              );
-                            }
-                          } else {
-                            // techStack, memberExperiences 값이 둘 다 채워진 경우
-                            if (context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const HomePage(),
-                                ),
-                              );
-                            }
-                          }
-                        }
-                        // userRole 저장
-                        await prefs.setString('userRole', result['role']);
-                      } else {
-                        // 로그인 실패 처리
-                        setState(() {
-                          loginSuccess = false; // false가 되면 로그인 버튼 위에 실패 메세지 구현
-                        });
+                    // 유효성 통과 시 홈 화면으로 이동
+                    if (formKey.currentState!.validate()) {
+                      String studentId = idController.text;
+                      String password = pwController.text;
+                      String? fcmToken = await _getFCMToken();
+                      if (fcmToken == null) {
+                        // FCM 토큰을 가져오지 못했을 때의 예외 처리
+                        print('FCM 토큰을 가져올 수 없습니다.');
+                        return; // 더 이상 진행하지 않음
                       }
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2A72E7),
-                  minimumSize: const Size(double.infinity, 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+
+                      print('fcmToken: $fcmToken');
+
+                      LoginAPI()
+                          .handleLogin(context, studentId, password, fcmToken)
+                          .then((result) async {
+                        if (result['success']) {
+                          setState(() {
+                            loginSuccess = true;
+                          });
+                          final prefs = await SharedPreferences.getInstance();
+                          if (isAutoLogin) {
+                            // 자동 로그인 체크 시에만 학번과 비밀번호 저장
+                            await prefs.setString('studentId', studentId);
+                            await prefs.setString('password', password);
+                          }
+                          // userRole 값에 따라 다른 페이지로 이동
+                          if (result['role'] == 'ROLE_ADMIN') {
+                            if (context.mounted) {
+                              Navigator.pushNamed(context, '/dashboard');
+                            }
+                          } else if (result['role'] == 'ROLE_USER') {
+                            // techStack 값이 null이거나 값이 비어있는 경우
+                            if (result['techStack'] == null ||
+                                result['techStack'].isEmpty) {
+                              // 학번, 비밀번호, fcmToken 저장
+                              await prefs.setString('studentId', studentId);
+                              await prefs.setString('password', password);
+                              await prefs.setString('fcmToken', fcmToken);
+
+                              if (context.mounted) {
+                                Navigator.pushNamed(context, '/set-profile');
+                              }
+
+                              // memberExperience 값이 null이거나 값이 비어있는 경우
+                            } else if (result['memberExperiences'] == null ||
+                                result['memberExperiences'].isEmpty) {
+                              // 학번, 비밀번호, fcmToken 저장
+                              await prefs.setString('studentId', studentId);
+                              await prefs.setString('password', password);
+                              await prefs.setString('fcmToken', fcmToken);
+                              if (context.mounted) {
+                                Navigator.pushNamed(
+                                    context, '/member-experience');
+                              }
+
+                              // 둘 다 비어있을 경우
+                            } else if ((result['techStack'] == null ||
+                                    result['techStack'].isEmpty) &&
+                                (result['memberExperiences'] == null ||
+                                    result['memberExperiences'].isEmpty)) {
+                              // 학번, 비밀번호, fcmToken 저장
+                              await prefs.setString('studentId', studentId);
+                              await prefs.setString('password', password);
+                              await prefs.setString('fcmToken', fcmToken);
+                              if (context.mounted) {
+                                Navigator.pushNamed(context, '/set-profile');
+                              }
+                            } else {
+                              // techStack, memberExperiences 값이 둘 다 채워진 경우
+                              if (context.mounted) {
+                                Navigator.pushNamed(context, '/homepage');
+                              }
+                            }
+                          }
+                          // userRole 저장
+                          await prefs.setString('userRole', result['role']);
+                        } else {
+                          // 로그인 실패 처리
+                          setState(() {
+                            loginSuccess =
+                                false; // false가 되면 로그인 버튼 위에 실패 메세지 구현
+                          });
+                        }
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2A72E7),
+                    minimumSize: const Size(double.infinity, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  child: const Text(
+                    '로그인',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                child: const Text(
-                  '로그인',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              // ElevatedButton(
-              //   onPressed: () async {
-              //     String fcmToken = await _getFCMToken();
-              //     await NotificationService().notification(fcmToken);
-              //   },
-              //   child: const Text('알림 테스트 버튼'),
-              // ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
