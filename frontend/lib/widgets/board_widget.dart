@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
-import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -128,14 +128,12 @@ class _BoardState extends State<Board> {
                   if (widget.category == 'HIDDEN') {
                     alertSnackBar(context, '숨긴 게시글은 조회할 수 없습니다.');
                   } else {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BoardDetailPage(
-                          announcementId: board['id'],
-                          category: widget.category,
-                        ),
-                      ),
+                    await Get.toNamed(
+                      '/detail-board',
+                      arguments: {
+                        'announcementId': board['id'],
+                        'category': widget.category,
+                      },
                     );
                   }
                 }

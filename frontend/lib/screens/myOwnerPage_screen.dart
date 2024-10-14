@@ -6,6 +6,7 @@ import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/account_widget.dart';
 import 'package:frontend/widgets/profile_widget.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -230,14 +231,13 @@ class _MyOwnerPageState extends State<MyOwnerPage> {
                           children: [
                             ListTile(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BoardDetailPage(
-                                      announcementId: selectedBoard['id'],
-                                      category: 'PROFILE',
-                                    ),
-                                  ),
+                                Get.toNamed(
+                                  '/detail-board',
+                                  arguments: {
+                                    'announcementId': selectedBoard['id'],
+                                    'category': 'PROFILE',
+                                  },
+                                  preventDuplicates: false,
                                 );
                               },
                               title: Text(

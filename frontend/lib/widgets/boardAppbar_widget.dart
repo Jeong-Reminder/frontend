@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 
 // BoardAppbar 위젯 정의
 class BoardAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -17,8 +19,12 @@ class BoardAppbar extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.only(left: 12.0),
         child: IconButton(
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/homepage', (route) => false);
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(),
+                ),
+                (route) => false);
           },
           icon: Image.asset('assets/images/logo.png'),
           color: Colors.black,
@@ -32,9 +38,11 @@ class BoardAppbar extends StatelessWidget implements PreferredSizeWidget {
             onPressed: () async {
               if (userRole == 'ROLE_USER') {
                 if (context.mounted) {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    '/myuser',
+                    MaterialPageRoute(
+                      builder: (context) => const MyUserPage(),
+                    ),
                   );
                 }
               } else if (userRole == 'ROLE_ADMIN') {

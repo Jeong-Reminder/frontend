@@ -47,18 +47,20 @@ class DownloadImagePage extends StatelessWidget {
           // ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 60.0),
-        child: Hero(
-          tag: 'image_$index',
-          child: Image.file(
-            imageFile,
-            width: MediaQuery.of(context).size.width,
-            fit: BoxFit.cover, // 이미지를 컨테이너에 맞게 채움
-            errorBuilder: (BuildContext context, Object exception,
-                StackTrace? stackTrace) {
-              return const Text('이미지를 불러올 수 없습니다.');
-            },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 60.0),
+          child: Hero(
+            tag: 'image_$index',
+            child: Image.file(
+              imageFile,
+              width: MediaQuery.of(context).size.width,
+              fit: BoxFit.cover, // 이미지를 컨테이너에 맞게 채움
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return const Text('이미지를 불러올 수 없습니다.');
+              },
+            ),
           ),
         ),
       ),

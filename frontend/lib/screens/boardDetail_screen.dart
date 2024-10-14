@@ -1,20 +1,25 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/contestBoard_screen.dart';
+import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/downloadImage_screen.dart';
+import 'package:frontend/screens/gradeBoard_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/update_screen.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
-import 'package:frontend/screens/myOwnerPage_screen.dart';
-import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class BoardDetailPage extends StatefulWidget {
   final int? announcementId;
@@ -61,6 +66,10 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
   List<File> pickedImages = [];
   List<File> pickedFiles = [];
+
+  final Map<String, dynamic> arguments = Get.arguments;
+  int? announcementId;
+  String category = '';
 
   // 회원정보를 로드하는 메서드
   Future<void> _loadCredentials() async {
@@ -126,12 +135,16 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.announcementId != null) {
-      print('id: ${widget.announcementId}');
+
+    announcementId = arguments['announcementId'];
+    category = arguments['category'];
+
+    if (announcementId != null) {
+      print('id: $announcementId');
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Provider.of<AnnouncementProvider>(context, listen: false)
-            .fetchOneBoard(widget.announcementId!);
+            .fetchOneBoard(announcementId!);
 
         setState(() {
           board =
@@ -341,7 +354,6 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                       ),
                     const SizedBox(height: 20),
 
-                    // 게시글 파일
                     if (pickedFiles.isNotEmpty)
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -349,7 +361,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                           children: pickedFiles.asMap().entries.map((entry) {
                             File file = entry.value;
 
-                            // 파일 이름을 이용해 board의 파일 정보를 찾기
+                            // 파일 이름과 경로를 모두 이용하여 정확하게 비교
                             final correspondingFile =
                                 board['files']?.firstWhere(
                               (f) =>
@@ -358,40 +370,78 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                               orElse: () => null,
                             );
 
-                            return GestureDetector(
-                              onTap: () async {
-                                if (correspondingFile != null) {
-                                  final fileUrl = correspondingFile['fileUrl'];
-                                  final fileName =
-                                      correspondingFile['originalFilename'];
+                            // 파일
+                            return Row(
+                              children: [
+                                const Icon(
+                                  Icons.insert_drive_file,
+                                  size: 25,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(width: 8),
 
-                                  print('fileUrl: $fileUrl');
-                                  print('fileName: $fileName');
-                                  final announcementProvider =
-                                      Provider.of<AnnouncementProvider>(context,
-                                          listen: false);
+                                // onPressed에 shareXFile을 호출하는 위젯에 Builder를 감쌀 것!!
+                                // 그냥 맨 위에 달게 되면 Row 정렬의 파일들을 감싸는 위젯의 위치로 간주하기 때문에 공유 팝업이 같은 위치로 찍히는 사태가 발생
+                                // onPressed에 shareXFile을 호출하는 위젯에 Builder를 감싸면 해당 위젯의 위치를 뽑아낼 수 있음
+                                Builder(
+                                  builder: (BuildContext context) {
+                                    return TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          if (correspondingFile != null) {
+                                            final fileUrl =
+                                                correspondingFile['fileUrl'];
+                                            final fileName = correspondingFile[
+                                                'originalFilename'];
 
-                                  await announcementProvider.downloadFile(
-                                      fileUrl, fileName);
-                                } else {
-                                  print('해당 파일 정보를 찾을 수 없습니다.');
-                                }
-                              },
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.insert_drive_file,
-                                    size: 25,
-                                    color: Colors.grey,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    path.basename(file.path),
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  const SizedBox(height: 10),
-                                ],
-                              ),
+                                            if (kDebugMode) {
+                                              print(
+                                                  'file.path: ${path.basename(file.path)}'); // ex) 재학생 명단.xlsx
+                                              print('fileUrl: $fileUrl');
+                                              print('fileName: $fileName');
+                                            }
+
+                                            final announcementProvider =
+                                                Provider.of<
+                                                        AnnouncementProvider>(
+                                                    context,
+                                                    listen: false);
+
+                                            // 파일 다운로드
+                                            await announcementProvider
+                                                .downloadFile(
+                                                    fileUrl, fileName, context);
+
+                                            // 캐시 비우기
+                                            await DefaultCacheManager()
+                                                .emptyCache();
+                                          } else {
+                                            print('해당 파일 정보를 찾을 수 없습니다.');
+                                          }
+                                        } catch (e) {
+                                          print('오류 발생: $e');
+                                        }
+                                      },
+                                      // 클릭할 떄 나오는 색상
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.black,
+                                        minimumSize: Size.zero,
+                                        padding: EdgeInsets.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Text(
+                                        path.basename(file.path),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 10),
+                              ],
                             );
                           }).toList(),
                         ),
@@ -439,22 +489,54 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
   // 공지 카테고리에 맞는 Navigator 메서드
   void pushNamedAndRemoveUntil() {
-    if (widget.category == 'CORSEA') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/corSea-board', (route) => false);
-    } else if (widget.category == 'ACADEMIC_ALL') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/grade-board', (route) => false);
-    } else if (widget.category == 'CONTEST') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/contest-board', (route) => false);
-    } else if (widget.category == 'TOTAL') {
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/total-board', (route) => false);
-    } else if (widget.category == 'PROFILE') {
-      Navigator.pushNamedAndRemoveUntil(context, '/myowner', (route) => false);
+    if (category == 'CORSEA') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'ACADEMIC_ALL') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'CONTEST') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ContestBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'TOTAL') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == 'PROFILE') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MyOwnerPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
     } else {
-      Navigator.pushNamedAndRemoveUntil(context, '/homepage', (route) => false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
     }
   }
 }
