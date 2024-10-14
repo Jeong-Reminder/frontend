@@ -149,195 +149,204 @@ class _MyUserPageState extends State<MyUserPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // 프로필
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UserInfoPage(
-                          profile: techStack,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => UserInfoPage(
+                            profile: techStack,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: Profile(
-                    profileUrl: 'assets/images/profile.png',
-                    name: '${techStack['memberName']}', // 이름 전달
-                    status: status ?? '', // 상태 전달
-                    showSubTitle: true,
-                    showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
-                    studentId: studentId ?? '', // 학번 전달
+                      );
+                    },
+                    child: Profile(
+                      profileUrl: 'assets/images/profile.png',
+                      name: '${techStack['memberName']}', // 이름 전달
+                      status: status ?? '', // 상태 전달
+                      showSubTitle: true,
+                      showExperienceButton: true, // 내 경험 보러가기 버튼 표시 여부
+                      studentId: studentId ?? '', // 학번 전달
+                    ),
                   ),
-                ),
-                const SizedBox(height: 25),
+                  const SizedBox(height: 25),
 
-                // 사용자가 설정한 기술 스택 및 팀
-                SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'DEVELOPMENT FIELD',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Development Field 배지
-                      // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
-                      Wrap(
-                        direction: Axis.horizontal,
-                        alignment: WrapAlignment.start,
-                        spacing: 10,
-                        runSpacing: 10,
-                        // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                        children: developmentField.map((field) {
-                          // 괄호 안에 있는 변수는 리스트를 map한 이름
-                          return badge(
-                            field['logoUrl'],
-                            field['title'],
-                            field['titleColor'],
-                            field['badgeColor'],
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 26),
-                      const Text(
-                        'DEVELOPMENT TOOLS',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Development Tools 배지
-                      Wrap(
-                        direction: Axis.horizontal,
-                        alignment: WrapAlignment.start,
-                        spacing: 10,
-                        runSpacing: 10,
-                        // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
-                        children: developmentTool.map((tools) {
-                          return badge(
-                            tools['logoUrl'],
-                            tools['title'],
-                            tools['titleColor'],
-                            tools['badgeColor'],
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 26),
-
-                      // 생성된 팀
-                      Row(
+                  // 사용자가 설정한 기술 스택 및 팀
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 5.0, right: 10.0),
+                      child: ListView(
                         children: [
                           const Text(
-                            '내 팀 현황',
+                            'DEVELOPMENT FIELD',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                isExpanded = !isExpanded;
-                              });
-                            },
-                            icon: Icon(
-                              isExpanded
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
+                          const SizedBox(height: 20),
+
+                          // Development Field 배지
+                          // Wrap : 자식 위젯을 하나씩 순차적으로 채워가면서 너비를 초과하면 자동으로 다음 줄에 이어서 위젯을 채워주는 위젯
+                          Wrap(
+                            direction: Axis.horizontal,
+                            alignment: WrapAlignment.start,
+                            spacing: 10,
+                            runSpacing: 10,
+                            // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                            children: developmentField.map((field) {
+                              // 괄호 안에 있는 변수는 리스트를 map한 이름
+                              return badge(
+                                field['logoUrl'],
+                                field['title'],
+                                field['titleColor'],
+                                field['badgeColor'],
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 26),
+                          const Text(
+                            'DEVELOPMENT TOOLS',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                      if (isExpanded)
-                        (teamApplyProvider.teams['teamList'] == null ||
-                                teamApplyProvider.teams['teamList'].isEmpty)
-                            ? const Text('생성된 팀이 없습니다.')
-                            : ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount:
-                                    teamApplyProvider.teams['teamList'].length,
-                                itemBuilder: (context, index) {
-                                  final team = teamApplyProvider
-                                      .teams['teamList'][index];
-                                  final teamMembers =
-                                      team['teamMember'] as List<dynamic>;
+                          const SizedBox(height: 20),
+                          // Development Tools 배지
 
-                                  // data의 memberName과 teamMember의 memberName을 비교하여 memberRole을 찾기
-                                  final memberRole = teamMembers.firstWhere(
-                                    (member) =>
-                                        member['memberName'] ==
-                                        techStack['memberName'],
-                                    orElse: () => {'memberRole': 'Member'},
-                                  )['memberRole'];
+                          Wrap(
+                            direction: Axis.horizontal,
+                            alignment: WrapAlignment.start,
+                            spacing: 10,
+                            runSpacing: 10,
+                            // children 속성에 직접 전달하여 Iterable<Widget> 반환 문제 해결
+                            children: developmentTool.map((tools) {
+                              return badge(
+                                tools['logoUrl'],
+                                tools['title'],
+                                tools['titleColor'],
+                                tools['badgeColor'],
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 26),
+                          // 생성된 팀
+                          Row(
+                            children: [
+                              const Text(
+                                '내 팀 현황',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    isExpanded = !isExpanded;
+                                  });
+                                },
+                                icon: Icon(
+                                  isExpanded
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (isExpanded)
+                            (teamApplyProvider.teams['teamList'] == null ||
+                                    teamApplyProvider.teams['teamList'].isEmpty)
+                                ? const Text('생성된 팀이 없습니다.')
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: teamApplyProvider
+                                        .teams['teamList'].length,
+                                    itemBuilder: (context, index) {
+                                      final team = teamApplyProvider
+                                          .teams['teamList'][index];
+                                      final teamMembers =
+                                          team['teamMember'] as List<dynamic>;
+                                      // data의 memberName과 teamMember의 memberName을 비교하여 memberRole을 찾기
+                                      final memberRole = teamMembers.firstWhere(
+                                        (member) =>
+                                            member['memberName'] ==
+                                            techStack['memberName'],
+                                        orElse: () => {'memberRole': 'Member'},
+                                      )['memberRole'];
 
-                                  return Card(
-                                    color: const Color(0xFFECECEC),
-                                    elevation: 1.0,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 5.0),
-                                      child: ListTile(
-                                        title: Text(
-                                          team['teamName'] ?? '팀 이름 없음',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                      return Card(
+                                        color: const Color(0xFFECECEC),
+                                        elevation: 1.0,
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5.0),
+                                          child: ListTile(
+                                            title: Text(
+                                              team['teamName'] ?? '팀 이름 없음',
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            subtitle: Row(
+                                              children: [
+                                                Text(
+                                                  team['teamCategory'] ??
+                                                      '카테고리 없음',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: Color(0xFF808080),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 14),
+                                                ElevatedButton(
+                                                  onPressed: () {},
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        const Color(0xFFEA4E44),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                    ),
+                                                    minimumSize:
+                                                        const Size(33, 20),
+                                                  ),
+                                                  child: Text(
+                                                    memberRole == 'LEADER'
+                                                        ? 'Leader'
+                                                        : 'Member',
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                        subtitle: Row(
-                                          children: [
-                                            Text(
-                                              team['teamCategory'] ?? '카테고리 없음',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Color(0xFF808080),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 14),
-                                            ElevatedButton(
-                                              onPressed: () {},
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    const Color(0xFFEA4E44),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(6),
-                                                ),
-                                                minimumSize: const Size(33, 20),
-                                              ),
-                                              child: Text(
-                                                memberRole == 'LEADER'
-                                                    ? 'Leader'
-                                                    : 'Member',
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                    ],
+                                      );
+                                    },
+                                  ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             // 계정(비밀번호 변경, 로그아웃) 위젯
             const AccountWidget(),
