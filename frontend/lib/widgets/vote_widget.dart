@@ -288,45 +288,49 @@ class _VoteWidgetState extends State<VoteWidget> {
                                   children: [
                                     // GestureDetector를 InkWell로 대체
                                     InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          // 사용자만 투표 항목 눌러서 투표할 수 있게 설정
-                                          if (userRole == 'ROLE_USER') {
-                                            if (vote.repetition!) {
-                                              // 선택한 항목 아이디가 있으면 해당 요소 삭제
-                                              if (selectedIndexList.contains(
-                                                  vote.voteItemIds![i])) {
-                                                selectedIndexList.removeWhere(
-                                                    (element) =>
-                                                        element ==
-                                                        vote.voteItemIds![i]);
-                                                print(
-                                                    'selectedIndexList: $selectedIndexList');
-                                              }
-                                              // 선택한 항목 아이디 추가
-                                              else {
-                                                selectedIndexList
-                                                    .add(vote.voteItemIds![i]);
-                                                print(
-                                                    'selectedIndexList: $selectedIndexList');
-                                              }
-                                            } else {
-                                              // 선택한 항목이 현재 항목 아이디와 동일하다면 null로 변경
-                                              if (selectedIndex ==
-                                                  vote.voteItemIds![i]) {
-                                                selectedIndex = null;
-                                                print(
-                                                    'selectedIndex: $selectedIndex');
-                                              } else {
-                                                selectedIndex =
-                                                    vote.voteItemIds![i];
-                                                print(
-                                                    'selectedIndex: $selectedIndex');
-                                              }
-                                            }
-                                          }
-                                        });
-                                      },
+                                      onTap: (vote.voteEnded!)
+                                          ? () {}
+                                          : () {
+                                              setState(() {
+                                                // 사용자만 투표 항목 눌러서 투표할 수 있게 설정
+                                                if (userRole == 'ROLE_USER') {
+                                                  if (vote.repetition!) {
+                                                    // 선택한 항목 아이디가 있으면 해당 요소 삭제
+                                                    if (selectedIndexList
+                                                        .contains(vote
+                                                            .voteItemIds![i])) {
+                                                      selectedIndexList
+                                                          .removeWhere((element) =>
+                                                              element ==
+                                                              vote.voteItemIds![
+                                                                  i]);
+                                                      print(
+                                                          'selectedIndexList: $selectedIndexList');
+                                                    }
+                                                    // 선택한 항목 아이디 추가
+                                                    else {
+                                                      selectedIndexList.add(
+                                                          vote.voteItemIds![i]);
+                                                      print(
+                                                          'selectedIndexList: $selectedIndexList');
+                                                    }
+                                                  } else {
+                                                    // 선택한 항목이 현재 항목 아이디와 동일하다면 null로 변경
+                                                    if (selectedIndex ==
+                                                        vote.voteItemIds![i]) {
+                                                      selectedIndex = null;
+                                                      print(
+                                                          'selectedIndex: $selectedIndex');
+                                                    } else {
+                                                      selectedIndex =
+                                                          vote.voteItemIds![i];
+                                                      print(
+                                                          'selectedIndex: $selectedIndex');
+                                                    }
+                                                  }
+                                                }
+                                              });
+                                            },
                                       child: Card(
                                         color: const Color(0xFFEFEFF2),
                                         shape: RoundedRectangleBorder(
@@ -414,27 +418,18 @@ class _VoteWidgetState extends State<VoteWidget> {
                                               ),
                                               const SizedBox(width: 40),
 
-                                              // 투표 완료한 경우 투표 인원 표시
+                                              // 투표 완료된거나 투표 기간이 종료된 경우 투표 인원 표시
                                               (vote.voteItems![i]['hasVoted'] ||
-                                                      userRole == 'ROLE_ADMIN')
-                                                  ? GestureDetector(
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                const ViewVotePage(),
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: Text(
-                                                        '${vote.voteItems![i]['voters'].length}명',
-                                                        style: const TextStyle(
-                                                          fontSize: 11,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.black,
-                                                        ),
+                                                          userRole ==
+                                                              'ROLE_ADMIN') ||
+                                                      vote.voteEnded!
+                                                  ? Text(
+                                                      '${vote.voteItems![i]['voters'].length}명',
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black,
                                                       ),
                                                     )
                                                   : Container(),
