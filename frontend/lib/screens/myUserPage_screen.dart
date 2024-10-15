@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/screens/favorite_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/userInfo_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:frontend/widgets/account_widget.dart';
@@ -125,8 +126,12 @@ class _MyUserPageState extends State<MyUserPage> {
           padding: const EdgeInsets.only(left: 12.0),
           child: IconButton(
             onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                  context, '/homepage', (route) => false); // 홈 페이지로 이동
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomePage(),
+                  ),
+                  (route) => false); // 홈 페이지로 이동
             },
             icon: Image.asset('assets/images/logo.png'),
             color: Colors.black,

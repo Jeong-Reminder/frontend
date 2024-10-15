@@ -6,6 +6,22 @@ import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity: FlutterActivity() {
+    private val CHANNEL = "com.sungkyul/notification"
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "navigateToDetail") {
+                val id = call.argument<Int>("id")
+                val category = call.argument<String>("category")
+                
+                // 이곳에서 Flutter로 전달할 데이터를 추가
+                result.success(mapOf("id" to id, "category" to category))
+            }
+        }
+    }
+    
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 

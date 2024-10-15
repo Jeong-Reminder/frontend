@@ -1,9 +1,15 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/screens/boardDetail_screen.dart';
+import 'package:frontend/screens/contestBoard_screen.dart';
+import 'package:frontend/screens/corSeaBoard_screen.dart';
+import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/memberRecruit_screen.dart';
@@ -250,8 +256,12 @@ class _HomePageState extends State<HomePage> {
             child: IconButton(
               onPressed: () {
                 if (userRole == 'ROLE_ADMIN') {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/dashboard', (route) => false);
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashBoardPage(),
+                      ),
+                      (route) => false);
                 }
               },
               icon: Image.asset('assets/images/logo.png'),
@@ -313,9 +323,11 @@ class _HomePageState extends State<HomePage> {
 
                   if (userRole == 'ROLE_USER') {
                     if (context.mounted) {
-                      Navigator.pushNamed(
+                      Navigator.push(
                         context,
-                        '/myuser',
+                        MaterialPageRoute(
+                          builder: (context) => const MyUserPage(),
+                        ),
                       );
                     }
                   } else if (userRole == 'ROLE_ADMIN') {
@@ -415,15 +427,12 @@ class _HomePageState extends State<HomePage> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  BoardDetailPage(
-                                                announcementId: board['id'],
-                                                category: 'HOME',
-                                              ),
-                                            ),
+                                          Get.toNamed(
+                                            '/detail-board',
+                                            arguments: {
+                                              'announcementId': board['id'],
+                                              'category': 'HOME',
+                                            },
                                           );
                                         },
                                         child: Container(
@@ -536,16 +545,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/grade-board');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const GradeBoardPage(),
+                          ),
+                        );
                       },
                       child: homeItem(
                           imgPath: 'assets/images/grade.png', title: '학년공지'),
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(
+                        Navigator.push(
                           context,
-                          '/contest-board',
+                          MaterialPageRoute(
+                            builder: (context) => const ContestBoardPage(),
+                          ),
                         );
                       },
                       child: homeItem(
@@ -554,7 +570,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/corSea-board');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CorSeaBoardPage(),
+                          ),
+                        );
                       },
                       child: homeItem(
                           imgPath: 'assets/images/company.png', title: '기업탐방'),

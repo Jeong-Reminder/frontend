@@ -3,7 +3,9 @@ import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 
@@ -120,11 +122,12 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
         return GestureDetector(
           onTap: () async {
             // RecruitDetailPage로 이동할 때, await로 결과를 기다림
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RecruitDetailPage(makeTeam: post),
-              ),
+            print('post id: ${post['id']}');
+
+            final result = await Get.toNamed(
+              '/detail-recruit',
+              arguments: {'makeTeamId': post['id']},
+              preventDuplicates: false,
             );
 
             // 만약 전달받은 값이 true라면 해당 post를 리스트에서 제거
@@ -319,7 +322,14 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/myuser');
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const MyUserPage(),
+                //   ),
+                // );
+
+                print('recruitList: $recruitList');
               },
               child: const Icon(
                 Icons.account_circle,

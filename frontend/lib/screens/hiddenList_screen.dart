@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/contestBoard_screen.dart';
+import 'package:frontend/screens/corSeaBoard_screen.dart';
+import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/widgets/board_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -41,13 +45,37 @@ class _HiddenPageState extends State<HiddenPage> {
         leading: BackButton(
           onPressed: () {
             if (widget.category == 'TOTAL') {
-              Navigator.popAndPushNamed(context, '/total-board');
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
+                ),
+                (route) => false, // 이전 모든 라우트를 제거
+              );
             } else if (widget.category == 'ACADEMIC_ALL') {
-              Navigator.popAndPushNamed(context, '/grade-board');
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
+                ),
+                (route) => false, // 이전 모든 라우트를 제거
+              );
             } else if (widget.category == 'CONTEST') {
-              Navigator.popAndPushNamed(context, '/contest-board');
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ContestBoardPage(), // 페이지로 직접 이동
+                ),
+                (route) => false, // 이전 모든 라우트를 제거
+              );
             } else if (widget.category == 'CORSEA') {
-              Navigator.popAndPushNamed(context, '/corSea-board');
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
+                ),
+                (route) => false, // 이전 모든 라우트를 제거
+              );
             }
           },
           color: Colors.black,

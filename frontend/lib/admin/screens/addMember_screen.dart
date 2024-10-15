@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/models/admin_model.dart';
+import 'package:frontend/admin/screens/userInfo_screen.dart';
 import 'package:frontend/admin/services/userInfo_service.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -113,7 +114,12 @@ class _AddMemberPageState extends State<AddMemberPage> {
 
                 try {
                   await UserService().createUser(user);
-                  Navigator.pushNamed(context, '/user-info');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const UserInfoPage(),
+                    ),
+                  );
                 } catch (e) {
                   print(e);
                   ScaffoldMessenger.of(context).showSnackBar(

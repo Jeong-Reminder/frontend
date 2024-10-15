@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/board_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
@@ -288,9 +289,11 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             child: IconButton(
               onPressed: () async {
                 if (context.mounted) {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    '/myowner',
+                    MaterialPageRoute(
+                      builder: (context) => const MyOwnerPage(),
+                    ),
                   );
                 }
               },
@@ -628,45 +631,50 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
                 Radius.circular(10.0),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  titleController.text,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                // const Text(
-                //   '02/03  14:28',
-                //   style: TextStyle(
-                //     color: Color(0xFFA89F9F),
-                //   ),
-                // ),
-                const SizedBox(height: 15),
-                Text(
-                  contentController.text,
-                  style: const TextStyle(fontSize: 15),
-                ),
-                const SizedBox(height: 15),
-                if (pickedImages.isNotEmpty)
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Column(
-                        children: pickedImages.map((pickedImage) {
-                          return Image.file(
-                            File(pickedImage.path),
-                            height: 240,
-                          );
-                        }).toList(),
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    titleController.text,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-              ],
+                  const SizedBox(height: 15),
+
+                  // 내용
+                  Text(
+                    contentController.text,
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  const SizedBox(height: 15),
+
+                  // 이미지
+                  if (pickedImages.isNotEmpty)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Center(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Row(
+                            children: pickedImages.map((pickedImage) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10.0),
+                                child: Image.file(
+                                  File(pickedImage.path),
+                                  height: 240,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ));
         });

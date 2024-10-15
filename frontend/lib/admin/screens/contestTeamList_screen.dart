@@ -245,6 +245,7 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false, // 키보드가 올라와도 텍스트 필드 영역이 온전하게 보일 때 사용
       appBar: AppBar(
         scrolledUnderElevation: 0,
         toolbarHeight: 70,

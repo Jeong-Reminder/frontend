@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/screens/contestTeamList_screen.dart';
+import 'package:frontend/admin/screens/userInfo_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
 
 class DashBoardPage extends StatefulWidget {
   const DashBoardPage({super.key});
@@ -63,7 +65,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
                     // 홈가기 버튼
                     dashboardBtn(
                       () {
-                        Navigator.pushNamed(context, '/homepage');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomePage(),
+                          ),
+                        );
                       },
                       'assets/images/homeImg.png',
                       '홈으로 가기',
@@ -72,7 +79,12 @@ class _DashBoardPageState extends State<DashBoardPage> {
                     // 회원 정보 목록 버튼
                     dashboardBtn(
                       () {
-                        Navigator.pushNamed(context, '/user-info');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UserInfoPage(),
+                          ),
+                        );
                       },
                       'assets/images/userInfoImg.png',
                       '회원 정보 목록',
