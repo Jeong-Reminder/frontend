@@ -60,6 +60,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
   bool isLoading = true; // 로딩 상태
 
   int likeCount = 0;
+  int? level;
   double downloadProgress = 0.0;
 
   Map<String, dynamic> board = {};
@@ -77,6 +78,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
     final credentials = await loginAPI.loadCredentials(); // 저장된 자격증명 로드
     setState(() {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
+      level = credentials['level'];
     });
   }
 
@@ -184,7 +186,11 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         leadingWidth: 120,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF2A72E7),
+              ),
+            )
           : SingleChildScrollView(
               child: Padding(
                 padding:
@@ -451,7 +457,8 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
 
                     // 투표 보기
                     if (board['votes'] != null &&
-                        (board['votes'] as List).isNotEmpty)
+                        (board['votes'] as List).isNotEmpty &&
+                        (board['announcementLevel'] == level))
                       Theme(
                         data: Theme.of(context)
                             .copyWith(dividerColor: Colors.transparent),
@@ -467,6 +474,7 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                           ],
                         ),
                       ),
+
                     const SizedBox(height: 10),
 
                     // 댓글 작성 제한 메세지

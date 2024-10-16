@@ -158,8 +158,10 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 120.0),
+        padding: const EdgeInsets.only(
+            left: 25.0, right: 25.0, top: 120.0, bottom: 50.0),
         child: SingleChildScrollView(
           child: Column(
             children: [

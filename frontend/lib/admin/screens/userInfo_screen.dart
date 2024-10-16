@@ -522,7 +522,10 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       : Future.value(filteredUserList),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                          child: CircularProgressIndicator(
+                        color: Color(0xFF2A72E7),
+                      ));
                     } else if (snapshot.hasError) {
                       return const Center(child: Text('에러 로딩 데이터'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

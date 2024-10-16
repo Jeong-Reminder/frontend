@@ -562,6 +562,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
   // 그 값을 이전 화면에서 받아서 상태를 업데이트해서 다이얼로그가 닫힐 때 isConfirmedVote 값을 반환
   Future<void> _showVoteSheet(BuildContext context) async {
     final result = await showModalBottomSheet<bool>(
+      backgroundColor: Colors.white,
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
@@ -594,6 +595,14 @@ class _BoardWritePageState extends State<BoardWritePage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      '투표 제목과 종료 날짜는 무조건 설정해주세요',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey,
+                      ),
+                    ),
                     const SizedBox(height: 15),
 
                     // 제목 입력 필드
@@ -612,9 +621,7 @@ class _BoardWritePageState extends State<BoardWritePage> {
                             horizontal: 10.0, vertical: 5.0),
                       ),
                       onSaved: (val) {
-                        setState() {
-                          voteTitleController.text = val!;
-                        }
+                        voteTitleController.text = val!;
                       },
                     ),
                     const SizedBox(height: 19),
@@ -705,13 +712,16 @@ class _BoardWritePageState extends State<BoardWritePage> {
                     // 확인 버튼
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            isConfirmedVote = true;
-                          });
+                        onPressed: (voteTitleController.text.isEmpty ||
+                                selectedEndDate == null)
+                            ? () {}
+                            : () {
+                                setState(() {
+                                  isConfirmedVote = true;
+                                });
 
-                          Navigator.pop(context, isConfirmedVote);
-                        },
+                                Navigator.pop(context, isConfirmedVote);
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFDBE7FB),
                           surfaceTintColor:
