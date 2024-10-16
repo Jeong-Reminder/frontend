@@ -242,7 +242,10 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
   Widget buildContent() {
     // 로딩 중일 때 로딩 인디케이터 표시
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+          child: CircularProgressIndicator(
+        color: Color(0xFF2A72E7),
+      ));
     }
 
     // 사용자가 아무 버튼도 선택하지 않은 경우

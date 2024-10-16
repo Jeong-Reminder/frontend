@@ -471,7 +471,9 @@ class _ContestTeamListPageState extends State<ContestTeamListPage> {
                 // 로딩 중일 때
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(), // 로딩 스피너
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF2A72E7),
+                    ), // 로딩 스피너
                   );
                 }
 

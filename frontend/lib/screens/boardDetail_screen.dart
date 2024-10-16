@@ -186,7 +186,11 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         leadingWidth: 120,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF2A72E7),
+              ),
+            )
           : SingleChildScrollView(
               child: Padding(
                 padding:
