@@ -97,8 +97,9 @@ class _GradeBoardPageState extends State<GradeBoardPage> {
     // gradeCategory와 일치하는 공지만 필터링
     final filteredBoardList = gradeBoardList.where((board) {
       final gradeLevel = board['announcementLevel'];
-      return gradeLevel ==
-          gradeCategory; // 처음에 1학년으로 되어있기 때문에 페이지 들어갈 때 1학년 공지가 먼저 보이게 설정하는 코드
+      return gradeLevel == gradeCategory ||
+          gradeLevel ==
+              0; // 처음에 1학년으로 되어있기 때문에 페이지 들어갈 때 1학년 공지가 먼저 보이게 설정하는 코드
     }).toList();
 
     return Scaffold(

@@ -39,6 +39,7 @@ class _SetProfilePageState extends State<SetProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 120.0),
         // SingleChildScrollView를 사용하여 콘텐츠를 스크롤할 수 있게 하였고

@@ -32,6 +32,7 @@ class _SetSkillPageState extends State<SetSkillPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 120.0),
         child: Column(
