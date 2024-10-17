@@ -247,6 +247,7 @@ class LoginAPI {
 
         return {
           'success': true,
+          'accessToken': accessToken,
           'role': userRole,
           'techStack': techStack,
           'memberExperiences': memberExperience,

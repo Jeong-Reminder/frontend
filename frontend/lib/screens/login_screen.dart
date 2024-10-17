@@ -400,6 +400,8 @@ class _LoginPageState extends State<LoginPage> {
                             // 자동 로그인 체크 시에만 학번과 비밀번호 저장
                             await prefs.setString('studentId', studentId);
                             await prefs.setString('password', password);
+                            // await prefs.setString(
+                            //     'accessToken', result['accessToken']);
                           }
                           // userRole 값에 따라 다른 페이지로 이동
                           if (result['role'] == 'ROLE_ADMIN') {
