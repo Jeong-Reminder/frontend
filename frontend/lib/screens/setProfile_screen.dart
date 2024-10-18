@@ -80,9 +80,11 @@ class _SetProfilePageState extends State<SetProfilePage> {
                     // 보직 선택 제목
                     Row(
                       children: [
-                        const Text(
-                          '2. 희망분야 선택',
-                          style: TextStyle(
+                        Text(
+                          chosenpositionList.isEmpty
+                              ? '2. 희망분야 선택'
+                              : '2. 희망분야 선택(${chosenpositionList.length})',
+                          style: const TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
                           ),
@@ -90,17 +92,22 @@ class _SetProfilePageState extends State<SetProfilePage> {
                         const SizedBox(width: 10),
 
                         // 선택된 보직 배지
-                        Wrap(
-                          direction: Axis.horizontal,
-                          alignment: WrapAlignment.start,
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: chosenpositionList.map((position) {
-                            return badge(
-                              position['title'],
-                              position['isSelected'],
-                            );
-                          }).toList(),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Wrap(
+                              direction: Axis.horizontal,
+                              alignment: WrapAlignment.start,
+                              spacing: 10,
+                              runSpacing: 10,
+                              children: chosenpositionList.map((position) {
+                                return badge(
+                                  position['title'],
+                                  position['isSelected'],
+                                );
+                              }).toList(),
+                            ),
+                          ),
                         ),
                       ],
                     ),
