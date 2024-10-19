@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/profile_model.dart';
 import 'package:frontend/providers/profile_provider.dart';
+import 'package:frontend/screens/editField_screen.dart';
+import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
+import 'package:frontend/screens/setProfile_screen.dart';
+import 'package:frontend/screens/setSkill_screen.dart';
 import 'package:frontend/services/profile_service.dart';
 import 'package:provider/provider.dart';
 
@@ -228,7 +232,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
               IconButton(
                 onPressed: () async {
                   // 전달받은 데이터값을 result에 저장해 developmentField에 저장
-                  final result = await Navigator.pushNamed(context, path);
+
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => (path == '/edit-field')
+                          ? const EditFieldPage()
+                          : const EditToolPage(),
+                    ),
+                  );
 
                   if (result != null && result is String) {
                     setState(() {
