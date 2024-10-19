@@ -73,20 +73,20 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon" # 안드로이드용 아이콘 생성 여부
   ios: true # iOS용 아이콘 생성 여부
-  image_path: "assets/icons/logo.png" # 아이콘 경로
+  image_path: "assets/icons/appstore.png" # 아이콘 경로
   min_sdk_android: 21 # 안드로이드 최소 SDK 설정
   web:
     generate: true # 웹용 아이콘 생성 여부
-    image_path: "assets/icons/logo.png" # 웹 아이콘 경로
+    image_path: "assets/icons/appstore.png" # 웹 아이콘 경로
     background_color: "#hexcode" # 웹용 배경 색상
     theme_color: "#hexcode" # 웹용 테마 색상
   windows:
     generate: true # 윈도우용 아이콘 생성 여부
-    image_path: "assets/icons/logo.png" # 윈도우 아이콘 경로
+    image_path: "assets/icons/appstore.png" # 윈도우 아이콘 경로
     icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
   macos:
     generate: true # macOS용 아이콘 생성 여부
-    image_path: "assets/icons/logo.png" # macOS 아이콘 경로
+    image_path: "assets/icons/appstore.png" # macOS 아이콘 경로
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -149,7 +149,20 @@ flutter:
     - assets/skilImages/notion.png
     - assets/skilImages/slack.png
     - assets/skilImages/zoom.png
-    - assets/icons/logo.png
+    - assets/skilImages/none.png
+    - assets/skilImages/cLanguage.png
+    - assets/skilImages/c++Language.png
+    - assets/skilImages/java.png
+    - assets/skilImages/ruby.png
+    - assets/skilImages/python.png
+    - assets/skilImages/php.png
+    - assets/skilImages/dart.png
+    - assets/skilImages/swift.png
+    - assets/skilImages/kotlin.png
+    - assets/skilImages/fortran.png
+    - assets/skilImages/rust.png
+    - assets/skilImages/R.png
+    - assets/icons/appstore.png
 # An image asset can refer to one or more resolution-specific "variants", see
 # https://flutter.dev/assets-and-images/#resolution-aware
 
