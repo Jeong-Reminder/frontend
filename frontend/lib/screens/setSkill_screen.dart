@@ -223,73 +223,74 @@ class _SetSkillPageState extends State<SetSkillPage> {
                     visible: completedField
                         ? selectedTools.isNotEmpty
                         : selectedFields.isNotEmpty,
-                    child: BottomSheet(
-                      onClosing: () {},
-                      enableDrag: false, // 드래그 기능 비활성화
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width,
-                        // maxHeight: MediaQuery.of(context).size.height / 3.6,
-                      ),
-                      backgroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      builder: (context) {
-                        return Column(
-                          children: [
-                            SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                height:
-                                    MediaQuery.of(context).size.height / 5.5,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF6F6F6),
+                    child: Column(
+                      children: [
+                        BottomSheet(
+                          onClosing: () {},
+                          enableDrag: false, // 드래그 기능 비활성화
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width,
+                            // maxHeight: MediaQuery.of(context).size.height / 3.6,
+                          ),
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          builder: (context) {
+                            return Column(
+                              children: [
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.vertical,
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height /
+                                        5.5,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFF6F6F6),
+                                    ),
+                                    child: completedField
+                                        ? Wrap(
+                                            direction: Axis.horizontal,
+                                            spacing: 10,
+                                            runSpacing: 10,
+                                            children:
+                                                selectedTools.map((tools) {
+                                              return badge(
+                                                tools['logoUrl'],
+                                                tools['title'],
+                                                tools['titleColor'],
+                                                tools['badgeColor'],
+                                                tools['isSelected'],
+                                              );
+                                            }).toList(),
+                                          )
+                                        : Wrap(
+                                            direction: Axis.horizontal,
+                                            spacing: 10,
+                                            runSpacing: 10,
+                                            children:
+                                                selectedFields.map((stack) {
+                                              return badge(
+                                                stack['logoUrl'],
+                                                stack['title'],
+                                                stack['titleColor'],
+                                                stack['badgeColor'],
+                                                stack['isSelected'],
+                                              );
+                                            }).toList(),
+                                          ),
+                                  ),
                                 ),
-                                child: completedField
-                                    ? Wrap(
-                                        direction: Axis.horizontal,
-                                        spacing: 10,
-                                        runSpacing: 10,
-                                        children: selectedTools.map((tools) {
-                                          return badge(
-                                            tools['logoUrl'],
-                                            tools['title'],
-                                            tools['titleColor'],
-                                            tools['badgeColor'],
-                                            tools['isSelected'],
-                                          );
-                                        }).toList(),
-                                      )
-                                    : Wrap(
-                                        direction: Axis.horizontal,
-                                        spacing: 10,
-                                        runSpacing: 10,
-                                        children: selectedFields.map((stack) {
-                                          return badge(
-                                            stack['logoUrl'],
-                                            stack['title'],
-                                            stack['titleColor'],
-                                            stack['badgeColor'],
-                                            stack['isSelected'],
-                                          );
-                                        }).toList(),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                          ],
-                        );
-                      },
+                                const SizedBox(height: 10),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        Center(child: checkBtn()),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // 확인 버튼
-                  if (selectedFields.isNotEmpty || selectedTools.isNotEmpty)
-                    completedField
-                        ? Center(child: checkBtn())
-                        : Center(child: checkBtn()),
                 ],
               ),
             ),

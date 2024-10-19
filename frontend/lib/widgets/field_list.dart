@@ -58,13 +58,6 @@ List<Map<String, dynamic>> fieldList = [
     'isSelected': false,
   },
   {
-    'logoUrl': 'assets/skilImages/docker.png',
-    'title': 'DOCKER',
-    'titleColor': Colors.white,
-    'badgeColor': const Color(0xFF0BB7ED),
-    'isSelected': false,
-  },
-  {
     'logoUrl': 'assets/skilImages/yarn.png',
     'title': 'YARN',
     'titleColor': Colors.white,
@@ -160,6 +153,13 @@ List<Map<String, dynamic>> fieldList = [
     'title': 'FORTRAN',
     'titleColor': const Color(0xFF734F96),
     'badgeColor': const Color(0xFF0095F9),
+    'isSelected': false,
+  },
+  {
+    'logoUrl': 'assets/skilImages/matlab.png',
+    'title': 'MATLAB',
+    'titleColor': const Color(0xFFFA8042),
+    'badgeColor': const Color(0xFF583647),
     'isSelected': false,
   },
 ];
