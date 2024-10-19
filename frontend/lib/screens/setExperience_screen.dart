@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/experience_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/home_screen.dart';
@@ -8,7 +9,9 @@ import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SetExperiencePage extends StatefulWidget {
-  const SetExperiencePage({super.key});
+  final bool? update;
+  final String? name;
+  const SetExperiencePage({this.update, this.name, super.key});
 
   @override
   State<SetExperiencePage> createState() => _SetExperiencePageState();
@@ -73,7 +76,7 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
       // 빈 배열로 설정
       ProjectExperience emptyExperience = ProjectExperience(
         experienceName: '[]', // 빈 배열 값
-        experienceRole: '[]', // 빈 배열 값
+        experienceRole: 'NONE',
         experienceContent: '[]', // 빈 배열 값
         experienceGithub: '[]', // 빈 배열 값
         experienceJob: '[]', // 빈 배열 값
@@ -84,26 +87,47 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
       final provider = context.read<ProjectExperienceProvider>();
       await provider.createProjectExperience(emptyExperience);
 
-      // 홈 페이지로 이동
       if (context.mounted) {
-        final prefs = await SharedPreferences.getInstance();
-        final studentId = prefs.getString('studentId');
-        final password = prefs.getString('password');
-        final fcmToken = prefs.getString('fcmToken');
+        if (widget.update == true) {
+          final projectExperienceProvider =
+              Provider.of<ProjectExperienceProvider>(context, listen: false);
 
-        if (context.mounted) {
-          LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomePage(),
-            ),
-          );
+          // 프로젝트 경험 데이터를 가져옴
+          await projectExperienceProvider.fetchExperiences();
+          // 가져온 프로젝트 경험 데이터를 리스트로 저장
+          List<ProjectExperience> experiences =
+              projectExperienceProvider.projectExperiences;
 
-          // 학번, 비번, 토큰 제거
-          prefs.remove('studentId');
-          prefs.remove('password');
-          prefs.remove('fcmToken');
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ExperiencePage(
+                    experiences: experiences, name: widget.name!),
+              ),
+            );
+          }
+        } else {
+          // 홈 페이지로 이동
+          final prefs = await SharedPreferences.getInstance();
+          final studentId = prefs.getString('studentId');
+          final password = prefs.getString('password');
+          final fcmToken = prefs.getString('fcmToken');
+
+          if (context.mounted) {
+            LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+
+            // 학번, 비번, 토큰 제거
+            prefs.remove('studentId');
+            prefs.remove('password');
+            prefs.remove('fcmToken');
+          }
         }
       }
     } else {
@@ -130,23 +154,47 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
       final provider = context.read<ProjectExperienceProvider>();
       await provider.createProjectExperience(newExperience);
 
-      // 홈 페이지로 이동
       if (context.mounted) {
-        // 아이디, 비밀번호, fcmToken 꺼내옴
-        // 이유 : 로그인 api를 호출해 본인 프로필 정보가 뜰 수 있게 구현(로그인을 호출하지 않으면 전에 로그인한 회원의 정보가 뜸)
-        final prefs = await SharedPreferences.getInstance();
-        final studentId = prefs.getString('studentId');
-        final password = prefs.getString('password');
-        final fcmToken = prefs.getString('fcmToken');
+        if (widget.update == true) {
+          // 경험 추가하기로 이동할 때 코드(경험 조회 화면으로 이동)
+          final projectExperienceProvider =
+              Provider.of<ProjectExperienceProvider>(context, listen: false);
 
-        if (context.mounted) {
-          LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomePage(),
-            ),
-          );
+          // 프로젝트 경험 데이터를 가져옴
+          await projectExperienceProvider.fetchExperiences();
+          // 가져온 프로젝트 경험 데이터를 리스트로 저장
+          List<ProjectExperience> experiences =
+              projectExperienceProvider.projectExperiences;
+
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ExperiencePage(
+                    experiences: experiences, name: widget.name!),
+              ),
+            );
+          }
+        } else {
+          // 홈 페이지로 이동
+          // 아이디, 비밀번호, fcmToken 꺼내옴
+          // 이유 : 로그인 api를 호출해 본인 프로필 정보가 뜰 수 있게 구현(로그인을 호출하지 않으면 전에 로그인한 회원의 정보가 뜸)
+          final prefs = await SharedPreferences.getInstance();
+          final studentId = prefs.getString('studentId');
+          final password = prefs.getString('password');
+          final fcmToken = prefs.getString('fcmToken');
+
+          if (context.mounted) {
+            LoginAPI().handleLogin(context, studentId!, password!, fcmToken!);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          }
+
+          // 학번, 비번, 토큰 제거
           prefs.remove('studentId');
           prefs.remove('password');
           prefs.remove('fcmToken');
@@ -427,7 +475,9 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                                   partController.text.isNotEmpty &&
                                   (selectedDuration != null ||
                                       customDurationValue.isNotEmpty)
-                              ? '알리미 시작하기'
+                              ? (widget.update == true)
+                                  ? '경험 추가하기'
+                                  : '알리미 시작하기'
                               : '없음',
                           style: const TextStyle(
                             fontSize: 16,
