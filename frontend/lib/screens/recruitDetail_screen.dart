@@ -1301,6 +1301,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         builder: (context) => ExperiencePage(
                           experiences: provider.memberExperiences, // 가져온 경험 데이터
                           name: name, // 멤버의 이름을 전달
+                          category: 'recruit',
                         ),
                       ),
                     );

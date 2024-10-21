@@ -103,7 +103,9 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => ExperiencePage(
-                    experiences: experiences, name: widget.name!),
+                  experiences: experiences,
+                  name: widget.name!,
+                ),
               ),
             );
           }
@@ -171,7 +173,9 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => ExperiencePage(
-                    experiences: experiences, name: widget.name!),
+                  experiences: experiences,
+                  name: widget.name!,
+                ),
               ),
             );
           }
