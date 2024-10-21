@@ -180,19 +180,43 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // 로그인 시 FCM 토큰 발급 함수
-  Future<String?> _getFCMToken() async {
-    String? token;
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
+  // FCM 토큰과 발급 시각을 저장하는 함수
+  Future<void> saveFCMToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fcmToken', token); // FCM 토큰 저장
+    await prefs.setInt(
+        'fcmTokenTimestamp', DateTime.now().millisecondsSinceEpoch); // 발급 시각 저장
+  }
 
-    token = await messaging.getToken();
-    if (token == null) {
-      print('FCM 토큰을 가져오지 못했습니다.');
-      return null; // null 값을 반환하여 처리 가능하게 함
+  // FCM 토큰 갱신 여부를 확인하고 필요 시 새 토큰을 발급하는 함수
+  Future<String?> getFCMTokenWithRefreshCheck() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedToken = prefs.getString('fcmToken'); // 저장된 토큰
+    final tokenTimestamp =
+        prefs.getInt('fcmTokenTimestamp') ?? 0; // 저장된 토큰의 발급 시각
+
+    final currentTime = DateTime.now().millisecondsSinceEpoch; // 현재 시간
+    const tokenValidityDuration = 30 * 24 * 60 * 60 * 1000; // 30일 (밀리초 단위)
+
+    // 토큰이 없거나, 30일 이상이 지난 경우 새 토큰 발급
+    if (storedToken == null ||
+        currentTime - tokenTimestamp > tokenValidityDuration) {
+      String? newToken = await FirebaseMessaging.instance.getToken(); // 새 토큰 발급
+      if (newToken != null) {
+        await saveFCMToken(newToken); // 새 토큰과 발급 시각 저장
+        return newToken;
+      } else {
+        print('새 FCM 토큰을 가져오지 못했습니다.');
+        return null;
+      }
+    } else {
+      // 저장된 토큰이 유효한 경우
+      return storedToken;
     }
+  }
 
-    print('FCM 토큰: $token');
-    return token;
+  Future<String?> _getFCMToken() async {
+    return await getFCMTokenWithRefreshCheck(); // 갱신된 토큰 가져오기
   }
 
   @override
