@@ -71,22 +71,22 @@ dev_dependencies:
 
     # flutter_launcher_icons 설정
 flutter_launcher_icons:
-    android: 'launcher_icon' # 안드로이드용 아이콘 생성 여부
-    ios: true # iOS용 아이콘 생성 여부
-    image_path: 'assets/icons/logo.png' # 아이콘 경로
-    min_sdk_android: 21 # 안드로이드 최소 SDK 설정
-    web:
-        generate: true # 웹용 아이콘 생성 여부
-        image_path: 'assets/icons/logo.png' # 웹 아이콘 경로
-        background_color: '#hexcode' # 웹용 배경 색상
-        theme_color: '#hexcode' # 웹용 테마 색상
-    windows:
-        generate: true # 윈도우용 아이콘 생성 여부
-        image_path: 'assets/icons/logo.png' # 윈도우 아이콘 경로
-        icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
-    macos:
-        generate: true # macOS용 아이콘 생성 여부
-        image_path: 'assets/icons/logo.png' # macOS 아이콘 경로
+  android: "launcher_icon" # 안드로이드용 아이콘 생성 여부
+  ios: true # iOS용 아이콘 생성 여부
+  image_path: "assets/icons/appstore.png" # 아이콘 경로
+  min_sdk_android: 21 # 안드로이드 최소 SDK 설정
+  web:
+    generate: true # 웹용 아이콘 생성 여부
+    image_path: "assets/icons/appstore.png" # 웹 아이콘 경로
+    background_color: "#hexcode" # 웹용 배경 색상
+    theme_color: "#hexcode" # 웹용 테마 색상
+  windows:
+    generate: true # 윈도우용 아이콘 생성 여부
+    image_path: "assets/icons/appstore.png" # 윈도우 아이콘 경로
+    icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
+  macos:
+    generate: true # macOS용 아이콘 생성 여부
+    image_path: "assets/icons/appstore.png" # macOS 아이콘 경로
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -98,58 +98,85 @@ flutter:
     # the material Icons class.
     uses-material-design: true
 
-    # To add assets to your application, add an assets section, like this:
-    assets:
-        - assets/images/sungkyul.png
-        - assets/images/mustRead.png
-        - assets/images/coloredMustRead.png
-        - assets/images/vote.png
-        - assets/images/logo.png
-        - assets/images/general.png
-        - assets/images/grade.png
-        - assets/images/competition.png
-        - assets/images/company.png
-        - assets/images/etc.png
-        - assets/images/light.png
-        - assets/images/smile.png
-        - assets/images/good.png
-        - assets/images/votecheck.png
-        - assets/images/addsquare.png
-        - assets/images/classselect.png
-        - assets/images/contestnotice.png
-        - assets/images/profile.png
-        - assets/images/cyclingPerson.png
-        - assets/images/billiard.png
-        - assets/images/projectExperience.png
-        - assets/images/githubLogo.png
-        - assets/images/calendar.png
-        - assets/images/send.png
-        - assets/images/userInfoImg.png
-        - assets/images/homeImg.png
-        - assets/images/contestImg.png
-        - assets/images/filtering.png
-        - assets/images/Folder_send_light.png
-        - assets/images/frust.png
-        - assets/images/ad.png
-        - assets/skilImages/typescript.png
-        - assets/skilImages/javascript.png
-        - assets/skilImages/tailwindcss.png
-        - assets/skilImages/docker.png
-        - assets/skilImages/eslint.png
-        - assets/skilImages/figma.png
-        - assets/skilImages/html.png
-        - assets/skilImages/npm.png
-        - assets/skilImages/prettier.png
-        - assets/skilImages/react.png
-        - assets/skilImages/vscode.png
-        - assets/skilImages/css.png
-        - assets/skilImages/yarn.png
-        - assets/skilImages/discord.png
-        - assets/skilImages/github.png
-        - assets/skilImages/notion.png
-        - assets/skilImages/slack.png
-        - assets/skilImages/zoom.png
-        - assets/icons/logo.png
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/sungkyul.png
+    - assets/images/mustRead.png
+    - assets/images/coloredMustRead.png
+    - assets/images/vote.png
+    - assets/images/logo.png
+    - assets/images/general.png
+    - assets/images/grade.png
+    - assets/images/competition.png
+    - assets/images/company.png
+    - assets/images/etc.png
+    - assets/images/light.png
+    - assets/images/smile.png
+    - assets/images/good.png
+    - assets/images/votecheck.png
+    - assets/images/addsquare.png
+    - assets/images/classselect.png
+    - assets/images/contestnotice.png
+    - assets/images/profile.png
+    - assets/images/cyclingPerson.png
+    - assets/images/billiard.png
+    - assets/images/projectExperience.png
+    - assets/images/githubLogo.png
+    - assets/images/calendar.png
+    - assets/images/send.png
+    - assets/images/userInfoImg.png
+    - assets/images/homeImg.png
+    - assets/images/contestImg.png
+    - assets/images/filtering.png
+    - assets/images/Folder_send_light.png
+    - assets/images/frust.png
+    - assets/images/ad.png
+    - assets/skilImages/typescript.png
+    - assets/skilImages/javascript.png
+    - assets/skilImages/tailwindcss.png
+    - assets/skilImages/docker.png
+    - assets/skilImages/eslint.png
+    - assets/skilImages/figma.png
+    - assets/skilImages/html.png
+    - assets/skilImages/npm.png
+    - assets/skilImages/prettier.png
+    - assets/skilImages/react.png
+    - assets/skilImages/vscode.png
+    - assets/skilImages/css.png
+    - assets/skilImages/yarn.png
+    - assets/skilImages/discord.png
+    - assets/skilImages/github.png
+    - assets/skilImages/notion.png
+    - assets/skilImages/slack.png
+    - assets/skilImages/zoom.png
+    - assets/skilImages/intellij.png
+    - assets/skilImages/notepad++.png
+    - assets/skilImages/androidStudio.png
+    - assets/skilImages/eclipse.png
+    - assets/skilImages/auth0.png
+    - assets/skilImages/jupyter.png
+    - assets/skilImages/stackOverflow.png
+    - assets/skilImages/postman.png
+    - assets/skilImages/nginx.png
+    - assets/skilImages/postgresql.png
+    - assets/skilImages/rabbitmq.png
+    - assets/skilImages/redis.png
+    - assets/skilImages/firebase.png
+    - assets/skilImages/none.png
+    - assets/skilImages/cLanguage.png
+    - assets/skilImages/c++Language.png
+    - assets/skilImages/java.png
+    - assets/skilImages/ruby.png
+    - assets/skilImages/python.png
+    - assets/skilImages/php.png
+    - assets/skilImages/dart.png
+    - assets/skilImages/swift.png
+    - assets/skilImages/kotlin.png
+    - assets/skilImages/fortran.png
+    - assets/skilImages/rust.png
+    - assets/skilImages/R.png
+    - assets/skilImages/matlab.png
+    - assets/icons/appstore.png
 # An image asset can refer to one or more resolution-specific "variants", see
 # https://flutter.dev/assets-and-images/#resolution-aware
 

@@ -354,7 +354,8 @@ class _VoteWidgetState extends State<VoteWidget> {
                                               // 투표 항목 선택 리스트가 비어있지 않을 경우 보이게 설정
                                               // vote.hasVoted도 설정을 해야 재투표할때 선택 아이콘이 보임
                                               (vote.voteItems![i]['hasVoted'] &&
-                                                      vote.hasVoted!)
+                                                      vote.hasVoted! &&
+                                                      userRole == 'ROLE_USER')
                                                   ? Image.asset(
                                                       'assets/images/votecheck.png',
                                                       width: 12,
@@ -364,15 +365,16 @@ class _VoteWidgetState extends State<VoteWidget> {
                                                   // 투표를 하지 않았고 투표를 할려고 할 때
                                                   // 다중 선택 모드에서 현재 항목의 아이디가 selectedIndexList에 포함되어 있으면 원 모양을 표시
                                                   // 단일 선택 모드에서 selectedIndex가 현재 아이디와 같다면 원 모양을 표시합니다.
-                                                  : ((vote.repetition! &&
-                                                              selectedIndexList
-                                                                  .contains(vote
-                                                                          .voteItemIds![
-                                                                      i])) ||
-                                                          (!vote.repetition! &&
-                                                              selectedIndex ==
-                                                                  vote.voteItemIds![
-                                                                      i]))
+                                                  : (userRole == 'ROLE_USER' &&
+                                                          ((vote.repetition! &&
+                                                                  selectedIndexList
+                                                                      .contains(
+                                                                          vote.voteItemIds![
+                                                                              i])) ||
+                                                              (!vote.repetition! &&
+                                                                  selectedIndex ==
+                                                                      vote.voteItemIds![
+                                                                          i])))
                                                       ? InkWell(
                                                           borderRadius:
                                                               BorderRadius

@@ -241,6 +241,12 @@ Future<void> setupInteractedMessage() async {
     _exitNavigateBoard(initialMessage.data);
   }
 
+  // 앱이 백그라운드에 있을 때 알림 클릭 처리
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('A message was opened: ${message.data}');
+    _exitNavigateBoard(message.data);
+  });
+
   _navigateBoard();
 }
 
@@ -250,11 +256,19 @@ void _exitNavigateBoard(Map<String, dynamic> messageData) {
 
   print("Navigating to BoardDetailPage with ID: $id, Category: $category");
 
-  Get.toNamed(
-    '/detail-board',
-    arguments: {'announcementId': id, 'category': category},
-    preventDuplicates: false,
-  );
+  if (category == '공지') {
+    Get.toNamed(
+      '/detail-board',
+      arguments: {'announcementId': id, 'category': category},
+      preventDuplicates: false,
+    );
+  } else if (category == '팀원모집') {
+    Get.toNamed(
+      '/detail-recruit',
+      arguments: {'makeTeamId': id},
+      preventDuplicates: false,
+    );
+  }
 }
 
 // id와 category를 받아서 상세 페이지로 이동하는 메서드

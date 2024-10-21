@@ -1,16 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/projectExperience_model.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
+import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/setExperience_screen.dart';
+import 'package:frontend/services/login_services.dart';
 import 'package:provider/provider.dart';
 
 class ExperiencePage extends StatefulWidget {
   final List<ProjectExperience> experiences;
   final String name;
+  String? category = '';
 
-  const ExperiencePage({
+  ExperiencePage({
     required this.experiences,
     required this.name,
+    this.category,
     super.key,
   });
 
@@ -21,10 +26,23 @@ class ExperiencePage extends StatefulWidget {
 class ExperiencePageState extends State<ExperiencePage> {
   late List<bool> _isExpanded;
 
+  String? name;
+
   @override
   void initState() {
     super.initState();
     _isExpanded = List<bool>.filled(widget.experiences.length, false);
+
+    _loadCredentials();
+  }
+
+  // 사용자의 자격 증명을 불러오는 함수
+  Future<void> _loadCredentials() async {
+    final loginAPI = LoginAPI();
+    final credentials = await loginAPI.loadCredentials();
+    setState(() {
+      name = credentials['name'] ?? ''; // 사용자의 이름
+    });
   }
 
   @override
@@ -32,11 +50,21 @@ class ExperiencePageState extends State<ExperiencePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         toolbarHeight: 70,
         backgroundColor: Colors.white,
         leading: BackButton(
           onPressed: () {
-            Navigator.pop(context);
+            if (widget.category == 'recruit') {
+              Navigator.pop(context);
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyUserPage(),
+                ),
+              );
+            }
           },
         ),
       ),
@@ -102,78 +130,18 @@ class ExperiencePageState extends State<ExperiencePage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () async {
-                            final newExperiences = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SetExperiencePage(),
-                              ),
-                            );
-                            // 새로운 경험 리스트가 추가된 경우 리스트에 반영
-                            if (newExperiences != null &&
-                                newExperiences is List<ProjectExperience>) {
-                              setState(() {
-                                widget.experiences.addAll(newExperiences);
-                              });
-                              // 여러 개의 경험 추가 API 호출
-                              final provider =
-                                  context.read<ProjectExperienceProvider>();
-                              await provider
-                                  .createProjectExperiences(newExperiences);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blueAccent),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '경험 추가하기',
-                                style: TextStyle(
-                                  color: Colors.blueAccent,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: widget.experiences.length + 1,
-                        itemBuilder: (context, index) {
-                          // 마지막 항목에는 "경험 추가하기" 버튼을 배치
-                          if (index == widget.experiences.length) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: GestureDetector(
+                        (widget.name == name)
+                            ? GestureDetector(
                                 onTap: () async {
-                                  final newExperiences = await Navigator.push(
+                                  await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SetExperiencePage(),
+                                      builder: (context) => SetExperiencePage(
+                                        update: true,
+                                        name: widget.name,
+                                      ),
                                     ),
                                   );
-                                  // 새로운 경험 리스트가 추가된 경우 리스트에 반영
-                                  if (newExperiences != null &&
-                                      newExperiences
-                                          is List<ProjectExperience>) {
-                                    setState(() {
-                                      widget.experiences.addAll(newExperiences);
-                                    });
-                                    // 여러 개의 경험 추가 API 호출
-                                    final provider = context
-                                        .read<ProjectExperienceProvider>();
-                                    await provider.createProjectExperiences(
-                                        newExperiences);
-                                  }
                                 },
                                 child: Container(
                                   padding:
@@ -194,7 +162,77 @@ class ExperiencePageState extends State<ExperiencePage> {
                                     ),
                                   ),
                                 ),
-                              ),
+                              )
+                            : Container(),
+                      ],
+                    )
+                  else
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: widget.experiences.length + 1,
+                        itemBuilder: (context, index) {
+                          // 마지막 항목에는 "경험 추가하기" 버튼을 배치
+                          if (index == widget.experiences.length) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: (widget.name == name)
+                                  ? GestureDetector(
+                                      onTap: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                SetExperiencePage(
+                                              update: true,
+                                              name: widget.name,
+                                            ),
+                                          ),
+                                        );
+                                        // final newExperiences = await Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) => SetExperiencePage(
+                                        //       update: true,
+                                        //       name: widget.name,
+                                        //     ),
+                                        //   ),
+                                        // );
+                                        // // 새로운 경험 리스트가 추가된 경우 리스트에 반영
+                                        // if (newExperiences != null &&
+                                        //     newExperiences
+                                        //         is List<ProjectExperience>) {
+                                        //   setState(() {
+                                        //     widget.experiences.addAll(newExperiences);
+                                        //   });
+                                        //   // 여러 개의 경험 추가 API 호출
+                                        //   final provider = context
+                                        //       .read<ProjectExperienceProvider>();
+                                        //   await provider.createProjectExperiences(
+                                        //       newExperiences);
+                                        // }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.blueAccent),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: const Center(
+                                          child: Text(
+                                            '경험 추가하기',
+                                            style: TextStyle(
+                                              color: Colors.blueAccent,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Container(),
                             );
                           }
                           final experience = widget.experiences[index];

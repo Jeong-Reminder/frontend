@@ -263,7 +263,9 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
     return ChangeNotifierProvider(
       create: (context) => MakeTeamProvider(),
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
+          backgroundColor: Colors.white,
           scrolledUnderElevation: 0,
           toolbarHeight: 70,
           leading: Padding(
@@ -281,14 +283,6 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
           ),
           leadingWidth: 120,
           actions: const [
-            Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
-                Icons.add_alert,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
             Padding(
               padding: EdgeInsets.only(right: 20.0),
               child: Icon(
