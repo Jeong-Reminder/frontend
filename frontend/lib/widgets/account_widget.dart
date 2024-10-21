@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/changePW_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/privacyPolicy_screen.dart';
 import 'package:frontend/services/login_services.dart';
 
 class AccountWidget extends StatelessWidget {
@@ -13,7 +14,7 @@ class AccountWidget extends StatelessWidget {
       children: [
         // 계정 경계선
         const Divider(),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
 
         // 계정 제목
         const Text(
@@ -23,7 +24,7 @@ class AccountWidget extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
 
         // 비밀번호 변경 버튼
         TextButton(
@@ -48,7 +49,29 @@ class AccountWidget extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        // 개인정보처리방침 버튼
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PrivacyPolicyPage(),
+              ),
+            ); // PrivacyPolicyPage로 이동
+          },
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: const Text(
+            '개인정보처리방침',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF808080),
+            ),
+          ),
+        ),
 
         // 로그아웃 버튼
         TextButton(
