@@ -149,6 +149,19 @@ flutter:
     - assets/skilImages/notion.png
     - assets/skilImages/slack.png
     - assets/skilImages/zoom.png
+    - assets/skilImages/intellij.png
+    - assets/skilImages/notepad++.png
+    - assets/skilImages/androidStudio.png
+    - assets/skilImages/eclipse.png
+    - assets/skilImages/auth0.png
+    - assets/skilImages/jupyter.png
+    - assets/skilImages/stackOverflow.png
+    - assets/skilImages/postman.png
+    - assets/skilImages/nginx.png
+    - assets/skilImages/postgresql.png
+    - assets/skilImages/rabbitmq.png
+    - assets/skilImages/redis.png
+    - assets/skilImages/firebase.png
     - assets/skilImages/none.png
     - assets/skilImages/cLanguage.png
     - assets/skilImages/c++Language.png
@@ -162,6 +175,7 @@ flutter:
     - assets/skilImages/fortran.png
     - assets/skilImages/rust.png
     - assets/skilImages/R.png
+    - assets/skilImages/matlab.png
     - assets/icons/appstore.png
 # An image asset can refer to one or more resolution-specific "variants", see
 # https://flutter.dev/assets-and-images/#resolution-aware
