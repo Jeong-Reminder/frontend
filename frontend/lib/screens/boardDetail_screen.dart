@@ -458,7 +458,8 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                     // 투표 보기
                     if (board['votes'] != null &&
                         (board['votes'] as List).isNotEmpty &&
-                        (board['announcementLevel'] == level))
+                        (board['announcementLevel'] == level ||
+                            userRole == 'ROLE_ADMIN'))
                       Theme(
                         data: Theme.of(context)
                             .copyWith(dividerColor: Colors.transparent),
