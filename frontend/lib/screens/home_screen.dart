@@ -397,13 +397,16 @@ class _HomePageState extends State<HomePage> {
 
                       // 전체 공지에서 필독 상태인 공지만 필터링한 공지
                       if (userRole == 'ROLE_ADMIN') {
-                        mustBoardList = boardList;
+                        mustBoardList = boardList.where((board) {
+                          return board['announcementImportant'] == true;
+                        }).toList();
                       }
 
                       // 학생일 경우에는 학년까지 필터링해야 함
                       if (userRole == 'ROLE_USER') {
                         userBoardList = boardList.where((board) {
-                          return board['announcementLevel'] == level &&
+                          return (board['announcementLevel'] == level ||
+                                  board['announcementLevel'] == 0) &&
                               board['announcementImportant'] == true;
                         }).toList();
                       }
