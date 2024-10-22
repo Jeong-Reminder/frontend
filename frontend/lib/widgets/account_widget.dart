@@ -152,12 +152,15 @@ class AccountWidget extends StatelessWidget {
                     bool success = await loginAPI.logout();
                     if (success) {
                       // 로그인 화면으로 이동
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
-                      );
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                          (route) => false,
+                        );
+                      }
                     } else {
                       Navigator.pop(context);
                     }
