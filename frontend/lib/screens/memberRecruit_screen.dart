@@ -427,7 +427,8 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
               Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
-                children: categoryList.map((label) {
+                children: categoryList.toSet().map((label) {
+                  // 중복 제거를 위해 toSet() 사용
                   return GestureDetector(
                     onTap: () {
                       setState(() {
@@ -476,6 +477,7 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                   );
                 }).toList(),
               ),
+
               const SizedBox(height: 20),
               buildContent(), // 해당 경진대회에 따라 다른 콘텐츠 표시
             ],
