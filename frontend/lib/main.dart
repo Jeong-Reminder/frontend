@@ -202,6 +202,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _screenSize();
 
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
         GetPage(name: '/', page: () => const LoginPage()), // 로그인 페이지

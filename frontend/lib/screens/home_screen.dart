@@ -599,25 +599,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 20),
 
-                // 광고
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 10,
-                  decoration: BoxDecoration(
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/ad.png'),
-                      fit: BoxFit.fill,
-                    ),
-                    color: const Color(0xFFDBE7FB),
-                    borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
-                    border: Border.all(
-                      // 박스 테두리
-                      color: const Color(0xFF2B72E7).withOpacity(0.25),
-                      width: 1, // 두께
-                    ),
-                  ),
-                ),
-
                 // 달력
                 const Padding(
                   padding: EdgeInsets.only(top: 20),
