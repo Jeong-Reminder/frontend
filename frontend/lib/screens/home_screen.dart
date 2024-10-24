@@ -599,6 +599,61 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 20),
 
+                Container(
+                  // 세 번째 위젯 박스
+                  width: MediaQuery.of(context).size.width,
+
+                  padding: const EdgeInsets.all(20.0),
+                  margin: const EdgeInsets.only(right: 9.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDBE7FB),
+                    borderRadius: BorderRadius.circular(15.0), // 박스 둥근 비율
+                    border: Border.all(
+                      // 박스 테두리
+                      color: const Color(0xFF2B72E7).withOpacity(0.25),
+                      width: 1, // 두께
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '이런 경진대회라면 놓칠 수 없지!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                '정보통신공학과 학생만 가능한 경험',
+                                style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10.0),
+                                child: Image.asset(
+                                  'assets/images/light.png',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Image.asset(
+                        'assets/images/smile.png',
+                      ),
+                    ],
+                  ),
+                ),
+
                 // 달력
                 const Padding(
                   padding: EdgeInsets.only(top: 20),
