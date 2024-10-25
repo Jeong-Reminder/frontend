@@ -9,6 +9,7 @@ import 'package:frontend/screens/downloadImage_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
+import 'package:frontend/screens/notificationList_screen.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/update_screen.dart';
 import 'package:frontend/models/vote_model.dart';
@@ -535,6 +536,14 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         context,
         MaterialPageRoute(
           builder: (context) => const MyOwnerPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
+    } else if (category == '공지' || category == '팀원모집') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const NotificationListPage(), // 페이지로 직접 이동
         ),
         (route) => false, // 이전 모든 라우트를 제거
       );

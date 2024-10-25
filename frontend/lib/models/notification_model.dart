@@ -4,7 +4,7 @@ class NotificationModel {
   String? content;
   String? category;
   int? targetId;
-  String? createAt;
+  String? createdAt;
   bool? read;
 
   NotificationModel({
@@ -13,7 +13,7 @@ class NotificationModel {
     required this.content,
     required this.category,
     required this.targetId,
-    required this.createAt,
+    required this.createdAt,
     required this.read,
   });
 
@@ -23,6 +23,6 @@ class NotificationModel {
         content = json['content'],
         category = json['category'],
         targetId = json['targetId'],
-        createAt = json['createAt'],
+        createdAt = json['createdAt'],
         read = json['read'];
 }

@@ -2,12 +2,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/providers/announcement_provider.dart';
-import 'package:frontend/screens/boardDetail_screen.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
 import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
+import 'package:frontend/screens/notificationList_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -276,8 +276,15 @@ class _HomePageState extends State<HomePage> {
               child: Stack(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      _resetNotificationCount(); // 알림 아이콘을 클릭하면 카운트를 초기화
+                    onPressed: () async {
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationListPage(),
+                          ),
+                        );
+                      }
                     },
                     icon: const Icon(
                       Icons.add_alert,

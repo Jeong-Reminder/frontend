@@ -8,6 +8,7 @@ class NotificationProvider with ChangeNotifier {
   List<NotificationModel> get notificationList =>
       _notificationList; // 저장된 알림 리스트 호출 메서드
 
+  // 회원별 알림 조회
   Future<void> fetchNotification() async {
     List<NotificationModel> getNotificationList =
         await NotificationListService().fetchNotification();
