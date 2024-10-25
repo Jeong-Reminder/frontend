@@ -42,4 +42,29 @@ class NotificationService {
       print('푸쉬 알림 실패: ${response.statusCode} - ${response.body}');
     }
   }
+
+  // 알림 읽기
+  Future<void> readNotification(String messageId) async {
+    String baseUrl =
+        'https://reminder.sungkyul.ac.kr/api/v1/notifications/$messageId';
+
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final response = await http.put(
+      url,
+      headers: <String, String>{
+        'access': accessToken,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('앍기 읽기 성공: ${response.body}');
+    } else {
+      print('알림 읽기 실패: ${response.statusCode} - ${response.body}');
+    }
+  }
 }
