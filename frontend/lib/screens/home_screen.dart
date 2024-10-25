@@ -1,7 +1,8 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/screens/dashboard_screen.dart';
+import 'package:frontend/models/notification_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
+import 'package:frontend/providers/notification_provider.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -57,6 +58,8 @@ class _HomePageState extends State<HomePage> {
   int? level;
   int notificationCount = 0; // 알림 카운트를 위한 변수
 
+  List<NotificationModel> notifyList = [];
+  List<Map<String, dynamic>> boardList = [];
   List<Map<String, dynamic>> voteList = [
     {
       "name": "1차 증원 투표",
@@ -75,56 +78,35 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-  Future<List<Map<String, dynamic>>>? boardList;
-
   // 위젯의 상태 초기화
   @override
   void initState() {
     super.initState();
     _selectedDay = _focuseDay;
 
-    // Firebase 메시지 초기화
-    _initializeFirebaseMessaging();
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Provider.of<AnnouncementProvider>(context, listen: false)
           .fetchAllBoards();
 
+      if (context.mounted) {
+        await Provider.of<NotificationProvider>(context, listen: false)
+            .fetchNotification();
+      }
+
       setState(() {
-        boardList = getData();
+        boardList =
+            Provider.of<AnnouncementProvider>(context, listen: false).boardList;
+        notifyList = Provider.of<NotificationProvider>(context, listen: false)
+            .notificationList;
       });
     });
+    getData();
 
     _loadCredentials();
   }
 
-  // // 비동기 초기화 메서드
-  // Future<void> _initializeData() async {
-  //   await Provider.of<AnnouncementProvider>(context, listen: false)
-  //       .fetchAllBoards();
-  //   getData(); // 전체 공지 api가 먼저 호출되어야 홈화면에 공지를 띄울 수 있음.
-  // }
-
-  // Firebase 메시지 수신을 위한 초기화 함수
-  void _initializeFirebaseMessaging() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      setState(() {
-        notificationCount += 1; // 알림이 수신되면 카운트를 증가시킴
-      });
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      setState(() {
-        notificationCount += 1; // 앱이 열릴 때도 알림 카운트 증가
-      });
-    });
-  }
-
-  // 알림 카운트 리셋 함수 (사용자가 알림 아이콘을 눌렀을 때 호출)
-  void _resetNotificationCount() {
-    setState(() {
-      notificationCount = 0; // 알림 카운트 초기화
-    });
+  Future<List<Map<String, dynamic>>> getData() async {
+    return Provider.of<AnnouncementProvider>(context, listen: false).boardList;
   }
 
   // 역할을 로드하는 메서드
@@ -241,6 +223,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 아직 읽지 않았고 전체 게시글과 알림 리스트 아이디가 서로 동일한 리스트 출력
+    List<NotificationModel> falseList = notifyList.where((notify) {
+      return notify.read == false;
+    }).where((bd) {
+      return boardList.any((b) => b['id'] == bd.targetId);
+    }).toList();
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -292,10 +281,10 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.black,
                     ),
                   ),
-                  if (notificationCount > 0) // 알림이 있으면 숫자를 표시
+                  if (falseList.isNotEmpty) // 알림이 있으면 숫자를 표시
                     Positioned(
-                      right: 0,
-                      top: 0,
+                      right: 12,
+                      top: 5,
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -303,17 +292,8 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '$notificationCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
+                          minWidth: 6,
+                          minHeight: 6,
                         ),
                       ),
                     ),
@@ -374,7 +354,7 @@ class _HomePageState extends State<HomePage> {
 
                 // 필독 공지들
                 FutureBuilder<List<Map<String, dynamic>>>(
-                  future: boardList,
+                  future: getData(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -728,9 +708,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-
-  Future<List<Map<String, dynamic>>> getData() async {
-    return Provider.of<AnnouncementProvider>(context, listen: false).boardList;
   }
 }
