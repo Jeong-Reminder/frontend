@@ -16,8 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+16
-
+version: 1.0.0+17
 
 environment:
     sdk: '>=3.2.3 <4.0.0'
@@ -31,7 +30,6 @@ environment:
 dependencies:
     flutter:
         sdk: flutter
-
 
     cupertino_icons: ^1.0.2
     image_picker: ^1.0.8
@@ -64,13 +62,20 @@ dependencies:
     url_launcher_ios: ^6.2.4
     share: ^2.0.4
     flutter_cache_manager: ^3.3.1
-
+    flutter_native_splash: ^2.4.1
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
     flutter_lints: ^4.0.0
     flutter_launcher_icons: ^0.13.1
+
+flutter_native_splash:
+    color: '#ffffff' # 스플래시 화면 배경색
+    image: assets/images/splashimage.png # 스플래시 화면에 사용할 이미지
+    android: true # 안드로이드에만 적용
+    ios: false # iOS는 적용하지 않음
+    fullscreen: true # 전체화면 모드
 
 # flutter_launcher_icons 설정
 flutter_launcher_icons:
@@ -134,6 +139,7 @@ flutter:
         - assets/images/Folder_send_light.png
         - assets/images/frust.png
         - assets/images/ad.png
+        - assets/images/splashimage.png
         - assets/skilImages/typescript.png
         - assets/skilImages/javascript.png
         - assets/skilImages/tailwindcss.png
