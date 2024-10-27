@@ -1,8 +1,8 @@
 name: frontend
-description: "A new Flutter project."
+description: 'A new Flutter project.'
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: "none" # Remove this line if you wish to publish to pub.dev
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+17
 
 environment:
-  sdk: ">=3.2.3 <4.0.0"
+    sdk: '>=3.2.3 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -64,12 +64,11 @@ dependencies:
     flutter_cache_manager: ^3.3.1
     flutter_native_splash: ^2.4.1
 
-
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^4.0.0
-  flutter_launcher_icons: ^0.13.1
+    flutter_test:
+        sdk: flutter
+    flutter_lints: ^4.0.0
+    flutter_launcher_icons: ^0.13.1
 
 flutter_native_splash:
     color: '#ffffff' # 스플래시 화면 배경색
@@ -80,32 +79,32 @@ flutter_native_splash:
 
 # flutter_launcher_icons 설정
 flutter_launcher_icons:
-  android: "launcher_icon" # 안드로이드용 아이콘 생성 여부
-  ios: true # iOS용 아이콘 생성 여부
-  image_path: "assets/icons/appstore.png" # 아이콘 경로
-  min_sdk_android: 21 # 안드로이드 최소 SDK 설정
-  web:
-    generate: true # 웹용 아이콘 생성 여부
-    image_path: "assets/icons/appstore.png" # 웹 아이콘 경로
-    background_color: "#hexcode" # 웹용 배경 색상
-    theme_color: "#hexcode" # 웹용 테마 색상
-  windows:
-    generate: true # 윈도우용 아이콘 생성 여부
-    image_path: "assets/icons/appstore.png" # 윈도우 아이콘 경로
-    icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
-  macos:
-    generate: true # macOS용 아이콘 생성 여부
-    image_path: "assets/icons/appstore.png" # macOS 아이콘 경로
+    android: 'launcher_icon' # 안드로이드용 아이콘 생성 여부
+    ios: true # iOS용 아이콘 생성 여부
+    image_path: 'assets/icons/appstore.png' # 아이콘 경로
+    min_sdk_android: 21 # 안드로이드 최소 SDK 설정
+    web:
+        generate: true # 웹용 아이콘 생성 여부
+        image_path: 'assets/icons/appstore.png' # 웹 아이콘 경로
+        background_color: '#hexcode' # 웹용 배경 색상
+        theme_color: '#hexcode' # 웹용 테마 색상
+    windows:
+        generate: true # 윈도우용 아이콘 생성 여부
+        image_path: 'assets/icons/appstore.png' # 윈도우 아이콘 경로
+        icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
+    macos:
+        generate: true # macOS용 아이콘 생성 여부
+        image_path: 'assets/icons/appstore.png' # macOS 아이콘 경로
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
-  uses-material-design: true
+    # The following line ensures that the Material Icons font is
+    # included with your application, so that you can use the icons in
+    # the material Icons class.
+    uses-material-design: true
 
     # To add assets to your application, add an assets section, like this:
     assets:
@@ -189,7 +188,6 @@ flutter:
         - assets/skilImages/R.png
         - assets/skilImages/matlab.png
         - assets/icons/appstore.png
-
 # An image asset can refer to one or more resolution-specific "variants", see
 # https://flutter.dev/assets-and-images/#resolution-aware
 
