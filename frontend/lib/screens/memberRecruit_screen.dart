@@ -3,11 +3,11 @@ import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/screens/makeTeam_screen.dart';
+import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/screens/recruitDetail_screen.dart';
 
 class MemberRecruitPage extends StatefulWidget {
   const MemberRecruitPage({super.key});
@@ -243,9 +243,17 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
     // 로딩 중일 때 로딩 인디케이터 표시
     if (isLoading) {
       return const Center(
-          child: CircularProgressIndicator(
-        color: Color(0xFF2A72E7),
-      ));
+        child: CircularProgressIndicator(
+          color: Color(0xFF2A72E7),
+        ),
+      );
+    }
+
+    // 공지글이 아예 없는 경우
+    if (cateBoardList.isEmpty) {
+      return const Center(
+        child: Text('작성된 카테고리가 없습니다'),
+      );
     }
 
     // 사용자가 아무 버튼도 선택하지 않은 경우
@@ -325,12 +333,25 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => const MyUserPage(),
-                //   ),
-                // );
+                if (userRole == 'ROLE_USER') {
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyUserPage(),
+                      ),
+                    );
+                  }
+                } else if (userRole == 'ROLE_ADMIN') {
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyOwnerPage(),
+                      ),
+                    );
+                  }
+                }
 
                 print('recruitList: $recruitList');
               },
