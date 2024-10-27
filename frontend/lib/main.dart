@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
+import 'package:frontend/providers/notification_provider.dart';
 import 'package:frontend/providers/profile_provider.dart';
 import 'package:frontend/providers/projectExperience_provider.dart';
 import 'package:frontend/providers/teamApply_provider.dart';
@@ -133,6 +134,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AnnouncementProvider()),
         ChangeNotifierProvider(create: (_) => VoteProvider()),
         ChangeNotifierProvider(create: (_) => TeamApplyProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const MyApp(),
     ),
@@ -202,6 +204,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _screenSize();
 
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
         GetPage(name: '/', page: () => const LoginPage()), // 로그인 페이지

@@ -72,8 +72,6 @@
 		<key>NSUbiquitousContainerIsDocumentScopePublic</key>
 		<true/>
 	</dict>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>We need access to your tracking information to provide a better experience.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
