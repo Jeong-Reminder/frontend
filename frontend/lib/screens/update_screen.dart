@@ -10,6 +10,7 @@ import 'package:frontend/screens/myOwnerPage_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -575,6 +576,21 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () async {
           try {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return Center(
+                  child: Lottie.asset(
+                    'assets/loading/Animation - 1730082233943.json',
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
+            );
+
             // 게시글
             final board = Board(
               announcementCategory: getSelectedCategoryText(),
@@ -588,6 +604,8 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             await Provider.of<AnnouncementProvider>(context, listen: false)
                 .updateBoard(board, pickedImages, pickedFiles,
                     widget.board['id'], context);
+
+            Navigator.pop(context);
           } catch (e) {
             print(e.toString());
           }

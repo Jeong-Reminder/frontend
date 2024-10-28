@@ -17,6 +17,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
     as picker;
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:lottie/lottie.dart';
 
 class BoardWritePage extends StatefulWidget {
   final String category;
@@ -466,71 +467,90 @@ class _BoardWritePageState extends State<BoardWritePage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () async {
           try {
-            // 게시글 작성 API
-            final board = Board(
-              announcementCategory: getSelectedCategoryText(),
-              announcementTitle: titleController.text,
-              announcementContent: contentController.text,
-              announcementImportant: isMustRead,
-              visible: true,
-              announcementLevel: getSelectedGradeInt(),
+            // 로딩 다이얼로그 표시
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return Center(
+                  child: Lottie.asset(
+                    'assets/loading/Animation - 1730082233943.json',
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
             );
 
-            final boardId = await AnnouncementProvider()
-                .createBoard(board, pickedImages, pickedFiles);
+            // // 게시글 작성 API
+            // final board = Board(
+            //   announcementCategory: getSelectedCategoryText(),
+            //   announcementTitle: titleController.text,
+            //   announcementContent: contentController.text,
+            //   announcementImportant: isMustRead,
+            //   visible: true,
+            //   announcementLevel: getSelectedGradeInt(),
+            // );
 
-            print('boardId: $boardId');
+            // final boardId = await AnnouncementProvider()
+            //     .createBoard(board, pickedImages, pickedFiles);
 
-            if (isConfirmedVote) {
-              // 투표 생성 API
-              final vote = Vote(
-                subjectTitle: voteTitleController.text,
-                repetition: isMultiplied,
-                additional: true,
-                announcementId: boardId,
-                endDateTime: formatDateTime(selectedEndDate!),
-                // voteItemIds: [],
-              );
+            // print('boardId: $boardId');
 
-              await VoteProvider().createVote(vote, boardId);
-            }
+            // if (isConfirmedVote) {
+            //   // 투표 생성 API
+            //   final vote = Vote(
+            //     subjectTitle: voteTitleController.text,
+            //     repetition: isMultiplied,
+            //     additional: true,
+            //     announcementId: boardId,
+            //     endDateTime: formatDateTime(selectedEndDate!),
+            //     // voteItemIds: [],
+            //   );
 
-            if (context.mounted) {
-              if (widget.category == 'TOTAL') {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
-                  ),
-                  (route) => false, // 이전 모든 라우트를 제거
-                );
-              } else if (widget.category == 'ACADEMIC_ALL') {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
-                  ),
-                  (route) => false, // 이전 모든 라우트를 제거
-                );
-              } else if (widget.category == 'CONTEST') {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const ContestBoardPage(), // 페이지로 직접 이동
-                  ),
-                  (route) => false, // 이전 모든 라우트를 제거
-                );
-              } else if (widget.category == 'CORSEA') {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
-                  ),
-                  (route) => false, // 이전 모든 라우트를 제거
-                );
-              }
-            }
+            //   await VoteProvider().createVote(vote, boardId);
+            // }
+
+            // // 다이얼로그 닫기
+            // Navigator.pop(context);
+
+            // if (context.mounted) {
+            //   if (widget.category == 'TOTAL') {
+            //     Navigator.pushAndRemoveUntil(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
+            //       ),
+            //       (route) => false, // 이전 모든 라우트를 제거
+            //     );
+            //   } else if (widget.category == 'ACADEMIC_ALL') {
+            //     Navigator.pushAndRemoveUntil(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
+            //       ),
+            //       (route) => false, // 이전 모든 라우트를 제거
+            //     );
+            //   } else if (widget.category == 'CONTEST') {
+            //     Navigator.pushAndRemoveUntil(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) =>
+            //             const ContestBoardPage(), // 페이지로 직접 이동
+            //       ),
+            //       (route) => false, // 이전 모든 라우트를 제거
+            //     );
+            //   } else if (widget.category == 'CORSEA') {
+            //     Navigator.pushAndRemoveUntil(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
+            //       ),
+            //       (route) => false, // 이전 모든 라우트를 제거
+            //     );
+            //   }
+            // }
           } catch (e) {
             print(e.toString());
           }
