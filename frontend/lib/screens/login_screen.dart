@@ -5,6 +5,7 @@ import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/setExperience_screen.dart';
 import 'package:frontend/screens/setProfile_screen.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -98,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // 역할에 따라 페이지로 이동하는 함수
-  void _navigateBasedOnRole(String role) {
+  void _navigateBasedOnRole(String role) async {
     if (role == 'ROLE_ADMIN') {
       Navigator.pushReplacement(
         context,
@@ -107,12 +108,36 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } else if (role == 'ROLE_USER') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
+      RemoteMessage? initialMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
+
+      if (initialMessage != null) {
+        Map<String, dynamic> messageData = initialMessage.data;
+
+        final int id = int.parse(messageData['targetId'].toString());
+        final String category = messageData['category'].toString();
+
+        if (category == '공지') {
+          Get.toNamed(
+            '/detail-board',
+            arguments: {'announcementId': id, 'category': category},
+          );
+        } else if (category == '팀원모집') {
+          Get.toNamed(
+            '/detail-recruit',
+            arguments: {'makeTeamId': id},
+          );
+        }
+      } else {
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ),
+          );
+        }
+      }
     }
   }
 
