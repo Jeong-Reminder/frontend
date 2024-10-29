@@ -484,73 +484,73 @@ class _BoardWritePageState extends State<BoardWritePage> {
             );
 
             // // 게시글 작성 API
-            // final board = Board(
-            //   announcementCategory: getSelectedCategoryText(),
-            //   announcementTitle: titleController.text,
-            //   announcementContent: contentController.text,
-            //   announcementImportant: isMustRead,
-            //   visible: true,
-            //   announcementLevel: getSelectedGradeInt(),
-            // );
+            final board = Board(
+              announcementCategory: getSelectedCategoryText(),
+              announcementTitle: titleController.text,
+              announcementContent: contentController.text,
+              announcementImportant: isMustRead,
+              visible: true,
+              announcementLevel: getSelectedGradeInt(),
+            );
 
-            // final boardId = await AnnouncementProvider()
-            //     .createBoard(board, pickedImages, pickedFiles);
+            final boardId = await AnnouncementProvider()
+                .createBoard(board, pickedImages, pickedFiles);
 
-            // print('boardId: $boardId');
+            print('boardId: $boardId');
 
-            // if (isConfirmedVote) {
-            //   // 투표 생성 API
-            //   final vote = Vote(
-            //     subjectTitle: voteTitleController.text,
-            //     repetition: isMultiplied,
-            //     additional: true,
-            //     announcementId: boardId,
-            //     endDateTime: formatDateTime(selectedEndDate!),
-            //     // voteItemIds: [],
-            //   );
+            if (isConfirmedVote) {
+              // 투표 생성 API
+              final vote = Vote(
+                subjectTitle: voteTitleController.text,
+                repetition: isMultiplied,
+                additional: true,
+                announcementId: boardId,
+                endDateTime: formatDateTime(selectedEndDate!),
+                // voteItemIds: [],
+              );
 
-            //   await VoteProvider().createVote(vote, boardId);
-            // }
+              await VoteProvider().createVote(vote, boardId);
+            }
 
-            // // 다이얼로그 닫기
-            // Navigator.pop(context);
+            // 다이얼로그 닫기
+            Navigator.pop(context);
 
-            // if (context.mounted) {
-            //   if (widget.category == 'TOTAL') {
-            //     Navigator.pushAndRemoveUntil(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
-            //       ),
-            //       (route) => false, // 이전 모든 라우트를 제거
-            //     );
-            //   } else if (widget.category == 'ACADEMIC_ALL') {
-            //     Navigator.pushAndRemoveUntil(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
-            //       ),
-            //       (route) => false, // 이전 모든 라우트를 제거
-            //     );
-            //   } else if (widget.category == 'CONTEST') {
-            //     Navigator.pushAndRemoveUntil(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) =>
-            //             const ContestBoardPage(), // 페이지로 직접 이동
-            //       ),
-            //       (route) => false, // 이전 모든 라우트를 제거
-            //     );
-            //   } else if (widget.category == 'CORSEA') {
-            //     Navigator.pushAndRemoveUntil(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
-            //       ),
-            //       (route) => false, // 이전 모든 라우트를 제거
-            //     );
-            //   }
-            // }
+            if (context.mounted) {
+              if (widget.category == 'TOTAL') {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TotalBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
+              } else if (widget.category == 'ACADEMIC_ALL') {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const GradeBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
+              } else if (widget.category == 'CONTEST') {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const ContestBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
+              } else if (widget.category == 'CORSEA') {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CorSeaBoardPage(), // 페이지로 직접 이동
+                  ),
+                  (route) => false, // 이전 모든 라우트를 제거
+                );
+              }
+            }
           } catch (e) {
             print(e.toString());
           }

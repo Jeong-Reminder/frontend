@@ -1,8 +1,8 @@
 name: frontend
-description: 'A new Flutter project.'
+description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+17
 
 environment:
-    sdk: '>=3.2.3 <4.0.0'
+  sdk: ">=3.2.3 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -28,166 +28,169 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-    flutter:
-        sdk: flutter
+  flutter:
+    sdk: flutter
 
-    cupertino_icons: ^1.0.2
-    image_picker: ^1.0.8
-    table_calendar: ^3.1.1
-    flutter_datetime_picker_plus: ^2.2.0
-    intl: ^0.19.0
-    badges: ^3.1.2
-    percent_indicator: ^4.2.3
-    file_picker: ^8.0.0+1
-    excel: ^4.0.3
-    http: ^1.2.0
-    shared_preferences: ^2.2.3
-    cookie_jar: ^4.0.8
-    path_provider: ^2.1.4
-    jwt_decoder: ^2.0.1
-    path: ^1.8.3
-    provider: ^6.1.2
-    toggle_switch: ^2.3.0
-    url_launcher: ^6.3.0
-    firebase_core: ^2.1.7
-    firebase_auth: ^4.4.0
-    firebase_messaging: ^14.4.0
-    firebase_core_platform_interface: ^5.1.0
-    firebase_analytics: ^10.8.0
-    flutter_local_notifications: ^17.2.1+2
-    get: ^4.6.6
-    convert: ^3.1.1
-    permission_handler: ^11.3.1
-    share_plus: ^7.2.2
-    url_launcher_ios: ^6.2.4
-    share: ^2.0.4
-    flutter_cache_manager: ^3.3.1
-    flutter_native_splash: ^2.4.1
+  cupertino_icons: ^1.0.2
+  image_picker: ^1.0.8
+  table_calendar: ^3.1.1
+  flutter_datetime_picker_plus: ^2.2.0
+  intl: ^0.19.0
+  badges: ^3.1.2
+  percent_indicator: ^4.2.3
+  file_picker: ^8.0.0+1
+  excel: ^4.0.3
+  http: ^1.2.0
+  shared_preferences: ^2.2.3
+  cookie_jar: ^4.0.8
+  path_provider: ^2.1.4
+  jwt_decoder: ^2.0.1
+  path: ^1.8.3
+  provider: ^6.1.2
+  toggle_switch: ^2.3.0
+  url_launcher: ^6.3.0
+  firebase_core: ^2.1.7
+  firebase_auth: ^4.4.0
+  firebase_messaging: ^14.4.0
+  firebase_core_platform_interface: ^5.1.0
+  firebase_analytics: ^10.8.0
+  flutter_local_notifications: ^17.2.1+2
+  get: ^4.6.6
+  convert: ^3.1.1
+  permission_handler: ^11.3.1
+  share_plus: ^7.2.2
+  url_launcher_ios: ^6.2.4
+  share: ^2.0.4
+  flutter_cache_manager: ^3.3.1
+  flutter_native_splash: ^2.3.10
+  lottie: ^3.1.3
 
 dev_dependencies:
-    flutter_test:
-        sdk: flutter
-    flutter_lints: ^4.0.0
-    flutter_launcher_icons: ^0.13.1
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter_native_splash:
-    color: '#ffffff' # 스플래시 화면 배경색
-    image: assets/images/splashimage.png # 스플래시 화면에 사용할 이미지
-    android: true # 안드로이드에만 적용
-    ios: false # iOS는 적용하지 않음
-    fullscreen: true # 전체화면 모드
+  color: "#ffffff" # 스플래시 화면 배경색
+  image: assets/images/splashimage.png # 스플래시 화면에 사용할 이미지
+  android: true # 안드로이드에만 적용
+  ios: false # iOS는 적용하지 않음
+  fullscreen: true # 전체화면 모드
 
 # flutter_launcher_icons 설정
 flutter_launcher_icons:
-    android: 'launcher_icon' # 안드로이드용 아이콘 생성 여부
-    ios: true # iOS용 아이콘 생성 여부
-    image_path: 'assets/icons/appstore.png' # 아이콘 경로
-    min_sdk_android: 21 # 안드로이드 최소 SDK 설정
-    web:
-        generate: true # 웹용 아이콘 생성 여부
-        image_path: 'assets/icons/appstore.png' # 웹 아이콘 경로
-        background_color: '#hexcode' # 웹용 배경 색상
-        theme_color: '#hexcode' # 웹용 테마 색상
-    windows:
-        generate: true # 윈도우용 아이콘 생성 여부
-        image_path: 'assets/icons/appstore.png' # 윈도우 아이콘 경로
-        icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
-    macos:
-        generate: true # macOS용 아이콘 생성 여부
-        image_path: 'assets/icons/appstore.png' # macOS 아이콘 경로
+  android: "launcher_icon" # 안드로이드용 아이콘 생성 여부
+  ios: true # iOS용 아이콘 생성 여부
+  image_path: "assets/icons/appstore.png" # 아이콘 경로
+  min_sdk_android: 21 # 안드로이드 최소 SDK 설정
+  web:
+    generate: true # 웹용 아이콘 생성 여부
+    image_path: "assets/icons/appstore.png" # 웹 아이콘 경로
+    background_color: "#hexcode" # 웹용 배경 색상
+    theme_color: "#hexcode" # 웹용 테마 색상
+  windows:
+    generate: true # 윈도우용 아이콘 생성 여부
+    image_path: "assets/icons/appstore.png" # 윈도우 아이콘 경로
+    icon_size: 48 # 윈도우 아이콘 크기 (기본값: 48)
+  macos:
+    generate: true # macOS용 아이콘 생성 여부
+    image_path: "assets/icons/appstore.png" # macOS 아이콘 경로
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-    # The following line ensures that the Material Icons font is
-    # included with your application, so that you can use the icons in
-    # the material Icons class.
-    uses-material-design: true
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
 
-    # To add assets to your application, add an assets section, like this:
-    assets:
-        - assets/images/sungkyul.png
-        - assets/images/mustRead.png
-        - assets/images/coloredMustRead.png
-        - assets/images/vote.png
-        - assets/images/logo.png
-        - assets/images/general.png
-        - assets/images/grade.png
-        - assets/images/competition.png
-        - assets/images/company.png
-        - assets/images/etc.png
-        - assets/images/light.png
-        - assets/images/smile.png
-        - assets/images/good.png
-        - assets/images/votecheck.png
-        - assets/images/addsquare.png
-        - assets/images/classselect.png
-        - assets/images/contestnotice.png
-        - assets/images/profile.png
-        - assets/images/cyclingPerson.png
-        - assets/images/billiard.png
-        - assets/images/projectExperience.png
-        - assets/images/githubLogo.png
-        - assets/images/calendar.png
-        - assets/images/send.png
-        - assets/images/userInfoImg.png
-        - assets/images/homeImg.png
-        - assets/images/contestImg.png
-        - assets/images/filtering.png
-        - assets/images/Folder_send_light.png
-        - assets/images/frust.png
-        - assets/images/ad.png
-        - assets/images/notification.png
-        - assets/images/recruit.png
-        - assets/images/splashimage.png
-        - assets/skilImages/typescript.png
-        - assets/skilImages/javascript.png
-        - assets/skilImages/tailwindcss.png
-        - assets/skilImages/docker.png
-        - assets/skilImages/eslint.png
-        - assets/skilImages/figma.png
-        - assets/skilImages/html.png
-        - assets/skilImages/npm.png
-        - assets/skilImages/prettier.png
-        - assets/skilImages/react.png
-        - assets/skilImages/vscode.png
-        - assets/skilImages/css.png
-        - assets/skilImages/yarn.png
-        - assets/skilImages/discord.png
-        - assets/skilImages/github.png
-        - assets/skilImages/notion.png
-        - assets/skilImages/slack.png
-        - assets/skilImages/zoom.png
-        - assets/skilImages/intellij.png
-        - assets/skilImages/notepad++.png
-        - assets/skilImages/androidStudio.png
-        - assets/skilImages/eclipse.png
-        - assets/skilImages/auth0.png
-        - assets/skilImages/jupyter.png
-        - assets/skilImages/stackOverflow.png
-        - assets/skilImages/postman.png
-        - assets/skilImages/nginx.png
-        - assets/skilImages/postgresql.png
-        - assets/skilImages/rabbitmq.png
-        - assets/skilImages/redis.png
-        - assets/skilImages/firebase.png
-        - assets/skilImages/none.png
-        - assets/skilImages/cLanguage.png
-        - assets/skilImages/c++Language.png
-        - assets/skilImages/java.png
-        - assets/skilImages/ruby.png
-        - assets/skilImages/python.png
-        - assets/skilImages/php.png
-        - assets/skilImages/dart.png
-        - assets/skilImages/swift.png
-        - assets/skilImages/kotlin.png
-        - assets/skilImages/fortran.png
-        - assets/skilImages/rust.png
-        - assets/skilImages/R.png
-        - assets/skilImages/matlab.png
-        - assets/icons/appstore.png
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/sungkyul.png
+    - assets/images/mustRead.png
+    - assets/images/coloredMustRead.png
+    - assets/images/vote.png
+    - assets/images/logo.png
+    - assets/images/general.png
+    - assets/images/grade.png
+    - assets/images/competition.png
+    - assets/images/company.png
+    - assets/images/etc.png
+    - assets/images/light.png
+    - assets/images/smile.png
+    - assets/images/good.png
+    - assets/images/votecheck.png
+    - assets/images/addsquare.png
+    - assets/images/classselect.png
+    - assets/images/contestnotice.png
+    - assets/images/profile.png
+    - assets/images/cyclingPerson.png
+    - assets/images/billiard.png
+    - assets/images/projectExperience.png
+    - assets/images/githubLogo.png
+    - assets/images/calendar.png
+    - assets/images/send.png
+    - assets/images/userInfoImg.png
+    - assets/images/homeImg.png
+    - assets/images/contestImg.png
+    - assets/images/filtering.png
+    - assets/images/Folder_send_light.png
+    - assets/images/frust.png
+    - assets/images/ad.png
+    - assets/images/notification.png
+    - assets/images/recruit.png
+    - assets/images/splashimage.png
+    - assets/skilImages/typescript.png
+    - assets/skilImages/javascript.png
+    - assets/skilImages/tailwindcss.png
+    - assets/skilImages/docker.png
+    - assets/skilImages/eslint.png
+    - assets/skilImages/figma.png
+    - assets/skilImages/html.png
+    - assets/skilImages/npm.png
+    - assets/skilImages/prettier.png
+    - assets/skilImages/react.png
+    - assets/skilImages/vscode.png
+    - assets/skilImages/css.png
+    - assets/skilImages/yarn.png
+    - assets/skilImages/discord.png
+    - assets/skilImages/github.png
+    - assets/skilImages/notion.png
+    - assets/skilImages/slack.png
+    - assets/skilImages/zoom.png
+    - assets/skilImages/intellij.png
+    - assets/skilImages/notepad++.png
+    - assets/skilImages/androidStudio.png
+    - assets/skilImages/eclipse.png
+    - assets/skilImages/auth0.png
+    - assets/skilImages/jupyter.png
+    - assets/skilImages/stackOverflow.png
+    - assets/skilImages/postman.png
+    - assets/skilImages/nginx.png
+    - assets/skilImages/postgresql.png
+    - assets/skilImages/rabbitmq.png
+    - assets/skilImages/redis.png
+    - assets/skilImages/firebase.png
+    - assets/skilImages/none.png
+    - assets/skilImages/cLanguage.png
+    - assets/skilImages/c++Language.png
+    - assets/skilImages/java.png
+    - assets/skilImages/ruby.png
+    - assets/skilImages/python.png
+    - assets/skilImages/php.png
+    - assets/skilImages/dart.png
+    - assets/skilImages/swift.png
+    - assets/skilImages/kotlin.png
+    - assets/skilImages/fortran.png
+    - assets/skilImages/rust.png
+    - assets/skilImages/R.png
+    - assets/skilImages/matlab.png
+    - assets/icons/appstore.png
+    - assets/loading/Animation - 1730082233943.json
+    - assets/ca/star.sungkyul.ac.kr.cert.pem
 # An image asset can refer to one or more resolution-specific "variants", see
 # https://flutter.dev/assets-and-images/#resolution-aware
 
