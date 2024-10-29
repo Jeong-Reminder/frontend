@@ -3,6 +3,7 @@ import 'package:frontend/models/notification_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/notification_provider.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/notificationList_service.dart';
 import 'package:frontend/services/notification_services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -111,14 +112,14 @@ class _NotificationListPageState extends State<NotificationListPage>
 
             // 알림 공지
             FutureBuilder<List<NotificationModel>>(
-              future: getNoticiationData(),
+              future: NotificationListService().fetchNotification(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('snapshot.data가 비어있음'));
+                  return const Center(child: Text('알림이 없습니다.'));
                 } else {
                   // cateIndex와 read 상태에 따라 필터링된 알림 리스트에서
                   // 현재 게시된 게시글 아이디(b['id'])와 필터링된 알림 리스트 아이디(bd.targetId)가 동일하면 필터링

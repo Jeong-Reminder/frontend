@@ -17,6 +17,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
     as picker;
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'package:lottie/lottie.dart';
 
 class BoardWritePage extends StatefulWidget {
   final String category;
@@ -466,7 +467,23 @@ class _BoardWritePageState extends State<BoardWritePage> {
       bottomNavigationBar: ElevatedButton(
         onPressed: () async {
           try {
-            // 게시글 작성 API
+            // 로딩 다이얼로그 표시
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return Center(
+                  child: Lottie.asset(
+                    'assets/loading/Animation - 1730082233943.json',
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                );
+              },
+            );
+
+            // // 게시글 작성 API
             final board = Board(
               announcementCategory: getSelectedCategoryText(),
               announcementTitle: titleController.text,
@@ -494,6 +511,9 @@ class _BoardWritePageState extends State<BoardWritePage> {
 
               await VoteProvider().createVote(vote, boardId);
             }
+
+            // 다이얼로그 닫기
+            Navigator.pop(context);
 
             if (context.mounted) {
               if (widget.category == 'TOTAL') {

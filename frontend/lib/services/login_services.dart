@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:frontend/providers/profile_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginAPI {
@@ -162,9 +160,6 @@ class LoginAPI {
   // 로그인 API
   Future<Map<String, dynamic>> handleLogin(BuildContext context,
       String studentId, String password, String fcmToken) async {
-    // HttpOverrides 설정
-    HttpOverrides.global = MyHttpOverrides();
-
     try {
       final url = Uri.parse(loginAddress);
 

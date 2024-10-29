@@ -260,54 +260,54 @@ class _HomePageState extends State<HomePage> {
           leadingWidth: 120,
           actions: [
             // 알림 아이콘
-            Padding(
-              padding: const EdgeInsets.only(right: 20.0),
-              child: Stack(
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      if (context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NotificationListPage(),
-                          ),
-                        );
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.add_alert,
-                      size: 30,
-                      color: Colors.black,
-                    ),
-                  ),
-                  if (falseList.isNotEmpty) // 알림이 있으면 숫자를 표시
-                    Positioned(
-                      right: 12,
-                      top: 5,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 6,
-                          minHeight: 6,
-                        ),
+            if (userRole == 'ROLE_USER')
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: Stack(
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const NotificationListPage(),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.add_alert,
+                        size: 30,
+                        color: Colors.black,
                       ),
                     ),
-                ],
+                    if (falseList.isNotEmpty) // 알림이 있으면 숫자를 표시
+                      Positioned(
+                        right: 12,
+                        top: 5,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 6,
+                            minHeight: 6,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
 
             // 프로필 아이콘
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
                 onTap: () async {
-                  print('알림 수: $notificationCount');
-
                   if (userRole == 'ROLE_USER') {
                     if (context.mounted) {
                       Navigator.push(
@@ -327,6 +327,13 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
                   }
+
+                  // 3초 후 다이얼로그 닫기
+                  Future.delayed(const Duration(seconds: 3), () {
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  });
                 },
                 child: const Icon(
                   Icons.account_circle,

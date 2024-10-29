@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/admin/providers/admin_provider.dart';
+import 'package:frontend/firebase_options.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/makeTeam_provider.dart';
 import 'package:frontend/providers/notification_provider.dart';
@@ -22,21 +25,15 @@ import 'package:provider/provider.dart';
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-// 백그라운드에서 수신된 FCM 메시지 핸들러 (앱이 백그라운드에서 알림을 받을 때 처리)
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(); // Firebase 재초기화
-  print('Handling a background message: ${message.messageId}');
-  _showNotification(message); // 백그라운드 메시지를 수신하면 알림 표시
-}
-
 // 알림을 보여주는 함수 (전역 함수로 설정하여 백그라운드에서도 사용 가능)
 void _showNotification(RemoteMessage message) async {
   // Android용 알림 설정
   var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-    'high_importance_channel', // 알림 채널 ID
-    'High Importance Notifications', // 알림 채널 이름
+    'high_importance_channel', // 채널 ID
+    'High Importance Notifications', // 채널 이름
     channelDescription: 'This channel is used for important notifications.',
-    icon: '@mipmap/ic_launcher', // 알림 아이콘 설정
+    importance: Importance.high, // 중요도를 high로 설정하여 헤드업 알림 활성화
+    icon: '@mipmap/launcher_icon', // 알림 아이콘 설정
   );
 
   // iOS용 알림 설정
@@ -65,11 +62,29 @@ void _showNotification(RemoteMessage message) async {
   );
 }
 
+// 백그라운드 메시지 핸들러 함수 정의
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('Handling a background message: ${message.data}');
+
+  _showNotification(message);
+}
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter의 비동기적 초기화
 
+  ByteData data = await PlatformAssetBundle()
+      .load('assets/ca/star.sungkyul.ac.kr.cert.pem');
+  SecurityContext.defaultContext
+      .setTrustedCertificatesBytes(data.buffer.asUint8List());
+
   try {
-    await Firebase.initializeApp(); // Firebase 초기화 시도
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ); // Firebase 초기화 시도
     print("Firebase initialized successfully");
   } catch (e) {
     print("Firebase initialization error: $e");
@@ -82,12 +97,9 @@ void main() async {
     sound: true,
   );
 
-  // 백그라운드 메시지 핸들러 등록
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
   // 알림 초기화 설정(Android 및 iOS용)
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
+      AndroidInitializationSettings('@mipmap/launcher_icon');
   DarwinInitializationSettings initializationSettingsDarwin =
       DarwinInitializationSettings(
     onDidReceiveLocalNotification: (id, title, body, payload) async {},
@@ -114,14 +126,16 @@ void main() async {
     print('Got a message whilst in the foreground!');
     print('Message data: ${message.data}');
 
-    if (message.notification != null) {
-      print('Notification id: ${message.data['targetId']}');
-      print('Notification category: ${message.data['category']}');
-
-      // 알림을 즉시 이동하지 않고, 표시만 함
-      _showNotification(message);
-    }
+    // 알림 표시
+    _showNotification(message);
   });
+
+  // 앱이 백그라운드에 있을 때 알림 클릭 처리
+  // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  //   print('Got a message whilst in the foreground!');
+  //   print('Message data: ${message.data}');
+  //   _showNotification(message);
+  // });
 
   // 앱 실행 시 Provider로 여러 상태 관리 클래스 주입
   runApp(
@@ -139,6 +153,8 @@ void main() async {
       child: const MyApp(),
     ),
   );
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
 class MyApp extends StatefulWidget {
@@ -178,7 +194,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // 중요한 알림을 받을 채널 생성(Android)
   void _createNotificationChannel() async {
-    var channel = const AndroidNotificationChannel(
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel', // 채널 ID
       'High Importance Notifications', // 채널 이름
       description: 'This channel is used for important notifications.', // 채널 설명
@@ -204,6 +220,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _screenSize();
 
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
@@ -244,12 +261,6 @@ Future<void> setupInteractedMessage() async {
     _exitNavigateBoard(initialMessage.data);
   }
 
-  // 앱이 백그라운드에 있을 때 알림 클릭 처리
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print('A message was opened: ${message.data}');
-    _exitNavigateBoard(message.data);
-  });
-
   _navigateBoard();
 }
 
@@ -260,16 +271,14 @@ void _exitNavigateBoard(Map<String, dynamic> messageData) {
   print("Navigating to BoardDetailPage with ID: $id, Category: $category");
 
   if (category == '공지') {
-    Get.toNamed(
+    navigatorKey.currentState?.pushNamed(
       '/detail-board',
       arguments: {'announcementId': id, 'category': category},
-      preventDuplicates: false,
     );
   } else if (category == '팀원모집') {
-    Get.toNamed(
+    navigatorKey.currentState?.pushNamed(
       '/detail-recruit',
       arguments: {'makeTeamId': id},
-      preventDuplicates: false,
     );
   }
 }
@@ -292,16 +301,14 @@ void _navigateBoard() async {
       print("Received ID: $id, Category: $category");
 
       if (category == '공지') {
-        Get.toNamed(
+        navigatorKey.currentState?.pushNamed(
           '/detail-board',
           arguments: {'announcementId': id, 'category': category},
-          preventDuplicates: false,
         );
       } else if (category == '팀원모집') {
-        Get.toNamed(
+        navigatorKey.currentState?.pushNamed(
           '/detail-recruit',
           arguments: {'makeTeamId': id},
-          preventDuplicates: false,
         );
       }
     }
