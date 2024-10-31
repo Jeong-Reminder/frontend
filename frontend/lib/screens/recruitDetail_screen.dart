@@ -162,7 +162,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         );
 
         final teamApplyService = TeamApplyService();
-        int applicationId = await teamApplyService.createTeamApply(teamApply);
+        int applicationId = await teamApplyService.createTeamApply(
+            teamApply, recruitList['id']);
 
         _controller.clear();
         await _fetchApplyList();
@@ -695,7 +696,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                           if (member['memberRole'] == 'MEMBER')
                             SizedBox(
                               height: 20,
-                              width: 92,
+                              width: 95,
                               child: ElevatedButton(
                                 onPressed: () {},
                                 style: ElevatedButton.styleFrom(
@@ -943,7 +944,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                       ),
                                       child: const Center(
                                         child: Text(
-                                          '승인',
+                                          '승인하기',
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,

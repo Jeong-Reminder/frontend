@@ -17,20 +17,20 @@ class TeamApplyProvider with ChangeNotifier {
   }
 
   // 팀원 신청글 작성
-  Future<int> createTeamApply(TeamApply teamApply) async {
-    try {
-      int applicationId = await service.createTeamApply(teamApply);
-      print('Application ID: $applicationId');
+  // Future<int> createTeamApply(TeamApply teamApply) async {
+  //   try {
+  //     int applicationId = await service.createTeamApply(teamApply);
+  //     print('Application ID: $applicationId');
 
-      teamApplys.add(teamApply);
-      notifyListeners();
+  //     teamApplys.add(teamApply);
+  //     notifyListeners();
 
-      return applicationId;
-    } catch (e) {
-      print(e);
-      rethrow;
-    }
-  }
+  //     return applicationId;
+  //   } catch (e) {
+  //     print(e);
+  //     rethrow;
+  //   }
+  // }
 
   // 팀원 신청글 수정
   Future<void> updateTeamApply(

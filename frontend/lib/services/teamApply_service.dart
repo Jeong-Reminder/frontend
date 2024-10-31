@@ -20,11 +20,7 @@ class TeamApplyService {
   }
 
   // 팀원 신청글 작성 API
-  Future<int> createTeamApply(TeamApply teamapply) async {
-    final int? id = await getId();
-    if (id == null) {
-      throw Exception('저장된 모집글 ID를 찾을 수 없습니다.');
-    }
+  Future<int> createTeamApply(TeamApply teamapply, int id) async {
     // final String baseUrl =
     //     'http://127.0.0.1:9000/api/v1/recruitment/team-application/$id';
     final String baseUrl =
@@ -152,10 +148,8 @@ class TeamApplyService {
   // 팀 생성 API
   Future<int> createTeam(
       int recruitmentId, String teamName, String kakaoUrl) async {
-
     // String baseUrl = 'http://127.0.0.1:9000/api/v1/team';
     String baseUrl = 'https://reminder.sungkyul.ac.kr/api/v1/team';
-
 
     final token = await getToken();
     if (token == null) {
