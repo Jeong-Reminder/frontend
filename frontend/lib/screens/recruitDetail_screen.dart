@@ -468,6 +468,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     makeTeam['memberName'] == name) ...[
                   const Spacer(),
                   PopupMenuButton<String>(
+                    color: const Color(0xFFEFF0F2),
                     onSelected: (value) {
                       if (value == '수정') {
                         final currentMakeTeam = MakeTeam(
@@ -928,37 +929,11 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               const SizedBox(width: 4),
 
                               // userRole이 'USER'일 경우에만 댓글 창을 보여줌
-                              if (userRole == 'ROLE_USER') ...[
-                                // 승인 버튼은 글쓴 사람만 볼 수 있도록 설정
-                                if (isAuthor)
-                                  GestureDetector(
-                                    onTap: () {
-                                      _showApproveDialog(index);
-                                    },
-                                    child: Container(
-                                      height: 20,
-                                      width: 50,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF2A72E7),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: const Center(
-                                        child: Text(
-                                          '승인하기',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                              if (userRole == 'ROLE_USER') ...[],
 
                               const Spacer(),
                               // 현재 사용자가 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
-                              if (isCurrentUser)
+                              if (isCurrentUser || isAuthor)
                                 PopupMenuButton<String>(
                                   color: const Color(0xFFEFF0F2),
                                   onSelected: (String item) {
@@ -970,14 +945,23 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                           index);
                                     } else if (item == '삭제') {
                                       _deleteContent(index);
+                                    } else if (item == '승인하기') {
+                                      _showApproveDialog(
+                                          index); // 승인 확인 다이얼로그 호출
                                     }
                                   },
                                   itemBuilder: (BuildContext context) {
-                                    return <PopupMenuEntry<String>>[
-                                      popUpItem('수정', '수정'),
-                                      const PopupMenuDivider(),
-                                      popUpItem('삭제', '삭제'),
+                                    List<PopupMenuEntry<String>> items = [
+                                      if (isCurrentUser) ...[
+                                        popUpItem('수정', '수정'),
+                                        const PopupMenuDivider(),
+                                        popUpItem('삭제', '삭제'),
+                                      ],
                                     ];
+                                    if (isAuthor) {
+                                      items.add(popUpItem('승인하기', '승인하기'));
+                                    }
+                                    return items;
                                   },
                                   child: const Icon(Icons.more_vert),
                                 ),
@@ -1030,7 +1014,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('${recruitList['memberName']}님의 기술 스택'),
+            backgroundColor: Colors.white,
+            title: Text('${recruitList['memberName']}'),
             titleTextStyle: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -1081,10 +1066,18 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('닫기'),
+                style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all(
+                    const Color(0xFF2A72E7), // 닫기 버튼 글자 색상 설정
+                  ),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
+                child: const Text(
+                  '닫기',
+                  style: TextStyle(fontWeight: FontWeight.bold), // 굵기 설정
+                ),
               ),
             ],
           );
@@ -1187,6 +1180,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: Center(child: Text('${applyList[index]['memberName']} 승인')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1205,12 +1199,12 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     'assets/images/billiard.png',
                     width: 16,
                     height: 16,
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
                   const SizedBox(width: 8.0),
                   const Text(
                     '한 번 승인하면 되돌릴 수 없습니다',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Colors.black),
                   ),
                 ],
               ),
@@ -1222,18 +1216,34 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextButton(
-                    child: const Text('취소'),
+                    style: ButtonStyle(
+                      foregroundColor: WidgetStateProperty.all(
+                        const Color(0xFF2A72E7), // 취소 버튼 글자 색상 설정
+                      ),
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(fontWeight: FontWeight.bold), // 굵기 설정
+                    ),
                   ),
                   const SizedBox(width: 8.0),
                   TextButton(
-                    child: const Text('확인'),
+                    style: ButtonStyle(
+                      foregroundColor: WidgetStateProperty.all(
+                        const Color(0xFF2A72E7), // 확인 버튼 글자 색상 설정
+                      ),
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _processApplication(index);
                     },
+                    child: const Text(
+                      '확인',
+                      style: TextStyle(fontWeight: FontWeight.bold), // 굵기 설정
+                    ),
                   ),
                 ],
               ),
@@ -1373,11 +1383,18 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           // 다이얼로그 하단의 "닫기" 버튼
           actions: <Widget>[
             TextButton(
-              child: const Text('닫기',
-                  style: TextStyle(color: Colors.black)), // 버튼 텍스트 색상 변경
+              style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.all(
+                  const Color(0xFF2A72E7), // 닫기 버튼 글자 색상 설정
+                ),
+              ),
               onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
+                Navigator.of(context).pop();
               },
+              child: const Text(
+                '닫기',
+                style: TextStyle(fontWeight: FontWeight.bold), // 굵기 설정
+              ),
             ),
           ],
         );
