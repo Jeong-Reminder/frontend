@@ -932,7 +932,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                               if (userRole == 'ROLE_USER') ...[],
 
                               const Spacer(),
-                              // 현재 사용자가 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
+                              // 현재 사용자가 모집글 사용자이거나 댓글 작성자인 경우에만 팝업 메뉴를 보여 줌
                               if (isCurrentUser || isAuthor)
                                 PopupMenuButton<String>(
                                   color: const Color(0xFFEFF0F2),
@@ -1015,7 +1015,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         builder: (BuildContext context) {
           return AlertDialog(
             backgroundColor: Colors.white,
-            title: Text('${recruitList['memberName']}'),
+            title: Text('${recruitList['memberName']}의 기술 스택'),
             titleTextStyle: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -1066,11 +1066,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
             ),
             actions: <Widget>[
               TextButton(
-                style: ButtonStyle(
-                  foregroundColor: WidgetStateProperty.all(
-                    const Color(0xFF2A72E7), // 닫기 버튼 글자 색상 설정
-                  ),
-                ),
+                style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF2A72E7)),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -1216,11 +1213,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextButton(
-                    style: ButtonStyle(
-                      foregroundColor: WidgetStateProperty.all(
-                        const Color(0xFF2A72E7), // 취소 버튼 글자 색상 설정
-                      ),
-                    ),
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF2A72E7)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -1231,11 +1225,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   ),
                   const SizedBox(width: 8.0),
                   TextButton(
-                    style: ButtonStyle(
-                      foregroundColor: WidgetStateProperty.all(
-                        const Color(0xFF2A72E7), // 확인 버튼 글자 색상 설정
-                      ),
-                    ),
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF2A72E7)),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _processApplication(index);
@@ -1383,11 +1374,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           // 다이얼로그 하단의 "닫기" 버튼
           actions: <Widget>[
             TextButton(
-              style: ButtonStyle(
-                foregroundColor: WidgetStateProperty.all(
-                  const Color(0xFF2A72E7), // 닫기 버튼 글자 색상 설정
-                ),
-              ),
+              style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF2A72E7)),
               onPressed: () {
                 Navigator.of(context).pop();
               },

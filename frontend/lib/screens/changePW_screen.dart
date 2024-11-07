@@ -140,6 +140,7 @@ class _ChangePWPageState extends State<ChangePWPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         toolbarHeight: 70,
         leading: BackButton(
           onPressed: () {
