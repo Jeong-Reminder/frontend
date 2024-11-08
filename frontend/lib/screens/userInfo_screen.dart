@@ -6,6 +6,7 @@ import 'package:frontend/screens/editTool_screen.dart';
 import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/services/profile_service.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserInfoPage extends StatefulWidget {
   final Map<String, dynamic> profile;
@@ -76,10 +77,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
               ),
               const SizedBox(height: 20),
               // initState에서 초기화하지 않고 그냥 바로 지정
-              userInfo('희망분야', widget.profile['hopeJob']),
-              userInfo('깃허브 링크', widget.profile['githubLink']),
-              userInfo('Development Field', widget.profile['developmentField']),
-              userInfo('Development Tool', widget.profile['developmentTool']),
+              userInfo('희망분야', widget.profile['hopeJob'], false),
+              userInfo('깃허브 링크', widget.profile['githubLink'], true),
+              userInfo('Development Field', widget.profile['developmentField'],
+                  false),
+              userInfo(
+                  'Development Tool', widget.profile['developmentTool'], false),
             ],
           ),
         ),
@@ -102,27 +105,32 @@ class _UserInfoPageState extends State<UserInfoPage> {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) {
+        final screenWidth = MediaQuery.of(context).size.width;
+
         return AlertDialog(
           backgroundColor: const Color(0xFFFFFFFF),
           title: const Text('프로필 수정하기'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 수정 모달창에서는 컨트롤러로 보이게 작성
-                editTextField('희망분야', hopeJobController),
-                editTextField('깃허브 링크', githubLinkController),
-                editFieldTool(
-                  'Development Field',
-                  fieldController,
-                  '/edit-field',
-                ),
-                editFieldTool(
-                  'Development Tool',
-                  toolController,
-                  '/edit-tool',
-                ),
-              ],
+          content: SizedBox(
+            width: screenWidth * 0.9,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 수정 모달창에서는 컨트롤러로 보이게 작성
+                  editTextField('희망분야', hopeJobController),
+                  editTextField('깃허브 링크', githubLinkController),
+                  editFieldTool(
+                    'Development Field',
+                    fieldController,
+                    '/edit-field',
+                  ),
+                  editFieldTool(
+                    'Development Tool',
+                    toolController,
+                    '/edit-tool',
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -187,7 +195,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   }
 
   // 회원 정보 위젯
-  Widget userInfo(String title, String info) {
+  Widget userInfo(String title, String info, bool isConnected) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -202,11 +210,28 @@ class _UserInfoPageState extends State<UserInfoPage> {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          info,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 14,
+        GestureDetector(
+          onTap: () async {
+            if (isConnected) {
+              final Uri uri = Uri.parse(info); // Uri 객체로 URL 생성
+
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(
+                  uri,
+                );
+              } else {
+                throw '$info를 찾을 수 없습니다.';
+              }
+            }
+          },
+          child: Text(
+            info,
+            style: TextStyle(
+              fontSize: 14,
+              color: isConnected ? Colors.blue : Colors.black,
+              decoration: isConnected ? TextDecoration.underline : null,
+              decorationColor: Colors.blue,
+            ),
           ),
         ),
         const SizedBox(height: 20),

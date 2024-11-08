@@ -319,12 +319,21 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       TextFormField(
                         controller: idController,
+                        cursorColor: const Color(0xFF2A72E7),
                         decoration: const InputDecoration(
                           labelText: '학번',
-                          labelStyle: TextStyle(fontSize: 14.0),
+                          labelStyle: TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.black,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(5.0),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
                             ),
                           ),
                           contentPadding: EdgeInsets.symmetric(
@@ -346,12 +355,21 @@ class _LoginPageState extends State<LoginPage> {
                       // 비밀번호 텍스트폼필드
                       TextFormField(
                         controller: pwController,
+                        cursorColor: const Color(0xFF2A72E7),
                         decoration: InputDecoration(
                           labelText: '비밀번호',
-                          labelStyle: const TextStyle(fontSize: 14.0),
+                          labelStyle: const TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.black,
+                          ),
                           border: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(5.0),
+                            ),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
                             ),
                           ),
                           suffixIcon: IconButton(
