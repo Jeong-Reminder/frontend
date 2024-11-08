@@ -29,7 +29,9 @@ class _EditToolPageState extends State<EditToolPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Development Tool 수정'),
       ),
       body: Padding(
