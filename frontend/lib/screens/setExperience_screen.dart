@@ -29,6 +29,7 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
   TextEditingController partController =
       TextEditingController(); // 맡은 파트 입력 컨트롤러
   String? selectedDuration; // 선택된 프로젝트 기간을 저장하는 함수
+  String? selectedRole; // 드롭다운에서 선택된 역할을 저장하는 변수
   bool writtenText = false;
   String customDurationValue = ''; // 직접 입력된 프로젝트 기간을 저장하는 변수
 
@@ -274,11 +275,17 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // 역할 입력 필드
-                  TextFormField(
-                    controller: rollController,
+
+                  // 역할 선택 드롭다운
+                  DropdownButtonFormField<String>(
+                    value: selectedRole, // 초기 선택값, 필요 시 변수 초기화
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedRole = newValue; // 선택된 값을 상태로 업데이트
+                      });
+                    },
                     decoration: const InputDecoration(
-                      labelText: '나의 역할(LEADER, MEMBER)를 입력해주세요',
+                      labelText: '나의 역할(LEADER, MEMBER)을 선택해주세요',
                       labelStyle: TextStyle(
                         fontSize: 12,
                         color: Color(0xFF808080),
@@ -296,8 +303,17 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                     ),
                     style: const TextStyle(
                       fontSize: 12,
+                      color: Colors.black,
                     ),
+                    dropdownColor: Colors.white, // 드롭다운 메뉴의 배경 색상
+                    items: ['LEADER', 'MEMBER'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
+
                   const SizedBox(height: 10),
                   // 프로젝트 경험 입력 필드
                   TextFormField(
@@ -415,6 +431,7 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                       fontSize: 12,
                       color: Color(0xFF808080),
                     ),
+                    dropdownColor: Colors.white, // 드롭다운 메뉴의 배경 색상
                     items: projectDurationOptions.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
