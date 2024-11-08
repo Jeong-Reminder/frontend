@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:frontend/widgets/field_list.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RecruitDetailPage extends StatefulWidget {
   final int? makeTeamId;
@@ -106,6 +107,19 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
           const TextPosition(offset: 1),
         );
       });
+    }
+  }
+
+  // 깃허브 링크 실행
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url); // Uri 객체로 URL 생성
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(
+        uri,
+      );
+    } else {
+      throw 'Could not launch $url';
     }
   }
 
@@ -1041,24 +1055,29 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  RichText(
-                    text: TextSpan(
-                      text: 'Github: ',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: githubLink,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
-                          ),
+                  GestureDetector(
+                    onTap: () {
+                      _launchURL(githubLink); // 링크 클릭 시 URL 실행 함수 호출
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Github: ',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
-                      ],
+                        children: [
+                          TextSpan(
+                            text: githubLink,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -1347,25 +1366,29 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-                // GitHub URL을 하이퍼링크 스타일로 표시
-                RichText(
-                  text: TextSpan(
-                    text: 'Github: ', // "Github: " 라벨
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black, // 기본 텍스트 색상 변경
-                    ),
-                    children: [
-                      TextSpan(
-                        text: githubUrl, // 실제 GitHub URL
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline, // 하이퍼링크 스타일
-                        ),
+                GestureDetector(
+                  onTap: () {
+                    _launchURL(githubUrl); // 링크 클릭 시 URL 실행 함수 호출
+                  },
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Github: ',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                    ],
+                      children: [
+                        TextSpan(
+                          text: githubUrl,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
