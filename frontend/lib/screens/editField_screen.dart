@@ -29,7 +29,9 @@ class _EditFieldPageState extends State<EditFieldPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Development Field 수정'),
       ),
       body: SingleChildScrollView(

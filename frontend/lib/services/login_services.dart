@@ -349,13 +349,3 @@ class LoginAPI {
     }
   }
 }
-
-// 개발 환경에서만 사용해야되고 보안상 위험하기 때문에 프로덕션 환경에서 사용하면 절대 안된다.
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
-}
