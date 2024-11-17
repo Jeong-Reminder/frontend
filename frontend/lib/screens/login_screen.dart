@@ -401,46 +401,46 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // 자동 로그인
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isAutoLogin,
-                          onChanged: (value) async {
-                            setState(() {
-                              isAutoLogin = value!;
-                            });
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setBool('isAutoLogin', isAutoLogin);
-                            if (!isAutoLogin) {
-                              await prefs.remove('studentId');
-                              await prefs.remove('password');
-                            }
-                          },
-                          activeColor: const Color(0xFF2A72E7),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: const VisualDensity(
-                            horizontal: VisualDensity.minimumDensity,
-                            vertical: VisualDensity.minimumDensity,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const Text(
-                          '자동 로그인',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF808080),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     // 자동 로그인
+                //     Row(
+                //       children: [
+                //         Checkbox(
+                //           value: isAutoLogin,
+                //           onChanged: (value) async {
+                //             setState(() {
+                //               isAutoLogin = value!;
+                //             });
+                //             final prefs = await SharedPreferences.getInstance();
+                //             await prefs.setBool('isAutoLogin', isAutoLogin);
+                //             if (!isAutoLogin) {
+                //               await prefs.remove('studentId');
+                //               await prefs.remove('password');
+                //             }
+                //           },
+                //           activeColor: const Color(0xFF2A72E7),
+                //           materialTapTargetSize:
+                //               MaterialTapTargetSize.shrinkWrap,
+                //           visualDensity: const VisualDensity(
+                //             horizontal: VisualDensity.minimumDensity,
+                //             vertical: VisualDensity.minimumDensity,
+                //           ),
+                //         ),
+                //         const SizedBox(width: 5),
+                //         const Text(
+                //           '자동 로그인',
+                //           style: TextStyle(
+                //             fontSize: 14,
+                //             fontWeight: FontWeight.bold,
+                //             color: Color(0xFF808080),
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ],
+                // ),
                 const SizedBox(height: 27),
 
                 // 로그인 실패 메세지
