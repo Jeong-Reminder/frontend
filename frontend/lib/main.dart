@@ -76,10 +76,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter의 비동기적 초기화
 
-  ByteData data = await PlatformAssetBundle()
-      .load('assets/ca/star.sungkyul.ac.kr.cert.pem');
-  SecurityContext.defaultContext
-      .setTrustedCertificatesBytes(data.buffer.asUint8List());
+  // ByteData data = await PlatformAssetBundle()
+  //     .load('assets/ca/star.sungkyul.ac.kr.cert.pem');
+  // SecurityContext.defaultContext
+  //     .setTrustedCertificatesBytes(data.buffer.asUint8List());
 
   try {
     await Firebase.initializeApp(
