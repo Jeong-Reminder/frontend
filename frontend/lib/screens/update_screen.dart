@@ -283,31 +283,6 @@ class _BoardUpdatePageState extends State<BoardUpdatePage> {
             Navigator.pop(context);
           },
         ),
-        actions: [
-          // 프로필 아이콘
-          Padding(
-            padding: const EdgeInsets.only(right: 23.0),
-            child: IconButton(
-              onPressed: () async {
-                if (context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyOwnerPage(),
-                    ),
-                  );
-                }
-              },
-              padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
-              ),
-              visualDensity: VisualDensity.compact,
-            ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
