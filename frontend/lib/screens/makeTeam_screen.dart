@@ -282,16 +282,18 @@ class _MakeTeamPageState extends State<MakeTeamPage> {
             ),
           ),
           leadingWidth: 120,
-          actions: const [
-            Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(
-                Icons.account_circle,
-                size: 30,
-                color: Colors.black,
-              ),
-            ),
-          ],
+          actions: isEditMode
+              ? null
+              : const [
+                  Padding(
+                    padding: EdgeInsets.only(right: 20.0),
+                    child: Icon(
+                      Icons.account_circle,
+                      size: 30,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
