@@ -252,8 +252,8 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
     }
   }
 
-  // 팀원 신청글 승인 처리 함수
-  Future<void> _processApplication(int index) async {
+  // 팀원 신청글 승인 / 거절 처리 함수
+  Future<void> _processApplication(int index, String action) async {
     try {
       if (applyList.isEmpty || index < 0 || index >= applyList.length) {
         print('Invalid index: $index');
@@ -268,18 +268,28 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
         throw Exception('memberId or recruitmentId is null');
       }
 
+      // "accept" 값 설정 (true 또는 false를 문자열로 처리)
+      final bool accept = action == 'accept';
+
       final teamApplyService = TeamApplyService();
       await teamApplyService.processTeamApply(
-          memberId, recruitmentId, true); // true는 승인 처리
+          memberId, recruitmentId, accept); // "accept" 값을 전달
 
-      setState(() {
-        apply['memberRole'] = 'MEMBER'; // 승인된 멤버의 역할을 설정
-        acceptMemberList.add(apply); // 승인된 팀원 리스트에 추가
-        applyList.removeAt(index);
-        print('승인 처리 성공: $memberId');
-      });
+      if (accept == 'true') {
+        setState(() {
+          apply['memberRole'] = 'MEMBER'; // 승인된 멤버의 역할을 설정
+          acceptMemberList.add(apply); // 승인된 팀원 리스트에 추가
+          applyList.removeAt(index);
+          print('승인 처리 성공: $memberId');
+        });
+      } else {
+        setState(() {
+          applyList.removeAt(index);
+          print('거절 처리 성공: $memberId');
+        });
+      }
     } catch (e) {
-      print('승인 처리 실패: $e');
+      print('처리 실패: $e');
     }
   }
 
@@ -962,6 +972,9 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                     } else if (item == '승인하기') {
                                       _showApproveDialog(
                                           index); // 승인 확인 다이얼로그 호출
+                                    } else if (item == '반려하기') {
+                                      _showRejectDialog(
+                                          index); // 반려 확인 다이얼로그 호출
                                     }
                                   },
                                   itemBuilder: (BuildContext context) {
@@ -973,7 +986,11 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                                       ],
                                     ];
                                     if (isAuthor) {
-                                      items.add(popUpItem('승인하기', '승인하기'));
+                                      items.addAll([
+                                        popUpItem('승인하기', '승인하기'),
+                                        const PopupMenuDivider(),
+                                        popUpItem('반려하기', '반려하기'), // 반려하기 메뉴 추가
+                                      ]);
                                     }
                                     return items;
                                   },
@@ -1248,7 +1265,81 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                         foregroundColor: const Color(0xFF2A72E7)),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      _processApplication(index);
+                      _processApplication(index, 'accept');
+                    },
+                    child: const Text(
+                      '확인',
+                      style: TextStyle(fontWeight: FontWeight.bold), // 굵기 설정
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 반려 확인 다이얼로그
+  void _showRejectDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Center(child: Text('${applyList[index]['memberName']} 반려')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Align(
+                alignment: Alignment.center,
+                child: Text('정말로 반려하시겠습니까?'),
+              ),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/reject_icon.png',
+                    width: 16,
+                    height: 16,
+                    color: Colors.black,
+                  ),
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    '한 번 반려하면 되돌릴 수 없습니다',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF2A72E7)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(fontWeight: FontWeight.bold), // 굵기 설정
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF2A72E7)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _processApplication(index, 'reject'); // 반려 처리
                     },
                     child: const Text(
                       '확인',
