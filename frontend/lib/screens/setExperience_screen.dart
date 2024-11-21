@@ -177,7 +177,9 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
         final githubLink = 'https://github.com/${githubLinkController[0].text}';
         final roll = selectedRole[0];
         final part = partController[0].text;
-        final duration = selectedDuration[0] ?? customDurationValue[0];
+        final duration = (selectedDuration[0] == '직접 입력')
+            ? customDurationValue[0]
+            : selectedDuration[0];
 
         ProjectExperience newExperience = ProjectExperience(
           experienceName: projectName,
@@ -185,7 +187,7 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
           experienceContent: projectExperience,
           experienceGithub: githubLink,
           experienceJob: part,
-          experienceDate: duration,
+          experienceDate: duration!,
         );
 
         writtenText = true;
@@ -193,6 +195,36 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
 
         final provider = context.read<ProjectExperienceProvider>();
         await provider.createProjectExperience(newExperience);
+
+        // 경험을 여러 개 작성한 경우
+      } else if (projectNameController.length > 1) {
+        List<ProjectExperience> newExperiences = [];
+
+        for (int i = 0; i < projectNameController.length; i++) {
+          final projectName = projectNameController[i].text;
+          final projectExperience = projectExperienceController[i].text;
+          final githubLink =
+              'https://github.com/${githubLinkController[i].text}';
+          final roll = selectedRole[i];
+          final part = partController[i].text;
+          final duration = (selectedDuration[i] == '직접 입력')
+              ? customDurationValue[i]
+              : selectedDuration[i];
+
+          ProjectExperience newExperience = ProjectExperience(
+            experienceName: projectName,
+            experienceRole: roll!,
+            experienceContent: projectExperience,
+            experienceGithub: githubLink,
+            experienceJob: part,
+            experienceDate: duration!,
+          );
+
+          newExperiences.add(newExperience); // 경험 리스트에 추가
+        }
+        final provider = context.read<ProjectExperienceProvider>();
+        await provider
+            .createProjectExperiences(newExperiences); // 경험 여러개 작성 API 호출
       }
 
       if (context.mounted) {
@@ -248,6 +280,9 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 키보드가 올라왔는지 확인
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -311,9 +346,15 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                               Radius.circular(5.0),
                             ),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
+                            ),
+                          ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 5.0),
                         ),
+                        cursorColor: const Color(0xFF2A72E7),
                         style: const TextStyle(
                           fontSize: 12,
                         ),
@@ -342,6 +383,11 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                               Radius.circular(5.0),
                             ),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
+                            ),
+                          ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 5.0),
                         ),
@@ -359,6 +405,7 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                       ),
 
                       const SizedBox(height: 10),
+
                       // 프로젝트 경험 입력 필드
                       TextFormField(
                         controller: projectExperienceController[index],
@@ -380,9 +427,15 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                               Radius.circular(5.0),
                             ),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
+                            ),
+                          ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 5.0),
                         ),
+                        cursorColor: const Color(0xFF2A72E7),
                         style: const TextStyle(
                           fontSize: 12,
                         ),
@@ -411,9 +464,15 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                               Radius.circular(5.0),
                             ),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
+                            ),
+                          ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 5.0),
                         ),
+                        cursorColor: const Color(0xFF2A72E7),
                         style: const TextStyle(
                           fontSize: 12,
                         ),
@@ -437,9 +496,15 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                               Radius.circular(5.0),
                             ),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
+                            ),
+                          ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 5.0),
                         ),
+                        cursorColor: const Color(0xFF2A72E7),
                         style: const TextStyle(
                           fontSize: 12,
                         ),
@@ -470,6 +535,11 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                             ),
                             borderRadius: BorderRadius.all(
                               Radius.circular(5.0),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Color(0xFF2A72E7),
                             ),
                           ),
                           contentPadding: EdgeInsets.symmetric(
@@ -509,9 +579,15 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                                   Radius.circular(5.0),
                                 ),
                               ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color(0xFF2A72E7),
+                                ),
+                              ),
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: 10.0, vertical: 5.0),
                             ),
+                            cursorColor: const Color(0xFF2A72E7),
                             style: const TextStyle(
                               fontSize: 12,
                             ),
@@ -522,7 +598,7 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                       //   Padding(
                       //     padding: const EdgeInsets.symmetric(vertical: 10.0),
                       //     child: Text(
-                      //       '직접 입력한 프로젝트 기간: $customDurationValue',
+                      //       '직접 입력한 프로젝트 기간: ${customDurationValue[index]}',
                       //       style: const TextStyle(
                       //         fontSize: 12,
                       //         color: Color(0xFF808080),
@@ -543,37 +619,41 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
                 ),
                 itemCount: formatLength,
               ),
+              SizedBox(height: isKeyboardVisible ? 10 : 0),
 
               // 겸험 추가하기 버튼
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    formatLength++;
-                  });
-                  _addNewExperienceFields();
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  side: const BorderSide(
-                    color: Colors.blueAccent,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                child: const Center(
-                  child: Text(
-                    '경험 추가하기',
-                    style: TextStyle(
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              (widget.update! == true)
+                  ? Container()
+                  : ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          formatLength++;
+                        });
+                        _addNewExperienceFields(); // 컨트롤러 혹은 문자열 리스트 요소 추가
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        side: const BorderSide(
+                          color: Colors.blueAccent,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '경험 추가하기',
+                          style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
+
               const SizedBox(height: 10),
 
               // 알리미 시작하기 또는 없음 버튼
