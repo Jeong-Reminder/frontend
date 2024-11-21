@@ -435,8 +435,10 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
                         // 일반 사용자일 경우 표시되는 메뉴 항목
                         return <PopupMenuEntry<String>>[
                           popUpItem('URL 공유', 'URL 공유'),
-                          const PopupMenuDivider(),
-                          popUpItem('모집글 작성', '모집글 작성'),
+                          if (selectedButton.isNotEmpty) ...[
+                            const PopupMenuDivider(),
+                            popUpItem('모집글 작성', '모집글 작성'),
+                          ]
                         ];
                       }
                     },
