@@ -74,6 +74,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
+  // HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized(); // Flutter의 비동기적 초기화
 
   // ByteData data = await PlatformAssetBundle()
@@ -338,3 +339,12 @@ void _onNotificationTap(String payload) {
     );
   }
 }
+
+// class MyHttpOverrides extends HttpOverrides {
+//   @override
+//   HttpClient createHttpClient(SecurityContext? context) {
+//     return super.createHttpClient(context)
+//       ..badCertificateCallback =
+//           (X509Certificate cert, String host, int port) => true;
+//   }
+// }

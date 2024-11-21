@@ -1303,7 +1303,7 @@ class _RecruitDetailPageState extends State<RecruitDetailPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Image.asset(
-                    'assets/images/reject_icon.png',
+                    'assets/images/billiard.png',
                     width: 16,
                     height: 16,
                     color: Colors.black,
