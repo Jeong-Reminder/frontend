@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/models/notification_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
@@ -77,6 +78,7 @@ class _HomePageState extends State<HomePage> {
       "end_day": "2024-05-25",
     },
   ];
+  List<Map<String, dynamic>> selectedBoardList = []; // 달력에서 선택한 해당 날짜의 게시글
 
   // 위젯의 상태 초기화
   @override
@@ -121,15 +123,12 @@ class _HomePageState extends State<HomePage> {
 
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
-      // 만약 선택한 날짜가 이전에 선택한 날짜와 다른 날짜라면 실행
-      setState(() {
-        _selectedDay = selectedDay; // 선택한 날짜를 새로운 선택한 날짜로 설정
-        _focuseDay = focusedDay; // 포커스된 날짜를 새로운 포커스된 날짜로 설정
-      });
-      _showEventsForSelectedDay(
-          selectedDay); // 선택한 날짜에 대한 이벤트를 표시하기 위해 _showEventsForSelectedDay 메서드 호출
-    }
+    setState(() {
+      _selectedDay = selectedDay; // 선택한 날짜를 새로운 선택한 날짜로 설정
+      _focuseDay = focusedDay; // 포커스된 날짜를 새로운 포커스된 날짜로 설정
+    });
+    _showEventsForSelectedDay(
+        selectedDay); // 선택한 날짜에 대한 이벤트를 표시하기 위해 _showEventsForSelectedDay 메서드 호출
   }
 
   void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
@@ -142,82 +141,150 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 선택된 날짜에 해당하는 이벤트 표시
-  void _showEventsForSelectedDay(DateTime selectedDay) {
-    // 선택된 날짜에 해당하는 이벤트 확인
-    List<String> eventsForSelectedDay = [];
-    for (var vote in voteList) {
-      // voteList의 각 요소에 대해 반복
-      // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
-      DateTime startDate = DateTime.parse(vote['start_day']);
-      DateTime endDate = DateTime.parse(vote['end_day']);
-      // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
-      if (selectedDay.isAfter(startDate) &&
-          selectedDay.isBefore(endDate.add(const Duration(days: 1)))) {
-        // 선택한 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
-        eventsForSelectedDay.add(vote['name']);
+  Future<void> _showEventsForSelectedDay(DateTime selectedDay) async {
+    int id = 0;
+    print(
+        '선택한 날짜: $selectedDay'); // 2024-11-18 00:00:00.000Z  "2024-09-09T05:34:37"
+
+    for (var selectedBoard in boardList) {
+      DateTime boardCreatedTime = DateTime.parse(selectedBoard['createdTime']);
+
+      if ((boardCreatedTime.year == selectedDay.year) &&
+          (boardCreatedTime.month == selectedDay.month) &&
+          (boardCreatedTime.day == selectedDay.day)) {
+        print('두 날짜는 같다');
+        setState(() {
+          id = selectedBoard['id'];
+          print('게시글 id: $id');
+        });
+        await Provider.of<AnnouncementProvider>(context, listen: false)
+            .fetchOneBoard(id);
+        if (context.mounted) {
+          Map<String, dynamic> board =
+              Provider.of<AnnouncementProvider>(context, listen: false).board;
+          setState(() {
+            selectedBoardList.add(board);
+          });
+        }
       }
     }
-    // 이벤트가 있는 경우 모달 다이얼로그로 표시
-    if (eventsForSelectedDay.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFDBE7FB), // 모달창 배경색
-            title: Text(
-                '${selectedDay.year}년${selectedDay.month}월${selectedDay.day}일 이벤트'), // 날 / 월 / 년
-            titleTextStyle: const TextStyle(
-                fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: eventsForSelectedDay
-                  .map((event) => Text(
-                        event,
-                        style: const TextStyle(
-                            fontSize: 16, color: Colors.black), // 텍스트 스타일
-                      ))
-                  .toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
+
+    // 해당 게시글이 있는 경우 모달 바텀 시트로 표시
+    if (selectedBoardList.isNotEmpty) {
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
               ),
-            ],
-          );
-        },
-      );
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    '${selectedDay.year}년 ${selectedDay.month}월 ${selectedDay.day}일 이벤트',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ), // 날 / 월 / 년
+                  const SizedBox(height: 20),
+
+                  // 투표
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true, // ListView의 크기를 제한
+                      physics: const BouncingScrollPhysics(), // 부드러운 스크롤
+                      itemCount: selectedBoardList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        Map<String, dynamic> board =
+                            selectedBoardList[index]; // 해당 게시글
+
+                        return (board['votes'].isNotEmpty)
+                            ? ListTile(
+                                leading: Image.asset('assets/images/vote.png'),
+                                title: Text(
+                                  board['votes'][0]['subjectTitle'],
+                                ),
+                                subtitle: Text(
+                                  '기간: ${board['createdTime']} ~ ${board['votes'][0]['endDateTime']}',
+                                  style: const TextStyle(
+                                    color: Color(0xFFD9D9D9),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                trailing: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  // 꺽새 아이콘을 통해 투표가 들어가있는 게시글 이동
+                                  onPressed: () async {
+                                    Get.toNamed(
+                                      '/detail-board',
+                                      arguments: {
+                                        'announcementId': board['id'],
+                                        'category': 'HOME',
+                                      },
+                                    );
+                                  },
+                                  icon: const Icon(Icons.chevron_right),
+                                ),
+                              )
+                            : null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ).whenComplete(
+          () => selectedBoardList
+              .clear(), // 바텀 시트 닫을 때 selectedBoardList의 내용 제거(제거하지 않으면 다른 날에도 보임)
+        );
+      }
     } else {
       // 선택된 날짜에 이벤트가 없는 경우 알림 표시
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFDBE7FB), // 모달창 배경색
-            title: Text(
-                '${selectedDay.year}년${selectedDay.month}월${selectedDay.day}일 이벤트'),
-            titleTextStyle: const TextStyle(
-                fontSize: 24,
-                color: Colors.black,
-                fontWeight: FontWeight.bold), // 날 / 월 / 년
-            content: const Text('해당 날짜에는 이벤트가 없습니다.'),
-            // 텍스트 스타일
-            contentTextStyle:
-                const TextStyle(fontSize: 16, color: Colors.black),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
               ),
-            ],
-          );
-        },
-      );
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    '${selectedDay.year}년 ${selectedDay.month}월 ${selectedDay.day}일 이벤트',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ), // 날 / 월 / 년
+                  const SizedBox(height: 20),
+                  const Text('해당 날짜에는 이벤트가 없습니다.'),
+                ],
+              ),
+            );
+          },
+        );
+      }
     }
   }
 
@@ -673,6 +740,21 @@ class _HomePageState extends State<HomePage> {
                     rangeEndDay: _rangeEnd, // 선택된 범위의 종료일
                     calendarStyle: const CalendarStyle(
                       outsideDaysVisible: false,
+                      markerDecoration: BoxDecoration(
+                        // 마커 색상
+                        color: Color(0xFF2A72E7),
+                        shape: BoxShape.circle,
+                      ),
+                      selectedDecoration: BoxDecoration(
+                        // 선택 날짜 색상
+                        color: Color(0xFF2A72E7),
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        // 오늘 날짜 색상
+                        color: Color(0xFF94B8F3),
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     onFormatChanged: (format) {
                       if (_calendarFomat != format) {
@@ -702,6 +784,21 @@ class _HomePageState extends State<HomePage> {
                       }
                       return events; // voteList에 정의된 이벤트가 있는 날짜에만 해당 이벤트가 표시
                     },
+                    headerStyle: const HeaderStyle(
+                      formatButtonTextStyle: TextStyle(
+                        // 주차(week) 색상
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                      leftChevronIcon: Icon(
+                        Icons.chevron_left,
+                        color: Colors.black,
+                      ),
+                      rightChevronIcon: Icon(
+                        Icons.chevron_right,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                 ),
               ],
