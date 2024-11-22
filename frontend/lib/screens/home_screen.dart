@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
   List<NotificationModel> notifyList = [];
   List<Map<String, dynamic>> boardList = [];
   List<Vote> voteList = []; // 투표 전체 조회 리스트
-  List<Map<String, dynamic>> selectedBoardList = []; // 달력에서 선택한 해당 날짜의 게시글
+  List<Vote> selectedVoteList = []; // 달력에서 선택한 해당 날짜의 게시글의 투표
 
   // 위젯의 상태 초기화
   @override
@@ -141,7 +141,6 @@ class _HomePageState extends State<HomePage> {
 
   // 선택된 날짜에 해당하는 이벤트 표시
   Future<void> _showEventsForSelectedDay(DateTime selectedDay) async {
-    int id = 0;
     List<Map<String, dynamic>> calendarBoardList =
         []; // 학생의 해당 학년 게시글 혹은 관리자가 작성한 게시글
     print(
@@ -160,33 +159,39 @@ class _HomePageState extends State<HomePage> {
     });
 
     for (var selectedBoard in calendarBoardList) {
-      DateTime boardCreatedTime = DateTime.parse(selectedBoard['createdTime']);
+      for (var vote in voteList) {
+        if (selectedBoard['id'] == vote.announcementId) {
+          DateTime boardCreatedTime =
+              DateTime.parse(selectedBoard['createdTime'])
+                  .add(const Duration(hours: 9));
 
-      if ((boardCreatedTime.year == selectedDay.year) &&
-          (boardCreatedTime.month == selectedDay.month) &&
-          (boardCreatedTime.day == selectedDay.day)) {
-        print('두 날짜는 같다');
-        setState(() {
-          id = selectedBoard['id'];
-          print('게시글 id: $id');
-        });
-        await Provider.of<AnnouncementProvider>(context, listen: false)
-            .fetchOneBoard(id);
-        if (context.mounted) {
-          Map<String, dynamic> board =
-              Provider.of<AnnouncementProvider>(context, listen: false).board;
-          setState(() {
-            // 게시글 생성 시간과 달력 선택 날짜와 동일하더라도 투표가 있으면 selctedBoardList에 추가
-            if (board['votes'].isNotEmpty) {
-              selectedBoardList.add(board);
-            }
-          });
+          DateTime voteEndTime = DateTime.parse(vote.endDateTime!);
+
+          // selectedDay가 boardCreatedTime과 voteEndTime 사이에 있는지 확인
+          if ((selectedDay.year > boardCreatedTime.year ||
+                  (selectedDay.year == boardCreatedTime.year &&
+                      (selectedDay.month > boardCreatedTime.month ||
+                          (selectedDay.month == boardCreatedTime.month &&
+                              selectedDay.day >=
+                                  boardCreatedTime.day)))) && // 시작일 이상
+              (selectedDay.year < voteEndTime.year ||
+                  (selectedDay.year == voteEndTime.year &&
+                      (selectedDay.month < voteEndTime.month ||
+                          (selectedDay.month == voteEndTime.month &&
+                              selectedDay.day <= voteEndTime.day))))) {
+            print(
+                'selectedDay($selectedDay)가 boardCreatedTime($boardCreatedTime)과 voteEndTime($voteEndTime) 사이에 있습니다.');
+
+            setState(() {
+              selectedVoteList.add(vote);
+            });
+          }
         }
       }
     }
 
     // 해당 게시글이 있는 경우 모달 바텀 시트로 표시
-    if (selectedBoardList.isNotEmpty) {
+    if (selectedVoteList.isNotEmpty) {
       if (context.mounted) {
         showModalBottomSheet(
           context: context,
@@ -219,41 +224,38 @@ class _HomePageState extends State<HomePage> {
                     child: ListView.builder(
                       shrinkWrap: true, // ListView의 크기를 제한
                       physics: const BouncingScrollPhysics(), // 부드러운 스크롤
-                      itemCount: selectedBoardList.length,
+                      itemCount: selectedVoteList.length,
                       itemBuilder: (BuildContext context, int index) {
-                        Map<String, dynamic> board =
-                            selectedBoardList[index]; // 해당 게시글
+                        Vote vote = selectedVoteList[index]; // 해당 투표
 
-                        return (board['votes'].isNotEmpty)
-                            ? ListTile(
-                                leading: Image.asset('assets/images/vote.png'),
-                                title: Text(
-                                  board['votes'][0]['subjectTitle'],
-                                ),
-                                subtitle: Text(
-                                  '${convertUtcToKst(board['createdTime'])} ~ ${board['votes'][0]['endDateTime']}',
-                                  style: const TextStyle(
-                                    color: Color(0xFFD9D9D9),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                trailing: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  // 꺽새 아이콘을 통해 투표가 들어가있는 게시글 이동
-                                  onPressed: () async {
-                                    Get.toNamed(
-                                      '/detail-board',
-                                      arguments: {
-                                        'announcementId': board['id'],
-                                        'category': 'HOME',
-                                      },
-                                    );
-                                  },
-                                  icon: const Icon(Icons.chevron_right),
-                                ),
-                              )
-                            : null;
+                        return ListTile(
+                          leading: Image.asset('assets/images/vote.png'),
+                          title: Text(
+                            vote.subjectTitle!,
+                          ),
+                          subtitle: Text(
+                            '종료일 : ${vote.endDateTime}',
+                            style: const TextStyle(
+                              color: Color(0xFFD9D9D9),
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            // 꺽새 아이콘을 통해 투표가 들어가있는 게시글 이동
+                            onPressed: () async {
+                              Get.toNamed(
+                                '/detail-board',
+                                arguments: {
+                                  'announcementId': vote.announcementId,
+                                  'category': 'HOME',
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.chevron_right),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -262,7 +264,7 @@ class _HomePageState extends State<HomePage> {
             );
           },
         ).whenComplete(
-          () => selectedBoardList
+          () => selectedVoteList
               .clear(), // 바텀 시트 닫을 때 selectedBoardList의 내용 제거(제거하지 않으면 다른 날에도 보임)
         );
       }
@@ -803,10 +805,18 @@ class _HomePageState extends State<HomePage> {
                             DateTime endDate =
                                 DateTime.parse(vote.endDateTime!);
                             // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
-                            if (day.isAfter(startDate.add(const Duration(
-                                    hours: -9))) // 달력 마커에는 9시간 빠르게 설정
-                                &&
-                                day.isBefore(endDate)) {
+                            if ((day.year > startDate.year ||
+                                    (day.year == startDate.year &&
+                                        (day.month > startDate.month ||
+                                            (day.month == startDate.month &&
+                                                day.day >=
+                                                    startDate
+                                                        .day)))) && // 시작일 이상
+                                (day.year < endDate.year ||
+                                    (day.year == endDate.year &&
+                                        (day.month < endDate.month ||
+                                            (day.month == endDate.month &&
+                                                day.day <= endDate.day))))) {
                               // 현재 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
                               events.add(vote.subjectTitle);
                             }

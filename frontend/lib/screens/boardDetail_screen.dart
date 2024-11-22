@@ -15,6 +15,7 @@ import 'package:frontend/screens/update_screen.dart';
 import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:frontend/widgets/vote_widget.dart';
 import 'package:frontend/services/login_services.dart';
@@ -81,6 +82,14 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
       level = credentials['level'];
     });
+  }
+
+  // 국제 표준시간에서 한국시간으로 변환 메서드
+  // 만든 이유: 앱에서 설정한 시간은 한국시간으로 잘 받아지는데 작성 api 성공 후 서버에서 받은 시간에서는 국제 표준 시간으로 받아 만들게 됨
+  String convertUtcToKst(String utcTimeString) {
+    DateTime utcTime = DateTime.parse(utcTimeString);
+    DateTime kstTime = utcTime.add(const Duration(hours: 9));
+    return DateFormat("yyyy-MM-dd HH:mm").format(kstTime);
   }
 
   // Uint8List를 파일로 저장하는 함수
@@ -288,6 +297,16 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
                           child: const Icon(Icons.more_vert),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 5),
+
+                    // 게시글 생성 시간
+                    Text(
+                      convertUtcToKst(board['createdTime']),
+                      style: const TextStyle(
+                        color: Color(0xFFD9D9D9),
+                        fontSize: 12,
+                      ),
                     ),
                     const SizedBox(height: 20),
 
