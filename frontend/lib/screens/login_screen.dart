@@ -211,6 +211,7 @@ class _LoginPageState extends State<LoginPage> {
     await prefs.setString('fcmToken', token); // FCM 토큰 저장
     await prefs.setInt(
         'fcmTokenTimestamp', DateTime.now().millisecondsSinceEpoch); // 발급 시각 저장
+    print('FCM 토큰이 저장되었습니다');
   }
 
 // FCM 토큰을 삭제하는 함수
@@ -221,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
     print('FCM 토큰이 삭제되었습니다.');
   }
 
-// FCM 토큰 갱신 여부를 확인하고, 필요 시 새 토큰을 발급하고 14일 이상 된 경우 토큰 삭제
+  // FCM 토큰 갱신 여부를 확인하고, 필요 시 새 토큰을 발급하고 1년 이상 된 경우 토큰 삭제
   Future<String?> getFCMTokenWithRefreshCheck() async {
     final prefs = await SharedPreferences.getInstance();
     final storedToken = prefs.getString('fcmToken'); // 저장된 토큰
@@ -229,9 +230,9 @@ class _LoginPageState extends State<LoginPage> {
         prefs.getInt('fcmTokenTimestamp') ?? 0; // 저장된 토큰의 발급 시각
 
     final currentTime = DateTime.now().millisecondsSinceEpoch; // 현재 시간
-    const tokenValidityDuration = 14 * 24 * 60 * 60 * 1000; // 14일 (밀리초 단위)
+    const tokenValidityDuration = 365 * 24 * 60 * 60 * 1000; // 365일 (밀리초 단위)
 
-    // 토큰이 없거나, 14일 이상이 지난 경우 새 토큰 발급
+    // 토큰이 없거나, 1년 이상이 지난 경우 새 토큰 발급
     if (storedToken == null ||
         currentTime - tokenTimestamp > tokenValidityDuration) {
       // 14일 이상 된 토큰은 삭제
@@ -453,7 +454,11 @@ class _LoginPageState extends State<LoginPage> {
                 // 로그인 버튼
                 ElevatedButton(
                   onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
                     await _getFCMToken();
+
+                    print(
+                        'FCM 토큰: ${prefs.getString('fcmToken')}, 발급 시각: ${prefs.getInt('fcmTokenTimestamp')}');
 
                     // 유효성 통과 시 홈 화면으로 이동
                     if (formKey.currentState!.validate()) {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/models/notification_model.dart';
+import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/notification_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -11,6 +13,7 @@ import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/notificationList_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/memberRecruit_screen.dart';
@@ -60,23 +63,8 @@ class _HomePageState extends State<HomePage> {
 
   List<NotificationModel> notifyList = [];
   List<Map<String, dynamic>> boardList = [];
-  List<Map<String, dynamic>> voteList = [
-    {
-      "name": "1차 증원 투표",
-      "start_day": "2024-05-07",
-      "end_day": "2024-05-08",
-    },
-    {
-      "name": "2차 증원 투표",
-      "start_day": "2024-05-10",
-      "end_day": "2024-05-11",
-    },
-    {
-      "name": "팀원 모집 기간",
-      "start_day": "2024-05-21",
-      "end_day": "2024-05-25",
-    },
-  ];
+  List<Vote> voteList = []; // 투표 전체 조회 리스트
+  List<Vote> selectedVoteList = []; // 달력에서 선택한 해당 날짜의 게시글의 투표
 
   // 위젯의 상태 초기화
   @override
@@ -91,6 +79,9 @@ class _HomePageState extends State<HomePage> {
       if (context.mounted) {
         await Provider.of<NotificationProvider>(context, listen: false)
             .fetchNotification();
+        if (context.mounted) {
+          await Provider.of<VoteProvider>(context, listen: false).fetchVotes();
+        }
       }
 
       setState(() {
@@ -98,6 +89,8 @@ class _HomePageState extends State<HomePage> {
             Provider.of<AnnouncementProvider>(context, listen: false).boardList;
         notifyList = Provider.of<NotificationProvider>(context, listen: false)
             .notificationList;
+        voteList =
+            Provider.of<VoteProvider>(context, listen: false).allVoteList;
       });
     });
     getData();
@@ -119,17 +112,22 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // 국제 표준시간에서 한국시간으로 변환 메서드
+  // 만든 이유: 앱에서 설정한 시간은 한국시간으로 잘 받아지는데 작성 api 성공 후 서버에서 받은 시간에서는 국제 표준 시간으로 받아 만들게 됨
+  String convertUtcToKst(String utcTimeString) {
+    DateTime utcTime = DateTime.parse(utcTimeString);
+    DateTime kstTime = utcTime.add(const Duration(hours: 9));
+    return DateFormat("yyyy-MM-dd HH:mm").format(kstTime);
+  }
+
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
-      // 만약 선택한 날짜가 이전에 선택한 날짜와 다른 날짜라면 실행
-      setState(() {
-        _selectedDay = selectedDay; // 선택한 날짜를 새로운 선택한 날짜로 설정
-        _focuseDay = focusedDay; // 포커스된 날짜를 새로운 포커스된 날짜로 설정
-      });
-      _showEventsForSelectedDay(
-          selectedDay); // 선택한 날짜에 대한 이벤트를 표시하기 위해 _showEventsForSelectedDay 메서드 호출
-    }
+    setState(() {
+      _selectedDay = selectedDay; // 선택한 날짜를 새로운 선택한 날짜로 설정
+      _focuseDay = focusedDay; // 포커스된 날짜를 새로운 포커스된 날짜로 설정
+    });
+    _showEventsForSelectedDay(
+        selectedDay); // 선택한 날짜에 대한 이벤트를 표시하기 위해 _showEventsForSelectedDay 메서드 호출
   }
 
   void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
@@ -142,82 +140,169 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 선택된 날짜에 해당하는 이벤트 표시
-  void _showEventsForSelectedDay(DateTime selectedDay) {
-    // 선택된 날짜에 해당하는 이벤트 확인
-    List<String> eventsForSelectedDay = [];
-    for (var vote in voteList) {
-      // voteList의 각 요소에 대해 반복
-      // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
-      DateTime startDate = DateTime.parse(vote['start_day']);
-      DateTime endDate = DateTime.parse(vote['end_day']);
-      // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
-      if (selectedDay.isAfter(startDate) &&
-          selectedDay.isBefore(endDate.add(const Duration(days: 1)))) {
-        // 선택한 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
-        eventsForSelectedDay.add(vote['name']);
+  Future<void> _showEventsForSelectedDay(DateTime selectedDay) async {
+    List<Map<String, dynamic>> calendarBoardList =
+        []; // 학생의 해당 학년 게시글 혹은 관리자가 작성한 게시글
+    print(
+        '선택한 날짜: $selectedDay'); // 2024-11-18 00:00:00.000Z  "2024-09-09T05:34:37"
+
+    setState(() {
+      if (userRole == 'ROLE_USER') {
+        calendarBoardList = boardList
+            .where((board) =>
+                level == board['announcementLevel'] ||
+                board['announcementLevel'] == 0)
+            .toList();
+      } else {
+        calendarBoardList = boardList;
+      }
+    });
+
+    for (var selectedBoard in calendarBoardList) {
+      for (var vote in voteList) {
+        if (selectedBoard['id'] == vote.announcementId) {
+          DateTime boardCreatedTime =
+              DateTime.parse(selectedBoard['createdTime'])
+                  .add(const Duration(hours: 9));
+
+          DateTime voteEndTime = DateTime.parse(vote.endDateTime!);
+
+          // selectedDay가 boardCreatedTime과 voteEndTime 사이에 있는지 확인
+          if ((selectedDay.year > boardCreatedTime.year ||
+                  (selectedDay.year == boardCreatedTime.year &&
+                      (selectedDay.month > boardCreatedTime.month ||
+                          (selectedDay.month == boardCreatedTime.month &&
+                              selectedDay.day >=
+                                  boardCreatedTime.day)))) && // 시작일 이상
+              (selectedDay.year < voteEndTime.year ||
+                  (selectedDay.year == voteEndTime.year &&
+                      (selectedDay.month < voteEndTime.month ||
+                          (selectedDay.month == voteEndTime.month &&
+                              selectedDay.day <= voteEndTime.day))))) {
+            print(
+                'selectedDay($selectedDay)가 boardCreatedTime($boardCreatedTime)과 voteEndTime($voteEndTime) 사이에 있습니다.');
+
+            setState(() {
+              selectedVoteList.add(vote);
+            });
+          }
+        }
       }
     }
-    // 이벤트가 있는 경우 모달 다이얼로그로 표시
-    if (eventsForSelectedDay.isNotEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFDBE7FB), // 모달창 배경색
-            title: Text(
-                '${selectedDay.year}년${selectedDay.month}월${selectedDay.day}일 이벤트'), // 날 / 월 / 년
-            titleTextStyle: const TextStyle(
-                fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: eventsForSelectedDay
-                  .map((event) => Text(
-                        event,
-                        style: const TextStyle(
-                            fontSize: 16, color: Colors.black), // 텍스트 스타일
-                      ))
-                  .toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
+
+    // 해당 게시글이 있는 경우 모달 바텀 시트로 표시
+    if (selectedVoteList.isNotEmpty) {
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
               ),
-            ],
-          );
-        },
-      );
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    '${selectedDay.year}년 ${selectedDay.month}월 ${selectedDay.day}일 이벤트',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ), // 날 / 월 / 년
+                  const SizedBox(height: 20),
+
+                  // 투표
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true, // ListView의 크기를 제한
+                      physics: const BouncingScrollPhysics(), // 부드러운 스크롤
+                      itemCount: selectedVoteList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        Vote vote = selectedVoteList[index]; // 해당 투표
+
+                        return ListTile(
+                          leading: Image.asset('assets/images/vote.png'),
+                          title: Text(
+                            vote.subjectTitle!,
+                          ),
+                          subtitle: Text(
+                            '종료일 : ${vote.endDateTime}',
+                            style: const TextStyle(
+                              color: Color(0xFFD9D9D9),
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            // 꺽새 아이콘을 통해 투표가 들어가있는 게시글 이동
+                            onPressed: () async {
+                              Get.toNamed(
+                                '/detail-board',
+                                arguments: {
+                                  'announcementId': vote.announcementId,
+                                  'category': 'HOME',
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.chevron_right),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ).whenComplete(
+          () => selectedVoteList
+              .clear(), // 바텀 시트 닫을 때 selectedBoardList의 내용 제거(제거하지 않으면 다른 날에도 보임)
+        );
+      }
     } else {
       // 선택된 날짜에 이벤트가 없는 경우 알림 표시
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFDBE7FB), // 모달창 배경색
-            title: Text(
-                '${selectedDay.year}년${selectedDay.month}월${selectedDay.day}일 이벤트'),
-            titleTextStyle: const TextStyle(
-                fontSize: 24,
-                color: Colors.black,
-                fontWeight: FontWeight.bold), // 날 / 월 / 년
-            content: const Text('해당 날짜에는 이벤트가 없습니다.'),
-            // 텍스트 스타일
-            contentTextStyle:
-                const TextStyle(fontSize: 16, color: Colors.black),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close'),
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return Container(
+              width: MediaQuery.of(context).size.width,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
               ),
-            ],
-          );
-        },
-      );
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
+                    '${selectedDay.year}년 ${selectedDay.month}월 ${selectedDay.day}일 이벤트',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ), // 날 / 월 / 년
+                  const SizedBox(height: 20),
+                  const Text('해당 날짜에는 이벤트가 없습니다.'),
+                ],
+              ),
+            );
+          },
+        );
+      }
     }
   }
 
@@ -657,6 +742,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: TableCalendar(
+                    locale: 'ko_KR',
                     firstDay: DateTime.utc(2010, 3, 14), //  달력의 시작 날짜
                     lastDay: DateTime.utc(2030, 3, 14), // 달력의 종료 날짜
                     focusedDay: _focuseDay, // 초기로 포커스된 날짜
@@ -673,6 +759,21 @@ class _HomePageState extends State<HomePage> {
                     rangeEndDay: _rangeEnd, // 선택된 범위의 종료일
                     calendarStyle: const CalendarStyle(
                       outsideDaysVisible: false,
+                      markerDecoration: BoxDecoration(
+                        // 마커 색상
+                        color: Color(0xFF2A72E7),
+                        shape: BoxShape.circle,
+                      ),
+                      selectedDecoration: BoxDecoration(
+                        // 선택 날짜 색상
+                        color: Color(0xFF2A72E7),
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        // 오늘 날짜 색상
+                        color: Color(0xFF94B8F3),
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     onFormatChanged: (format) {
                       if (_calendarFomat != format) {
@@ -687,21 +788,58 @@ class _HomePageState extends State<HomePage> {
                     eventLoader: (day) {
                       // day = 달력에서 확인하려는 날짜
                       List<dynamic> events = []; // 이벤트를 저장할 빈 리스트를 초기화
+
+                      // 계정이 학생일 경우 게시글의 설정 학년과 학생의 학년과 게시글의 아이디와 투표에 들어있는 게시글 아이디가 동일하면
+                      // events에 추가하는 작업 진행
                       for (var vote in voteList) {
-                        // voteList의 각 요소에 대해 반복
-                        // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
-                        DateTime startDate = DateTime.parse(vote['start_day']);
-                        DateTime endDate = DateTime.parse(vote['end_day']);
-                        // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
-                        if (day.isAfter(startDate) &&
-                            day.isBefore(
-                                endDate.add(const Duration(days: 1)))) {
-                          // 현재 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
-                          events.add(vote['name']);
+                        for (var board in boardList) {
+                          if ((userRole == 'ROLE_USER')
+                              ? (board['announcementLevel'] == level ||
+                                      board['announcementLevel'] == 0) &&
+                                  board['id'] == vote.announcementId
+                              : board['id'] == vote.announcementId) {
+                            // voteList의 각 요소에 대해 반복
+                            // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
+                            DateTime startDate =
+                                DateTime.parse(board['createdTime']);
+                            DateTime endDate =
+                                DateTime.parse(vote.endDateTime!);
+                            // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
+                            if ((day.year > startDate.year ||
+                                    (day.year == startDate.year &&
+                                        (day.month > startDate.month ||
+                                            (day.month == startDate.month &&
+                                                day.day >=
+                                                    startDate
+                                                        .day)))) && // 시작일 이상
+                                (day.year < endDate.year ||
+                                    (day.year == endDate.year &&
+                                        (day.month < endDate.month ||
+                                            (day.month == endDate.month &&
+                                                day.day <= endDate.day))))) {
+                              // 현재 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
+                              events.add(vote.subjectTitle);
+                            }
+                          }
                         }
                       }
                       return events; // voteList에 정의된 이벤트가 있는 날짜에만 해당 이벤트가 표시
                     },
+                    headerStyle: const HeaderStyle(
+                      formatButtonTextStyle: TextStyle(
+                        // 주차(week) 색상
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                      leftChevronIcon: Icon(
+                        Icons.chevron_left,
+                        color: Colors.black,
+                      ),
+                      rightChevronIcon: Icon(
+                        Icons.chevron_right,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
                 ),
               ],
