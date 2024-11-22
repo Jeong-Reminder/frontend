@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frontend/admin/screens/dashboard_screen.dart';
 import 'package:frontend/models/notification_model.dart';
+import 'package:frontend/models/vote_model.dart';
 import 'package:frontend/providers/announcement_provider.dart';
 import 'package:frontend/providers/notification_provider.dart';
+import 'package:frontend/providers/vote_provider.dart';
 import 'package:frontend/screens/contestBoard_screen.dart';
 import 'package:frontend/screens/corSeaBoard_screen.dart';
 import 'package:frontend/screens/gradeBoard_screen.dart';
@@ -12,6 +13,7 @@ import 'package:frontend/screens/myUserPage_screen.dart';
 import 'package:frontend/screens/notificationList_screen.dart';
 import 'package:frontend/services/login_services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/screens/totalBoard_screen.dart';
 import 'package:frontend/screens/memberRecruit_screen.dart';
@@ -61,23 +63,7 @@ class _HomePageState extends State<HomePage> {
 
   List<NotificationModel> notifyList = [];
   List<Map<String, dynamic>> boardList = [];
-  List<Map<String, dynamic>> voteList = [
-    {
-      "name": "1차 증원 투표",
-      "start_day": "2024-05-07",
-      "end_day": "2024-05-08",
-    },
-    {
-      "name": "2차 증원 투표",
-      "start_day": "2024-05-10",
-      "end_day": "2024-05-11",
-    },
-    {
-      "name": "팀원 모집 기간",
-      "start_day": "2024-05-21",
-      "end_day": "2024-05-25",
-    },
-  ];
+  List<Vote> voteList = []; // 투표 전체 조회 리스트
   List<Map<String, dynamic>> selectedBoardList = []; // 달력에서 선택한 해당 날짜의 게시글
 
   // 위젯의 상태 초기화
@@ -93,6 +79,9 @@ class _HomePageState extends State<HomePage> {
       if (context.mounted) {
         await Provider.of<NotificationProvider>(context, listen: false)
             .fetchNotification();
+        if (context.mounted) {
+          await Provider.of<VoteProvider>(context, listen: false).fetchVotes();
+        }
       }
 
       setState(() {
@@ -100,6 +89,8 @@ class _HomePageState extends State<HomePage> {
             Provider.of<AnnouncementProvider>(context, listen: false).boardList;
         notifyList = Provider.of<NotificationProvider>(context, listen: false)
             .notificationList;
+        voteList =
+            Provider.of<VoteProvider>(context, listen: false).allVoteList;
       });
     });
     getData();
@@ -119,6 +110,14 @@ class _HomePageState extends State<HomePage> {
       userRole = credentials['userRole']; // 로그인 정보에 있는 level를 가져와 저장
       level = credentials['level'];
     });
+  }
+
+  // 국제 표준시간에서 한국시간으로 변환 메서드
+  // 만든 이유: 앱에서 설정한 시간은 한국시간으로 잘 받아지는데 작성 api 성공 후 서버에서 받은 시간에서는 국제 표준 시간으로 받아 만들게 됨
+  String convertUtcToKst(String utcTimeString) {
+    DateTime utcTime = DateTime.parse(utcTimeString);
+    DateTime kstTime = utcTime.add(const Duration(hours: 9));
+    return DateFormat("yyyy-MM-dd HH:mm").format(kstTime);
   }
 
   // 날짜가 선택되었을 때 실행되는 콜백 메서드
@@ -143,10 +142,24 @@ class _HomePageState extends State<HomePage> {
   // 선택된 날짜에 해당하는 이벤트 표시
   Future<void> _showEventsForSelectedDay(DateTime selectedDay) async {
     int id = 0;
+    List<Map<String, dynamic>> calendarBoardList =
+        []; // 학생의 해당 학년 게시글 혹은 관리자가 작성한 게시글
     print(
         '선택한 날짜: $selectedDay'); // 2024-11-18 00:00:00.000Z  "2024-09-09T05:34:37"
 
-    for (var selectedBoard in boardList) {
+    setState(() {
+      if (userRole == 'ROLE_USER') {
+        calendarBoardList = boardList
+            .where((board) =>
+                level == board['announcementLevel'] ||
+                board['announcementLevel'] == 0)
+            .toList();
+      } else {
+        calendarBoardList = boardList;
+      }
+    });
+
+    for (var selectedBoard in calendarBoardList) {
       DateTime boardCreatedTime = DateTime.parse(selectedBoard['createdTime']);
 
       if ((boardCreatedTime.year == selectedDay.year) &&
@@ -163,7 +176,10 @@ class _HomePageState extends State<HomePage> {
           Map<String, dynamic> board =
               Provider.of<AnnouncementProvider>(context, listen: false).board;
           setState(() {
-            selectedBoardList.add(board);
+            // 게시글 생성 시간과 달력 선택 날짜와 동일하더라도 투표가 있으면 selctedBoardList에 추가
+            if (board['votes'].isNotEmpty) {
+              selectedBoardList.add(board);
+            }
           });
         }
       }
@@ -215,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                                   board['votes'][0]['subjectTitle'],
                                 ),
                                 subtitle: Text(
-                                  '기간: ${board['createdTime']} ~ ${board['votes'][0]['endDateTime']}',
+                                  '${convertUtcToKst(board['createdTime'])} ~ ${board['votes'][0]['endDateTime']}',
                                   style: const TextStyle(
                                     color: Color(0xFFD9D9D9),
                                     fontSize: 12,
@@ -724,6 +740,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20.0),
                   child: TableCalendar(
+                    locale: 'ko_KR',
                     firstDay: DateTime.utc(2010, 3, 14), //  달력의 시작 날짜
                     lastDay: DateTime.utc(2030, 3, 14), // 달력의 종료 날짜
                     focusedDay: _focuseDay, // 초기로 포커스된 날짜
@@ -769,17 +786,31 @@ class _HomePageState extends State<HomePage> {
                     eventLoader: (day) {
                       // day = 달력에서 확인하려는 날짜
                       List<dynamic> events = []; // 이벤트를 저장할 빈 리스트를 초기화
+
+                      // 계정이 학생일 경우 게시글의 설정 학년과 학생의 학년과 게시글의 아이디와 투표에 들어있는 게시글 아이디가 동일하면
+                      // events에 추가하는 작업 진행
                       for (var vote in voteList) {
-                        // voteList의 각 요소에 대해 반복
-                        // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
-                        DateTime startDate = DateTime.parse(vote['start_day']);
-                        DateTime endDate = DateTime.parse(vote['end_day']);
-                        // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
-                        if (day.isAfter(startDate) &&
-                            day.isBefore(
-                                endDate.add(const Duration(days: 1)))) {
-                          // 현재 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
-                          events.add(vote['name']);
+                        for (var board in boardList) {
+                          if ((userRole == 'ROLE_USER')
+                              ? (board['announcementLevel'] == level ||
+                                      board['announcementLevel'] == 0) &&
+                                  board['id'] == vote.announcementId
+                              : board['id'] == vote.announcementId) {
+                            // voteList의 각 요소에 대해 반복
+                            // DateTime.parse 함수를 사용하여 문자열 형태의 날짜를 DateTime 객체로 변환
+                            DateTime startDate =
+                                DateTime.parse(board['createdTime']);
+                            DateTime endDate =
+                                DateTime.parse(vote.endDateTime!);
+                            // 현재 날짜가 해당 이벤트의 시작일 이후이고, 종료일 이전인지 확인
+                            if (day.isAfter(startDate.add(const Duration(
+                                    hours: -9))) // 달력 마커에는 9시간 빠르게 설정
+                                &&
+                                day.isBefore(endDate)) {
+                              // 현재 날짜가 해당 이벤트의 기간 내에 있는 경우, 이벤트 이름을 리스트에 추가
+                              events.add(vote.subjectTitle);
+                            }
+                          }
                         }
                       }
                       return events; // voteList에 정의된 이벤트가 있는 날짜에만 해당 이벤트가 표시

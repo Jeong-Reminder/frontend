@@ -6,9 +6,11 @@ import 'package:http/http.dart' as http;
 
 class VoteProvider with ChangeNotifier {
   final List<Vote> _voteList = [];
+  final List<Vote> _allVoteList = []; // 전체 투표 조회 API 리스트
   final List<Map<String, dynamic>> _contentList = [];
 
   List<Vote> get voteList => _voteList;
+  List<Vote> get allVoteList => _allVoteList;
   List<Map<String, dynamic>> get contentList => _contentList;
 
   // 엑세스 토큰 할당
@@ -112,6 +114,41 @@ class VoteProvider with ChangeNotifier {
       print('투표 조회 성공: ${Vote.fromJson(dataResponse)} - $dataResponse');
     } else {
       print("투표 조회 실패: ${response.body}");
+    }
+  }
+
+  // 투표 전체 조회
+  Future<void> fetchVotes() async {
+    final accessToken = await getToken();
+    if (accessToken == null) {
+      throw Exception('엑세스 토큰을 찾을 수 없음');
+    }
+
+    final url = Uri.parse(baseUrl);
+    final response = await http.get(
+      url,
+      headers: {
+        'access': accessToken,
+      },
+    );
+    _allVoteList.clear();
+
+    if (response.statusCode == 200) {
+      final utf8Response = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(utf8Response);
+
+      final dataResponse = jsonResponse['data'];
+
+      // dataResponse가 Map일 경우 직접 Vote 객체로 변환하여 추가
+      for (var data in dataResponse) {
+        _allVoteList.add(Vote.fromJson(data));
+      }
+
+      notifyListeners();
+
+      print('투표 전체 조회 성공:$dataResponse');
+    } else {
+      print("투표 전체 조회 실패: ${response.body}");
     }
   }
 

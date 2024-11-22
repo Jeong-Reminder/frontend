@@ -17,6 +17,7 @@ import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/recruitDetail_screen.dart';
 import 'package:get/get.dart';
 import 'package:frontend/services/login_services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 // 알림 플러그인 인스턴스 생성 (로컬 푸시 알림을 보여주기 위한 플러그인)
@@ -73,6 +74,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter의 비동기적 초기화
+
+  await initializeDateFormatting();
 
   // ByteData data = await PlatformAssetBundle()
   //     .load('assets/ca/star.sungkyul.ac.kr.cert.pem');
