@@ -122,17 +122,20 @@ class _NotificationListPageState extends State<NotificationListPage>
                   return const Center(child: Text('알림이 없습니다.'));
                 } else {
                   // cateIndex와 read 상태에 따라 필터링된 알림 리스트에서
-                  // 현재 게시된 게시글 아이디(b['id'])와 필터링된 알림 리스트 아이디(bd.targetId)가 동일하면 필터링
-                  List<NotificationModel> filteredList =
-                      snapshot.data!.where((board) {
-                    if (cateIndex == 0) {
-                      return board.category == '공지' && !board.read!;
-                    } else {
-                      return board.category == '팀원모집' && !board.read!;
-                    }
-                  }).where((bd) {
-                    return allBoardList.any((b) => b['id'] == bd.targetId);
-                  }).toList();
+                  // 공지에서는 현재 게시된 게시글 아이디(b['id'])와 필터링된 알림 리스트 아이디(bd.targetId)가 동일하면 필터링
+                  List<NotificationModel> filteredList = [];
+
+                  if (cateIndex == 0) {
+                    filteredList = snapshot.data!.where((notice) {
+                      return notice.category == '공지' && !notice.read!;
+                    }).where((bd) {
+                      return allBoardList.any((b) => b['id'] == bd.targetId);
+                    }).toList();
+                  } else {
+                    filteredList = snapshot.data!.where((notice) {
+                      return notice.category == '팀원모집' && !notice.read!;
+                    }).toList();
+                  }
 
                   // 필터링된 리스트가 비어있으면 알림이 없다고 표시
                   if (filteredList.isEmpty) {
@@ -146,18 +149,18 @@ class _NotificationListPageState extends State<NotificationListPage>
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: filteredList.length,
                       itemBuilder: (context, index) {
-                        NotificationModel board = filteredList[index];
+                        NotificationModel notice = filteredList[index];
 
                         return notificationTile(
                           cateIndex == 0
                               ? 'assets/images/notification.png'
                               : 'assets/images/recruit.png',
-                          board.title!, // 알림 제목
-                          board.content!, // 알림 내용
-                          board.createdAt!, // 알림 생성시간
-                          board.category!, // 알림 카테고리
-                          board.targetId!, // 알림 공지 혹은 모집글 아이디
-                          board.id!, // 알림 아이디
+                          notice.title!, // 알림 제목
+                          notice.content!, // 알림 내용
+                          notice.createdAt!, // 알림 생성시간
+                          notice.category!, // 알림 카테고리
+                          notice.targetId!, // 알림 공지 혹은 모집글 아이디
+                          notice.id!, // 알림 아이디
                         );
                       },
                     ),
@@ -227,7 +230,7 @@ class _NotificationListPageState extends State<NotificationListPage>
                   '/detail-board',
                   arguments: {
                     'announcementId': targetId,
-                    'category': category,
+                    'category': 'NOTICE',
                   },
                   preventDuplicates: false,
                 );

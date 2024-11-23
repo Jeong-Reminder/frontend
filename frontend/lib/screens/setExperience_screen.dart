@@ -622,37 +622,35 @@ class _SetExperiencePageState extends State<SetExperiencePage> {
               SizedBox(height: isKeyboardVisible ? 10 : 0),
 
               // 겸험 추가하기 버튼
-              (widget.update! == true)
-                  ? Container()
-                  : ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          formatLength++;
-                        });
-                        _addNewExperienceFields(); // 컨트롤러 혹은 문자열 리스트 요소 추가
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        side: const BorderSide(
-                          color: Colors.blueAccent,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '경험 추가하기',
-                          style: TextStyle(
-                            color: Colors.blueAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    formatLength++;
+                  });
+                  _addNewExperienceFields(); // 컨트롤러 혹은 문자열 리스트 요소 추가
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  side: const BorderSide(
+                    color: Colors.blueAccent,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    '경험 추가하기',
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
+                  ),
+                ),
+              ),
 
               const SizedBox(height: 10),
 
