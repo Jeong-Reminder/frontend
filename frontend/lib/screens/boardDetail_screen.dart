@@ -558,6 +558,14 @@ class _BoardDetailPageState extends State<BoardDetailPage> {
         ),
         (route) => false, // 이전 모든 라우트를 제거
       );
+    } else if (category == 'NOTICE') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const NotificationListPage(), // 페이지로 직접 이동
+        ),
+        (route) => false, // 이전 모든 라우트를 제거
+      );
     } else {
       Navigator.pushAndRemoveUntil(
         context,
