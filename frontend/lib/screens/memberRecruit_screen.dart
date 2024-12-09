@@ -290,6 +290,15 @@ class _MemberRecruitPageState extends State<MemberRecruitPage> {
           DateTime createdTimeB = DateTime.parse(b['createdTime']);
           return createdTimeB.compareTo(createdTimeA); // 내림차순
         });
+
+        // 모집 종료 날짜가 지난 글을 삭제
+        DateTime now = DateTime.now();
+        recruitList.removeWhere((post) {
+          DateTime endTime = DateTime.parse(post['endTime']);
+          return endTime.isBefore(now); // 현재 시간보다 모집 종료 날짜가 이전이면 삭제
+        });
+
+        print("Expired posts removed. Remaining posts: $recruitList");
       });
     } catch (e) {
       print("Error fetching recruit data: $e");
